@@ -36,23 +36,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUserStore } from "@/providers/user-store-provider";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  currentPage: number;
+  paginatedData: {
+    data: TData[];
+    totalItems: number | null;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  onChangePage: (page: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  currentPage,
+  paginatedData,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
   const table = useReactTable({
-    data,
+    data: paginatedData.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -65,9 +73,6 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
-
-  const id = useUserStore((state) => state.id);
-  const email = useUserStore((state) => state.email);
 
   return (
     <div>
@@ -131,6 +136,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Rows per page</p>
@@ -154,8 +160,9 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
+            {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
+            {/* {table.getPageCount()} */}
+            Page {currentPage}
           </div>
           <Button
             variant="outline"
