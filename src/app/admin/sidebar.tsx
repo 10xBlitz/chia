@@ -1,3 +1,4 @@
+"use client";
 import { LogoutButton } from "@/components/logout-button";
 import {
   DropdownMenu,
@@ -16,13 +17,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ChevronUp, Home, SettingsIcon, User2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  ChevronUp,
+  HomeIcon,
+  HospitalIcon,
+  SettingsIcon,
+  User2,
+  Users,
+} from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const items = [
   {
-    title: "User",
+    title: "User Management",
     url: "/admin/user",
-    icon: Home,
+    icon: Users,
+  },
+  {
+    title: "Clinic Management",
+    url: "/admin/clinic",
+    icon: HospitalIcon,
   },
   {
     title: "Settings",
@@ -32,6 +47,8 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
+  console.log("-=--->pathname:", pathname);
   return (
     <Sidebar>
       <SidebarContent>
@@ -41,7 +58,13 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(
+                      "hover:bg-gray-500/30",
+                      pathname === item.url && "bg-gray-500/20"
+                    )}
+                  >
                     <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>

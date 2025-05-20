@@ -15,49 +15,52 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export type UserTable = Tables<"user">;
+export type ClinicTable = {
+  id: number;
+  price: number;
+  created_at: string;
+  clinic: {
+    id: number;
+    clinic_name: string;
+    location: string;
+    contact_number: string;
+    link: string | null;
+    pictures: string | null;
+    region: string;
+    views: number;
+  };
+  treatment: {
+    id: number;
+    treatment_name: string;
+    image_url: string | null;
+  };
+};
 
-export const columns: ColumnDef<UserTable>[] = [
+export const columns: ColumnDef<ClinicTable>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => (
-      <div>{`${row.original.role[0].toUpperCase()}${row.original.role.substring(
-        1
-      )}`}</div>
-    ),
+    cell: ({ row }) => <div>{row.original?.treatment?.treatment_name}</div>,
   },
   {
-    accessorKey: "age",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Age
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <>{calculateAge(new Date(row.original.birthdate))}</>,
+    accessorKey: "clinic_name",
+    header: "Clinic Name",
+    cell: ({ row }) => <div>{row.original?.clinic?.clinic_name}</div>,
   },
   {
-    accessorKey: "full_name",
-    header: "Name",
+    accessorKey: "location",
+    header: "Location",
+    cell: ({ row }) => <div>{row.original?.clinic?.location}</div>,
   },
   {
-    accessorKey: "residence",
-    header: "Residence",
-  },
-  {
-    accessorKey: "work_place",
-    header: "Work Place",
-  },
-
-  {
-    accessorKey: "contact_number",
+    accessorKey: "contact",
     header: "Contact",
+    cell: ({ row }) => <div>{row.original?.clinic?.contact_number}</div>,
+  },
+  {
+    accessorKey: "views",
+    header: "Views",
+    cell: ({ row }) => <div>{row.original?.clinic?.views}</div>,
   },
 
   {

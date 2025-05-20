@@ -78,26 +78,25 @@ export function DataTable<TData, TValue>({
   );
 
   //-- Start search params
-  const [fullName, setFullName] = React.useState(
-    searchParam.get("full_name") || ""
+  const [clinicName, setClinicName] = React.useState(
+    searchParam.get("clinic_name") || ""
   );
-  const [category, setCategory] = React.useState(
-    searchParam.get("category") || ""
+  const [treatmentId, setTreatmentId] = React.useState(
+    searchParam.get("treatment_id") || ""
   );
-  const [dates, setDates] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 5),
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: new Date(2022, 0, 20),
+    to: addDays(new Date(2022, 0, 20), 20),
   });
 
-  const debouncedFullName = useDebounce(fullName || "", 500);
-  // const debouncedCreatedAt = useDebounce(createdAt, 500);
+  const debouncedClinicName = useDebounce(clinicName || "", 500);
   //-- End search params
 
   const buildSearchParams = (overrides: Record<string, string>) => {
     const params = new URLSearchParams(searchParam.toString());
 
-    params.set("full_name", debouncedFullName);
-    if (category) params.set("category", category);
+    params.set("clinic_name", debouncedClinicName);
+    if (treatmentId) params.set("treatment_id", treatmentId);
     Object.entries(overrides).forEach(([key, value]) => {
       params.set(key, value);
     });
@@ -129,10 +128,9 @@ export function DataTable<TData, TValue>({
       buildSearchParams({
         page: "1",
         limit: String(currentLimit),
-        dates: dates ? JSON.stringify(dates) : "",
       })
     );
-  }, [debouncedFullName, category, dates]);
+  }, [debouncedClinicName, treatmentId]);
 
   const changePageInSearchParams = (page: number) => {
     router.push(
@@ -147,12 +145,15 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center gap-3 py-4">
         <Input
-          placeholder="Search by name..."
-          value={fullName}
-          onChange={(event) => setFullName(event.target.value)}
+          placeholder="Search by clinic name..."
+          value={clinicName}
+          onChange={(event) => setClinicName(event.target.value)}
           className="max-w-sm"
         />
-        <Select value={category} onValueChange={(value) => setCategory(value)}>
+        <Select
+          value={treatmentId}
+          onValueChange={(value) => setTreatmentId(value)}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
@@ -173,18 +174,18 @@ export function DataTable<TData, TValue>({
               variant={"outline"}
               className={cn(
                 "w-[300px] justify-start text-left font-normal",
-                !dates && "text-muted-foreground"
+                !date && "text-muted-foreground"
               )}
             >
               <CalendarIcon />
-              {dates?.from ? (
-                dates.to ? (
+              {date?.from ? (
+                date.to ? (
                   <>
-                    {format(dates.from, "LLL dd, y")} -{" "}
-                    {format(dates.to, "LLL dd, y")}
+                    {format(date.from, "LLL dd, y")} -{" "}
+                    {format(date.to, "LLL dd, y")}
                   </>
                 ) : (
-                  format(dates.from, "LLL dd, y")
+                  format(date.from, "LLL dd, y")
                 )
               ) : (
                 <span>Pick a date</span>
@@ -195,9 +196,9 @@ export function DataTable<TData, TValue>({
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={dates?.from}
-              selected={dates}
-              onSelect={(dates) => setDates(dates)}
+              defaultMonth={date?.from}
+              selected={date}
+              onSelect={setDate}
               numberOfMonths={2}
             />
           </PopoverContent>
