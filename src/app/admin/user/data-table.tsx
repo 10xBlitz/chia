@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   ColumnDef,
@@ -10,7 +10,7 @@ import {
   useReactTable,
   ColumnFiltersState,
   getFilteredRowModel,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -19,40 +19,48 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-} from "lucide-react"
-import * as React from "react"
+} from "lucide-react";
+import * as React from "react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-
+} from "@/components/ui/select";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  currentPage: number;
+  paginatedData: {
+    data: TData[];
+    totalItems: number | null;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  onChangePage: (page: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  currentPage,
+  paginatedData,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  )
+  );
   const table = useReactTable({
-    data,
+    data: paginatedData.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -64,7 +72,7 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
-  })
+  });
 
   return (
     <div>
@@ -93,7 +101,7 @@ export function DataTable<TData, TValue>({
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -107,14 +115,20 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   결과 없음
                 </TableCell>
               </TableRow>
@@ -122,13 +136,14 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
+
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
-              table.setPageSize(Number(value))
+              table.setPageSize(Number(value));
             }}
           >
             <SelectTrigger className="h-8 w-[70px]">
@@ -144,9 +159,11 @@ export function DataTable<TData, TValue>({
           </Select>
         </div>
         <div className="flex items-center space-x-2">
-        <div className="flex items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </div>
+          <div className="flex items-center justify-center text-sm font-medium">
+            {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
+            {/* {table.getPageCount()} */}
+            Page {currentPage}
+          </div>
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
@@ -156,7 +173,7 @@ export function DataTable<TData, TValue>({
             <span className="sr-only">Go to first page</span>
             <ChevronsLeft />
           </Button>
-          
+
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
@@ -186,8 +203,7 @@ export function DataTable<TData, TValue>({
             <ChevronsRight />
           </Button>
         </div>
-
       </div>
     </div>
-  )
+  );
 }
