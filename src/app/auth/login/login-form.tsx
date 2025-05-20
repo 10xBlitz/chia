@@ -26,7 +26,7 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const updateEmailAndId = useUserStore((state) => state.updateEmailAndId);
+  const updateUser = useUserStore((state) => state.updateUser);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +41,7 @@ export function LoginForm({
       });
       if (error) throw error;
 
-      updateEmailAndId(data.user.id, data.user.email as string);
+      updateUser({ id: data.user.id, email: data.user.email });
 
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/admin");

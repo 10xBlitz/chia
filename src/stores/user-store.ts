@@ -18,7 +18,7 @@ export type UserState = {
 };
 
 export type UserAction = {
-  updateEmailAndId: (id: string, email: string) => void;
+  updateUser: (userData: Partial<UserState>) => void;
 };
 
 export type UserStore = UserState & UserAction;
@@ -45,11 +45,7 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
     persist(
       (set) => ({
         ...initState,
-        updateEmailAndId: (id: string, email: string) =>
-          set(() => {
-            console.log("-->updateEmailAndId", { id, email });
-            return { email, id };
-          }),
+        updateUser: (userData) => set(() => userData),
       }),
       { name: "user-store" }
     )

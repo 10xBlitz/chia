@@ -8,12 +8,11 @@ const SettingsClient = () => {
   const id = useUserStore((state) => state.id);
   const email = useUserStore((state) => state.email);
 
-  const updateEmailAndId = useUserStore((state) => state.updateEmailAndId);
+  //   const updateUser = useUserStore((state) => state.updateUser);
 
-  console.log({ id, email });
-  useEffect(() => {
-    updateEmailAndId("test-id", "test-email@example.com");
-  }, []);
+  //   useEffect(() => {
+  //     updateUser({ id: "1234567890", email: "sample@email.com" });
+  //   }, []);
   return (
     <div>
       <h2>User Info</h2>
