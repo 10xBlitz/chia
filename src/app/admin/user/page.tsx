@@ -1,5 +1,5 @@
 import { getPaginatedUsers } from "@/lib/supabase/functions/get-paginated-users";
-import { columns } from "./columns";
+import { columns, UserTable } from "./columns";
 import { DataTable } from "./data-table";
 
 // async function getData(): Promise<UserTable[]> {
@@ -27,7 +27,12 @@ export default async function Page({
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={data.data} currentPage={page} />
+      <DataTable
+        columns={columns}
+        paginatedData={data}
+        currentPage={page}
+        onChangePage={(page) => {}}
+      />
     </div>
   );
 }

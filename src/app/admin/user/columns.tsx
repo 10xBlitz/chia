@@ -18,10 +18,6 @@ export type UserTable = Tables<"user">;
 
 export const columns: ColumnDef<UserTable>[] = [
   {
-    accessorKey: "category",
-    header: "Category",
-  },
-  {
     accessorKey: "age",
     header: "Age",
   },
@@ -41,10 +37,7 @@ export const columns: ColumnDef<UserTable>[] = [
     accessorKey: "contact",
     header: "Contact",
   },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
+
   // {
   //   accessorKey: "email",
   //   // sorting example
