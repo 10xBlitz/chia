@@ -124,3 +124,13 @@
     cursor: pointer;
   }
 }
+
+@layer utilities {
+  .btn-primary {
+    background-color: #287dfa;
+  }
+
+  .btn-primary:hover {
+    background-color: #1e6bb8;
+  }
+}

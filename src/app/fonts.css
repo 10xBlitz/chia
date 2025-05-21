@@ -1,0 +1,27 @@
+/* styles/fonts.css */
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard/Pretendard-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* styles/fonts.css */
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/Pretendard/Pretendard-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@layer utilities {
+  .font-pretendard-600 {
+    font-family: "Pretendard";
+    font-weight: 600;
+  }
+
+  .font-pretendard-500 {
+    font-family: "Pretendard, sans-serif";
+    font-weight: 500;
+  }
+}

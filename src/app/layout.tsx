@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./fonts.css";
 import { UserStoreProvider } from "@/providers/user-store-provider";
 import CustomQueryClientProvider from "@/providers/query-client-provider";
 
