@@ -2,15 +2,15 @@ import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 
 interface Filters {
-  clinic_name?: string | null;
+  full_name?: string | null;
   treatment_id?: number | null;
- date_range?: {
+  date_range?: {
     from?: string;
     to?: string;
   };
 }
 
-export async function getPaginatedClinics(
+export async function getPaginatedReservations(
   page = 1,
   limit = 10,
   filters: Filters = {}
@@ -20,26 +20,38 @@ export async function getPaginatedClinics(
 
   const offset = (page - 1) * limit;
 
+//   export type ReservationTable = {
+//   id: number;
+//   category: string;
+//   name: string;
+//   residence: string;
+//   workplace: string;
+//   contact_number: string;
+//   clinic_name: string;
+// };
+
   let query = supabaseClient
-    .from("clinic")
+    .from("reservation")
     .select(`
       id,
-      clinic_name,
-      location,
-      contact_number,
-      link,
-      pictures,
-      region,
-      views,
-      clinic_treatment (
+      reservation_date,
+      patient:user!patient_id ( 
+        id, 
+        full_name, 
+        residence, 
+        birthdate,
+        work_place, 
+        contact_number
+       ),
+      clinic_treatment(
         id,
-        treatment (
-          id,
-          treatment_name,
-          image_url
+        treatment(
+          treatment_name
+        ),
+        clinic(
+          clinic_name
         )
       )
-   
     `, { count: "exact" }) // dot-less select implies INNER JOIN
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
@@ -49,20 +61,21 @@ export async function getPaginatedClinics(
   //   query = query.eq("clinic_treatment.treatment_id", filters.treatment_id);
   // }
 
-  if (filters.clinic_name) {
-    query = query.ilike("clinic_name", `%${filters.clinic_name}%`);
+  if (filters.full_name) {
+    query = query.ilike("patient.full_name", `%${filters.full_name}%`);
+    query = query.not("patient", "is", null);
   }
+
 
  // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-       query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
-   
-    query = query.lte("created_at", filters.date_range.to);
+    query = query.gte("reservation_date", (startOfDay(filters.date_range.from)).toISOString());
+    query = query.lte("reservation_date", filters.date_range.to);
   }
 
 
   const { data, error, count } = await query;
-  console.log("getPaginatedClinics", data, count);
+  console.log("getPaginatedClinics", data, count, filters);
 
   if (error) throw error;
 

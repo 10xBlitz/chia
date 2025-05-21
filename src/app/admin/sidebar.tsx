@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import {
+  BookMarked,
   ChevronUp,
   HomeIcon,
   HospitalIcon,
@@ -38,6 +39,16 @@ const items = [
     title: "Clinic Management",
     url: "/admin/clinic",
     icon: HospitalIcon,
+  },
+  {
+    title: "Reservation Management",
+    url: "/admin/reservation",
+    icon: BookMarked,
+  },
+  {
+    title: "Review Management",
+    url: "/admin/review",
+    icon: BookMarked,
   },
   {
     title: "Settings",

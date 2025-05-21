@@ -1,0 +1,66 @@
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+
+import { CellAction } from "./cell-actions";
+
+export type ReviewTable = {
+  id: number;
+  rating: number;
+  review: string | null;
+  reservation: {
+    patient: {
+      id: number;
+      full_name: string;
+      residence: string;
+      birthdate: string;
+      work_place: string;
+      contact_number: string;
+    };
+    clinic_treatment: {
+      id: number;
+      treatment: {
+        treatment_name: string;
+      };
+      clinic: {
+        clinic_name: string;
+      };
+    };
+  };
+};
+
+export const columns: ColumnDef<ReviewTable>[] = [
+  {
+    accessorKey: "age",
+    header: "Age",
+    cell: ({ row }) => {
+      const birthdate = new Date(row.original.reservation.patient.birthdate);
+      const age = new Date().getFullYear() - birthdate.getFullYear();
+      return <div>{age}</div>;
+    },
+  },
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => <div>{row.original.reservation.patient.full_name}</div>,
+  },
+  {
+    accessorKey: "clinic_name",
+    header: "Clinic Name",
+    cell: ({ row }) => (
+      <div>{row.original.reservation.clinic_treatment.clinic.clinic_name}</div>
+    ),
+  },
+  {
+    accessorKey: "rating",
+    header: "Rating",
+  },
+  {
+    accessorKey: "review",
+    header: "Review",
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <CellAction data={row.original} />,
+  },
+];

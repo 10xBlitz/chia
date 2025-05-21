@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "../client";
+import { startOfDay } from "date-fns";
 
 interface Filters {
   full_name?: string | null;
@@ -45,8 +46,9 @@ export async function getPaginatedUsers(
   
   // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte("created_at", filters.date_range.from);
+    query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
     query = query.lte("created_at", filters.date_range.to);
+  
   }
 
   
