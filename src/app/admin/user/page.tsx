@@ -22,7 +22,7 @@ export default function UserPage() {
     ],
     queryFn: async () => await getPaginatedUsers(page, limit, filters),
     placeholderData: keepPreviousData,
-    staleTime: 10 * 1000, // 3 seconds
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   return (
