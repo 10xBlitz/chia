@@ -1,36 +1,45 @@
+"use client";
+
 import { getPaginatedUsers } from "@/lib/supabase/functions/get-paginated-users";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Loading from "@/components/loading";
 
-export default async function UserPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | null };
-}) {
+export default function UserPage() {
+  const searchParams = useSearchParams();
   const { page, limit, filters } = validateUserQueryParams(searchParams);
 
-  const data = await getPaginatedUsers(page, limit, filters);
+  const { isError, error, data, isLoading } = useQuery({
+    queryKey: [
+      "users",
+      page,
+      limit,
+      filters.full_name,
+      filters.category,
+      filters.date_range,
+    ],
+    queryFn: async () => await getPaginatedUsers(page, limit, filters),
+    placeholderData: keepPreviousData,
+    staleTime: 10 * 1000, // 3 seconds
+  });
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable
-        columns={columns}
-        paginatedData={data}
-        currentPage={page}
-        currentLimit={limit}
-      />
+      {isError && <div className="bg-red-500/20">{error.message}</div>}
+      {isLoading && <Loading />}
+      {data && <DataTable columns={columns} paginatedData={data} />}
     </div>
   );
 }
 
-export function validateUserQueryParams(
-  searchParams: Record<string, string | null>
-) {
-  const pageParam = searchParams["page"];
-  const limitParam = searchParams["limit"];
-  const fullNameParam = searchParams["full_name"];
-  const categoryParam = searchParams["category"];
-  const encodedDates = searchParams["dates"];
+export function validateUserQueryParams(searchParams: ReadonlyURLSearchParams) {
+  const pageParam = searchParams.get("page");
+  const limitParam = searchParams.get("limit");
+  const fullNameParam = searchParams.get("full_name");
+  const categoryParam = searchParams.get("category");
+  const encodedDates = searchParams.get("dates");
 
   const page = pageParam ? Number(pageParam) : 1;
   const limit =

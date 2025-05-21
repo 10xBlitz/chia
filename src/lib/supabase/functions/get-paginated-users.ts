@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "../client";
 
 interface Filters {
@@ -14,6 +15,8 @@ export async function getPaginatedUsers(
   limit = 10,
   filters: Filters = {}
 ) {
+  console.log("---->getPaginatedUsers", { page, limit, filters });
+
   if (limit > 1000) {
     throw Error("limit exceeds 1000");
   }
@@ -41,14 +44,12 @@ export async function getPaginatedUsers(
 
   
   // Date range filter
-  if (filters.date_range?.from) {
+  if (filters.date_range?.from && filters.date_range?.to) {
     query = query.gte("created_at", filters.date_range.from);
-  }
-
-  if (filters.date_range?.to) {
     query = query.lte("created_at", filters.date_range.to);
   }
 
+  
   const { data, error, count } = await query;
 
   if (error) throw error;
