@@ -1,72 +1,87 @@
 "use client";
 import { Stepper } from "@/components/stepper";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Step1 from "./components/step-1";
-import Step2 from "./components/step-2";
-
-const formSchema = z
-  .object({
-    name: z.string().min(1, { message: "이름은 필수입니다." }),
-    email: z.string().min(1, { message: "이메일은 필수입니다." }),
-    password: z
-      .string()
-      .min(6, { message: "비밀번호는 최소 6자 이상이어야 합니다." }),
-    confirmPassword: z
-      .string()
-      .min(6, { message: "비밀번호는 최소 6자 이상이어야 합니다." }),
-    gender: z.string().min(1, { message: "성별은 필수입니다." }),
-    birthdate: z.string().min(1, { message: "생년월일을 입력하세요." }),
-    residence: z.string().min(1, { message: "거주가 필요합니다." }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "비밀번호가 일치하지 않습니다.",
-  });
+import Step1 from "./step-1";
+import Step2 from "./step-2";
+import { fullSchema, step1Schema, step2Schema } from "./schema";
+import { AnimatePresence, motion } from "framer-motion";
+import Step3 from "./step-3";
 
 const steps = [
-  { label: "Personal", sub: "Info" },
-  { label: "Account", sub: "Info" },
-  { label: "Review" },
+  { label: "계정" }, // Account
+  { label: "개인 정보" }, // Personal
+  { label: "검토" }, // Review
 ];
 
 const SignupPage = () => {
-  const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [isStepValid, setIsStepValid] = useState(false);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
+
+  const form = useForm<z.infer<typeof fullSchema>>({
+    resolver: zodResolver(fullSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
+      gender: "",
+      birthdate: new Date(),
+      residence: "",
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log("Form submitted", data);
+  const currentSchema = currentStep === 1 ? step1Schema : step2Schema;
+  const watchedValues = form.watch();
+
+  useEffect(() => {
+    const validate = async () => {
+      const result = currentSchema.safeParse(watchedValues);
+      setIsStepValid(result.success);
+    };
+    validate();
+  }, [watchedValues, currentStep]);
+
+  const onSubmit = (data: z.infer<typeof fullSchema>) => {
+    console.log("Final submit", data);
+  };
+
+  const nextStep = () => {
+    setDirection("next");
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+  };
+
+  const prevStep = () => {
+    setDirection("prev");
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  // Variants for swipe animation with directional support
+  const variants = {
+    enter: (dir: "next" | "prev") => ({
+      x: dir === "next" ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: "next" | "prev") => ({
+      x: dir === "next" ? -300 : 300,
+      opacity: 0,
+    }),
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 flex-1 overflow-x-hidden">
       <Link href="/patient" className="cursor-pointer">
         <Image
           src="/icons/chevron-left.svg"
@@ -76,54 +91,89 @@ const SignupPage = () => {
         />
       </Link>
 
-      <Stepper steps={steps} currentStep={currentStep} />
+      <div className="flex items-center mt-3 justify-center w-full">
+        <Stepper steps={steps} currentStep={currentStep} />
+      </div>
 
-      <span className="font-pretendard-600 text-[20px]">
+      <span className="font-pretendard-600 mt-4 text-[20px]">
         이메일로 로그인하기
       </span>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-10"
+          className="flex flex-col gap-10 flex-1"
         >
-          {currentStep === 1 && <Step1 form={form} />}
-
-          {currentStep === 2 && <Step2 form={form} />}
-
-          {/* buttons */}
-
-          {/* create navigation buttons here */}
-          <div className="flex items-center justify-between">
-            {currentStep > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCurrentStep((prev) => prev - 1)}
+          <AnimatePresence initial={false} mode="wait" custom={direction}>
+            {currentStep === 1 && (
+              <motion.div
+                key="step1"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-10 flex-1"
               >
-                이전
-              </Button>
+                <Step1 form={form} />
+              </motion.div>
             )}
-            {currentStep < steps.length && (
-              <Button
-                disabled={!form.formState.isValid || loading}
-                type="button"
-                onClick={() => {
-                  if (currentStep === 3) {
-                    form.handleSubmit(onSubmit)();
-                  } else {
-                    setCurrentStep((prev) => prev + 1);
-                  }
-                }}
-                className={cn(
-                  "w-full",
-                  !form.formState.isValid
-                    ? "bg-white !text-black !opacity-100 border-1 border-black/30"
-                    : "btn-primary"
-                )}
-                size="lg"
+
+            {currentStep === 2 && (
+              <motion.div
+                key="step2"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-10 flex-1"
               >
-                다음
+                <Step2 form={form} />
+              </motion.div>
+            )}
+
+            {currentStep === 3 && (
+              <motion.div
+                key="step3"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-10 flex-1"
+              >
+                <Step3 form={form} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Navigation buttons */}
+          <div className="flex items-end flex-1 gap-2">
+            <Button
+              disabled={currentStep <= 1}
+              type="button"
+              className="w-[49%] btn-primary"
+              onClick={prevStep}
+            >
+              이전 {/* Previous */}
+            </Button>
+
+            {currentStep < steps.length ? (
+              <Button
+                type="button"
+                className="w-[49%] btn-primary"
+                onClick={nextStep}
+                disabled={!isStepValid}
+              >
+                다음 {/* Next */}
+              </Button>
+            ) : (
+              <Button type="submit" className="w-[49%] btn-primary">
+                제출하기 {/* Submit */}
               </Button>
             )}
           </div>

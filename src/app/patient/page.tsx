@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const PatientHomePage = () => {
   return (
-    <div>
+    <>
       <div className="flex flex-col gap-10">
         <Image
           src={"/images/chia-logo.svg"}
@@ -69,7 +69,7 @@ const PatientHomePage = () => {
         <Link href="/patient/auth/signup">이메일로 로그인하기</Link>
         <Link href="">이메일로 로그인하기</Link>
       </div>
-    </div>
+    </>
   );
 };
 

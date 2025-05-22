@@ -1,20 +1,11 @@
 // src/stores/counter-store.ts
 import { createStore } from "zustand/vanilla";
 import { persist } from "zustand/middleware";
+import { Tables } from "@/lib/supabase/types";
 
-export type UserState = {
-  id: string;
+export type UserState = Tables<"user"> & {
   email: string;
-  full_name: string;
-  gender: string;
-  birth_date: Date;
-  contact_number: string;
-  residence: string;
-  work_place: string;
-  region: string;
   role: "admin" | "patient" | "dentist" | "dentist_employee";
-  clinic_id: number;
-  created_at: Date;
 };
 
 export type UserAction = {
@@ -23,19 +14,22 @@ export type UserAction = {
 
 export type UserStore = UserState & UserAction;
 
+
+
+
 export const defaultInitState: UserState = {
-  id: "",
+  id: 1,
   email: "",
   full_name: "",
   gender: "",
-  birth_date: new Date(),
+  birthdate:"",
   contact_number: "",
   residence: "",
   work_place: "",
   region: "",
   role: "admin",
   clinic_id: 0,
-  created_at: new Date(),
+  created_at: "",
 };
 
 export const createUserStore = (initState: UserState = defaultInitState) => {

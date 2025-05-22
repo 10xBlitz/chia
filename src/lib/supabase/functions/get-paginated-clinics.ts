@@ -55,8 +55,7 @@ export async function getPaginatedClinics(
 
  // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-       query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
-   
+    query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
     query = query.lte("created_at", filters.date_range.to);
   }
 

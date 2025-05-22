@@ -7,33 +7,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import React from "react";
-import { UseFormReturn } from "react-hook-form";
+import { StepInterface } from "./schema";
 
-interface Step1Props {
-  form: UseFormReturn<
-    {
-      name: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-      gender: string;
-      birthdate: string;
-      residence: string;
-    },
-    any,
-    {
-      name: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-      gender: string;
-      birthdate: string;
-      residence: string;
-    }
-  >;
-}
-
-const Step2: React.FC<Step1Props> = ({ form }) => {
+const Step1: React.FC<StepInterface> = ({ form }) => {
   return (
     <>
       <FormField
@@ -42,10 +18,14 @@ const Step2: React.FC<Step1Props> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-[16px] font-pretendard-600">
-              qqq
+              이름
             </FormLabel>
             <FormControl>
-              <Input placeholder="이름을 입력해주세요." {...field} />
+              <Input
+                className="h-[45px]"
+                placeholder="이름을 입력해주세요."
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -57,9 +37,13 @@ const Step2: React.FC<Step1Props> = ({ form }) => {
         name="email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>www</FormLabel>
+            <FormLabel>이메일 주소</FormLabel>
             <FormControl>
-              <Input placeholder="이메일 주소를 입력해주세요." {...field} />
+              <Input
+                className="h-[45px]"
+                placeholder="이메일 주소를 입력해주세요."
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -75,6 +59,7 @@ const Step2: React.FC<Step1Props> = ({ form }) => {
             <FormControl>
               <Input
                 type="password"
+                className="h-[45px]"
                 placeholder="비밀번호 (최소 6자리 이상 입력)"
                 {...field}
               />
@@ -93,6 +78,7 @@ const Step2: React.FC<Step1Props> = ({ form }) => {
             <FormControl>
               <Input
                 type="password"
+                className="h-[45px]"
                 placeholder="비밀번호를 확인해주세요."
                 {...field}
               />
@@ -105,4 +91,4 @@ const Step2: React.FC<Step1Props> = ({ form }) => {
   );
 };
 
-export default Step2;
+export default Step1;
