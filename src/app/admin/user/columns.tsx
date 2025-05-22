@@ -2,18 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, EditIcon, Trash2Icon } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Tables } from "@/lib/supabase/types";
 import { calculateAge } from "@/lib/utils";
 
-import { MoreHorizontal } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { CellAction } from "./cell-actions";
 
 export type UserTable = Tables<"user">;

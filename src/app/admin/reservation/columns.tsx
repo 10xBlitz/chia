@@ -6,10 +6,10 @@ import { CellAction } from "./cell-actions";
 import { format } from "date-fns";
 
 export type ReservationTable = {
-  id: number;
+  id: string;
   reservation_date: string;
   patient: {
-    id: number;
+    id: string;
     full_name: string;
     residence: string;
     birthdate: string;
@@ -17,7 +17,7 @@ export type ReservationTable = {
     contact_number: string;
   };
   clinic_treatment: {
-    id: number;
+    id: string;
     treatment: {
       treatment_name: string;
     };

@@ -5,12 +5,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-actions";
 
 export type ReviewTable = {
-  id: number;
+  id: string;
   rating: number;
   review: string | null;
   reservation: {
     patient: {
-      id: number;
+      id: string;
       full_name: string;
       residence: string;
       birthdate: string;
@@ -18,7 +18,7 @@ export type ReviewTable = {
       contact_number: string;
     };
     clinic_treatment: {
-      id: number;
+      id: string;
       treatment: {
         treatment_name: string;
       };

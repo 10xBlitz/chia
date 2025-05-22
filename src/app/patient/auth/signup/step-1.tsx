@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import React from "react";
 import { StepInterface } from "./schema";
 
-const Step1: React.FC<StepInterface> = ({ form }) => {
+const Step1: React.FC<StepInterface> = ({ form, confirmPasswordError }) => {
   return (
     <>
       <FormField
@@ -84,6 +84,10 @@ const Step1: React.FC<StepInterface> = ({ form }) => {
               />
             </FormControl>
             <FormMessage />
+
+            {confirmPasswordError && (
+              <span className="text-red-500">{confirmPasswordError}</span>
+            )}
           </FormItem>
         )}
       />

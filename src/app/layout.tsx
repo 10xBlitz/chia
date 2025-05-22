@@ -4,6 +4,7 @@ import "./globals.css";
 import "./fonts.css";
 import { UserStoreProvider } from "@/providers/user-store-provider";
 import CustomQueryClientProvider from "@/providers/query-client-provider";
+import { ToasterProvider } from "@/providers/toast-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <CustomQueryClientProvider>
           <UserStoreProvider>{children}</UserStoreProvider>
+          <ToasterProvider />
         </CustomQueryClientProvider>
       </body>
     </html>

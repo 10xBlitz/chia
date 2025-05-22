@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-actions";
 
 export type ClinicTable = {
-  id: number;
+  id: string;
   clinic_name: string;
   location: string;
   contact_number: string;
@@ -14,9 +14,9 @@ export type ClinicTable = {
   region: string;
   views: number;
   clinic_treatment: {
-    id: number;
+    id: string;
     treatment: {
-      id: number;
+      id: string;
       treatment_name: string;
       image_url: string | null;
     };

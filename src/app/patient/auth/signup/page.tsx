@@ -13,6 +13,9 @@ import Step2 from "./step-2";
 import { fullSchema, step1Schema, step2Schema } from "./schema";
 import { AnimatePresence, motion } from "framer-motion";
 import Step3 from "./step-3";
+import { supabaseClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const steps = [
   { label: "계정" }, // Account
@@ -24,6 +27,11 @@ const SignupPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
+  const [isLoading, setIsLoading] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<
+    string | null
+  >(null);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof fullSchema>>({
     resolver: zodResolver(fullSchema),
@@ -47,11 +55,62 @@ const SignupPage = () => {
       const result = currentSchema.safeParse(watchedValues);
       setIsStepValid(result.success);
     };
+
+    if (currentStep === 1) {
+      if (watchedValues.password !== watchedValues.confirmPassword) {
+        setConfirmPasswordError("비밀번호가 일치하지 않습니다."); // Passwords do not match
+      } else {
+        setConfirmPasswordError(null);
+      }
+    }
+
     validate();
   }, [watchedValues, currentStep]);
 
-  const onSubmit = (data: z.infer<typeof fullSchema>) => {
-    console.log("Final submit", data);
+  const onSubmit = async (data: z.infer<typeof fullSchema>) => {
+    try {
+      const { data: authUser, error } = await supabaseClient.auth.signUp({
+        email: data.email,
+        password: data.password,
+      });
+      if (error) throw error;
+      // Insert user profile into 'user' table after successful signup
+      const { data: insertData, error: insertError } = await supabaseClient
+        .from("user")
+        .insert([
+          {
+            id: authUser.user?.id as string,
+            full_name: data.name,
+            gender: data.gender,
+            birthdate: data.birthdate.toISOString(),
+            residence: data.residence,
+            work_place: data.workplace,
+            role: "patient",
+            contact_number: data.contact_number,
+          },
+        ])
+        .select();
+      if (insertError) throw insertError;
+
+      toast.success("회원가입이 완료되었습니다."); //Sign up completed.
+      console.log("User profile inserted:", insertData);
+
+      router.push("/main");
+      //(Sign up completed successfully)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "User already registered") {
+          toast.error("이미 가입된 이메일입니다."); //User already registered
+        } else {
+          toast.error(`회원가입에 실패했습니다: ${error?.message} `); //Sign up failed
+        }
+      }
+
+      //(Sign up failed)
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const nextStep = () => {
@@ -116,7 +175,10 @@ const SignupPage = () => {
                 transition={{ type: "tween", duration: 0.2 }}
                 className="flex flex-col gap-10 flex-1"
               >
-                <Step1 form={form} />
+                <Step1
+                  form={form}
+                  confirmPasswordError={confirmPasswordError || ""}
+                />
               </motion.div>
             )}
 
@@ -162,7 +224,7 @@ const SignupPage = () => {
               이전 {/* Previous */}
             </Button>
 
-            {currentStep < steps.length ? (
+            {currentStep < steps.length && (
               <Button
                 type="button"
                 className="w-[49%] btn-primary"
@@ -171,9 +233,15 @@ const SignupPage = () => {
               >
                 다음 {/* Next */}
               </Button>
-            ) : (
-              <Button type="submit" className="w-[49%] btn-primary">
-                제출하기 {/* Submit */}
+            )}
+
+            {currentStep === steps.length && (
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-[49%] btn-primary"
+              >
+                {isLoading ? "회원가입 중..." : "회원가입"} {/* Sign Up */}
               </Button>
             )}
           </div>

@@ -12,6 +12,7 @@ import { StepInterface } from "./schema";
 import AddressSelector from "@/components/address-selector";
 import GenderSelector from "@/components/gender-selector";
 import KoreanDatePicker from "@/components/date-picker";
+import { PhoneInput } from "@/components/phone-input";
 
 const Step2: React.FC<StepInterface> = ({ form }) => {
   return (
@@ -20,7 +21,7 @@ const Step2: React.FC<StepInterface> = ({ form }) => {
         control={form.control}
         name="gender"
         render={({ field }) => (
-          <FormItem className="space-y-3 font-bold font-pretendard-600">
+          <FormItem>
             <FormLabel className="text-[16px] font-pretendard-600">
               성별 {/* Gender */}
             </FormLabel>
@@ -29,6 +30,25 @@ const Step2: React.FC<StepInterface> = ({ form }) => {
                 onValueChange={field.onChange}
                 value={field.value}
                 disabled={false} // Set to true if you want to disable the selector
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="contact_number"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-[16px] font-pretendard-600">
+              연락처{/* Contact Number */}
+            </FormLabel>
+            <FormControl>
+              <PhoneInput
+                defaultCountry="KR"
+                onChange={field.onChange}
+                value={field.value}
               />
             </FormControl>
             <FormMessage />

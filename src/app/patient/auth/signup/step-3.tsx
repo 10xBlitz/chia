@@ -4,25 +4,24 @@ import { StepInterface } from "./schema";
 const Step3: React.FC<StepInterface> = ({ form }) => {
   return (
     <div className="p-6 bg-white rounded-lg">
-      {/* Sign Up Information Confirmation */}
       <div className="mb-4">
-        {/* Name */}
-        <strong className="block">이름:</strong>
+        <strong className="block">이름: {/* Name */}</strong>
         <div>{form.getValues("name")}</div>
       </div>
       <div className="mb-4">
-        {/* Email */}
-        <strong className="block">이메일:</strong>
+        <strong className="block">이메일: {/* Email */}</strong>
         <div>{form.getValues("email")}</div>
       </div>
       <div className="mb-4">
-        {/* Gender */}
-        <strong className="block">성별:</strong>
+        <strong className="block">성별: {/* Gender */}</strong>
         <div>{form.getValues("gender")}</div>
       </div>
       <div className="mb-4">
-        {/* Birthdate */}
-        <strong className="block">생년월일:</strong>
+        <strong className="block">연락처: {/* Contact Number */}</strong>
+        <div>{form.getValues("contact_number")}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">생년월일: {/* Birthdate */}</strong>
         <div>
           {form.getValues("birthdate")
             ? new Date(form.getValues("birthdate")).toLocaleDateString()
@@ -30,13 +29,11 @@ const Step3: React.FC<StepInterface> = ({ form }) => {
         </div>
       </div>
       <div className="mb-4">
-        {/* Residence */}
-        <strong className="block">거주지:</strong>
+        <strong className="block">거주지: {/* Residence */}</strong>
         <div>{form.getValues("residence")}</div>
       </div>
       <div className="mb-4">
-        {/* Workplace */}
-        <strong className="block">직장:</strong>
+        <strong className="block">직장: {/* Workplace */}</strong>
         <div>{form.getValues("workplace")}</div>
       </div>
     </div>
