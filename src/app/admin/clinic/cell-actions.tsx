@@ -7,13 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  Edit,
-  EditIcon,
-  EyeIcon,
-  MoreHorizontal,
-  Trash2Icon,
-} from "lucide-react";
+import { EditIcon, EyeIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { ClinicTable } from "./columns";
 import { TreatmentModal } from "./treatment-modal";
