@@ -1,14 +1,14 @@
 "use client";
 
-import { getPaginatedUsers } from "@/lib/supabase/functions/get-paginated-users";
+import { getPaginatedUsers } from "@/lib/supabase/services/users.services";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
-import { getPaginatedClinics } from "@/lib/supabase/functions/get-paginated-clinics";
-import { getPaginatedReservations } from "@/lib/supabase/functions/get-paginated-reservations";
-import { getPaginatedReviews } from "@/lib/supabase/functions/get-paginated-reviews";
+import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
+import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
+import { getPaginatedReviews } from "@/lib/supabase/services/reviews.services";
 
 export default function ReviewPage() {
   const searchParams = useSearchParams();

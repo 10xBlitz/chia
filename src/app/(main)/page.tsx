@@ -8,9 +8,9 @@ import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import ClinicCard from "./clinic-card";
-import BottomNavigation from "../bottom-navigation";
+import Link from "next/link";
+import { supabaseClient } from "@/lib/supabase/client";
 
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
@@ -47,6 +47,17 @@ export default function MainPage() {
         {!userId && (
           <Link href="/auth/login">
             <Button variant="outline">로그인 {/**login */}</Button>
+          </Link>
+        )}
+
+        {userId && (
+          <Link href="/auth/login">
+            <Button
+              variant="outline"
+              onClick={async () => await supabaseClient.auth.signOut()}
+            >
+              Logout {/**logout */}
+            </Button>
           </Link>
         )}
       </header>
@@ -175,7 +186,6 @@ export default function MainPage() {
           </div>
         </div>
       </main>
-      <BottomNavigation />
     </div>
   );
 }

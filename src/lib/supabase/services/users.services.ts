@@ -4,7 +4,7 @@ import { startOfDay } from "date-fns";
 
 interface Filters {
   full_name?: string | null;
-  category?: string;
+  category?: "patient" | "dentist" | "admin" | "dentist employee";
   date_range?: {
     from?: string;
     to?: string;

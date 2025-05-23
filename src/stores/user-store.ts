@@ -1,11 +1,16 @@
 // src/stores/counter-store.ts
 import { createStore } from "zustand/vanilla";
-import { persist } from "zustand/middleware";
 import { Tables } from "@/lib/supabase/types";
+import { User } from "@supabase/supabase-js";
 
-export type UserState = Tables<"user"> & {
-  email: string;
-};
+export type UserState = {
+  user: (Omit<Tables<"user">, "role"> & {
+    role: Tables<"user">["role"] | "" | null;
+    email: string;
+  }) | null;
+}
+
+
 
 export type UserAction = {
   updateUser: (userData: Partial<UserState>) => void;
@@ -16,21 +21,9 @@ export type UserStore = UserState & UserAction;
 
 
 
-export const defaultInitState: UserState = {
-  id: "",
-  email: "",
-  full_name: "",
-  gender: "",
-  birthdate:"",
-  contact_number: "",
-  residence: "",
-  work_place: "",
-  role: "admin",
-  clinic_id: "",
-  created_at: "",
-};
 
-export const createUserStore = (initState: UserState = defaultInitState) => {
+
+export const createUserStore = (initState: UserState) => {
   console.log("-->createUserStore", initState);
 
   // return createStore<UserStore>()(

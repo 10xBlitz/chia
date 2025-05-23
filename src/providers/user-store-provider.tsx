@@ -26,7 +26,7 @@ export const UserStoreContext = createContext<UserStoreApi | undefined>(
 
 // Define a default state for when no user is logged in or profile is not found
 // Ensure this matches your UserState type, especially clinic_id as nullable
-const defaultUserState: UserState = {
+const defaultUserState = {
   id: "",
   email: "",
   full_name: "",
@@ -35,7 +35,7 @@ const defaultUserState: UserState = {
   contact_number: "",
   residence: "",
   work_place: "",
-  role: "patient", // Or a 'guest' role
+  role: null, // Or a 'guest' role
   created_at: "",
   clinic_id: null, // Assuming clinic_id can be null
 };
@@ -69,26 +69,31 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         console.error("Error fetching user profile:", profileError.message);
         // Fallback to updating with auth data if profile fetch fails
         storeRef.current.getState().updateUser({
-          ...defaultUserState,
-          id: userId,
-          email: userEmail || "",
+          user: {
+            ...defaultUserState,
+            id: userId,
+            role: "",
+            email: userEmail || "", // Prefer auth email, fallback to profile email
+          },
         });
         return;
       }
 
       if (userProfileData) {
         storeRef.current.getState().updateUser({
-          id: userProfileData.id,
-          email: userEmail || "", // Prefer auth email, fallback to profile email
-          full_name: userProfileData.full_name,
-          gender: userProfileData.gender,
-          birthdate: userProfileData.birthdate,
-          contact_number: userProfileData.contact_number,
-          residence: userProfileData.residence,
-          work_place: userProfileData.work_place,
-          role: userProfileData.role,
-          created_at: userProfileData.created_at,
-          clinic_id: userProfileData.clinic_id,
+          user: {
+            id: userProfileData.id,
+            email: userEmail || "", // Prefer auth email, fallback to profile email
+            full_name: userProfileData.full_name,
+            gender: userProfileData.gender,
+            birthdate: userProfileData.birthdate,
+            contact_number: userProfileData.contact_number,
+            residence: userProfileData.residence,
+            work_place: userProfileData.work_place,
+            role: userProfileData.role,
+            created_at: userProfileData.created_at,
+            clinic_id: userProfileData.clinic_id,
+          },
         });
       } else {
         // User is authenticated, but no profile found (e.g., new user before profile creation)
@@ -96,9 +101,12 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           `User profile not found for ID: ${userId}. Updating store with auth details only.`
         );
         storeRef.current.getState().updateUser({
-          ...defaultUserState,
-          id: userId,
-          email: userEmail || "",
+          user: {
+            ...defaultUserState,
+            id: userId,
+            email: userEmail || "",
+            role: "", // Or a 'guest' role
+          },
         });
       }
     } catch (e) {
@@ -106,9 +114,12 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
       // Fallback to minimal update
       if (storeRef.current) {
         storeRef.current.getState().updateUser({
-          ...defaultUserState,
-          id: userId,
-          email: userEmail || "",
+          user: {
+            ...defaultUserState,
+            id: userId,
+            email: userEmail || "",
+            role: "", // Or a 'guest' role
+          },
         });
       }
     }
@@ -118,7 +129,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
 
     const initializeStore = async () => {
-      let initialDataForStore: UserState = defaultUserState;
+      let initialDataForStore: UserState = { user: defaultUserState };
       try {
         // Attempt to get the current session on initial load
         const {
@@ -128,6 +139,12 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
 
         if (sessionError) {
           console.error("Error getting initial session:", sessionError.message);
+        }
+
+        if (!session?.user) {
+          // No session means no user is logged in
+          initialDataForStore = { user: defaultUserState };
+          return;
         }
 
         if (session?.user) {
@@ -145,30 +162,36 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
               profileError.message
             );
             initialDataForStore = {
-              ...defaultUserState,
-              id: session.user.id,
-              email: session.user.email || "",
+              user: {
+                ...defaultUserState,
+                id: session.user.id,
+                email: session.user.email || "",
+              },
             };
           } else if (userProfileData) {
             initialDataForStore = {
-              id: userProfileData.id,
-              email: session.user.email || "",
-              full_name: userProfileData.full_name,
-              gender: userProfileData.gender,
-              birthdate: userProfileData.birthdate,
-              contact_number: userProfileData.contact_number,
-              residence: userProfileData.residence,
-              work_place: userProfileData.work_place,
-              role: userProfileData.role,
-              created_at: userProfileData.created_at,
-              clinic_id: userProfileData.clinic_id,
+              user: {
+                id: userProfileData.id,
+                email: session.user.email || "",
+                full_name: userProfileData.full_name,
+                gender: userProfileData.gender,
+                birthdate: userProfileData.birthdate,
+                contact_number: userProfileData.contact_number,
+                residence: userProfileData.residence,
+                work_place: userProfileData.work_place,
+                role: userProfileData.role,
+                created_at: userProfileData.created_at,
+                clinic_id: userProfileData.clinic_id,
+              },
             };
           } else {
             // Session exists but no profile, use auth details
             initialDataForStore = {
-              ...defaultUserState,
-              id: session.user.id,
-              email: session.user.email || "",
+              user: {
+                ...defaultUserState,
+                id: session.user.id,
+                email: session.user.email || "",
+              },
             };
           }
         }
@@ -179,8 +202,11 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         if (mounted) {
           // Create the store instance if it doesn't exist
           if (!storeRef.current) {
+            console.log("Creating new store instance.");
+
             storeRef.current = createUserStore(initialDataForStore);
           } else {
+            console.log("Store already exists, updating state.");
             // If store already exists (e.g., due to HMR or re-render), update its state
             storeRef.current.getState().updateUser(initialDataForStore);
           }
@@ -203,7 +229,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         if (event === "SIGNED_IN" && session?.user) {
           await fetchProfileAndUpdateStore(session.user.id, session.user.email);
         } else if (event === "SIGNED_OUT") {
-          storeRef.current.getState().updateUser(defaultUserState);
+          storeRef.current.getState().updateUser({ user: defaultUserState });
         } else if (event === "USER_UPDATED" && session?.user) {
           // If user's auth details change (e.g. email verified), re-fetch profile
           await fetchProfileAndUpdateStore(session.user.id, session.user.email);

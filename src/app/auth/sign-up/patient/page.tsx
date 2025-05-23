@@ -16,7 +16,6 @@ import Step3 from "./step-3";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { useCountStore } from "../../home/page";
 
 const steps = [
   { label: "계정" }, // Account
@@ -96,7 +95,7 @@ const SignupPage = () => {
       toast.success("회원가입이 완료되었습니다."); //Sign up completed.
       console.log("User profile inserted:", insertData);
 
-      router.push("/main");
+      router.push("/patient/home");
       //(Sign up completed successfully)
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -139,9 +138,8 @@ const SignupPage = () => {
       opacity: 0,
     }),
   };
-
   return (
-    <div className="flex flex-col gap-6 flex-1 overflow-x-hidden">
+    <div className="flex flex-col gap-6 flex-1 overflow-x-hidden max-w-[460px] px-[20px] py-[16px] mx-auto">
       <Link href="/patient" className="cursor-pointer">
         <Image
           src="/icons/chevron-left.svg"

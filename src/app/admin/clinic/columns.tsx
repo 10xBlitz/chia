@@ -10,7 +10,7 @@ export type ClinicTable = {
   location: string;
   contact_number: string;
   link: string | null;
-  pictures: string | null;
+  pictures: string[] | null;
   region: string;
   views: number;
   clinic_treatment: {

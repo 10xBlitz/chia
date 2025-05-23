@@ -5,7 +5,7 @@ import { DataTable } from "./data-table";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
-import { getPaginatedClinics } from "@/lib/supabase/functions/get-paginated-clinics";
+import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
 
 export default function ClinicPage() {
   const searchParams = useSearchParams();

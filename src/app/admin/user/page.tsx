@@ -1,11 +1,12 @@
 "use client";
 
-import { getPaginatedUsers } from "@/lib/supabase/functions/get-paginated-users";
+import { getPaginatedUsers } from "@/lib/supabase/services/users.services";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
+import { Tables } from "@/lib/supabase/types";
 
 export default function UserPage() {
   const searchParams = useSearchParams();
@@ -60,7 +61,9 @@ export function validateUserQueryParams(searchParams: ReadonlyURLSearchParams) {
   const filters = {
     full_name: fullNameParam || undefined,
     category:
-      categoryParam && categoryParam !== "all" ? categoryParam : undefined,
+      categoryParam && categoryParam !== "all"
+        ? (categoryParam as Tables<"user">["role"])
+        : undefined,
     date_range: Object.keys(dateRange).length > 0 ? dateRange : undefined,
   };
 

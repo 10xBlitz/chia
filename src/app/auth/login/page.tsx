@@ -1,11 +1,79 @@
-import { LoginForm } from '@/app/auth/login/login-form'
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
 
-export default function Page() {
+const PatientHomePage = () => {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <LoginForm />
+    <div className="max-w-[460px] min-h-screen flex flex-col  px-[20px] py-[16px] mx-auto">
+      <div className="flex flex-col gap-10">
+        <Image
+          src={"/images/chia-logo.svg"}
+          width={64}
+          height={24}
+          alt="Chia Logo"
+        />
+        <span
+          style={{
+            fontSize: "24px",
+            lineHeight: "130%",
+            letterSpacing: "-2.5%",
+            fontFamily: "Pretendard, sans-serif",
+            fontWeight: 600,
+          }}
+        >
+          치아로 접수하고 <br />
+          대기 없이 진료 받으세요!
+        </span>
+      </div>
+
+      <div className="w-full  relative flex items-center justify-center">
+        <Image
+          src={"/images/auth-main.svg"}
+          width={268}
+          height={268}
+          alt="Main Image"
+        />
+        <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white/80 via-white/40 to-transparent"></div>
+      </div>
+
+      <Button
+        className="bg-[#FEE500] hover:bg-[#e6cf00] h-[44px]  mt-20 w-full text-black text-[14px] pt-[10px] pr-[16px] pb-[10px] pl-[16px] rounded-[6px]"
+        style={{
+          fontSize: "14px",
+          fontFamily: "Pretendard, sans-serif",
+          lineHeight: "150%",
+          letterSpacing: "-2.5%",
+          fontWeight: 600,
+        }}
+      >
+        <Image
+          src={"/icons/message-filled.svg"}
+          width={21.559669494628906}
+          height={19.9}
+          alt="message icon"
+        />
+        카카오로 시작하기 {/** Get started with Kakao */}
+      </Button>
+
+      <div
+        className="flex text-[#767676] gap-3 text-[14px] underline flex-col w-full items-center justify-center mt-8"
+        style={{
+          fontFamily: "Pretendard, sans-serif",
+          lineHeight: "150%",
+          letterSpacing: "-2.5%",
+          fontWeight: 500,
+        }}
+      >
+        <Link href="/auth/login/patient-login-email">
+          이메일로 로그인하기 {/** Log in with email */}
+        </Link>
+
+        <Link href="/auth/login/dentist-login-email">
+          치과 의사로 로그인 {/** Log in as dentist */}
+        </Link>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default PatientHomePage;
