@@ -1,22 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query"; // Import useInfiniteQuery
 import Image from "next/image";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
-import { Button } from "@/components/ui/button";
 import ClinicCard from "./clinic-card";
-import Link from "next/link";
-import { supabaseClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const userId = useUserStore((state) => state.user?.id);
-  // const { ref: loadMoreRef, inView } = useInView(); // For detecting when to load more
+  const user = useUserStore((state) => state.user);
+  const router = useRouter();
 
   const handleSortOptionChange = (option: string) => {
     setSortOption(option);
@@ -35,6 +33,12 @@ export default function MainPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  useEffect(() => {
+    if (user?.role === "patient") {
+      router.push("/patient/home");
+    }
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen max-w-[460px] mx-auto">
       <header className="py-4 px-4 flex justify-between items-center border-b">
@@ -44,22 +48,6 @@ export default function MainPage() {
           width={76}
           alt="logo"
         />
-        {!userId && (
-          <Link href="/auth/login">
-            <Button variant="outline">로그인 {/**login */}</Button>
-          </Link>
-        )}
-
-        {userId && (
-          <Link href="/auth/login">
-            <Button
-              variant="outline"
-              onClick={async () => await supabaseClient.auth.signOut()}
-            >
-              Logout {/**logout */}
-            </Button>
-          </Link>
-        )}
       </header>
 
       <main className="flex-1 overflow-hidden">

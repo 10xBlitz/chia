@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ClinicCard from "./clinic-card";
 import BottomNavigation from "../bottom-navigation";
+import { UserIcon } from "lucide-react";
+import { supabaseClient } from "@/lib/supabase/client";
 
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
@@ -36,19 +38,23 @@ export default function MainPage() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen max-w-[460px] mx-auto">
-      <header className="py-4 px-4 flex justify-between items-center border-b">
+    <div className="flex flex-col min-h-screen max-w-[460px] ">
+      <header className="py-4  flex justify-between items-center border-b">
         <Image
           src={"/images/chia-logo.svg"}
           height={54}
           width={76}
           alt="logo"
         />
-        {!userId && (
-          <Link href="/auth/login">
-            <Button variant="outline">로그인 {/**login */}</Button>
-          </Link>
-        )}
+        <Link href="/auth/login">
+          <Button
+            variant="ghost"
+            onClick={() => supabaseClient.auth.signOut()}
+            className="min-h-10 "
+          >
+            <UserIcon className="min-h-6 min-w-6" /> 로그아웃 {/** Logout */}
+          </Button>
+        </Link>
       </header>
 
       <main className="flex-1 overflow-hidden">

@@ -239,6 +239,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     );
 
     return () => {
+      authListener.subscription.unsubscribe();
       mounted = false;
     };
   }, []); // Empty dependency array ensures this runs once on mount

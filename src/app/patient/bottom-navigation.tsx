@@ -10,7 +10,7 @@ export default function BottomNavigation() {
   const navItems = [
     {
       label: "홈",
-      path: "/main",
+      path: "/patient/home",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
