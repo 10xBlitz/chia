@@ -6,13 +6,8 @@ import Image from "next/image";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { InfiniteList } from "@/components/supabase-infinite-list";
-
-import { Button } from "@/components/ui/button";
-
 import ClinicCard from "./clinic-card";
 import BottomNavigation from "../bottom-navigation";
-import { UserIcon } from "lucide-react";
-import { supabaseClient } from "@/lib/supabase/client";
 import { LogoutButton } from "@/components/logout-button";
 
 export default function MainPage() {
