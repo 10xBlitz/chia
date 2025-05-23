@@ -1,10 +1,22 @@
-// src/providers/counter-store-provider.tsx
+// src/providers/user-store-provider.tsx
 "use client";
 
-import { type ReactNode, createContext, useRef, useContext } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useStore } from "zustand";
 
-import { type UserStore, createUserStore } from "@/stores/user-store";
+import {
+  type UserStore,
+  createUserStore,
+  type UserState,
+} from "@/stores/user-store"; // Ensure UserState is exported
+import { supabaseClient } from "@/lib/supabase/client";
 
 export type UserStoreApi = ReturnType<typeof createUserStore>;
 
@@ -12,24 +24,202 @@ export const UserStoreContext = createContext<UserStoreApi | undefined>(
   undefined
 );
 
+// Define a default state for when no user is logged in or profile is not found
+// Ensure this matches your UserState type, especially clinic_id as nullable
+const defaultUserState: UserState = {
+  id: "",
+  email: "",
+  full_name: "",
+  gender: "",
+  birthdate: "", // Consider using a valid default like new Date(0).toISOString() or ""
+  contact_number: "",
+  residence: "",
+  work_place: "",
+  role: "patient", // Or a 'guest' role
+  created_at: "",
+  clinic_id: null, // Assuming clinic_id can be null
+};
+
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const storeRef = useRef<UserStoreApi | null>(null);
+  // useState to ensure children are rendered only after the store is definitely initialized
+  const [isStoreInitialized, setIsStoreInitialized] = useState(false);
 
-  if (storeRef.current === null) {
-    storeRef.current = createUserStore({
-      id: "",
-      email: "",
-      full_name: "",
-      gender: "",
-      birth_date: new Date(),
-      contact_number: "",
-      residence: "",
-      work_place: "",
-      region: "",
-      role: "admin",
-      clinic_id: 0,
-      created_at: new Date(),
-    });
+  // Helper function to fetch user profile and update the store
+  const fetchProfileAndUpdateStore = async (
+    userId: string,
+    userEmail?: string
+  ) => {
+    if (!storeRef.current) {
+      console.warn(
+        "fetchProfileAndUpdateStore called before storeRef is initialized."
+      );
+      return;
+    }
+    try {
+      const { data: userProfileData, error: profileError } =
+        await supabaseClient
+          .from("user") // Your user table name
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+      // PGRST116: "Searched item was not found"
+      if (profileError && profileError.code !== "PGRST116") {
+        console.error("Error fetching user profile:", profileError.message);
+        // Fallback to updating with auth data if profile fetch fails
+        storeRef.current.getState().updateUser({
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+        });
+        return;
+      }
+
+      if (userProfileData) {
+        storeRef.current.getState().updateUser({
+          id: userProfileData.id,
+          email: userEmail || "", // Prefer auth email, fallback to profile email
+          full_name: userProfileData.full_name,
+          gender: userProfileData.gender,
+          birthdate: userProfileData.birthdate,
+          contact_number: userProfileData.contact_number,
+          residence: userProfileData.residence,
+          work_place: userProfileData.work_place,
+          role: userProfileData.role,
+          created_at: userProfileData.created_at,
+          clinic_id: userProfileData.clinic_id,
+        });
+      } else {
+        // User is authenticated, but no profile found (e.g., new user before profile creation)
+        console.warn(
+          `User profile not found for ID: ${userId}. Updating store with auth details only.`
+        );
+        storeRef.current.getState().updateUser({
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+        });
+      }
+    } catch (e) {
+      console.error("Unexpected error in fetchProfileAndUpdateStore:", e);
+      // Fallback to minimal update
+      if (storeRef.current) {
+        storeRef.current.getState().updateUser({
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    const initializeStore = async () => {
+      let initialDataForStore: UserState = defaultUserState;
+      try {
+        // Attempt to get the current session on initial load
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabaseClient.auth.getSession();
+
+        if (sessionError) {
+          console.error("Error getting initial session:", sessionError.message);
+        }
+
+        if (session?.user) {
+          // If session exists, try to fetch the user profile
+          const { data: userProfileData, error: profileError } =
+            await supabaseClient
+              .from("user")
+              .select("*")
+              .eq("id", session.user.id)
+              .single();
+
+          if (profileError && profileError.code !== "PGRST116") {
+            console.error(
+              "Error fetching initial user profile:",
+              profileError.message
+            );
+            initialDataForStore = {
+              ...defaultUserState,
+              id: session.user.id,
+              email: session.user.email || "",
+            };
+          } else if (userProfileData) {
+            initialDataForStore = {
+              id: userProfileData.id,
+              email: session.user.email || "",
+              full_name: userProfileData.full_name,
+              gender: userProfileData.gender,
+              birthdate: userProfileData.birthdate,
+              contact_number: userProfileData.contact_number,
+              residence: userProfileData.residence,
+              work_place: userProfileData.work_place,
+              role: userProfileData.role,
+              created_at: userProfileData.created_at,
+              clinic_id: userProfileData.clinic_id,
+            };
+          } else {
+            // Session exists but no profile, use auth details
+            initialDataForStore = {
+              ...defaultUserState,
+              id: session.user.id,
+              email: session.user.email || "",
+            };
+          }
+        }
+      } catch (e) {
+        console.error("Unexpected error during store initialization:", e);
+        // Fallback to default state
+      } finally {
+        if (mounted) {
+          // Create the store instance if it doesn't exist
+          if (!storeRef.current) {
+            storeRef.current = createUserStore(initialDataForStore);
+          } else {
+            // If store already exists (e.g., due to HMR or re-render), update its state
+            storeRef.current.getState().updateUser(initialDataForStore);
+          }
+          setIsStoreInitialized(true);
+        }
+      }
+    };
+
+    initializeStore();
+
+    // Subscribe to auth state changes
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!storeRef.current) {
+          // This case should be rare if initializeStore completes first
+          console.warn("onAuthStateChange: storeRef not initialized yet.");
+          return;
+        }
+
+        if (event === "SIGNED_IN" && session?.user) {
+          await fetchProfileAndUpdateStore(session.user.id, session.user.email);
+        } else if (event === "SIGNED_OUT") {
+          storeRef.current.getState().updateUser(defaultUserState);
+        } else if (event === "USER_UPDATED" && session?.user) {
+          // If user's auth details change (e.g. email verified), re-fetch profile
+          await fetchProfileAndUpdateStore(session.user.id, session.user.email);
+        }
+        // You might also handle TOKEN_REFRESHED if it implies user data changes in your app
+      }
+    );
+
+    return () => {
+      mounted = false;
+    };
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  // Render children only after the store is initialized
+  if (!isStoreInitialized || !storeRef.current) {
+    return null; // Or a loading spinner, or some fallback UI
   }
 
   return (
@@ -42,10 +232,12 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
 export const useUserStore = <T,>(selector: (store: UserStore) => T): T => {
   const userStoreContext = useContext(UserStoreContext);
 
-  // console.log("-->userStoreContext", userStoreContext?.getState());
-
   if (!userStoreContext) {
-    throw new Error(`useCounterStore must be used within CounterStoreProvider`);
+    // This error implies that useUserStore is used outside UserStoreProvider
+    // or before the store is initialized and provider has rendered.
+    throw new Error(
+      `useUserStore must be used within a UserStoreProvider, and after the store has been initialized.`
+    );
   }
 
   return useStore(userStoreContext, selector);

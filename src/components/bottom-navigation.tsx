@@ -93,7 +93,7 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center p-3">
+    <div className="fixed max-w-[460px] mx-auto bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center p-3">
       {navItems.map((item) => {
         const isActive = pathname === item.path;
         return (

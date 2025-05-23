@@ -5,7 +5,6 @@ import { Tables } from "@/lib/supabase/types";
 
 export type UserState = Tables<"user"> & {
   email: string;
-  role: "admin" | "patient" | "dentist" | "dentist_employee";
 };
 
 export type UserAction = {
@@ -18,7 +17,7 @@ export type UserStore = UserState & UserAction;
 
 
 export const defaultInitState: UserState = {
-  id: 1,
+  id: "",
   email: "",
   full_name: "",
   gender: "",
@@ -26,22 +25,29 @@ export const defaultInitState: UserState = {
   contact_number: "",
   residence: "",
   work_place: "",
-  region: "",
   role: "admin",
-  clinic_id: 0,
+  clinic_id: "",
   created_at: "",
 };
 
 export const createUserStore = (initState: UserState = defaultInitState) => {
   console.log("-->createUserStore", initState);
 
-  return createStore<UserStore>()(
-    persist(
+  // return createStore<UserStore>()(
+  //   persist(
+  //     (set) => ({
+  //       ...initState,
+  //       updateUser: (userData) => set(() => userData),
+  //     }),
+  //     { name: "user-store" }
+  //   )
+  // );
+
+
+   return createStore<UserStore>()(
       (set) => ({
         ...initState,
         updateUser: (userData) => set(() => userData),
       }),
-      { name: "user-store" }
-    )
   );
 };

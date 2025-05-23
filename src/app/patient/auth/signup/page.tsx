@@ -16,6 +16,7 @@ import Step3 from "./step-3";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useCountStore } from "../../home/page";
 
 const steps = [
   { label: "계정" }, // Account

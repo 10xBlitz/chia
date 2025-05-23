@@ -27,6 +27,7 @@ import {
   User2,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const items = [
@@ -76,10 +77,15 @@ export function AppSidebar() {
                       pathname === item.url && "bg-gray-500/20"
                     )}
                   >
-                    <a href={item.url}>
+                    {/* <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </a> */}
+
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

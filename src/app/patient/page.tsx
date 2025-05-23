@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useUserStore } from "@/providers/user-store-provider";
 import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +14,6 @@ const PatientHomePage = () => {
           height={24}
           alt="Chia Logo"
         />
-
         <span
           style={{
             fontSize: "24px",

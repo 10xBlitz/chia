@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect, useState } from "react";
 import ClinicCard from "@/components/clinic-card";
-import BottomNavigation from "@/components/bottom-navigation";
+import { Tables } from "@/lib/supabase/types";
+import { supabaseClient } from "@/lib/supabase/client";
+import { useInfiniteQuery } from "@tanstack/react-query"; // Import useInfiniteQuery
+import { useInView } from "react-intersection-observer"; // Import useInView
+import Image from "next/image";
 
 // Mock data for clinic listings
 const clinics = [
@@ -44,28 +46,70 @@ const clinics = [
     image: "/images/chia-logo.svg",
   },
 ];
+const TREATMENTS_PER_PAGE = 10; // Number of treatments to fetch per page
+const fetchTreatments = async ({ pageParam = 0 }: { pageParam?: number }) => {
+  const from = pageParam * TREATMENTS_PER_PAGE;
+  const to = from + TREATMENTS_PER_PAGE - 1;
 
-// Mock categories
-const categories = ["임플란트", "임플란트", "임플란트", "임플란트", "임플란트"];
+  const { data, error, count } = await supabaseClient
+    .from("treatment")
+    .select("id, treatment_name, image_url", { count: "exact" }) // Fetch count for hasNextPage logic
+    .range(from, to);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return {
+    data: data || [],
+    nextPage:
+      (pageParam + 1) * TREATMENTS_PER_PAGE < (count || 0)
+        ? pageParam + 1
+        : undefined,
+    count,
+  };
+};
 
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { ref: loadMoreRef, inView } = useInView(); // For detecting when to load more
 
   const handleSortOptionChange = (option: string) => {
     setSortOption(option);
     setIsDropdownOpen(false);
   };
 
+  const {
+    data: treatmentsData,
+    fetchNextPage,
+    hasNextPage,
+    isLoading: isLoadingTreatments,
+    isFetchingNextPage,
+    error: treatmentsError,
+  } = useInfiniteQuery<Awaited<ReturnType<typeof fetchTreatments>>, Error>({
+    queryKey: ["treatments"],
+    queryFn: async () => await fetchTreatments({ pageParam: 0 }),
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0, // Ensure initialPageParam is set
+  });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
+
+  const allTreatments =
+    treatmentsData?.pages.flatMap((page) => page.data) || [];
   return (
     <div className="flex flex-col h-full pb-16">
       {/* Top promotional banner */}
-      <div className="bg-blue-100 p-4 relative">
+      <div className="bg-[#C3D1FF] h-[200px] flex flex-col justify-center font-pretendard-600 p-4 relative">
         <div>
-          <div className="text-sm">Brand Name</div>
-          <div className="text-xl font-bold">메인 타이틀</div>
-          <div className="text-lg">2줄 이상</div>
-          <div className="text-xs mt-2">본문 텍스트 마지막 라인</div>
+          <div className="text-[14px]">Brand Name</div>
+          <div className=" text-[24px]">메인 타이틀</div>
+          <div className="text-[24px]">2줄 이상</div>
+          <div className="text-[14px] mt-2">본문 텍스트 마지막 라인</div>
         </div>
         <div className="absolute top-2 right-2 bg-black text-white text-xs rounded-full px-2 py-1">
           12/99
@@ -73,16 +117,48 @@ export default function MainPage() {
       </div>
 
       {/* Category scrollable area */}
-      <ScrollArea className="whitespace-nowrap py-4 border-b">
-        <div className="flex space-x-4 px-4">
-          {categories.map((category, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-              <span className="text-xs mt-1">{category}</span>
+      <div
+        style={{ scrollbarWidth: "none" }}
+        className="flex space-x-4 px-4 py-4 border-b overflow-x-scroll"
+      >
+        {isLoadingTreatments && !allTreatments.length && (
+          <p>Loading treatments...</p>
+        )}
+        {treatmentsError && (
+          <p>Error loading treatments: {treatmentsError.message}</p>
+        )}
+        {allTreatments.map((treatment, index) => (
+          <div
+            key={treatment.id}
+            className="flex flex-col items-center flex-shrink-0" // Added flex-shrink-0
+            // Add ref to the last item for infinite scroll trigger, or a dedicated sentinel element
+            // ref={index === allTreatments.length - 1 ? loadMoreRef : null}
+          >
+            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+              {treatment.image_url ? (
+                <Image
+                  src={treatment.image_url}
+                  alt={treatment.treatment_name || "treatment"}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+              ) : (
+                <span className="text-xs text-gray-500">Icon</span>
+              )}
             </div>
-          ))}
-        </div>
-      </ScrollArea>
+            <span className="text-xs mt-1 w-16 text-center truncate">
+              {treatment.treatment_name}
+            </span>
+          </div>
+        ))}
+        {/* Sentinel element for triggering load more */}
+        {hasNextPage && (
+          <div ref={loadMoreRef} className="flex-shrink-0">
+            {isFetchingNextPage ? "Loading more..." : ""}
+          </div>
+        )}
+      </div>
 
       {/* Sorting options */}
       <div className="flex justify-between items-center p-4">
@@ -147,9 +223,6 @@ export default function MainPage() {
           />
         ))}
       </div>
-
-      {/* Bottom navigation */}
-      <BottomNavigation />
     </div>
   );
 }
