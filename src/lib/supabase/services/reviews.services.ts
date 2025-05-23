@@ -1,4 +1,4 @@
-import { endOfDay, startOfDay } from "date-fns";
+import {  startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 
 interface Filters {

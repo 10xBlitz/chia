@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import {
   BookMarked,
   ChevronUp,
-  HomeIcon,
   HospitalIcon,
   SettingsIcon,
   User2,

@@ -78,7 +78,7 @@ export default function MainPage() {
               <p>Error loading treatments: {treatmentQuery.error.message}</p>
             )}
             {treatmentQuery.data &&
-              treatmentQuery.data.data.map((treatment, index) => (
+              treatmentQuery.data.data.map((treatment) => (
                 <div
                   key={treatment.id}
                   className="flex flex-col items-center flex-shrink-0" // Added flex-shrink-0
@@ -168,6 +168,7 @@ export default function MainPage() {
           `}
               pageSize={1}
               renderItem={(item) => (
+                /* eslint-disable @typescript-eslint/no-explicit-any */
                 <ClinicCard {...(item as unknown as any)} key={item.id} />
               )}
             />

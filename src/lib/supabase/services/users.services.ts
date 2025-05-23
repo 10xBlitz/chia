@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "../client";
 import { startOfDay } from "date-fns";
 

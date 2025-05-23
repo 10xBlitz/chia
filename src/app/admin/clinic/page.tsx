@@ -34,9 +34,7 @@ export default function ClinicPage() {
   );
 }
 
-export function validateClinicQueryParams(
-  searchParams: ReadonlyURLSearchParams
-) {
+function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
   const clinicNameParam = searchParams.get("clinic_name");
@@ -47,7 +45,7 @@ export function validateClinicQueryParams(
   const limit =
     limitParam && Number(limitParam) < 1000 ? Number(limitParam) : 10;
 
-  let dateRange: { from?: string; to?: string } = {};
+  const dateRange: { from?: string; to?: string } = {};
 
   if (encodedDates) {
     try {

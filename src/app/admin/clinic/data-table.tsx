@@ -33,7 +33,6 @@ import * as React from "react";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -88,9 +87,9 @@ export function DataTable<TData, TValue>({
   const [clinicName, setClinicName] = React.useState(
     searchParam.get("clinic_name") || ""
   );
-  const [category, setCategory] = React.useState(
-    searchParam.get("category") || ""
-  );
+  // const [category, setCategory] = React.useState(
+  //   searchParam.get("category") || ""
+  // );
   const [dates, setDates] = React.useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 5),

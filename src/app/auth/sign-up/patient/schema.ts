@@ -23,7 +23,7 @@ export const step2Schema = z.object({
 
 // ✅ Final full schema for form types + final submission
 export const fullSchema = step1Schema.merge(step2Schema)
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface StepInterface {
   form: UseFormReturn<{
     gender: string;

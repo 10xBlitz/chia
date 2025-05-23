@@ -4,8 +4,8 @@
 import { useUserStore } from "@/providers/user-store-provider";
 
 const SettingsClient = () => {
-  const id = useUserStore((state) => state.id);
-  const email = useUserStore((state) => state.email);
+  const id = useUserStore((state) => state.user?.id);
+  const email = useUserStore((state) => state.user?.email);
 
   // const updateUser = useUserStore((state) => state.updateUser);
 

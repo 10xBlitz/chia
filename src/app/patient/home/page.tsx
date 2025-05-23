@@ -6,7 +6,7 @@ import Image from "next/image";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { InfiniteList } from "@/components/supabase-infinite-list";
-import { useUserStore } from "@/providers/user-store-provider";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ClinicCard from "./clinic-card";
@@ -17,7 +17,6 @@ import { supabaseClient } from "@/lib/supabase/client";
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const userId = useUserStore((state) => state.user?.id);
   // const { ref: loadMoreRef, inView } = useInView(); // For detecting when to load more
 
   const handleSortOptionChange = (option: string) => {
@@ -85,7 +84,7 @@ export default function MainPage() {
               <p>Error loading treatments: {treatmentQuery.error.message}</p>
             )}
             {treatmentQuery.data &&
-              treatmentQuery.data.data.map((treatment, index) => (
+              treatmentQuery.data.data.map((treatment) => (
                 <div
                   key={treatment.id}
                   className="flex flex-col items-center flex-shrink-0" // Added flex-shrink-0
@@ -175,6 +174,7 @@ export default function MainPage() {
           `}
               pageSize={1}
               renderItem={(item) => (
+                /* eslint-disable @typescript-eslint/no-explicit-any */
                 <ClinicCard {...(item as unknown as any)} key={item.id} />
               )}
             />

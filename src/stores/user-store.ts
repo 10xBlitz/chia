@@ -1,7 +1,6 @@
 // src/stores/counter-store.ts
 import { createStore } from "zustand/vanilla";
 import { Tables } from "@/lib/supabase/types";
-import { User } from "@supabase/supabase-js";
 
 export type UserState = {
   user: (Omit<Tables<"user">, "role"> & {

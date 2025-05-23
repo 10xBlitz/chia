@@ -1,5 +1,5 @@
 'use client'
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/client'
 import { PostgrestQueryBuilder } from '@supabase/postgrest-js'
 import { SupabaseClient } from '@supabase/supabase-js'
@@ -14,6 +14,7 @@ type SupabaseClientType = typeof supabase
 type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N
 
 // Extracts the database type from the supabase client. If the supabase client doesn't have a type, it will fallback properly.
+
 type Database =
   SupabaseClientType extends SupabaseClient<infer U>
     ? IfAny<
@@ -47,7 +48,7 @@ type SupabaseQueryHandler<T extends SupabaseTableName> = (
   query: SupabaseSelectBuilder<T>
 ) => SupabaseSelectBuilder<T>
 
-interface UseInfiniteQueryProps<T extends SupabaseTableName, Query extends string = '*'> {
+interface UseInfiniteQueryProps<T extends SupabaseTableName> {
   // The table name to query
   tableName: T
   // The columns to select, defaults to `*`

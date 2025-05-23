@@ -35,7 +35,7 @@ export default function UserPage() {
   );
 }
 
-export function validateUserQueryParams(searchParams: ReadonlyURLSearchParams) {
+function validateUserQueryParams(searchParams: ReadonlyURLSearchParams) {
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
   const fullNameParam = searchParams.get("full_name");
@@ -46,7 +46,7 @@ export function validateUserQueryParams(searchParams: ReadonlyURLSearchParams) {
   const limit =
     limitParam && Number(limitParam) < 1000 ? Number(limitParam) : 10;
 
-  let dateRange: { from?: string; to?: string } = {};
+  const dateRange: { from?: string; to?: string } = {};
 
   if (encodedDates) {
     try {

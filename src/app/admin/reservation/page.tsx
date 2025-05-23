@@ -1,12 +1,10 @@
 "use client";
 
-import { getPaginatedUsers } from "@/lib/supabase/services/users.services";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
-import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
 import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
 
 export default function ReservationPage() {
@@ -36,9 +34,7 @@ export default function ReservationPage() {
   );
 }
 
-export function validateClinicQueryParams(
-  searchParams: ReadonlyURLSearchParams
-) {
+function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
   const fullNameParam = searchParams.get("full_name");
@@ -49,7 +45,7 @@ export function validateClinicQueryParams(
   const limit =
     limitParam && Number(limitParam) < 1000 ? Number(limitParam) : 10;
 
-  let dateRange: { from?: string; to?: string } = {};
+  const dateRange: { from?: string; to?: string } = {};
 
   if (encodedDates) {
     try {
