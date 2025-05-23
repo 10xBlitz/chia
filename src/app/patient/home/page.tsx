@@ -8,11 +8,12 @@ import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { InfiniteList } from "@/components/supabase-infinite-list";
 
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+
 import ClinicCard from "./clinic-card";
 import BottomNavigation from "../bottom-navigation";
 import { UserIcon } from "lucide-react";
 import { supabaseClient } from "@/lib/supabase/client";
+import { LogoutButton } from "@/components/logout-button";
 
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
@@ -45,15 +46,8 @@ export default function MainPage() {
           width={76}
           alt="logo"
         />
-        <Link href="/auth/login">
-          <Button
-            variant="ghost"
-            onClick={() => supabaseClient.auth.signOut()}
-            className="min-h-10 "
-          >
-            <UserIcon className="min-h-6 min-w-6" /> 로그아웃 {/** Logout */}
-          </Button>
-        </Link>
+
+        <LogoutButton />
       </header>
 
       <main className="flex-1 overflow-hidden">

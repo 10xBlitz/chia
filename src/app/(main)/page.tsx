@@ -9,6 +9,8 @@ import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
 import ClinicCard from "./clinic-card";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function MainPage() {
   const [sortOption, setSortOption] = useState("가까운순");
@@ -48,6 +50,11 @@ export default function MainPage() {
           width={76}
           alt="logo"
         />
+        <Link href="/auth/login">
+          <Button variant="outline" className="min-h-10 ">
+            로그인 {/** Login */}
+          </Button>
+        </Link>
       </header>
 
       <main className="flex-1 overflow-hidden">
@@ -65,7 +72,6 @@ export default function MainPage() {
                 priority
               />
             )}
-            {/* You can overlay text or other content here if needed */}
           </div>
 
           {/* Category scrollable area */}
