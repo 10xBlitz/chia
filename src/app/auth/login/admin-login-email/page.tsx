@@ -61,7 +61,7 @@ export default function LoginForm() {
         <div className={"flex flex-col gap-6"}>
           <Card className="shadow-none border-none">
             <CardHeader>
-              <CardTitle className="text-2xl">Dentist Login</CardTitle>
+              <CardTitle className="text-2xl">Admin Login</CardTitle>
               <CardDescription>
                 Enter your email below to login to your account
               </CardDescription>
