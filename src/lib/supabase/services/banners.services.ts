@@ -1,11 +1,8 @@
-import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
+import { Tables } from "../types";
 
 interface BannerFilters {
- date_range?: {
-    from?: string;
-    to?: string;
-  };
+  type?: Tables<"banner">["banner_type"];
   // Add more filters as needed, e.g., category, etc.
 }
 
@@ -29,10 +26,9 @@ export async function getPaginatedBanners(
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
- // Date range filter
-  if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
-    query = query.lte("created_at", filters.date_range.to);
+  // Date range filter
+  if (filters?.type) {
+    query = query.eq("banner_type", filters.type);
   }
 
   // Add more filters here as needed

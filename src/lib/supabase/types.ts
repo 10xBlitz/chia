@@ -11,18 +11,21 @@ export type Database = {
     Tables: {
       banner: {
         Row: {
+          banner_type: Database["public"]["Enums"]["banner_type"]
           created_at: string
           id: string
           image: string
           title: string | null
         }
         Insert: {
+          banner_type: Database["public"]["Enums"]["banner_type"]
           created_at?: string
           id?: string
           image: string
           title?: string | null
         }
         Update: {
+          banner_type?: Database["public"]["Enums"]["banner_type"]
           created_at?: string
           id?: string
           image?: string
@@ -492,6 +495,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      banner_type: "main" | "sub"
       user_role: "patient" | "dentist" | "admin" | "dentist employee"
     }
     CompositeTypes: {
@@ -608,6 +612,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      banner_type: ["main", "sub"],
       user_role: ["patient", "dentist", "admin", "dentist employee"],
     },
   },

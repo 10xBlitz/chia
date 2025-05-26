@@ -4,7 +4,8 @@ import { supabaseClient } from "../client";
 interface Filters {
   clinic_name?: string | null;
   treatment_id?: number | null;
- date_range?: {
+  region?: string | null;
+  date_range?: {
     from?: string;
     to?: string;
   };
@@ -22,7 +23,8 @@ export async function getPaginatedClinics(
 
   let query = supabaseClient
     .from("clinic")
-    .select(`
+    .select(
+      `
       id,
       clinic_name,
       location,
@@ -40,7 +42,9 @@ export async function getPaginatedClinics(
         )
       )
    
-    `, { count: "exact" }) // dot-less select implies INNER JOIN
+    `,
+      { count: "exact" }
+    ) // dot-less select implies INNER JOIN
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -53,12 +57,77 @@ export async function getPaginatedClinics(
     query = query.ilike("clinic_name", `%${filters.clinic_name}%`);
   }
 
- // Date range filter
+  // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
+    query = query.gte(
+      "created_at",
+      startOfDay(filters.date_range.from).toISOString()
+    );
     query = query.lte("created_at", filters.date_range.to);
   }
 
+  const { data, error, count } = await query;
+  console.log("getPaginatedClinics", data, count);
+
+  if (error) throw error;
+
+  const totalPages = count ? Math.ceil(count / limit) : 1;
+
+  return {
+    data,
+    totalItems: count,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
+}
+
+export async function getPaginatedClinicsWthReviews(
+  page = 1,
+  limit = 10,
+  filters: Filters = {}
+) {
+  if (limit > 1000) throw Error("limit exceeds 1000");
+  if (limit < 1) throw Error("limit must be a positive number");
+
+  const offset = (page - 1) * limit;
+
+  let query = supabaseClient
+    .from("clinic")
+    .select(
+      `
+        *,
+        clinic_treatment(
+          id,
+          reservation(
+          *,
+            review(
+              *
+            )
+          )
+        )
+      `,
+      { count: "exact" }
+    )
+    .order("id", { ascending: true })
+    .range(offset, offset + limit - 1);
+
+  if (filters.region) {
+    query = query.eq("region", filters.region);
+  }
+
+  if (filters.clinic_name) {
+    query = query.ilike("clinic_name", `%${filters.clinic_name}%`);
+  }
+
+  // Date range filter
+  if (filters.date_range?.from && filters.date_range?.to) {
+    query = query.gte(
+      "created_at",
+      startOfDay(filters.date_range.from).toISOString()
+    );
+    query = query.lte("created_at", filters.date_range.to);
+  }
 
   const { data, error, count } = await query;
   console.log("getPaginatedClinics", data, count);
