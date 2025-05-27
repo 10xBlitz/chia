@@ -1,173 +1,173 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query"; // Import useInfiniteQuery
+import { useEffect } from "react";
 import Image from "next/image";
-import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
-import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { InfiniteList } from "@/components/supabase-infinite-list";
+import { useUserStore } from "@/providers/user-store-provider";
 import ClinicCard from "./clinic-card";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import MainBannerCarousel from "./main-banner";
+import SubBannerCarousel from "./sub-banner";
+import TreatmentCategoryScroll from "./treatment-category";
+import EventCarousel from "./event";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 import BottomNavigation from "../bottom-navigation";
-import { LogoutButton } from "@/components/logout-button";
+import { UserIcon } from "lucide-react";
 
 export default function MainPage() {
-  const [sortOption, setSortOption] = useState("가까운순");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // const { ref: loadMoreRef, inView } = useInView(); // For detecting when to load more
+  const searchParams = useSearchParams();
+  const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
+  const user = useUserStore((state) => state.user);
+  const router = useRouter();
 
   const handleSortOptionChange = (option: string) => {
-    setSortOption(option);
-    setIsDropdownOpen(false);
+    router.push(`?searchByAddress=${option}`, { scroll: false });
+    // You can also trigger a refetch of the clinic list here if needed
   };
 
-  const treatmentQuery = useQuery({
-    queryKey: ["treatments"],
-    queryFn: async () => await getPaginatedTreatments(1, 100),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
+  useEffect(() => {
+    if (user?.role === "patient") {
+      router.push("/patient/home");
+    }
+  }, []);
 
-  const bannerQuery = useQuery({
-    queryKey: ["banners"],
-    queryFn: async () => await getPaginatedBanners(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+  // Fetch first 3 clinics for custom placement
+  const {
+    data: clinicsData,
+    isFetching: clinicsLoading,
+    error: clinicsError,
+  } = useQuery({
+    queryKey: ["clinics-initial", filterOption],
+    queryFn: async () => {
+      let addressFilter = "";
+      if (filterOption === "근무지") {
+        //workplace
+        addressFilter = user?.work_place.split(",")[1] || "";
+      } else if (filterOption === "거주") {
+        //residence
+        addressFilter = user?.residence.split(",")[1] || "";
+      }
+      const res = await getPaginatedClinicsWthReviews(1, 3, {
+        region: addressFilter,
+      });
+      return res.data || [];
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
   });
 
   return (
-    <div className="flex flex-col min-h-screen max-w-[460px] ">
-      <header className="py-4  flex justify-between items-center border-b">
+    <div className="flex flex-col max-w-[460px] mx-auto">
+      <header className="py-3 px-5 flex justify-between items-center">
         <Image
           src={"/images/chia-logo.svg"}
           height={54}
           width={76}
           alt="logo"
         />
-
-        <LogoutButton />
+        <Link href="/auth/login">
+          <UserIcon className="min-w-7 min-h-7" />
+        </Link>
       </header>
 
-      <main className="flex-1 overflow-hidden">
-        <div className="flex flex-col h-full pb-16">
-          {/* Top promotional banner */}
-          <div className="bg-[#C3D1FF] h-[200px] flex flex-col justify-center font-pretendard-600 p-4 relative overflow-hidden">
-            {bannerQuery.isLoading && <p>Loading banners...</p>}
-            {bannerQuery.error && <p>{bannerQuery.error.message}</p>}
-            {bannerQuery.data && bannerQuery.data.data[0]?.image && (
-              <Image
-                src={bannerQuery.data.data[0].image}
-                alt="Banner"
-                fill
-                className="object-cover"
-                priority
-              />
-            )}
-            {/* You can overlay text or other content here if needed */}
+      <main className="flex-1 overflow-hidden flex flex-col h-full pb-16">
+        {/* Top promotional banner */}
+        <MainBannerCarousel />
+
+        {/* Category scrollable area */}
+        <TreatmentCategoryScroll />
+
+        {/* Sorting options */}
+        <div className="flex justify-between items-center p-4">
+          <div className="text-sm">
+            지금 걸어갈 수 있는 병원 {/** Hospitals you can walk to now */}
           </div>
+          <Select value={filterOption} onValueChange={handleSortOptionChange}>
+            <SelectTrigger className="w-[100px] text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="근무지">근무지</SelectItem> {/** Workplace */}
+              <SelectItem value="거주">거주</SelectItem> {/** Residence */}
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* Category scrollable area */}
-          <div
-            style={{ scrollbarWidth: "none" }}
-            className="flex space-x-4 px-4 py-4 border-b overflow-x-scroll"
-          >
-            {treatmentQuery.isLoading && <p>Loading treatments...</p>}
-            {treatmentQuery.error && (
-              <p>Error loading treatments: {treatmentQuery.error.message}</p>
-            )}
-            {treatmentQuery.data &&
-              treatmentQuery.data.data.map((treatment) => (
-                <div
-                  key={treatment.id}
-                  className="flex flex-col items-center flex-shrink-0" // Added flex-shrink-0
-                  // Add ref to the last item for infinite scroll trigger, or a dedicated sentinel element
-                  // ref={index === allTreatments.length - 1 ? loadMoreRef : null}
-                >
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                    {treatment.image_url ? (
-                      <Image
-                        src={treatment.image_url}
-                        alt={treatment.treatment_name || "treatment"}
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <span className="text-xs text-gray-500">Icon</span>
-                    )}
-                  </div>
-                  <span className="text-xs mt-1 w-16 text-center ">
-                    {treatment.treatment_name}
-                  </span>
-                </div>
-              ))}
-          </div>
+        {/* Custom clinic/event/sub-banner order */}
+        <div className="flex flex-col gap-4 flex-1 overflow-auto px-2">
+          {/* 1. First 2 clinics */}
+          {clinicsLoading && <p>Loading clinics...</p>}
+          {clinicsError && <p>Error loading clinics: {clinicsError.message}</p>}
+          {clinicsData &&
+            clinicsData
+              .slice(0, 2)
+              .map((item) => <ClinicCard {...item} key={item.id} />)}
 
-          {/* Sorting options */}
-          <div className="flex justify-between items-center p-4">
-            <div className="text-sm">
-              지금 검색할 수 있는 병원 {/** Hospitals you can search for now */}
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="text-sm flex items-center"
-              >
-                {sortOption}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="ml-1"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
+          {/* 2. SubBanner */}
+          <SubBannerCarousel />
 
-              {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border rounded shadow-lg z-10">
-                  <div
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSortOptionChange("가까운순")}
-                  >
-                    근무지 {/** Work Location */}
-                  </div>
-                  <div
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSortOptionChange("인기순")}
-                  >
-                    거주 {/** Residence */}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* 3. Next 1 clinic */}
+          {clinicsData &&
+            clinicsData
+              .slice(2, 3)
+              .map((item) => <ClinicCard {...item} key={item.id} />)}
 
-          {/* Clinic listings */}
-          <div className="flex-1 overflow-auto">
+          {/* 4. Event Carousel */}
+          <EventCarousel />
+
+          {/* 5. Rest of clinics with infinite scroll */}
+          {clinicsData && clinicsData?.length >= 3 && (
             <InfiniteList
+              key={filterOption} // Reset list when sort changes
               tableName="clinic"
               columns={`
-                  *,
-                  clinic_treatment(
-                    id,
-                    reservation(
-                      review(
-                        *
+                      *,
+                      clinic_treatment(
+                        id,
+                        reservation(*),
+                        review(*)
                       )
-                    )
-                  )
-          `}
-              pageSize={1}
-              renderItem={(item) => (
+                    `}
+              pageSize={5}
+              // Only skip first 3 clinics, fetch all remaining
+              trailingQuery={(query) => {
+                let addressFilter = "";
+                if (filterOption === "근무지") {
+                  //workplace
+                  addressFilter = user?.work_place.split(",")[1] || "";
+                } else if (filterOption === "거주") {
+                  //residence
+                  addressFilter = user?.residence.split(",")[1] || "";
+                }
+                let q = query;
+                if (addressFilter) {
+                  q = q.eq("region", addressFilter);
+                }
+
+                q = q.range(3, 1000);
+                q.order("id", { ascending: true });
+
+                return q;
+              }}
+              renderItem={(item, index) => {
                 /* eslint-disable @typescript-eslint/no-explicit-any */
-                <ClinicCard {...(item as unknown as any)} key={item.id} />
-              )}
+                return (
+                  index > 3 && (
+                    <ClinicCard {...(item as unknown as any)} key={item.id} />
+                  )
+                );
+              }}
             />
-          </div>
+          )}
         </div>
       </main>
       <BottomNavigation />

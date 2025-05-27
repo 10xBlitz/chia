@@ -23,6 +23,11 @@ export const removeClinicFromFavorites = async (favoriteId: string) => {
     .delete()
     .eq("id", favoriteId);
 
+  console.log("Removing clinic from favorites:", {
+    favoriteId,
+    error,
+  });
+
   if (error) {
     throw new Error(`Failed to remove favorite: ${error.message}`);
   }
@@ -41,9 +46,15 @@ export const addClinicToFavorites = async (
     .select("id")
     .maybeSingle();
 
+  console.log("Adding clinic to favorites:", {
+    user_id,
+    clinic_id,
+    data,
+    error,
+  });
+
   if (error) {
     throw new Error(`Failed to add favorite: ${error.message}`);
   }
-
   return data?.id || null;
 };

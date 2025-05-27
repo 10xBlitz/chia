@@ -15,7 +15,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
-import Image from "next/image";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");

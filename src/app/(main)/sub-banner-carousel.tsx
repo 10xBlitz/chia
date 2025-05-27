@@ -21,12 +21,12 @@ export default function SubBannerCarousel() {
   const banners = data?.data || [];
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
+  // const [count, setCount] = React.useState(0);
 
   // Sync carousel state with API
   React.useEffect(() => {
     if (!api) return;
-    setCount(api.scrollSnapList().length);
+    // setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap());
 
     api.on("select", () => {
@@ -52,7 +52,7 @@ export default function SubBannerCarousel() {
     <div className="relative w-full p-4">
       {/* Dots indicator */}
       <div className="absolute top-6 right-8 z-10 flex gap-2">
-        {banners.map((_: any, idx: number) => (
+        {banners.map((_, idx: number) => (
           <span
             key={idx}
             className={`w-2 h-2 rounded-full transition-all ${
@@ -77,7 +77,7 @@ export default function SubBannerCarousel() {
               </div>
             </CarouselItem>
           )}
-          {banners.map((banner: any, idx: number) => (
+          {banners.map((banner, idx: number) => (
             <CarouselItem key={idx}>
               <div className="relative bg-[#d6d5d0] rounded-2xl h-[120px] w-full overflow-hidden">
                 <Image

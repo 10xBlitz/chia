@@ -1,84 +1,44 @@
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { useUserStore } from "@/providers/user-store-provider";
-import {
-  addClinicToFavorites,
-  checkIfClinicIsFavorite,
-  removeClinicFromFavorites,
-} from "@/lib/supabase/services/favorites.service";
-import { Bookmark, BookmarkCheck } from "lucide-react";
 
 interface ClinicCardProps {
-  id: string;
   clinic_name: string;
-  location: string;
   contact_number: string;
-  link: string | null;
-  pictures: string[] | null;
-  views: number;
-  opening_date: string;
-  region: string;
   created_at: string;
-  clinic_treatment: Array<{
+  id: string;
+  link: string | null;
+  location: string;
+  opening_date: string;
+  pictures: string[] | null;
+  region: string;
+  views: number;
+  clinic_treatment: {
     id: string;
-    reservation: Array<{
+    reservation: {
+      clinic_treatment_id: string;
+      consultation_type: string;
+      contact_number: string;
+      dentist_id: string | null;
       id: string;
-      review: Array<{
-        id: string;
-        rating: number | null;
-        review: string | null;
-        created_at: string;
-        reservation_id: string;
-      }>;
-    }>;
-  }>;
+      patient_id: string;
+      reservation_date: string;
+      reservation_time: string;
+      status: string;
+    }[];
+    review: {
+      clinic_treatment_id: string;
+      created_at: string;
+      id: string;
+      images: string[] | null;
+      rating: number;
+      review: string | null;
+    }[];
+  }[];
 }
 
 export default function ClinicCard(clinic: ClinicCardProps) {
-  const supabase = createClient();
-  const user = useUserStore((state) => state.user);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkFavorite = async () => {
-      console.log("Checking favorite status for clinic:", clinic.id);
-      console.log("Current user ID:", user?.id);
-      if (!user?.id) return;
-      const { isFavorite, favoriteId } = await checkIfClinicIsFavorite(
-        user.id,
-        clinic.id
-      );
-      setIsFavorite(isFavorite);
-      setFavoriteId(favoriteId);
-    };
-    checkFavorite();
-  }, [clinic.id, user?.id]);
-
-  const handleBookmarkClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!user) return;
-    if (isFavorite && favoriteId) {
-      await removeClinicFromFavorites(favoriteId);
-      setIsFavorite(false);
-      setFavoriteId(null);
-    } else {
-      console.log("Adding clinic to favorites");
-      console.log("User ID:", user.id);
-      const data = await addClinicToFavorites(user.id, clinic.id);
-      if (data) {
-        setIsFavorite(true);
-        setFavoriteId(data);
-      }
-    }
-  };
-
   // Get all reviews
   const allReviews =
-    clinic.clinic_treatment?.flatMap(
-      (ct) => ct.reservation?.flatMap((res) => res.review ?? []) ?? []
-    ) ?? [];
+    clinic.clinic_treatment?.flatMap((ct) => ct.review ?? []) ?? [];
   const avgRating =
     allReviews.length > 0
       ? (
@@ -101,21 +61,6 @@ export default function ClinicCard(clinic: ClinicCardProps) {
               target.src = "/images/auth-main.svg";
             }}
           />
-        )}
-        {user?.id && (
-          <button
-            className="absolute top-3 right-3 z-10 rounded-full p-1"
-            onClick={handleBookmarkClick}
-            aria-label={
-              isFavorite ? "Remove from favorites" : "Add to favorites"
-            }
-          >
-            {isFavorite ? (
-              <BookmarkCheck size={28} className="fill-yellow" />
-            ) : (
-              <Bookmark size={28} className="fill-white text-white" />
-            )}
-          </button>
         )}
       </div>
       <div className="font-semibold text-lg">{clinic.clinic_name}</div>

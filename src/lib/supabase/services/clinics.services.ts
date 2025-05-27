@@ -99,12 +99,8 @@ export async function getPaginatedClinicsWthReviews(
         *,
         clinic_treatment(
           id,
-          reservation(
-          *,
-            review(
-              *
-            )
-          )
+          reservation(*),
+          review(*)
         )
       `,
       { count: "exact" }

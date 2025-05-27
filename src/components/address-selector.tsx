@@ -16,12 +16,14 @@ interface AddressSelectorProps {
   onAddressSelect: (city: string, region: string) => void;
   initialCity?: string;
   initialRegion?: string;
+  disabled?: boolean; // Optional prop to disable the selector
 }
 
 export default function AddressSelector({
   onAddressSelect,
   initialCity,
   initialRegion,
+  disabled = false, // Default to false if not provided
 }: AddressSelectorProps) {
   const [selectedCity, setSelectedCity] = useState<string | null>(
     initialCity || null
@@ -36,7 +38,7 @@ export default function AddressSelector({
   // Determine what to display initially or when no address is selected
   const displayAddress =
     selectedCity && selectedRegion
-      ? `${selectedCity} ${selectedRegion}`
+      ? `${selectedCity},${selectedRegion}`
       : "주소 선택"; // "Select Address"
 
   const handleCitySelect = (city: string) => {
@@ -65,6 +67,7 @@ export default function AddressSelector({
       {/* Main button to open the selection */}
       <Button
         type="button"
+        disabled={disabled} // Disable button if prop is true
         onClick={() => {
           if (!selectedCity) {
             // If no city is selected, open city dialog
@@ -75,7 +78,7 @@ export default function AddressSelector({
           }
         }}
         variant="outline"
-        className="w-full justify-start text-left text-gray-700" // Adjust style as needed
+        className="w-full min-h-[45px] justify-start text-left text-gray-700" // Adjust style as needed
       >
         {displayAddress}
       </Button>

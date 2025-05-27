@@ -1,30 +1,33 @@
 "use client";
+import * as React from "react";
+import Image from "next/image";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import Image from "next/image";
-import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 
-export default function MainBannerCarousel() {
-  // Fetch banners with type "main"
+export default function SubBannerCarousel() {
+  // Fetch banners with type "sub"
   const { data, isLoading, error } = useQuery({
-    queryKey: ["banners", "main"],
-    queryFn: async () => await getPaginatedBanners(1, 10, { type: "main" }),
+    queryKey: ["banners", "sub"],
+    queryFn: async () => await getPaginatedBanners(1, 10, { type: "sub" }),
     staleTime: 1000 * 60 * 5,
+    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
   });
 
   const banners = data?.data || [];
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
+  // const [count, setCount] = React.useState(0);
 
   // Sync carousel state with API
   React.useEffect(() => {
     if (!api) return;
+    // setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap());
 
     api.on("select", () => {
@@ -42,45 +45,54 @@ export default function MainBannerCarousel() {
       } else {
         api.scrollNext();
       }
-    }, 5000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [api, banners.length]);
 
   return (
-    <div className="w-full ">
+    <div className="relative w-full p-4">
+      {/* Dots indicator */}
+      <div className="absolute top-6 right-8 z-10 flex gap-2">
+        {banners.map((_, idx: number) => (
+          <span
+            key={idx}
+            className={`w-2 h-2 rounded-full transition-all ${
+              idx === current ? "bg-neutral-900" : "bg-neutral-300"
+            }`}
+          />
+        ))}
+      </div>
       <Carousel setApi={setApi} className="w-full">
-        <CarouselContent className="w-full">
+        <CarouselContent>
           {isLoading && (
             <CarouselItem>
-              <div className="flex items-center justify-center h-[200px]">
+              <div className="flex items-center justify-center h-[120px]">
                 Loading...
               </div>
             </CarouselItem>
           )}
           {error && (
             <CarouselItem>
-              <div className="flex items-center justify-center h-[200px] text-red-500">
+              <div className="flex items-center justify-center h-[120px] text-red-500">
                 {error.message}
               </div>
             </CarouselItem>
           )}
-          {banners.map((banner, index: number) => (
-            <CarouselItem key={index} className="w-full">
-              <div className="relative w-screen h-[200px]">
+          {banners.map((banner, idx: number) => (
+            <CarouselItem key={idx}>
+              <div className="relative bg-[#d6d5d0] rounded-2xl h-[120px] w-full overflow-hidden">
                 <Image
                   src={banner.image}
                   alt={banner.title || "Banner Image"}
                   fill
-                  className="object-cover "
-                  priority={index === 0}
+                  className="object-cover rounded-2xl"
+                  priority={idx === 0}
+                  sizes="100vw"
                 />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="absolute bottom-2 rounded-full right-4 bg-black text-white px-3 py-1 text-sm z-10">
-          {banners.length ? `${current + 1} / ${data?.totalItems || 0}` : ""}
-        </div>
       </Carousel>
     </div>
   );

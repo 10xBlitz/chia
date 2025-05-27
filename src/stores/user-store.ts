@@ -3,13 +3,13 @@ import { createStore } from "zustand/vanilla";
 import { Tables } from "@/lib/supabase/types";
 
 export type UserState = {
-  user: (Omit<Tables<"user">, "role"> & {
-    role: Tables<"user">["role"] | "" | null;
-    email: string;
-  }) | null;
-}
-
-
+  user:
+    | (Omit<Tables<"user">, "role"> & {
+        role: Tables<"user">["role"] | "" | null;
+        email: string;
+      })
+    | null;
+};
 
 export type UserAction = {
   updateUser: (userData: Partial<UserState>) => void;
@@ -17,14 +17,7 @@ export type UserAction = {
 
 export type UserStore = UserState & UserAction;
 
-
-
-
-
-
 export const createUserStore = (initState: UserState) => {
-  console.log("-->createUserStore", initState);
-
   // return createStore<UserStore>()(
   //   persist(
   //     (set) => ({
@@ -35,11 +28,8 @@ export const createUserStore = (initState: UserState) => {
   //   )
   // );
 
-
-   return createStore<UserStore>()(
-      (set) => ({
-        ...initState,
-        updateUser: (userData) => set(() => userData),
-      }),
-  );
+  return createStore<UserStore>()((set) => ({
+    ...initState,
+    updateUser: (userData) => set(() => userData),
+  }));
 };

@@ -1,5 +1,10 @@
-import {  startOfDay } from "date-fns";
+import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
+import { v4 as uuidv4 } from "uuid";
+
+const BUCKET_NAME = "review-images";
+const MAX_FILE_SIZE_MB = 50;
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 interface Filters {
   full_name?: string | null;
@@ -20,24 +25,14 @@ export async function getPaginatedReviews(
 
   const offset = (page - 1) * limit;
 
-//   export type ReservationTable = {
-//   id: number;
-//   category: string;
-//   name: string;
-//   residence: string;
-//   workplace: string;
-//   contact_number: string;
-//   clinic_name: string;
-// };
-
   let query = supabaseClient
     .from("review")
-    .select(`
+    .select(
+      `
       id,
       rating,
       review,
-      reservation(
-         patient:user!patient_id ( 
+      patient:patient_id ( 
           id, 
           full_name, 
           residence, 
@@ -54,8 +49,9 @@ export async function getPaginatedReviews(
             clinic_name
           )
         )
-      )
-    `, { count: "exact" }) // dot-less select implies INNER JOIN
+    `,
+      { count: "exact" }
+    ) // dot-less select implies INNER JOIN
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -65,21 +61,25 @@ export async function getPaginatedReviews(
   // }
 
   if (filters.full_name) {
-    query = query.ilike("reservation.patient.full_name", `%${filters.full_name}%`);
-    query = query.not("reservation", "is", null)
-    query = query.not("reservation.patient", "is", null)
-
+    query = query.ilike(
+      "reservation.patient.full_name",
+      `%${filters.full_name}%`
+    );
+    query = query.not("reservation", "is", null);
+    query = query.not("reservation.patient", "is", null);
   }
 
- // Date range filter
+  // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
-    query = query.lte("created_at", (filters.date_range.to));
+    query = query.gte(
+      "created_at",
+      startOfDay(filters.date_range.from).toISOString()
+    );
+    query = query.lte("created_at", filters.date_range.to);
   }
-
 
   const { data, error, count } = await query;
-  console.log("paginatedREviews", data, count,filters);
+  console.log("paginatedREviews", data, count, filters);
 
   if (error) throw error;
 
@@ -92,4 +92,80 @@ export async function getPaginatedReviews(
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
   };
+}
+
+export type CreateReviewParams = {
+  rating: number;
+  review?: string;
+  clinic_treatment_id: string;
+  user_id: string;
+  images?: File[];
+};
+
+export async function createReview({
+  rating,
+  review,
+  clinic_treatment_id,
+  user_id,
+  images = [],
+}: CreateReviewParams) {
+  const uploadedImageUrls: string[] = [];
+  console.log("createReview", {
+    rating,
+    review,
+    clinic_treatment_id,
+    user_id,
+    images: images.map((img) => img.name),
+  });
+
+  for (const file of images) {
+    // Validate file type
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`);
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`);
+    }
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${uuidv4()}.${fileExt}`;
+    const filePath = `${user_id}/${fileName}`;
+
+    const { error: uploadError } = await supabaseClient.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, file, {
+        contentType: file.type,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+    }
+
+    const { data: publicUrlData } = supabaseClient.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    if (!publicUrlData.publicUrl) {
+      throw new Error("이미지 URL 생성 실패");
+    }
+
+    uploadedImageUrls.push(publicUrlData.publicUrl);
+  }
+
+  const { error: insertError } = await supabaseClient.from("review").insert({
+    rating,
+    review,
+    clinic_treatment_id: clinic_treatment_id,
+    images: uploadedImageUrls,
+    patient_id: user_id,
+  });
+
+  if (insertError) {
+    throw new Error(`리뷰 등록 실패: ${insertError.message}`);
+  }
+
+  return { success: true };
 }

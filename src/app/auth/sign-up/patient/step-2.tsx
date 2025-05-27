@@ -11,8 +11,8 @@ import { StepInterface } from "./schema";
 
 import AddressSelector from "@/components/address-selector";
 import GenderSelector from "@/components/gender-selector";
-import KoreanDatePicker from "@/components/date-picker";
 import { PhoneInput } from "@/components/phone-input";
+import { KoreanDatePicker } from "@/components/date-picker-v2";
 
 const Step2: React.FC<StepInterface> = ({ form }) => {
   return (
@@ -65,7 +65,11 @@ const Step2: React.FC<StepInterface> = ({ form }) => {
               생년월일 {/* Birthdate */}
             </FormLabel>
             <FormControl>
-              <KoreanDatePicker field={field} />
+              <KoreanDatePicker
+                onChange={field.onChange}
+                value={field.value}
+                disabled={field.disabled}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

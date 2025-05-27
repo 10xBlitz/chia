@@ -267,30 +267,52 @@ export type Database = {
       }
       quotation: {
         Row: {
+          birthdate: string | null
+          clinic_id: string | null
           concern: string | null
           created_at: string
+          gender: string
           id: string
-          image_url: string | null
+          image_url: string[] | null
+          name: string
           patient_id: string
           region: string
+          residence: string
         }
         Insert: {
+          birthdate?: string | null
+          clinic_id?: string | null
           concern?: string | null
           created_at?: string
+          gender: string
           id?: string
-          image_url?: string | null
+          image_url?: string[] | null
+          name: string
           patient_id: string
           region: string
+          residence: string
         }
         Update: {
+          birthdate?: string | null
+          clinic_id?: string | null
           concern?: string | null
           created_at?: string
+          gender?: string
           id?: string
-          image_url?: string | null
+          image_url?: string[] | null
+          name?: string
           patient_id?: string
           region?: string
+          residence?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "quotation_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quotation_patient_id_fkey"
             columns: ["patient_id"]
@@ -304,28 +326,34 @@ export type Database = {
         Row: {
           clinic_treatment_id: string
           consultation_type: string
-          dentist_id: string
+          contact_number: string
+          dentist_id: string | null
           id: string
           patient_id: string
           reservation_date: string
+          reservation_time: string
           status: string
         }
         Insert: {
           clinic_treatment_id: string
           consultation_type: string
-          dentist_id: string
+          contact_number?: string
+          dentist_id?: string | null
           id?: string
           patient_id: string
-          reservation_date?: string
+          reservation_date: string
+          reservation_time: string
           status?: string
         }
         Update: {
           clinic_treatment_id?: string
           consultation_type?: string
-          dentist_id?: string
+          contact_number?: string
+          dentist_id?: string | null
           id?: string
           patient_id?: string
           reservation_date?: string
+          reservation_time?: string
           status?: string
         }
         Relationships: [
@@ -354,32 +382,45 @@ export type Database = {
       }
       review: {
         Row: {
+          clinic_treatment_id: string
           created_at: string
           id: string
+          images: string[] | null
+          patient_id: string
           rating: number
-          reservation_id: string
           review: string | null
         }
         Insert: {
+          clinic_treatment_id: string
           created_at?: string
           id?: string
+          images?: string[] | null
+          patient_id: string
           rating: number
-          reservation_id: string
           review?: string | null
         }
         Update: {
+          clinic_treatment_id?: string
           created_at?: string
           id?: string
+          images?: string[] | null
+          patient_id?: string
           rating?: number
-          reservation_id?: string
           review?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "review_reservation_id_fkey"
-            columns: ["reservation_id"]
+            foreignKeyName: "review_clinic_treatment_id_fkey"
+            columns: ["clinic_treatment_id"]
             isOneToOne: false
-            referencedRelation: "reservation"
+            referencedRelation: "clinic_treatment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]

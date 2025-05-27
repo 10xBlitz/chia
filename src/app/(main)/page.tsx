@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
