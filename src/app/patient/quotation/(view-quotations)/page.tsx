@@ -38,12 +38,15 @@ export default function ViewQuotationPage() {
 
   const handleQuotationClick = (
     quotation_id: string,
+    quotation_details: string,
     clinic_id: string | null,
     bid_id: string | null
   ) => {
     if (!clinic_id) {
       //it means it's a public quotation
-      router.push(`/patient/quotation/view-bids/${quotation_id}`);
+      router.push(
+        `/patient/quotation/view-bids/${quotation_id}?quotation_details=${quotation_details}`
+      );
     } else {
       //it means it's a private quotation (specific to clinic)
       router.push(
@@ -53,9 +56,10 @@ export default function ViewQuotationPage() {
   };
 
   return (
-    <div className="p-4 relative min-h-screen max-w-[450px] mx-auto">
+    <>
+      <h2 className="font-bold text-xl mb-6">견적 {/* Estimates */}</h2>
       <h2 className="font-bold text-xl mb-4">
-        견적 목록 {/* Quotation List */}
+        견적 목록 {/* List of Quotes */}
       </h2>
       {isLoading && <div>로딩 중... {/* Loading... */}</div>}
 
@@ -71,7 +75,16 @@ export default function ViewQuotationPage() {
               className="flex text-sm items-center w-full py-1 cursor-pointer"
               style={{ minHeight: 48 }}
               onClick={() => {
-                handleQuotationClick(q.id, q?.clinic_id, q.bid?.[0]?.id);
+                const detail = `${
+                  q.region?.split(",")[1]?.trim() || q.region
+                } · ${q.treatment.treatment_name} 공개견적`;
+
+                handleQuotationClick(
+                  q.id,
+                  detail,
+                  q?.clinic_id,
+                  q.bid?.[0]?.id
+                );
               }}
             >
               <span className="font-bold text-black text-left whitespace-nowrap mr-4">
@@ -121,6 +134,6 @@ export default function ViewQuotationPage() {
         견적서 작성 {/* Create a Quote */}
       </Button>
       <BottomNavigation />
-    </div>
+    </>
   );
 }

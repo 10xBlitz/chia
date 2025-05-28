@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
 import Image from "next/image";
 import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
-import ClinicCard from "./clinic-card";
+import ClinicCard from "./components/clinic-card";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import MainBannerCarousel from "./main-banner";
-import SubBannerCarousel from "./sub-banner";
-import TreatmentCategoryScroll from "./treatment-category";
-import EventCarousel from "./event";
+import MainBannerCarousel from "./components/main-banner";
+import SubBannerCarousel from "./components/sub-banner";
+import TreatmentCategoryScroll from "./components/treatment-category";
+import EventCarousel from "./components/event";
 import {
   Select,
   SelectTrigger,
@@ -31,14 +30,7 @@ export default function MainPage() {
 
   const handleSortOptionChange = (option: string) => {
     router.push(`?searchByAddress=${option}`, { scroll: false });
-    // You can also trigger a refetch of the clinic list here if needed
   };
-
-  useEffect(() => {
-    if (user?.role === "patient") {
-      router.push("/patient/home");
-    }
-  }, []);
 
   // Fetch first 3 clinics for custom placement
   const {
@@ -66,8 +58,8 @@ export default function MainPage() {
   });
 
   return (
-    <div className="flex flex-col max-w-[460px] mx-auto">
-      <header className="py-3 px-5 flex justify-between items-center">
+    <div className="flex flex-col">
+      <header className="pb-3 px-5 flex justify-between items-center">
         <Image
           src={"/images/chia-logo.svg"}
           height={54}
@@ -80,10 +72,8 @@ export default function MainPage() {
       </header>
 
       <main className="flex-1 overflow-hidden flex flex-col h-full pb-16">
-        {/* Top promotional banner */}
         <MainBannerCarousel />
 
-        {/* Category scrollable area */}
         <TreatmentCategoryScroll />
 
         {/* Sorting options */}

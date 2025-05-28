@@ -14,11 +14,8 @@ export default function MainBannerCarousel() {
   // Fetch banners with type "main"
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["banners", "main"], // Add timestamp to prevent caching issues
-    queryFn: async () => {
-      console.log("Fetching main banners...");
-      return await getPaginatedBanners(1, 10, { type: "main" });
-    },
+    queryKey: ["banners", "main"],
+    queryFn: async () => await getPaginatedBanners(1, 10, { type: "main" }),
   });
 
   const [api, setApi] = useState<CarouselApi>();

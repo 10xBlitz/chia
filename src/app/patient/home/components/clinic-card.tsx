@@ -91,7 +91,7 @@ export default function ClinicCard(clinic: ClinicCardProps) {
 
   return (
     <Link
-      href={`/patient/clinic/${clinic.id}`}
+      href={`/patient/home/${clinic.id}`}
       className="p-4 border-b"
       onClick={(e) => {
         // Prevent navigation if the click originated from the bookmark button

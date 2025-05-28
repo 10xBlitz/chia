@@ -17,12 +17,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
-import BackButton from "@/components/back-button";
 import AddressSelector from "@/components/address-selector";
 import GenderSelector from "@/components/gender-selector";
 import { KoreanDatePicker } from "@/components/date-picker-v2";
@@ -38,28 +36,13 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { createQuotation } from "@/lib/supabase/services/quotation.services";
-
-const MAX_IMAGES = 5;
-const MAX_TEXT = 500;
-
-// --- Form Schema ---
-const quotationSchema = z.object({
-  treatment_id: z.string().min(1, "시술을 선택해주세요."),
-  region: z.string().min(1, "지역을 선택해주세요."),
-  name: z.string().min(1, "이름을 입력해주세요."),
-  gender: z.string({
-    required_error: "성별을 선택해주세요.",
-  }),
-  birthdate: z.date({ required_error: "생년월일을 선택해주세요." }),
-  residence: z.string().min(1, "주소를 선택해주세요."),
-  concern: z
-    .string()
-    .max(MAX_TEXT, `최대 ${MAX_TEXT}자까지 입력할 수 있습니다.`)
-    .optional(),
-  images: z.any().optional(),
-});
-
-type QuotationFormValues = z.infer<typeof quotationSchema>;
+import {
+  QUOTATION_MAX_IMAGES,
+  QUOTATION_MAX_TEXT,
+  QuotationFormValues,
+  quotationSchema,
+} from "./page.types";
+import HeaderWithBackButton from "@/components/header-no-logo";
 
 export default function CreateQuotationPage() {
   const router = useRouter();
@@ -159,53 +142,47 @@ export default function CreateQuotationPage() {
   return (
     <Form {...form}>
       <form
-        className="max-w-[460px] mx-auto min-h-screen flex flex-col bg-white"
+        className="flex flex-col gap-4"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        {/* Header */}
-        <div className="flex items-center px-4 pt-4 pb-2">
-          <BackButton />
-        </div>
-        {/* Treatment dropdown */}
-        <div className="px-4 mt-2">
-          {treatmentsLoading ? (
-            <div>로딩 중... {/**loading */}</div>
-          ) : (
-            <FormField
-              control={form.control}
-              name="treatment_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>시술 {/* Treatment */}</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={treatmentsLoading || !!treatmentsError}
-                    >
-                      <SelectTrigger className="w-full min-h-[45px]">
-                        <SelectValue
-                          placeholder="시술을 선택해주세요" /* Please select a treatment */
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {treatmentsData &&
-                          treatmentsData.map((t) => (
-                            <SelectItem key={t.id} value={t.id}>
-                              {t.treatment_name || "시술" /* Treatment */}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-        </div>
+        <HeaderWithBackButton title="견적 요청" /> {/**Request for Quote */}
+        {treatmentsLoading ? (
+          <div>로딩 중... {/**loading */}</div>
+        ) : (
+          <FormField
+            control={form.control}
+            name="treatment_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>시술 {/* Treatment */}</FormLabel>
+                <FormControl>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={treatmentsLoading || !!treatmentsError}
+                  >
+                    <SelectTrigger className="w-full min-h-[45px]">
+                      <SelectValue
+                        placeholder="시술을 선택해주세요" /* Please select a treatment */
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {treatmentsData &&
+                        treatmentsData.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.treatment_name || "시술" /* Treatment */}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         {/* Fill in for myself */}
-        <div className="px-4 mt-4 flex gap-3">
+        <div className="flex gap-3">
           <Checkbox
             onCheckedChange={(e) => {
               if (e && user) {
@@ -230,151 +207,134 @@ export default function CreateQuotationPage() {
             나 자신을 대신해 주세요 {/* Fill in for myself */}
           </FormLabel>
         </div>
-        {/* Region dropdown */}
-        <div className="px-4 mt-4">
-          <FormField
-            control={form.control}
-            name="region"
-            render={({ field }) => {
-              // Split city/region every render to ensure AddressSelector updates
-              const [city, region] =
-                field.value && field.value.includes(",")
-                  ? field.value.split(",")
-                  : ["", ""];
-              return (
-                <FormItem>
-                  <FormLabel>지역 {/* Region */}</FormLabel>
-                  <FormControl>
-                    <AddressSelector
-                      key={city + region} // Force remount when city/region changes
-                      onAddressSelect={(_city, _region) =>
-                        field.onChange(`${_city},${_region}`)
-                      }
-                      initialRegion={region}
-                      initialCity={city}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-        </div>
-        {/* Name */}
-        <div className="px-4 mt-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
+        <FormField
+          control={form.control}
+          name="region"
+          render={({ field }) => {
+            // Split city/region every render to ensure AddressSelector updates
+            const [city, region] =
+              field.value && field.value.includes(",")
+                ? field.value.split(",")
+                : ["", ""];
+            return (
               <FormItem>
-                <FormLabel>이름 {/* Name */}</FormLabel>
+                <FormLabel>지역 {/* Region */}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    className="min-h-[45px]"
-                    placeholder="이름을 입력해주세요" /* Please enter your name */
+                  <AddressSelector
+                    key={city + region} // Force remount when city/region changes
+                    onAddressSelect={(_city, _region) =>
+                      field.onChange(`${_city},${_region}`)
+                    }
+                    initialRegion={region}
+                    initialCity={city}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            )}
-          />
-        </div>
-        {/* Gender */}
-        <div className="px-4 mt-4">
-          <FormField
-            control={form.control}
-            name="gender"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>성별 {/* Gender */}</FormLabel>
-                <FormControl>
-                  <GenderSelector
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        {/* Birthdate */}
-        <div className="px-4 mt-4">
-          <FormField
-            control={form.control}
-            name="birthdate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>생년월일 {/* Birthdate */}</FormLabel>
-                <FormControl>
-                  <KoreanDatePicker
-                    value={field.value ? new Date(field.value) : undefined}
-                    onChange={(date) => field.onChange(date ? date : "")}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>이름 {/* Name */}</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  className="min-h-[45px]"
+                  placeholder="이름을 입력해주세요" /* Please enter your name */
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>성별 {/* Gender */}</FormLabel>
+              <FormControl>
+                <GenderSelector
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="birthdate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>생년월일 {/* Birthdate */}</FormLabel>
+              <FormControl>
+                <KoreanDatePicker
+                  value={field.value ? new Date(field.value) : undefined}
+                  onChange={(date) => field.onChange(date ? date : "")}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Residence */}
-        <div className="px-4 mt-4">
-          <FormField
-            control={form.control}
-            name="residence"
-            render={({ field }) => {
-              // Split city/region every render to ensure AddressSelector updates
-              const [city, region] =
-                field.value && field.value.includes(",")
-                  ? field.value.split(",")
-                  : ["", ""];
-              return (
-                <FormItem>
-                  <FormLabel>주소 {/* Address */}</FormLabel>
-                  <FormControl>
-                    <AddressSelector
-                      key={city + region} // Force remount when city/region changes
-                      onAddressSelect={(city, region) =>
-                        field.onChange(`${city},${region}`)
-                      }
-                      initialCity={city}
-                      initialRegion={region}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-        </div>
-        {/* Concern */}
-        <div className="px-4 mt-4">
-          <FormField
-            control={form.control}
-            name="concern"
-            render={({ field }) => (
+        <FormField
+          control={form.control}
+          name="residence"
+          render={({ field }) => {
+            // Split city/region every render to ensure AddressSelector updates
+            const [city, region] =
+              field.value && field.value.includes(",")
+                ? field.value.split(",")
+                : ["", ""];
+            return (
               <FormItem>
-                <FormLabel>고민/요청사항 {/* Concern/Request */}</FormLabel>
+                <FormLabel>주소 {/* Address */}</FormLabel>
                 <FormControl>
-                  <Textarea
-                    {...field}
-                    rows={5}
-                    placeholder="고민이나 요청사항을 입력해주세요." /* Please enter your concern or request */
-                    className="resize-none"
-                    maxLength={MAX_TEXT}
+                  <AddressSelector
+                    key={city + region} // Force remount when city/region changes
+                    onAddressSelect={(city, region) =>
+                      field.onChange(`${city},${region}`)
+                    }
+                    initialCity={city}
+                    initialRegion={region}
                   />
                 </FormControl>
-                <div className="text-right text-xs text-gray-400 mt-1">
-                  {field.value?.length || 0}/{MAX_TEXT}
-                </div>
                 <FormMessage />
               </FormItem>
-            )}
-          />
-        </div>
+            );
+          }}
+        />
+        <FormField
+          control={form.control}
+          name="concern"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>고민/요청사항 {/* Concern/Request */}</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  rows={5}
+                  placeholder="고민이나 요청사항을 입력해주세요." /* Please enter your concern or request */
+                  className="resize-none"
+                  maxLength={QUOTATION_MAX_TEXT}
+                />
+              </FormControl>
+              <div className="text-right text-xs text-gray-400 mt-1">
+                {field.value?.length || 0}/{QUOTATION_MAX_TEXT}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Image upload */}
-        <div className="px-4 mt-4">
+        <div>
           <FormLabel>
             사진 첨부 (선택) {/* Photo attachment (optional) */}
           </FormLabel>
@@ -396,7 +356,7 @@ export default function CreateQuotationPage() {
                 </Button>
               </div>
             ))}
-            {images.length < MAX_IMAGES && (
+            {images.length < QUOTATION_MAX_IMAGES && (
               <div className="w-20 h-20 flex items-center justify-center border rounded-lg bg-gray-100 relative">
                 <Button
                   type="button"
@@ -416,14 +376,14 @@ export default function CreateQuotationPage() {
                   accept="image/*"
                   multiple
                   className="hidden"
-                  max={MAX_IMAGES}
+                  max={QUOTATION_MAX_IMAGES}
                   onChange={(e) => {
                     const files = e.target.files;
                     if (!files) return;
-                    const allowed = MAX_IMAGES - images.length;
+                    const allowed = QUOTATION_MAX_IMAGES - images.length;
                     if (files.length > allowed) {
                       toast.error(
-                        `최대 ${MAX_IMAGES}장까지 업로드할 수 있습니다.` // You can upload up to {MAX_IMAGES} images.
+                        `최대 ${QUOTATION_MAX_IMAGES}장까지 업로드할 수 있습니다.` // You can upload up to {MAX_IMAGES} images.
                       );
                     }
                     const fileArr = Array.from(files).slice(0, allowed);
@@ -445,29 +405,26 @@ export default function CreateQuotationPage() {
             )}
           </div>
         </div>
-        {/* Submit button */}
-        <div className="px-4 py-4 mt-auto">
-          <Button
-            type="submit"
-            className="w-full btn-primary text-white"
-            disabled={mutation.status === "pending"}
-          >
-            {
-              typeof uploadingImageIdx === "number" ? (
-                <div className="  font-medium flex flex-col">
-                  <span> 제출 중... {/**Submitting... */}</span>
-                  <span className="text-sm">
-                    {" "}
-                    이미지 {/**Image */} {uploadingImageIdx + 1} 업로드 중...{" "}
-                    {/**Uploading */}
-                  </span>
-                </div>
-              ) : (
-                " 견적 요청하기"
-              ) /* Request Quotation */
-            }
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          className="w-full btn-primary mb-4 text-white"
+          disabled={mutation.status === "pending"}
+        >
+          {
+            typeof uploadingImageIdx === "number" ? (
+              <div className="  font-medium flex flex-col">
+                <span> 제출 중... {/**Submitting... */}</span>
+                <span className="text-sm">
+                  {" "}
+                  이미지 {/**Image */} {uploadingImageIdx + 1} 업로드 중...{" "}
+                  {/**Uploading */}
+                </span>
+              </div>
+            ) : (
+              " 견적 요청하기"
+            ) /* Request Quotation */
+          }
+        </Button>
       </form>
     </Form>
   );

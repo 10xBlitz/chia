@@ -1,12 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import BottomNavigation from "@/app/patient/bottom-navigation";
+import BackButton from "@/components/back-button";
 
 // Helper to fetch bids for a quotation
 async function fetchBids(quotationId: string) {
@@ -23,6 +24,8 @@ async function fetchBids(quotationId: string) {
 export default function BidsPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const quotationDetails = searchParams.get("quotation_details") || "";
   const quotationId = params?.quotation_id as string;
   const [enabled, setEnabled] = useState(false);
 
@@ -34,19 +37,28 @@ export default function BidsPage() {
     queryKey: ["bids", quotationId],
     queryFn: () => fetchBids(quotationId),
     enabled: enabled && !!quotationId,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
   });
 
   return (
-    <div className="p-4 relative min-h-screen max-w-[450px] mx-auto">
-      <h2 className="font-bold text-xl mb-4">
-        견적 답변 목록 {/* Bid List */}
-      </h2>
+    <div className="flex flex-col">
+      <header
+        className={
+          "flex flex-col gap-4 mb-5 font-bold font-pretendard-600 text-lg"
+        }
+      >
+        <BackButton className="-ml-2" />
+        <h2 className="font-bold text-xl">견적 {/* Estimates */}</h2>
+        <span className="text-sm">
+          {`견적 목록 > ${quotationDetails}` /* Quotation List > Details */}
+        </span>
+      </header>
+      {/* Public Quotation Biddings */}
       {isLoading && <div>로딩 중... {/* Loading... */}</div>}
-
       {bids?.length === 0 && (
         <div>입찰이 없습니다. {/* There is no bids. */}</div>
       )}
-
       {bids && (
         <div className="flex flex-col gap-3">
           {bids.map((b) => (
@@ -54,7 +66,11 @@ export default function BidsPage() {
               key={b.id}
               className="flex text-sm items-center w-full py-1 cursor-pointer"
               style={{ minHeight: 48 }}
-              onClick={() => router.push(`/patient/quotation/bid/${b.id}`)}
+              onClick={() =>
+                router.push(
+                  `/patient/quotation/view-bid/${quotationId}?bid_id=${b.id}`
+                )
+              }
             >
               <span className="font-bold text-black text-left whitespace-nowrap mr-4">
                 {new Date(b.created_at).toLocaleDateString("ko-KR", {

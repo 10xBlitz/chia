@@ -12,6 +12,7 @@ const BackButton = ({ className }: { className?: string }) => {
       className={cn(className && className)}
       variant="ghost"
       size="icon"
+      type="button"
       onClick={() => router.back()}
     >
       <Image src="/icons/chevron-left.svg" alt="back" height={20} width={12} />

@@ -30,7 +30,7 @@ const TABS = [
 // const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
 export default function ClinicDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { clinic_id } = useParams<{ clinic_id: string }>();
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function ClinicDetailPage() {
   };
 
   const { data: clinic, error } = useQuery({
-    queryKey: ["clinic-detail", id],
+    queryKey: ["clinic-detail", clinic_id],
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("clinic")
@@ -67,12 +67,12 @@ export default function ClinicDetailPage() {
             )
           `
         )
-        .eq("id", id)
+        .eq("id", clinic_id)
         .single();
       if (error) throw error;
       return data;
     },
-    enabled: !!id,
+    enabled: !!clinic_id,
     refetchInterval: 60000, // Refetch every minute
     refetchOnWindowFocus: true, // Refetch on window focus
     refetchOnReconnect: true, // Refetch on reconnect
@@ -119,7 +119,7 @@ export default function ClinicDetailPage() {
       setIsFavorite(false);
       setFavoriteId(null);
     } else {
-      const data = await addClinicToFavorites(user.id, id);
+      const data = await addClinicToFavorites(user.id, clinic_id);
       if (data) {
         setIsFavorite(true);
         setFavoriteId(data);
@@ -155,9 +155,9 @@ export default function ClinicDetailPage() {
     );
 
   return (
-    <div className="max-w-[460px] mx-auto bg-white flex flex-col">
+    <div className="flex flex-col !px-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2 bg-white z-20">
+      <div className="flex items-center justify-between px-4 pb-2 bg-white z-20">
         <BackButton />
         <BookmarkButton
           isActive={isFavorite}
@@ -491,13 +491,15 @@ export default function ClinicDetailPage() {
           variant="outline"
           className="flex-1"
           onClick={() =>
-            router.push("/patient/quotation/create-quotation?clinic_id=" + id)
+            router.push(
+              "/patient/quotation/create-quotation?clinic_id=" + clinic_id
+            )
           }
         >
           견적 요청 {/* Request for quote */}
         </Button>
         <Link
-          href={`/patient/reservation/create-reservation?clinic_id=${id}`}
+          href={`/patient/reservation/create-reservation?clinic_id=${clinic_id}`}
           className="flex-1"
         >
           <Button variant="outline" className="w-full">
@@ -511,7 +513,7 @@ export default function ClinicDetailPage() {
         className="fixed bottom-24 right-6 z-30 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 py-3 shadow-lg flex items-center gap-2 transition-all"
         style={{ fontWeight: 500, fontSize: 16 }}
         onClick={() => {
-          router.push(`/patient/review/create-review?clinic_id=${id}`);
+          router.push(`/patient/review/create-review?clinic_id=${clinic_id}`);
         }}
       >
         <EditIcon />

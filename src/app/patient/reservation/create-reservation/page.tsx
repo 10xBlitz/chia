@@ -43,12 +43,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
 import { useUserStore } from "@/providers/user-store-provider";
 import { PhoneInput } from "@/components/phone-input";
-import Image from "next/image";
 import { supabaseClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { KoreanDatePicker } from "@/components/date-picker-v2";
 import { KoreanTimePicker } from "@/components/time-picker";
+import HeaderWithBackButton from "@/components/header-no-logo";
 
 // Zod schema for validation
 const reservationSchema = z.object({
@@ -117,202 +117,196 @@ export default function CreateReservation() {
   }
 
   return (
-    <div className="max-w-[460px] mx-auto min-h-screen px-4 bg-white flex flex-col">
-      <div className="flex flex-col gap-5 mb-5 pt-4 mt-4 pb-2">
-        <Button onClick={() => router.back()} variant="ghost" className="w-fit">
-          <Image
-            src="/icons/chevron-left.svg"
-            alt="back"
-            height={20}
-            width={12}
-          />
-        </Button>
-        <h2 className="text-xl font-bold font-pretendard-600">
-          예약하기 {/**Make a reservation */}
-        </h2>
-      </div>
+    <div className="flex flex-col min-h-dvh">
+      <HeaderWithBackButton title="예약하기" />
+      {/**Make a reservation */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-6 pt-2 pb-24"
+          className="flex flex-col flex-1 mb-5"
         >
-          <div>
-            <FormLabel className="font-semibold">
-              희망 시간대 {/**Desired Time Zone */}
-            </FormLabel>
-            <div className="flex flex-col gap-2 mt-2">
+          <div className="flex flex-col gap-6 flex-1">
+            <div>
+              <FormLabel className="font-semibold">
+                희망 시간대 {/**Desired Time Zone */}
+              </FormLabel>
+              <div className="flex flex-col gap-2 mt-2">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <KoreanDatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <KoreanTimePicker
+                          time={field.value}
+                          setSelected={(e) => field.onChange(e)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            <div>
+              {treatments?.data && (
+                <FormField
+                  control={form.control}
+                  name="clinicTreatment"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>치료 {/**Treatment */}</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? treatments.data.find(
+                                    (treatment) => treatment.id === field.value
+                                  )?.treatment?.treatment_name
+                                : "관심 시술을 선택하세요"}{" "}
+                              {/** Select a treatment */}
+                              <ChevronsUpDown className="opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput
+                              placeholder="치료법 검색..." // Search treatment
+                              className="h-9"
+                            />
+                            <CommandList>
+                              <CommandEmpty>
+                                치료법이 발견되지 않았습니다{" "}
+                                {/**No treatment found. */}
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {treatments.data.map((treatment) => (
+                                  <CommandItem
+                                    value={treatment?.treatment.treatment_name}
+                                    key={treatment.id}
+                                    onSelect={() => {
+                                      form.setValue(
+                                        "clinicTreatment",
+                                        treatment.id
+                                      );
+                                    }}
+                                  >
+                                    {treatment.treatment.treatment_name}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto",
+                                        treatment.id === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+            <div>
+              <FormLabel className="font-semibold">
+                상담 유형 {/**Consultation Type */}
+              </FormLabel>
               <FormField
                 control={form.control}
-                name="date"
+                name="consultationType"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <KoreanDatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
+                  <FormItem className="mt-2">
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full min-h-[45px]">
+                          <SelectValue placeholder="상담 유형 선택" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="방문">방문</SelectItem> {/* Visit */}
+                        <SelectItem value="전화">전화</SelectItem> {/* Phone */}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+            <div>
+              <FormLabel className="font-semibold">연락처</FormLabel>
               <FormField
                 control={form.control}
-                name="time"
+                name="contact"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="mt-2">
                     <FormControl>
-                      <KoreanTimePicker
-                        time={field.value}
-                        setSelected={(e) => field.onChange(e)}
+                      <PhoneInput
+                        defaultCountry="KR"
+                        onChange={field.onChange}
+                        value={field.value}
                       />
                     </FormControl>
+                    <div className="flex gap-3 mt-2">
+                      <Checkbox
+                        id="terms"
+                        onCheckedChange={(e) =>
+                          e
+                            ? form.setValue(
+                                "contact",
+                                user?.contact_number || ""
+                              )
+                            : form.setValue("contact", "")
+                        }
+                      />
+                      <label
+                        htmlFor="terms"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Use my contact number
+                      </label>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
           </div>
-          <div>
-            {treatments?.data && (
-              <FormField
-                control={form.control}
-                name="clinicTreatment"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>치료 {/**Treatment */}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-full justify-between",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value
-                              ? treatments.data.find(
-                                  (treatment) => treatment.id === field.value
-                                )?.treatment.treatment_name
-                              : "관심 시술을 선택하세요"}{" "}
-                            {/** Select a treatment */}
-                            <ChevronsUpDown className="opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="치료법 검색..." // Search treatment
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              치료법이 발견되지 않았습니다{" "}
-                              {/**No treatment found. */}
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {treatments.data.map((treatment) => (
-                                <CommandItem
-                                  value={treatment.treatment.treatment_name}
-                                  key={treatment.id}
-                                  onSelect={() => {
-                                    form.setValue(
-                                      "clinicTreatment",
-                                      treatment.id
-                                    );
-                                  }}
-                                >
-                                  {treatment.treatment.treatment_name}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto",
-                                      treatment.id === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0"
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-          </div>
-          <div>
-            <FormLabel className="font-semibold">
-              상담 유형 {/**Consultation Type */}
-            </FormLabel>
-            <FormField
-              control={form.control}
-              name="consultationType"
-              render={({ field }) => (
-                <FormItem className="mt-2">
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full min-h-[45px]">
-                        <SelectValue placeholder="상담 유형 선택" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="방문">방문</SelectItem> {/* Visit */}
-                      <SelectItem value="전화">전화</SelectItem> {/* Phone */}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div>
-            <FormLabel className="font-semibold">연락처</FormLabel>
-            <FormField
-              control={form.control}
-              name="contact"
-              render={({ field }) => (
-                <FormItem className="mt-2">
-                  <FormControl>
-                    <PhoneInput
-                      defaultCountry="KR"
-                      onChange={field.onChange}
-                      value={field.value}
-                    />
-                  </FormControl>
-                  <div className="flex gap-3 mt-2">
-                    <Checkbox
-                      id="terms"
-                      onCheckedChange={(e) =>
-                        e
-                          ? form.setValue("contact", user?.contact_number || "")
-                          : form.setValue("contact", "")
-                      }
-                    />
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Use my contact number
-                    </label>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
           <Button
             type="submit"
-            className="w-full mt-4 h-[45px] btn-primary"
+            className="h-[45px] btn-primary"
             disabled={loading}
           >
             {loading ? "요청 중..." : "요청하기"}

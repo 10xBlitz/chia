@@ -57,7 +57,7 @@ export default function BottomNavigation() {
     },
     {
       label: "예약", //Reservation
-      path: "/main/reservations",
+      path: "/patient/reservation",
       icon: (isActive: boolean) => (
         <svg
           width="24"
@@ -89,7 +89,7 @@ export default function BottomNavigation() {
     },
     {
       label: "마이", //my
-      path: "/main/mypage",
+      path: "/patient/profile",
       icon: (isActive: boolean) => (
         <svg
           width="24"
@@ -125,9 +125,9 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <div className="fixed max-w-[460px] z-[999] mx-auto bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center p-3">
+    <div className="fixed max-w-[460px] z-[999] mx-auto bottom-0 left-0 right-0 bg-white flex justify-around items-center p-3">
       {navItems.map((item) => {
-        const isActive = pathname === item.path;
+        const isActive = pathname.startsWith(item.path);
         return (
           <div
             key={item.path}
