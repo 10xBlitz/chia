@@ -10,7 +10,7 @@ export async function getPaginatedTreatments(
   limit = 10,
   filters: TreatmentFilters = {}
 ) {
-  if (limit > 100) {
+  if (limit > 1000) {
     throw Error("Limit exceeds 100");
   }
   if (limit < 1) {
@@ -22,7 +22,7 @@ export async function getPaginatedTreatments(
   let query = supabaseClient
     .from("treatment")
     .select("id, treatment_name, image_url", { count: "exact" })
-    .order("id", { ascending: true })
+    .order("treatment_name", { ascending: true })
     .range(offset, offset + limit - 1);
 
   // Filters

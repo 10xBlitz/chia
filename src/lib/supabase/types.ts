@@ -267,7 +267,7 @@ export type Database = {
       }
       quotation: {
         Row: {
-          birthdate: string | null
+          birthdate: string
           clinic_id: string | null
           concern: string | null
           created_at: string
@@ -278,9 +278,10 @@ export type Database = {
           patient_id: string
           region: string
           residence: string
+          treatment_id: string
         }
         Insert: {
-          birthdate?: string | null
+          birthdate: string
           clinic_id?: string | null
           concern?: string | null
           created_at?: string
@@ -291,9 +292,10 @@ export type Database = {
           patient_id: string
           region: string
           residence: string
+          treatment_id: string
         }
         Update: {
-          birthdate?: string | null
+          birthdate?: string
           clinic_id?: string | null
           concern?: string | null
           created_at?: string
@@ -304,6 +306,7 @@ export type Database = {
           patient_id?: string
           region?: string
           residence?: string
+          treatment_id?: string
         }
         Relationships: [
           {
@@ -318,6 +321,13 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_treatment_id_fkey"
+            columns: ["treatment_id"]
+            isOneToOne: false
+            referencedRelation: "treatment"
             referencedColumns: ["id"]
           },
         ]

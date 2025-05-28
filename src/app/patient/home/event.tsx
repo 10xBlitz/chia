@@ -22,8 +22,6 @@ export default function EventCarousel() {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
-    staleTime: 1000 * 60 * 5, // Data is fresh for 5 minutes
   });
 
   // Add touch and mouse event listeners for scrolling

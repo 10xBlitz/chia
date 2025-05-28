@@ -12,11 +12,13 @@ import { useEffect, useState } from "react";
 
 export default function MainBannerCarousel() {
   // Fetch banners with type "main"
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["banners", "main"],
-    queryFn: async () => await getPaginatedBanners(1, 10, { type: "main" }),
-    staleTime: 1000 * 10, //
-    refetchInterval: 1000 * 10, // Refetch every 5 minutes
+    queryKey: ["banners", "main"], // Add timestamp to prevent caching issues
+    queryFn: async () => {
+      console.log("Fetching main banners...");
+      return await getPaginatedBanners(1, 10, { type: "main" });
+    },
   });
 
   const [api, setApi] = useState<CarouselApi>();
@@ -46,10 +48,12 @@ export default function MainBannerCarousel() {
     return () => clearInterval(interval);
   }, [api, data?.data.length]);
 
-  console.log("-----> banners: ", data?.data);
+  // useEffect(() => {
+  //   refetch();
+  // }, []);
 
   return (
-    <div className="!min-w-[460px] !max-w-[460px]">
+    <div className="relative max-w-[460px]">
       <Carousel setApi={setApi} className="w-full">
         <CarouselContent className="w-full">
           {isLoading && (
@@ -80,10 +84,10 @@ export default function MainBannerCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="absolute bottom-2 rounded-full right-4 bg-black text-white px-3 py-1 text-sm z-10">
-          {data?.data.length ? `${current + 1} / ${data?.totalItems || 0}` : ""}
-        </div>
       </Carousel>
+      <div className="absolute bottom-2 right-2 rounded-full bg-black text-white px-3 py-1 text-sm z-10">
+        {data?.data.length ? `${current + 1} / ${data?.totalItems || 0}` : ""}
+      </div>
     </div>
   );
 }

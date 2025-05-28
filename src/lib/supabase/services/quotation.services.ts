@@ -5,7 +5,7 @@ const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_MB = 10;
 const BUCKET_NAME = "quotation-images";
 interface CreateQuotationParams {
-  clinic_treatment_id: string;
+  treatment_id: string;
   region: string;
   name: string;
   gender: string;
@@ -13,7 +13,7 @@ interface CreateQuotationParams {
   residence: string;
   concern?: string;
   user_id: string;
-  clinic_id: string;
+  clinic_id: string | null;
   images?: File[];
   setUploadingImageIdx?: (idx: number | null) => void;
 }
@@ -28,6 +28,7 @@ export async function createQuotation({
   user_id,
   clinic_id,
   images = [],
+  treatment_id,
   setUploadingImageIdx,
 }: CreateQuotationParams) {
   const uploadedImageUrls: string[] = [];
@@ -78,6 +79,7 @@ export async function createQuotation({
       patient_id: user_id,
       clinic_id,
       image_url: uploadedImageUrls.length > 0 ? uploadedImageUrls : null,
+      treatment_id,
     },
   ]);
 

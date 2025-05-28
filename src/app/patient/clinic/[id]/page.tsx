@@ -73,8 +73,11 @@ export default function ClinicDetailPage() {
       return data;
     },
     enabled: !!id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
+    refetchInterval: 60000, // Refetch every minute
+    refetchOnWindowFocus: true, // Refetch on window focus
+    refetchOnReconnect: true, // Refetch on reconnect
+    refetchOnMount: true, //  refetch on mount
+    staleTime: 60000, // Data is fresh for 1 minute
   });
 
   // Flatten reviews: collect all reviews from all reservations in all clinic_treatment
@@ -488,7 +491,7 @@ export default function ClinicDetailPage() {
           variant="outline"
           className="flex-1"
           onClick={() =>
-            router.push("/patient/quotation/clinic?clinic_id=" + id)
+            router.push("/patient/quotation/create-quotation?clinic_id=" + id)
           }
         >
           견적 요청 {/* Request for quote */}

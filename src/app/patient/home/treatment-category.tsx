@@ -9,8 +9,6 @@ export default function TreatmentCategoryScroll() {
   const treatmentQuery = useQuery({
     queryKey: ["treatments"],
     queryFn: async () => await getPaginatedTreatments(1, 100),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
   });
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);

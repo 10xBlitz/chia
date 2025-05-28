@@ -26,7 +26,10 @@ import BackButton from "@/components/back-button";
 import AddressSelector from "@/components/address-selector";
 import GenderSelector from "@/components/gender-selector";
 import { KoreanDatePicker } from "@/components/date-picker-v2";
-import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
+import {
+  getPaginatedClinicTreatments,
+  getPaginatedTreatments,
+} from "@/lib/supabase/services/treatments.services";
 import {
   Select,
   SelectTrigger,
@@ -41,7 +44,7 @@ const MAX_TEXT = 500;
 
 // --- Form Schema ---
 const quotationSchema = z.object({
-  clinic_treatment_id: z.string().min(1, "시술을 선택해주세요."),
+  treatment_id: z.string().min(1, "시술을 선택해주세요."),
   region: z.string().min(1, "지역을 선택해주세요."),
   name: z.string().min(1, "이름을 입력해주세요."),
   gender: z.string({
@@ -61,7 +64,7 @@ type QuotationFormValues = z.infer<typeof quotationSchema>;
 export default function CreateQuotationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const clinic_id = searchParams.get("clinic_id") || "";
+  const clinic_id = searchParams.get("clinic_id") || null;
   const user = useUserStore((state) => state.user);
   const [uploadingImageIdx, setUploadingImageIdx] = useState<number | null>(
     null
@@ -75,11 +78,20 @@ export default function CreateQuotationPage() {
   } = useQuery({
     queryKey: ["clinic-treatments", clinic_id],
     queryFn: async () => {
-      if (!clinic_id) return [];
-      const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
-      return res.data || [];
+      if (clinic_id) {
+        const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
+        const formattedTreatments = res.data?.map((t) => ({
+          id: t.treatment_id,
+          treatment_name: t.treatment?.treatment_name,
+          image_url: t.treatment?.image_url,
+        }));
+
+        return formattedTreatments || [];
+      } else {
+        const res = await getPaginatedTreatments(1, 1000);
+        return res.data || [];
+      }
     },
-    enabled: !!clinic_id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchInterval: 1000 * 60 * 5, // 1 minute
   });
@@ -92,7 +104,7 @@ export default function CreateQuotationPage() {
   const form = useForm<QuotationFormValues>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
-      clinic_treatment_id: "",
+      treatment_id: "",
       region: "",
       name: "",
       gender: "",
@@ -111,7 +123,12 @@ export default function CreateQuotationPage() {
   const mutation = useMutation({
     mutationFn: async (values: QuotationFormValues) => {
       if (!user?.id) throw new Error("로그인이 필요합니다.");
-      if (!clinic_id) throw new Error("치과 정보가 없습니다.");
+      console.log("--->values: ", {
+        ...values,
+        user_id: user.id,
+        clinic_id,
+        images,
+      });
       return createQuotation({
         ...values,
         user_id: user.id,
@@ -156,7 +173,7 @@ export default function CreateQuotationPage() {
           ) : (
             <FormField
               control={form.control}
-              name="clinic_treatment_id"
+              name="treatment_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>시술 {/* Treatment */}</FormLabel>
@@ -175,10 +192,7 @@ export default function CreateQuotationPage() {
                         {treatmentsData &&
                           treatmentsData.map((t) => (
                             <SelectItem key={t.id} value={t.id}>
-                              {
-                                t.treatment?.treatment_name ||
-                                  "시술" /* Treatment */
-                              }
+                              {t.treatment_name || "시술" /* Treatment */}
                             </SelectItem>
                           ))}
                       </SelectContent>

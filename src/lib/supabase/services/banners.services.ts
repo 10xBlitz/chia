@@ -11,6 +11,10 @@ export async function getPaginatedBanners(
   limit = 10,
   filters: BannerFilters = {}
 ) {
+  // Refresh the session if expired
+  const { error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError) throw sessionError;
+
   if (limit > 100) {
     throw Error("Limit exceeds 100");
   }

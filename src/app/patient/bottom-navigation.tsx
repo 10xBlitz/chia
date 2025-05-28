@@ -31,7 +31,7 @@ export default function BottomNavigation() {
     },
     {
       label: "견적", //Estimate
-      path: "/main/search",
+      path: "/patient/quotation",
       icon: (isActive: boolean) => (
         <svg
           width="24"
@@ -98,7 +98,7 @@ export default function BottomNavigation() {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <g clip-path="url(#clip0_51_4636)">
+          <g clipPath="url(#clip0_51_4636)">
             <path d="M24 0H0V24H24V0Z" fill="white" />
             <path
               d="M4 17C4 14.7909 5.79086 13 8 13H16C18.2091 13 20 14.7909 20 17V18.5C20 19.3284 19.3284 20 18.5 20H5.5C4.67157 20 4 19.3284 4 18.5V17Z"
@@ -125,7 +125,7 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <div className="fixed max-w-[460px] z-[99999] mx-auto bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center p-3">
+    <div className="fixed max-w-[460px] z-[999] mx-auto bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center p-3">
       {navItems.map((item) => {
         const isActive = pathname === item.path;
         return (
