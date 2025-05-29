@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { EditIcon } from "lucide-react";
 import { EditProfileModal } from "./edit-profile-modal";
+import { format } from "date-fns";
 
 export default function EditProfilePage() {
   const user = useUserStore((state) => state.user);
@@ -32,7 +33,7 @@ export default function EditProfilePage() {
             </span>
             <span className="text-base text-black font-medium ml-2">
               {user?.birthdate
-                ? user.birthdate.replace(/-/g, ".")
+                ? format(user.birthdate, "yyyy.MM.dd")
                 : "0000.00.00"}
             </span>
           </div>

@@ -90,7 +90,7 @@ const CountrySelect = ({
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen} modal>
+    <Popover open={isOpen} onOpenChange={setIsOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           type="button"

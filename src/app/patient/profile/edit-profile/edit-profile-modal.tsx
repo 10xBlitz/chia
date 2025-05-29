@@ -22,6 +22,8 @@ import { KoreanDatePicker } from "@/components/date-picker-v2";
 import GenderSelector from "@/components/gender-selector";
 import toast from "react-hot-toast";
 import { updateUserProfile } from "@/lib/supabase/services/users.services";
+import { format } from "date-fns";
+import { AuthError } from "@supabase/supabase-js";
 
 // Zod schema for validation
 const profileSchema = z.object({
@@ -74,7 +76,7 @@ export function EditProfileModal({
         user: {
           ...user,
           ...updatable,
-          birthdate: updatable.birthdate.toISOString(),
+          birthdate: format(updatable.birthdate, "yyyy.MM.dd"),
         },
       });
       setLoading(false);
@@ -83,12 +85,8 @@ export function EditProfileModal({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       // Supabase error: has 'status' and 'message' fields
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "status" in err &&
-        "message" in err
-      ) {
+
+      if (err instanceof AuthError) {
         // Supabase duplicate email error
         if (
           err.message?.toLowerCase().includes("already registered") ||

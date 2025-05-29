@@ -8,6 +8,8 @@ import { removeClinicFromFavorites } from "@/lib/supabase/services/favorites.ser
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import BackButton from "@/components/back-button";
+import RemoveFavoriteModal from "./remove-favorite-modal";
+import { useState } from "react";
 
 type Clinic = {
   id: string;
@@ -29,6 +31,9 @@ export default function FavoriteClinicsPage() {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedFavorite, setSelectedFavorite] =
+    useState<FavoriteClinic | null>(null);
 
   // Fetch favorite clinics with clinic info and reviews
   const { data: favorites, isLoading } = useQuery<FavoriteClinic[]>({
@@ -79,10 +84,22 @@ export default function FavoriteClinicsPage() {
 
   const handleRemove = async (favoriteId: string) => {
     mutation.mutate(favoriteId);
+    setModalOpen(false);
+    setSelectedFavorite(null);
   };
 
   return (
     <div className="flex flex-col">
+      <RemoveFavoriteModal
+        open={modalOpen}
+        clinicName={selectedFavorite?.clinic.clinic_name || ""}
+        loading={mutation.status === "pending"}
+        onCancel={() => {
+          setModalOpen(false);
+          setSelectedFavorite(null);
+        }}
+        onConfirm={() => selectedFavorite && handleRemove(selectedFavorite.id)}
+      />
       {/* Header */}
       <header className="flex flex-col gap-9 font-bold mb-3 font-pretendard-600 text-lg">
         <BackButton />
@@ -139,7 +156,8 @@ export default function FavoriteClinicsPage() {
                       handleBookmarkClick={async (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        await handleRemove(fav.id);
+                        setSelectedFavorite(fav);
+                        setModalOpen(true);
                       }}
                       className="absolute top-2 right-2 z-10 rounded-full p-1"
                       notActiveStyle="text-white"

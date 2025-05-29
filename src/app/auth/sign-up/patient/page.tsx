@@ -3,8 +3,6 @@ import { Stepper } from "@/components/stepper";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,6 +14,7 @@ import Step3 from "./step-3";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import BackButton from "@/components/back-button";
 
 const steps = [
   { label: "계정" }, // Account
@@ -140,14 +139,7 @@ const SignupPage = () => {
   };
   return (
     <div className="flex flex-col gap-6 flex-1 overflow-x-hidden max-w-[460px] px-[20px] py-[16px] mx-auto">
-      <Link href="/patient" className="cursor-pointer">
-        <Image
-          src="/icons/chevron-left.svg"
-          alt="back"
-          height={20}
-          width={12}
-        />
-      </Link>
+      <BackButton />
 
       <div className="flex items-center mt-3 justify-center w-full">
         <Stepper steps={steps} currentStep={currentStep} />

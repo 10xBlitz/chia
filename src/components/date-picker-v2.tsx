@@ -85,7 +85,7 @@ export function KoreanDatePicker({
   }
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover open={open} modal={true} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -104,14 +104,7 @@ export function KoreanDatePicker({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent
-        className="w-auto p-4"
-        align="start"
-        onPointerDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
+      <PopoverContent className="w-auto p-4" align="start">
         {/* Year & Month selectors */}
         <div className="flex justify-center items-center gap-2 mb-2">
           <Select

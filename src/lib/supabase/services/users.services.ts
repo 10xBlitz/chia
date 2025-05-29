@@ -86,7 +86,7 @@ export async function updateUserProfile(
     .from("user")
     .update({
       ...profileFields,
-      birthdate: profileFields.birthdate.toISOString(),
+      birthdate: profileFields.birthdate.toDateString(),
     })
     .eq("id", userId);
   if (profileError) throw profileError;
