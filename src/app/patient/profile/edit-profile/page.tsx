@@ -1,36 +1,32 @@
 "use client";
 
 import { useUserStore } from "@/providers/user-store-provider";
-import { ChevronRightIcon } from "@/app/patient/profile/icons";
-import Link from "next/link";
 import HeaderWithBackButton from "@/components/header-no-logo";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { EditIcon } from "lucide-react";
+import { EditProfileModal } from "./edit-profile-modal";
 
 export default function EditProfilePage() {
   const user = useUserStore((state) => state.user);
+  const updateUser = useUserStore((state) => state.updateUser);
+  const [openProfile, setOpenProfile] = useState(false);
 
   return (
     <div className="flex flex-col">
       <HeaderWithBackButton title="기본 정보" /> {/* Basic Info */}
       <main className="flex-1 flex flex-col mt-2">
         <div className="flex flex-col">
-          {/* Name */}
-          <Link
-            href="/patient/profile/edit-profile/name"
-            className="flex items-center py-4"
-          >
+          {/* Name, Birthdate, Contact, Address */}
+          <div className="flex items-center py-4">
             <span className="text-sm text-gray-500 min-w-[72px]">
               이름 {/* Name */}
             </span>
             <span className="text-base text-black font-medium ml-2">
               {user?.full_name || "김00"}
             </span>
-            <ChevronRightIcon className="ml-auto" />
-          </Link>
-          {/* Birthdate */}
-          <Link
-            href="/patient/profile/edit-profile/birthdate"
-            className="flex items-center py-4"
-          >
+          </div>
+          <div className="flex items-center py-4">
             <span className="text-sm text-gray-500 min-w-[72px]">
               생년월일 {/* Birthdate */}
             </span>
@@ -39,26 +35,16 @@ export default function EditProfilePage() {
                 ? user.birthdate.replace(/-/g, ".")
                 : "0000.00.00"}
             </span>
-            <ChevronRightIcon className="ml-auto" />
-          </Link>
-          {/* Contact */}
-          <Link
-            href="/patient/profile/edit-profile/contact"
-            className="flex items-center py-4"
-          >
+          </div>
+          <div className="flex items-center py-4">
             <span className="text-sm text-gray-500 min-w-[72px]">
               연락처 {/* Contact */}
             </span>
             <span className="text-base text-black font-medium ml-2">
               {user?.contact_number || "010-1234-4567"}
             </span>
-            <ChevronRightIcon className="ml-auto" />
-          </Link>
-          {/* Address */}
-          <Link
-            href="/patient/profile/edit-profile/address"
-            className="flex items-center py-4"
-          >
+          </div>
+          <div className="flex items-center py-4">
             <span className="text-sm text-gray-500 min-w-[72px]">
               주소 {/* Address */}
             </span>
@@ -73,10 +59,28 @@ export default function EditProfilePage() {
                 <>주소지 등록 {/* Register Address */}</>
               )}
             </span>
-            <ChevronRightIcon className="ml-auto" />
-          </Link>
+          </div>
+          {/* Edit Basic Info Button */}
+          <div className="flex justify-end mb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md px-4 py-1 text-sm font-medium flex items-center gap-1"
+              onClick={() => setOpenProfile(true)}
+            >
+              <EditIcon className="w-4 h-4" /> 정보 수정 {/* Edit Info */}
+            </Button>
+          </div>
+          {/* Edit Password Button */}
         </div>
       </main>
+      {/* Modals */}
+      <EditProfileModal
+        open={openProfile}
+        onClose={() => setOpenProfile(false)}
+        userData={{ user }}
+        onUserUpdated={updateUser}
+      />
     </div>
   );
 }

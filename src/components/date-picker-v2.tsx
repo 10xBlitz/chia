@@ -90,6 +90,7 @@ export function KoreanDatePicker({
         <Button
           variant="outline"
           disabled={disabled}
+          type="button"
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && !disabled && "text-muted-foreground",
@@ -103,7 +104,14 @@ export function KoreanDatePicker({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-auto p-4" align="start">
+      <PopoverContent
+        className="w-auto p-4"
+        align="start"
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         {/* Year & Month selectors */}
         <div className="flex justify-center items-center gap-2 mb-2">
           <Select

@@ -121,16 +121,13 @@ export default function MainPage() {
             key={filterOption} // Reset list when sort changes
             tableName="clinic"
             columns={`
-                  *,
-                  clinic_treatment(
-                    id,
-                    reservation(
-                      review(
-                        *
+                      *,
+                      clinic_treatment(
+                        id,
+                        reservation(*),
+                        review(*)
                       )
-                    )
-                  )
-            `}
+                    `}
             pageSize={5}
             // Only skip first 3 clinics, fetch all remaining
             trailingQuery={(query) => {

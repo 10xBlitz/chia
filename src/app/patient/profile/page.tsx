@@ -12,6 +12,7 @@ import {
   ChevronRightIcon,
 } from "@/app/patient/profile/icons";
 import { useRouter } from "next/navigation";
+import { supabaseClient } from "@/lib/supabase/client";
 
 const quickActions = [
   {
@@ -93,7 +94,11 @@ export default function PatientProfilePage() {
           </div>
           <div className="bg-white">
             <Link
-              href="/auth/logout"
+              href="#"
+              onClick={async () => {
+                await supabaseClient.auth.signOut();
+                router.push("/");
+              }}
               className="flex items-center justify-between px-5 py-3 text-sm "
             >
               로그아웃 {/* Logout */}

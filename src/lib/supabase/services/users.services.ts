@@ -42,15 +42,15 @@ export async function getPaginatedUsers(
     query = query.eq("role", filters.category);
   }
 
-  
   // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte("created_at", (startOfDay(filters.date_range.from)).toISOString());
+    query = query.gte(
+      "created_at",
+      startOfDay(filters.date_range.from).toISOString()
+    );
     query = query.lte("created_at", filters.date_range.to);
-  
   }
 
-  
   const { data, error, count } = await query;
 
   if (error) throw error;
@@ -64,4 +64,39 @@ export async function getPaginatedUsers(
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
   };
+}
+
+// Update user profile fields (except email)
+export async function updateUserProfile(
+  userId: string,
+  values: {
+    full_name: string;
+    contact_number: string;
+    residence: string;
+    birthdate: Date;
+    gender: string;
+    work_place: string;
+  }
+) {
+  // Separate email from other fields
+  const { ...profileFields } = values;
+
+  // Update user table (excluding email)
+  const { error: profileError } = await supabaseClient
+    .from("user")
+    .update({
+      ...profileFields,
+      birthdate: profileFields.birthdate.toISOString(),
+    })
+    .eq("id", userId);
+  if (profileError) throw profileError;
+}
+
+// Update user password
+export async function updateUserPassword(userId: string, newPassword: string) {
+  // This assumes you have a function to update password via Supabase Auth
+  const { error } = await supabaseClient.auth.updateUser({
+    password: newPassword,
+  });
+  if (error) throw error;
 }
