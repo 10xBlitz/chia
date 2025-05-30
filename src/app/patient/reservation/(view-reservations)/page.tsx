@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../bottom-navigation";
-import HeaderWithBackButton from "@/components/header-no-logo";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 import { useSearchParams } from "next/navigation";
 
 // Helper to fetch reservations for the current user

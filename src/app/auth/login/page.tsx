@@ -6,12 +6,14 @@ const PatientHomePage = () => {
   return (
     <div className="max-w-[460px] min-h-screen flex flex-col  px-[20px] py-[16px] mx-auto">
       <div className="flex flex-col gap-10">
-        <Image
-          src={"/images/chia-logo.svg"}
-          width={64}
-          height={24}
-          alt="Chia Logo"
-        />
+        <div className="flex items-center">
+          <Image
+            src={"/images/chia-logo.svg"}
+            width={74}
+            height={34}
+            alt="Chia Logo"
+          />
+        </div>
         <span
           style={{
             fontSize: "24px",
@@ -64,11 +66,11 @@ const PatientHomePage = () => {
           fontWeight: 500,
         }}
       >
-        <Link href="/auth/login/patient-login-email">
+        <Link href="/auth/login/login-with-email?title=이메일로 로그인(환자)">
           이메일로 로그인하기 {/** Log in with email */}
         </Link>
 
-        <Link href="/auth/login/dentist-login-email">
+        <Link href="/auth/login/login-with-email?title=이메일로 로그인(치과)">
           치과 의사로 로그인 {/** Log in as dentist */}
         </Link>
       </div>

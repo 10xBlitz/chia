@@ -214,7 +214,12 @@ export default function ClinicDetailPage() {
           </div>
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4" />
-            <span>전화번호 {clinic.contact_number || "02-1234-5678"}</span>
+            <span>
+              전화번호
+              <a href={`tel:${clinic.contact_number}`} className=" underline">
+                {clinic.contact_number}
+              </a>
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Youtube className="h-4 w-4" />

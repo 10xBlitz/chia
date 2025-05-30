@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserStore } from "@/providers/user-store-provider";
-import HeaderWithBackButton from "@/components/header-no-logo";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { EditIcon } from "lucide-react";

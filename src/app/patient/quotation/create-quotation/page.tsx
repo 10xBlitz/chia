@@ -42,7 +42,7 @@ import {
   QuotationFormValues,
   quotationSchema,
 } from "./page.types";
-import HeaderWithBackButton from "@/components/header-no-logo";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 
 export default function CreateQuotationPage() {
   const router = useRouter();

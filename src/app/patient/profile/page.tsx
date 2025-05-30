@@ -121,7 +121,7 @@ export default function PatientProfilePage() {
           </div>
           <div className="bg-white">
             <Link
-              href="/support"
+              href="/patient/profile/chat"
               className="flex items-center justify-between px-5 py-3 text-sm"
             >
               서비스 이용 문의 {/* Service Inquiry */}

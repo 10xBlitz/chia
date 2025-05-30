@@ -78,6 +78,42 @@ export type Database = {
           },
         ]
       }
+      chat_room: {
+        Row: {
+          clinic_id: string | null
+          created_at: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          clinic_id?: string | null
+          created_at?: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          clinic_id?: string | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_room_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_room_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic: {
         Row: {
           clinic_name: string
@@ -117,6 +153,24 @@ export type Database = {
         }
         Relationships: []
       }
+      clinic_department: {
+        Row: {
+          created_at: string
+          department_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          department_name: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          department_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       clinic_treatment: {
         Row: {
           clinic_id: string
@@ -152,6 +206,39 @@ export type Database = {
             columns: ["treatment_id"]
             isOneToOne: false
             referencedRelation: "treatment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dentist_clinic_department: {
+        Row: {
+          clinic_department_id: string
+          dentist_id: string
+          id: string
+        }
+        Insert: {
+          clinic_department_id: string
+          dentist_id: string
+          id?: string
+        }
+        Update: {
+          clinic_department_id?: string
+          dentist_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dentist_clinic_department_clinic_department_id_fkey"
+            columns: ["clinic_department_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dentist_clinic_department_dentist_id_fkey"
+            columns: ["dentist_id"]
+            isOneToOne: false
+            referencedRelation: "user"
             referencedColumns: ["id"]
           },
         ]
@@ -227,6 +314,45 @@ export type Database = {
           {
             foreignKeyName: "favorite_clinic_patient_id_fkey"
             columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message: {
+        Row: {
+          chat_room_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chat_room_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chat_room_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_chat_room_id_fkey"
+            columns: ["chat_room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_room"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]

@@ -48,7 +48,7 @@ import toast from "react-hot-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { KoreanDatePicker } from "@/components/date-picker-v2";
 import { KoreanTimePicker } from "@/components/time-picker";
-import HeaderWithBackButton from "@/components/header-no-logo";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 
 // Zod schema for validation
 const reservationSchema = z.object({

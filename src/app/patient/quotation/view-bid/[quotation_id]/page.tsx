@@ -6,7 +6,7 @@ import { supabaseClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import HeaderWithBackButton from "@/components/header-no-logo";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 
 // Fetch bid and related data
 async function fetchBid(bidId: string) {

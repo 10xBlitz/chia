@@ -11,10 +11,11 @@ import Step2 from "./step-2";
 import { fullSchema, step1Schema, step2Schema } from "./schema";
 import { AnimatePresence, motion } from "framer-motion";
 import Step3 from "./step-3";
-import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
+import { useMutation } from "@tanstack/react-query";
+import { registerUser } from "@/lib/supabase/services/users.services";
 
 const steps = [
   { label: "계정" }, // Account
@@ -26,7 +27,6 @@ const SignupPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
-  const [isLoading, setIsLoading] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState<
     string | null
   >(null);
@@ -64,52 +64,33 @@ const SignupPage = () => {
     }
 
     validate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedValues, currentStep]);
 
-  const onSubmit = async (data: z.infer<typeof fullSchema>) => {
-    try {
-      const { data: authUser, error } = await supabaseClient.auth.signUp({
-        email: data.email,
-        password: data.password,
+  // useMutation for registerUser
+  const { mutate, status } = useMutation({
+    mutationFn: async (data: z.infer<typeof fullSchema>) => {
+      // Map form data to registerUser input
+      return registerUser({
+        ...data,
+        birthdate: data.birthdate.toISOString(),
+        role: "patient",
+        full_name: data.name,
+        clinic_id: null,
+        work_place: data.workplace,
       });
-      if (error) throw error;
-      // Insert user profile into 'user' table after successful signup
-      const { data: insertData, error: insertError } = await supabaseClient
-        .from("user")
-        .insert([
-          {
-            id: authUser.user?.id as string,
-            full_name: data.name,
-            gender: data.gender,
-            birthdate: data.birthdate.toISOString(),
-            residence: data.residence,
-            work_place: data.workplace,
-            role: "patient",
-            contact_number: data.contact_number,
-          },
-        ])
-        .select();
-      if (insertError) throw insertError;
-
-      toast.success("회원가입이 완료되었습니다."); //Sign up completed.
-      console.log("User profile inserted:", insertData);
-
+    },
+    onSuccess: () => {
+      toast.success("회원가입이 완료되었습니다!"); // Sign up completed successfully
       router.push("/patient/home");
-      //(Sign up completed successfully)
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (error.message === "User already registered") {
-          toast.error("이미 가입된 이메일입니다."); //User already registered
-        } else {
-          toast.error(`회원가입에 실패했습니다: ${error?.message} `); //Sign up failed
-        }
-      }
+    },
+    onError: (error) => {
+      toast.error(error?.message || "회원가입에 실패했습니다.");
+    },
+  });
 
-      //(Sign up failed)
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: z.infer<typeof fullSchema>) => {
+    mutate(data);
   };
 
   const nextStep = () => {
@@ -229,10 +210,11 @@ const SignupPage = () => {
             {currentStep === steps.length && (
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={status === "pending"}
                 className="w-[49%] btn-primary"
               >
-                {isLoading ? "회원가입 중..." : "회원가입"} {/* Sign Up */}
+                {status === "pending" ? "회원가입 중..." : "회원가입"}{" "}
+                {/* Sign Up */}
               </Button>
             )}
           </div>
