@@ -66,7 +66,7 @@ export default function MainPage() {
           width={76}
           alt="logo"
         />
-        <Link href="/auth/login">
+        <Link href="/patient/profile">
           <UserIcon className="min-w-7 min-h-7" />
         </Link>
       </header>

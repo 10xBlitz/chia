@@ -129,6 +129,7 @@ export async function registerUser(
         work_place: data.work_place,
         role: data.role,
         contact_number: data.contact_number,
+        clinic_id: data.clinic_id,
       },
     ])
     .select()

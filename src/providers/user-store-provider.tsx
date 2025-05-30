@@ -59,8 +59,8 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data: userProfileData, error: profileError } =
         await supabaseClient
-          .from("user") // Your user table name
-          .select("*")
+          .from("user")
+          .select("*, clinic(*)") // Fetch user and related clinic in one query
           .eq("id", userId)
           .single();
 
@@ -83,7 +83,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         storeRef.current.getState().updateUser({
           user: {
             id: userProfileData.id,
-            email: userEmail || "", // Prefer auth email, fallback to profile email
+            email: userEmail || "",
             full_name: userProfileData.full_name,
             gender: userProfileData.gender,
             birthdate: userProfileData.birthdate,
@@ -93,6 +93,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
             role: userProfileData.role,
             created_at: userProfileData.created_at,
             clinic_id: userProfileData.clinic_id,
+            clinic: userProfileData.clinic || null, // Attach clinic info if available
           },
         });
       } else {

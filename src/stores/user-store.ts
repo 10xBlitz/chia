@@ -7,6 +7,7 @@ export type UserState = {
     | (Omit<Tables<"user">, "role"> & {
         role: Tables<"user">["role"] | "" | null;
         email: string;
+        clinic?: Tables<"clinic"> | null; // Add clinic info for the user
       })
     | null;
 };

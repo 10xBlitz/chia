@@ -86,7 +86,7 @@ export default function DentistSignupPage() {
     },
     onSuccess: () => {
       toast.success("회원가입이 완료되었습니다!"); // Sign up completed successfully
-      router.push("/dentist/home");
+      router.push("/dentist");
     },
     onError: (error) => {
       console.log("---->error: ", error);
@@ -227,7 +227,7 @@ export default function DentistSignupPage() {
                     <MultipleSelector
                       selectFirstItem={false}
                       defaultOptions={treatments?.map((item) => ({
-                        label: item.treatment_name,
+                        label: item?.treatment_name,
                         value: item.id,
                       }))}
                       placeholder="여기에서 치료를 선택하세요" // Select treatments here

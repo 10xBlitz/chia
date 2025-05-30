@@ -169,3 +169,44 @@ export async function createReview({
 
   return { success: true };
 }
+
+/**
+ * Fetch all reviews for a clinic, including review images and patient info.
+ * @param clinicId The clinic id
+ */
+export async function getClinicReviews(clinicId: string) {
+  // Fetch all reviews where the related clinic_treatment.clinic_id matches
+  const { data: reviews, error: reviewsError } = await supabaseClient
+    .from("review")
+    .select(
+      `
+        *,
+        user:patient_id (
+          id,
+          full_name
+        ),
+        clinic_treatment (
+          id,
+          clinic_id
+        )
+      `
+    )
+    .eq("clinic_treatment.clinic_id", clinicId)
+    .order("created_at", { ascending: false });
+
+  if (reviewsError) throw reviewsError;
+
+  // Fetch clinic views
+  const { data: clinic, error: clinicError } = await supabaseClient
+    .from("clinic")
+    .select("views")
+    .eq("id", clinicId)
+    .single();
+
+  if (clinicError) throw clinicError;
+
+  return {
+    reviews: reviews || [],
+    views: clinic?.views ?? 0,
+  };
+}

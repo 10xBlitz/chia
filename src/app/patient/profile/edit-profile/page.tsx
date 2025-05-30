@@ -8,6 +8,41 @@ import { EditIcon } from "lucide-react";
 import { EditProfileModal } from "./edit-profile-modal";
 import { format } from "date-fns";
 
+// Reusable InfoRow component
+function InfoRow({
+  label,
+  value,
+  highlightWhenEmpty = false,
+  emptyText,
+  onClick,
+}: {
+  label: string;
+  value?: string;
+  highlightWhenEmpty?: boolean;
+  emptyText?: string;
+  onClick?: () => void;
+}) {
+  const displayValue =
+    value && value.trim().length > 0 ? value : emptyText ? emptyText : "-";
+  const textColor =
+    value && value.trim().length > 0
+      ? "text-black"
+      : highlightWhenEmpty
+      ? "text-blue-600"
+      : "text-gray-400";
+  return (
+    <div
+      className={`flex items-center py-4 ${onClick ? "cursor-pointer" : ""}`}
+      onClick={onClick}
+    >
+      <span className="text-sm text-gray-500 min-w-[72px]">{label}</span>
+      <span className={`text-base font-medium ml-2 ${textColor}`}>
+        {displayValue}
+      </span>
+    </div>
+  );
+}
+
 export default function EditProfilePage() {
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore((state) => state.updateUser);
@@ -18,49 +53,28 @@ export default function EditProfilePage() {
       <HeaderWithBackButton title="기본 정보" /> {/* Basic Info */}
       <main className="flex-1 flex flex-col mt-2">
         <div className="flex flex-col">
-          {/* Name, Birthdate, Contact, Address */}
-          <div className="flex items-center py-4">
-            <span className="text-sm text-gray-500 min-w-[72px]">
-              이름 {/* Name */}
-            </span>
-            <span className="text-base text-black font-medium ml-2">
-              {user?.full_name || "김00"}
-            </span>
-          </div>
-          <div className="flex items-center py-4">
-            <span className="text-sm text-gray-500 min-w-[72px]">
-              생년월일 {/* Birthdate */}
-            </span>
-            <span className="text-base text-black font-medium ml-2">
-              {user?.birthdate
+          <InfoRow
+            label="이름" // Name
+            value={user?.full_name || "김00"}
+          />
+          <InfoRow
+            label="생년월일" // Birthdate
+            value={
+              user?.birthdate
                 ? format(user.birthdate, "yyyy.MM.dd")
-                : "0000.00.00"}
-            </span>
-          </div>
-          <div className="flex items-center py-4">
-            <span className="text-sm text-gray-500 min-w-[72px]">
-              연락처 {/* Contact */}
-            </span>
-            <span className="text-base text-black font-medium ml-2">
-              {user?.contact_number || "010-1234-4567"}
-            </span>
-          </div>
-          <div className="flex items-center py-4">
-            <span className="text-sm text-gray-500 min-w-[72px]">
-              주소 {/* Address */}
-            </span>
-            <span
-              className={`text-base font-medium ml-2 ${
-                user?.residence ? "text-black" : "text-blue-600"
-              }`}
-            >
-              {user?.residence ? (
-                user.residence
-              ) : (
-                <>주소지 등록 {/* Register Address */}</>
-              )}
-            </span>
-          </div>
+                : "0000.00.00"
+            }
+          />
+          <InfoRow
+            label="연락처" // Contact
+            value={user?.contact_number || "010-1234-4567"}
+          />
+          <InfoRow
+            label="주소" // Address
+            value={user?.residence}
+            highlightWhenEmpty
+            emptyText="주소지 등록" // Register Address
+          />
           {/* Edit Basic Info Button */}
           <div className="flex justify-end mb-2">
             <Button
@@ -72,7 +86,6 @@ export default function EditProfilePage() {
               <EditIcon className="w-4 h-4" /> 정보 수정 {/* Edit Info */}
             </Button>
           </div>
-          {/* Edit Password Button */}
         </div>
       </main>
       {/* Modals */}
