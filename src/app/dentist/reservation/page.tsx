@@ -9,52 +9,20 @@ import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { ko } from "date-fns/locale";
 import { calculateAge } from "@/lib/utils";
-
-async function fetchClinicId() {
-  const {
-    data: { user },
-  } = await supabaseClient.auth.getUser();
-  if (!user) return null;
-  const { data, error } = await supabaseClient
-    .from("user")
-    .select("clinic_id")
-    .eq("id", user.id)
-    .single();
-  if (!error && data?.clinic_id) return data.clinic_id as string;
-  return null;
-}
-
-async function fetchReservations(clinicId: string | null, selectedDate: Date) {
-  if (!clinicId) return [];
-  const dateStr = format(selectedDate, "yyyy-MM-dd");
-  const { data } = await supabaseClient
-    .from("reservation")
-    .select("*, clinic_treatment(*, treatment(*)), user!patient_id(*)")
-    .eq("reservation_date", dateStr)
-    .eq("clinic_treatment.clinic_id", clinicId)
-    .order("reservation_time", { ascending: true });
-  return data ? (Array.isArray(data) ? data : [data]) : [];
-}
+import { useUserStore } from "@/providers/user-store-provider";
 
 export default function DentistReservationPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedReservationId, setSelectedReservationId] = useState<
     string | null
   >(null);
-
-  // Query for clinicId
-  const { data: clinicId, isLoading: clinicLoading } = useQuery({
-    queryKey: ["clinicId"],
-    queryFn: fetchClinicId,
-    staleTime: 1000 * 60 * 5,
-  });
+  const user = useUserStore((state) => state.user);
 
   // Query for reservations
   const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
-    queryKey: ["reservations", clinicId, selectedDate],
-    queryFn: () => fetchReservations(clinicId as string, selectedDate),
-    enabled: !!clinicId,
-    staleTime: 1000 * 30,
+    queryKey: ["reservations", user?.clinic_id, selectedDate],
+    queryFn: () => fetchReservations(user?.clinic_id, selectedDate),
+    enabled: !!user?.clinic_id,
   });
 
   return (
@@ -83,18 +51,16 @@ export default function DentistReservationPage() {
           예약 내역 {/**Reservation details */}
         </h2>
         <div className="space-y-2">
-          {(clinicLoading || reservationsLoading) && (
+          {reservationsLoading && (
             <div className="text-gray-400 text-center py-8">
               불러오는 중... {/**Loading... */}
             </div>
           )}
-          {!clinicLoading &&
-            !reservationsLoading &&
-            reservations.length === 0 && (
-              <div className="text-gray-400 text-center py-8">
-                예약이 없습니다. {/**There are no reservations. */}
-              </div>
-            )}
+          {!reservationsLoading && reservations.length === 0 && (
+            <div className="text-gray-400 text-center py-8">
+              예약이 없습니다. {/**There are no reservations. */}
+            </div>
+          )}
           {reservations.map((r) => (
             <div
               key={r.id}
@@ -124,4 +90,19 @@ export default function DentistReservationPage() {
       </div>
     </>
   );
+}
+
+async function fetchReservations(
+  clinicId: string | null | undefined,
+  selectedDate: Date
+) {
+  if (!clinicId) return [];
+  const dateStr = format(selectedDate, "yyyy-MM-dd");
+  const { data } = await supabaseClient
+    .from("reservation")
+    .select("*, clinic_treatment(*, treatment(*)), user!patient_id(*)")
+    .eq("reservation_date", dateStr)
+    .eq("clinic_treatment.clinic_id", clinicId)
+    .order("reservation_time", { ascending: true });
+  return data ? (Array.isArray(data) ? data : [data]) : [];
 }

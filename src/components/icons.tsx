@@ -116,3 +116,29 @@ export const ChevronRightIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
     />
   </svg>
 );
+
+export const QuotationIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
+  props
+) => (
+  <svg
+    width="30"
+    height="31"
+    viewBox="0 0 30 31"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M20 5.5H22.5C23.163 5.5 23.7989 5.76339 24.2678 6.23223C24.7366 6.70107 25 7.33696 25 8V25.5C25 26.163 24.7366 26.7989 24.2678 27.2678C23.7989 27.7366 23.163 28 22.5 28H7.5C6.83696 28 6.20107 27.7366 5.73223 27.2678C5.26339 26.7989 5 26.163 5 25.5V8C5 7.33696 5.26339 6.70107 5.73223 6.23223C6.20107 5.76339 6.83696 5.5 7.5 5.5H10"
+      fill="#287DFA"
+    />
+    <path
+      d="M18.75 3H11.25C10.5596 3 10 3.44772 10 4V6C10 6.55228 10.5596 7 11.25 7H18.75C19.4404 7 20 6.55228 20 6V4C20 3.44772 19.4404 3 18.75 3Z"
+      fill="white"
+      stroke="#287DFA"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

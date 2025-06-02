@@ -45,7 +45,7 @@ export default function DentistSignupPage() {
   });
 
   // Fetch treatments
-  const { data: treatments, isLoading: treatmentsLoading } = useQuery({
+  const { data: treatments } = useQuery({
     queryKey: ["treatments"],
     queryFn: async () => {
       const { data } = await supabaseClient
@@ -219,7 +219,7 @@ export default function DentistSignupPage() {
               <FormItem>
                 <FormLabel>치료 {/*Treatments */}</FormLabel>
                 <div>
-                  {treatmentsLoading ? (
+                  {!treatments ? (
                     <span className="text-gray-400 text-sm">
                       치료법을 로딩 중입니다... {/**Loading treatments... */}
                     </span>

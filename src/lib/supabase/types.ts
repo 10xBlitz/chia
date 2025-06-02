@@ -210,6 +210,42 @@ export type Database = {
           },
         ]
       }
+      clinic_view: {
+        Row: {
+          clinic_id: string
+          created_at: string
+          id: number
+          patient_id: string
+        }
+        Insert: {
+          clinic_id: string
+          created_at?: string
+          id?: number
+          patient_id: string
+        }
+        Update: {
+          clinic_id?: string
+          created_at?: string
+          id?: number
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_view_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinic_view_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dentist_clinic_department: {
         Row: {
           clinic_department_id: string

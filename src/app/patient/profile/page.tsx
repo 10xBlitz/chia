@@ -1,11 +1,7 @@
 "use client";
 
 import BottomNavigation from "../bottom-navigation";
-import {
-  ReservationsIcon,
-  FavoriteIcon,
-  ReviewIcon,
-} from "@/app/patient/profile/icons";
+import { ReservationsIcon, FavoriteIcon, ReviewIcon } from "@/components/icons";
 
 import MyMenuPage from "@/components/my-menu-page";
 
@@ -32,7 +28,7 @@ export default function PatientProfilePage() {
     <>
       <MyMenuPage
         actions={quickActions}
-        editProfileLink="/dentist/profile/edit-profile"
+        editProfileLink="/patient/profile/edit-profile"
       />
       <BottomNavigation />
     </>

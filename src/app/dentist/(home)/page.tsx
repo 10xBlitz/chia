@@ -4,9 +4,9 @@ import MyMenuPage from "@/components/my-menu-page";
 import React from "react";
 import {
   ReservationsIcon,
-  FavoriteIcon,
   ReviewIcon,
-} from "@/app/patient/profile/icons";
+  QuotationIcon,
+} from "@/components/icons";
 
 const quickActions = [
   {
@@ -20,8 +20,8 @@ const quickActions = [
     label: "리뷰", // Review
   },
   {
-    href: "/dentist/profile/favorites",
-    icon: FavoriteIcon,
+    href: "/dentist/quotation",
+    icon: QuotationIcon,
     label: "즐겨찾기", // Favorites
   },
 ];

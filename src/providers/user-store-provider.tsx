@@ -153,7 +153,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           const { data: userProfileData, error: profileError } =
             await supabaseClient
               .from("user")
-              .select("*")
+              .select("*, clinic(*)")
               .eq("id", session.user.id)
               .single();
 
@@ -183,6 +183,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
                 role: userProfileData.role,
                 created_at: userProfileData.created_at,
                 clinic_id: userProfileData.clinic_id,
+                clinic: userProfileData.clinic,
               },
             };
           } else {

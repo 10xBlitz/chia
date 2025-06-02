@@ -196,17 +196,16 @@ export async function getClinicReviews(clinicId: string) {
 
   if (reviewsError) throw reviewsError;
 
-  // Fetch clinic views
-  const { data: clinic, error: clinicError } = await supabaseClient
-    .from("clinic")
-    .select("views")
-    .eq("id", clinicId)
-    .single();
+  // Fetch clinic views count only
+  const { count: viewsCount, error: clinicError } = await supabaseClient
+    .from("clinic_view")
+    .select("*", { count: "exact", head: true })
+    .eq("clinic_id", clinicId);
 
   if (clinicError) throw clinicError;
 
   return {
     reviews: reviews || [],
-    views: clinic?.views ?? 0,
+    views: viewsCount ?? 0,
   };
 }

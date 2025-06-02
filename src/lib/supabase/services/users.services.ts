@@ -136,6 +136,17 @@ export async function registerUser(
     .single();
   if (insertError) throw insertError;
 
+  //not awaited because it is not finishing
+  // supabaseClient.auth
+  //   .updateUser({
+  //     data: {
+  //       role: data.role,
+  //     },
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error updating user role:", error);
+  //   });
+
   return { data: userData }; //Sign up completed successfully
 }
 

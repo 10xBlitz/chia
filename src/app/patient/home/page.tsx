@@ -40,16 +40,16 @@ export default function MainPage() {
   } = useQuery({
     queryKey: ["clinics-initial", filterOption],
     queryFn: async () => {
-      let addressFilter = "";
+      let regionFilter = "";
       if (filterOption === "근무지") {
         //workplace
-        addressFilter = user?.work_place.split(",")[1] || "";
+        regionFilter = user?.work_place.split(",")[1] || "";
       } else if (filterOption === "거주") {
         //residence
-        addressFilter = user?.residence.split(",")[1] || "";
+        regionFilter = user?.residence.split(",")[1] || "";
       }
       const res = await getPaginatedClinicsWthReviews(1, 3, {
-        region: addressFilter,
+        region: regionFilter,
       });
       return res.data || [];
     },

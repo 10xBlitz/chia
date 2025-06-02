@@ -29,6 +29,34 @@ const TABS = [
 // Dynamically import map if needed
 // const Map = dynamic(() => import("@/components/map"), { ssr: false });
 
+async function fetchClinicDetail(clinic_id: string) {
+  const { data, error } = await supabaseClient
+    .from("clinic")
+    .select(
+      `
+        *,
+        clinic_view(*),
+        working_hour(*),
+        clinic_treatment (
+            id,
+            treatment (
+                id,
+                treatment_name,
+                image_url
+            ),
+            review (
+              *,
+              user:patient_id(*)
+            )
+        )
+      `
+    )
+    .eq("id", clinic_id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export default function ClinicDetailPage() {
   const { clinic_id } = useParams<{ clinic_id: string }>();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -46,32 +74,7 @@ export default function ClinicDetailPage() {
 
   const { data: clinic, error } = useQuery({
     queryKey: ["clinic-detail", clinic_id],
-    queryFn: async () => {
-      const { data, error } = await supabaseClient
-        .from("clinic")
-        .select(
-          `
-            *,
-            working_hour(*),
-            clinic_treatment (
-                id,
-                treatment (
-                    id,
-                    treatment_name,
-                    image_url
-                ),
-                review (
-                  *,
-                  user:patient_id(*)
-                )
-            )
-          `
-        )
-        .eq("id", clinic_id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => fetchClinicDetail(clinic_id),
     enabled: !!clinic_id,
     refetchInterval: 60000, // Refetch every minute
     refetchOnWindowFocus: true, // Refetch on window focus
@@ -139,6 +142,20 @@ export default function ClinicDetailPage() {
     };
     checkFavorite();
   }, [user?.id, clinic?.id]);
+
+  useEffect(() => {
+    const addViewCount = async () => {
+      if (!clinic_id) return;
+      if (!user?.id) return;
+      const { error } = await supabaseClient
+        .from("clinic_view")
+        .insert([{ clinic_id: clinic_id, patient_id: user?.id }]);
+      if (error) {
+        console.error("Error updating view count:", error.message);
+      }
+    };
+    addViewCount();
+  }, []);
 
   // Copy address to clipboard
   const handleCopyAddress = () => {

@@ -4,7 +4,7 @@ import { useUserStore } from "@/providers/user-store-provider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-import { UserIcon, ChevronRightIcon } from "@/app/patient/profile/icons";
+import { UserIcon, ChevronRightIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase/client";
 

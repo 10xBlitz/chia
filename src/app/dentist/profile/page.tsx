@@ -5,53 +5,9 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { useUserStore } from "@/providers/user-store-provider";
 
-// Reusable row component
-function InfoRow({
-  label,
-  value,
-  link,
-  highlightWhenEmpty = false,
-  emptyText,
-}: {
-  label: string;
-  value?: string;
-  editable?: boolean;
-  link?: string;
-  highlightWhenEmpty?: boolean;
-  emptyText?: string;
-}) {
-  const displayValue =
-    value && value.trim().length > 0 ? value : emptyText ? emptyText : "-";
-  const textColor =
-    value && value.trim().length > 0
-      ? "text-black"
-      : highlightWhenEmpty
-      ? "text-blue-600"
-      : "text-gray-400";
-  const content = (
-    <span className={`text-base font-medium ml-2 ${textColor}`}>
-      {displayValue}
-    </span>
-  );
-  return (
-    <div className="flex items-center py-4">
-      <span className="text-sm text-gray-500 min-w-[72px]">{label}</span>
-      {link ? <Link href={link}>{content}</Link> : content}
-    </div>
-  );
-}
-
-// Section title
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-sm font-semibold text-black mt-6 mb-2">{children}</div>
-  );
-}
-
 export default function ProfilePage() {
   const user = useUserStore((state) => state.user);
-  console.log("User data:", user);
-  //   Dentist-specific fields
+  // Dentist-specific fields
   const dentistName = user?.clinic?.clinic_name || "일신치과의원";
   const establishedAt = user?.clinic?.created_at
     ? format(new Date(user.clinic.created_at), "yyyy.MM.dd")
@@ -64,43 +20,87 @@ export default function ProfilePage() {
       <HeaderWithBackButton title="프로필" />
       <main className="flex-1 flex flex-col mt-2">
         {/* Basic Info */}
-        <SectionTitle>기본 정보</SectionTitle>
-        <InfoRow label="이름" value={user?.full_name || "김00"} />
-        <InfoRow
-          label="생년월일"
-          value={
-            user?.birthdate
+        <div className="text-sm font-semibold text-black mt-6 mb-2">
+          기본 정보 {/* Basic Info */}
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">이름</span>{" "}
+          {/* Name */}
+          <span className="text-base font-medium ml-2 text-black">
+            {user?.full_name || "김00"}
+          </span>
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">생년월일</span>{" "}
+          {/* Birthdate */}
+          <span className="text-base font-medium ml-2 text-black">
+            {user?.birthdate
               ? format(new Date(user.birthdate), "yyyy.MM.dd")
-              : "1996.03.18"
-          }
-        />
-        <InfoRow
-          label="연락처"
-          value={user?.contact_number || "010-1234-4567"}
-        />
-        <InfoRow
-          label="주소"
-          value={user?.residence}
-          highlightWhenEmpty
-          emptyText="주소지 등록"
-          link={user?.residence ? undefined : "#"}
-        />
+              : "1996.03.18"}
+          </span>
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">연락처</span>{" "}
+          {/* Contact */}
+          <span className="text-base font-medium ml-2 text-black">
+            {user?.contact_number || "010-1234-4567"}
+          </span>
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">주소</span>{" "}
+          {/* Address */}
+          {user?.residence ? (
+            <span className="text-base font-medium ml-2 text-black">
+              {user.residence}
+            </span>
+          ) : (
+            <Link href="#" className="text-base font-medium ml-2 text-blue-600">
+              주소지 등록 {/* Register Address */}
+            </Link>
+          )}
+        </div>
 
         {/* Divider */}
         <div className="border-t my-4" />
 
         {/* Clinic Info */}
-        <SectionTitle>병원 정보</SectionTitle>
-        <InfoRow label="병원명" value={dentistName} />
-        <InfoRow label="개설일" value={establishedAt} />
-        <InfoRow label="연락처" value={clinicContact} />
-        <InfoRow
-          label="소재지"
-          value={clinicAddress}
-          highlightWhenEmpty
-          emptyText="소재지 등록"
-          link={clinicAddress ? undefined : "#"}
-        />
+        <div className="text-sm font-semibold text-black mt-6 mb-2">
+          병원 정보 {/* Clinic Info */}
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">병원명</span>{" "}
+          {/* Clinic Name */}
+          <span className="text-base font-medium ml-2 text-black">
+            {dentistName}
+          </span>
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">개설일</span>{" "}
+          {/* Established At */}
+          <span className="text-base font-medium ml-2 text-black">
+            {establishedAt}
+          </span>
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">연락처</span>{" "}
+          {/* Contact */}
+          <span className="text-base font-medium ml-2 text-black">
+            {clinicContact}
+          </span>
+        </div>
+        <div className="flex items-center py-4">
+          <span className="text-sm text-gray-500 min-w-[72px]">소재지</span>{" "}
+          {/* Location */}
+          {clinicAddress ? (
+            <span className="text-base font-medium ml-2 text-black">
+              {clinicAddress}
+            </span>
+          ) : (
+            <Link href="#" className="text-base font-medium ml-2 text-blue-600">
+              소재지 등록 {/* Register Location */}
+            </Link>
+          )}
+        </div>
       </main>
     </div>
   );

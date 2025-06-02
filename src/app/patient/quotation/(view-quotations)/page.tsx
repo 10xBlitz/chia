@@ -43,7 +43,7 @@ export default function ViewQuotationPage() {
     bid_id: string | null
   ) => {
     if (!clinic_id) {
-      //it means it's a public quotation
+      //it means it's a public quotation, so redirect to view all bids
       router.push(
         `/patient/quotation/view-bids/${quotation_id}?quotation_details=${quotation_details}`
       );
@@ -104,19 +104,17 @@ export default function ViewQuotationPage() {
               </span>
               <Button
                 className={`rounded-md px-4 h-9 font-medium ${
-                  q.bid
-                    ? "border border-gray-200 bg-white text-gray-500"
-                    : "bg-blue-600 text-white"
+                  q.bid.length > 0
+                    ? "bg-blue-600 text-white"
+                    : "border border-gray-200 bg-white text-gray-500"
                 }`}
                 variant={q.bid ? "outline" : "default"}
                 tabIndex={-1}
                 onClick={(e) => e.stopPropagation()}
               >
-                {
-                  q.clinic_id
-                    ? "답변완료" /* Answered */
-                    : "답변확인" /* Check Answers */
-                }
+                {q.bid.length > 0 ? "답변완료" : "답변 없음"}
+                {/* Answered */} {/* No answer */}
+                {}
               </Button>
             </div>
           ))}

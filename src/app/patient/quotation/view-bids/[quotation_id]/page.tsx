@@ -79,7 +79,7 @@ export default function BidsPage() {
                 })}
               </span>
               <span className="text-gray-600 truncate flex-1 mr-4 whitespace-nowrap">
-                {b.clinic_treatment.clinic?.clinic_name || "치과"}{" "}
+                {b.clinic_treatment.clinic?.clinic_name || "치과"}
                 {/* Dental Clinic */}
                 {" · "}
                 {
@@ -89,9 +89,8 @@ export default function BidsPage() {
                 }
               </span>
               <Button
-                className="rounded-md px-4 h-9 font-medium border border-gray-200 bg-white text-gray-500"
+                className="rounded-md px-4 h-9 font-medium btn-primary bg-blue-500 text-white"
                 variant="outline"
-                tabIndex={-1}
                 onClick={(e) => e.stopPropagation()}
               >
                 상세보기 {/* View Details */}

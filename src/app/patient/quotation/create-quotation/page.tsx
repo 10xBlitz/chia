@@ -112,8 +112,10 @@ export default function CreateQuotationPage() {
         clinic_id,
         images,
       });
+
       return createQuotation({
         ...values,
+        region: values.region.split(",")[1] || "", // Ensure region is just the second part after comma
         user_id: user.id,
         clinic_id,
         images,
@@ -222,9 +224,11 @@ export default function CreateQuotationPage() {
                 <FormControl>
                   <AddressSelector
                     key={city + region} // Force remount when city/region changes
-                    onAddressSelect={(_city, _region) =>
-                      field.onChange(`${_city},${_region}`)
-                    }
+                    onAddressSelect={(_city, _region) => {
+                      console.log("--->city: ", city);
+                      console.log("--->region: ", region);
+                      field.onChange(`${_city},${_region}`);
+                    }}
                     initialRegion={region}
                     initialCity={city}
                   />

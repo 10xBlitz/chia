@@ -7,19 +7,51 @@ import Image from "next/image";
 import { getClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { useUserStore } from "@/providers/user-store-provider";
 
-// Reusable: Section Title
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-lg font-semibold text-black mt-6 mb-2">{children}</div>
-  );
-}
+export default function DentistReviewPage() {
+  const user = useUserStore((state) => state.user);
+  const clinicId = user?.clinic_id;
 
-// Reusable: Info Row
-function InfoRow({ label, value }: { label: string; value: string | number }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["clinic-reviews", clinicId],
+    queryFn: async () => {
+      if (!clinicId) return { reviews: [], views: 0 };
+      return await getClinicReviews(clinicId);
+    },
+    enabled: !!clinicId,
+  });
+
+  const reviews = (data?.reviews || []).map((review) => ({
+    ...review,
+    review: review.review ?? "", // Ensure review is always a string
+    images: review.images ?? [],
+  }));
+  const views = data?.views ?? 0;
+
   return (
-    <div className="flex items-center py-2">
-      <span className="text-sm text-gray-500 min-w-[72px]">{label}</span>
-      <span className="text-base text-black font-medium ml-2">{value}</span>
+    <div className="flex flex-col">
+      <HeaderWithBackButton title="병원 정보" /> {/* Hospital Info */}
+      <main className="flex-1 flex flex-col mt-2">
+        <ReviewCard views={views} />
+        <div className="border-t my-6" />
+        <div className="text-lg font-semibold text-black mt-6 mb-2">
+          리뷰 목록 {/* Review List */}
+        </div>
+        <div>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-400">
+              로딩 중... {/* Loading... */}
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="text-gray-400 text-center py-8">
+              아직 리뷰가 없습니다. {/* No reviews yet. */}
+            </div>
+          ) : (
+            reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))
+          )}
+        </div>
+      </main>
     </div>
   );
 }
@@ -27,8 +59,9 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
 // Reusable: Review Card (with images and patient info)
 function ReviewCard({
   review,
+  views,
 }: {
-  review: {
+  review?: {
     id: string;
     rating: number;
     review: string;
@@ -36,7 +69,19 @@ function ReviewCard({
     created_at?: string;
     user?: { full_name?: string };
   };
+  views?: number;
 }) {
+  if (!review) {
+    // InfoRow for views
+    return (
+      <div className="flex items-center py-2">
+        <span className="text-sm text-gray-500 min-w-[72px]">조회수</span>
+        <span className="text-base text-black font-medium ml-2">
+          {views?.toLocaleString() ?? "0"}
+        </span>
+      </div>
+    );
+  }
   return (
     <div className="bg-[#F6FAFF] rounded-xl px-4 py-6 mb-4">
       <div className="flex items-center gap-4 mb-3">
@@ -93,53 +138,6 @@ function ReviewCard({
       <div className="text-[15px] leading-relaxed whitespace-pre-line">
         {review.review}
       </div>
-    </div>
-  );
-}
-
-export default function DentistReviewPage() {
-  const user = useUserStore((state) => state.user);
-  const clinicId = user?.clinic_id;
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["clinic-reviews", clinicId],
-    queryFn: async () => {
-      if (!clinicId) return { reviews: [], views: 0 };
-      return await getClinicReviews(clinicId);
-    },
-    enabled: !!clinicId,
-  });
-
-  const reviews = (data?.reviews || []).map((review) => ({
-    ...review,
-    review: review.review ?? "", // Ensure review is always a string
-    images: review.images ?? [],
-  }));
-  const views = data?.views ?? 0;
-
-  return (
-    <div className="flex flex-col">
-      <HeaderWithBackButton title="병원 정보" /> {/* Hospital Info */}
-      <main className="flex-1 flex flex-col mt-2">
-        <InfoRow label="조회수" value={views.toLocaleString()} /> {/* Views */}
-        <div className="border-t my-6" />
-        <SectionTitle>리뷰 목록</SectionTitle> {/* Review List */}
-        <div>
-          {isLoading ? (
-            <div className="text-center py-8 text-gray-400">
-              로딩 중... {/* Loading... */}
-            </div>
-          ) : reviews.length === 0 ? (
-            <div className="text-gray-400 text-center py-8">
-              아직 리뷰가 없습니다. {/* No reviews yet. */}
-            </div>
-          ) : (
-            reviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))
-          )}
-        </div>
-      </main>
     </div>
   );
 }
