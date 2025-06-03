@@ -10,13 +10,11 @@ import { Button } from "@/components/ui/button";
 import { EditIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
-import { validateTreatmentQueryParams } from "./page";
+import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
 import { TreatmentModal } from "./treatment-modal";
 import { TreatmentTable } from "./columns";
 import { ConfirmDeleteModal } from "@/components/confirm-modal";
 import { supabaseClient } from "@/lib/supabase/client";
-
 interface CellActionProps {
   data: TreatmentTable;
 }
@@ -144,3 +142,35 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     </>
   );
 };
+
+export function validateTreatmentQueryParams(
+  searchParams: ReadonlyURLSearchParams
+) {
+  const pageParam = searchParams.get("page");
+  const limitParam = searchParams.get("limit");
+  const treatmentNameParam = searchParams.get("treatment_name");
+  const encodedDates = searchParams.get("dates");
+
+  const page = pageParam ? Number(pageParam) : 1;
+  const limit =
+    limitParam && Number(limitParam) < 1000 ? Number(limitParam) : 10;
+
+  const dateRange: { from?: string; to?: string } = {};
+
+  if (encodedDates) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(encodedDates));
+      if (decoded?.from) dateRange.from = decoded.from;
+      if (decoded?.to) dateRange.to = decoded.to;
+    } catch (error) {
+      console.error("Invalid dates parameter:", error);
+    }
+  }
+
+  const filters = {
+    treatment_name: treatmentNameParam || undefined,
+    date_range: Object.keys(dateRange).length > 0 ? dateRange : undefined,
+  };
+
+  return { page, limit, filters };
+}

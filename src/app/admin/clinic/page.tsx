@@ -2,7 +2,7 @@
 
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   keepPreviousData,
   useQuery,
@@ -12,6 +12,7 @@ import Loading from "@/components/loading";
 import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
 import { ClinicModal } from "./clinic-modal";
 import { useState } from "react";
+import { validateClinicQueryParams } from "./cell-actions";
 
 export default function ClinicPage() {
   const searchParams = useSearchParams();
@@ -62,39 +63,4 @@ export default function ClinicPage() {
       )}
     </div>
   );
-}
-
-export function validateClinicQueryParams(
-  searchParams: ReadonlyURLSearchParams
-) {
-  const pageParam = searchParams.get("page");
-  const limitParam = searchParams.get("limit");
-  const clinicNameParam = searchParams.get("clinic_name");
-  const categoryParam = searchParams.get("category");
-  const encodedDates = searchParams.get("dates");
-
-  const page = pageParam ? Number(pageParam) : 1;
-  const limit =
-    limitParam && Number(limitParam) < 1000 ? Number(limitParam) : 10;
-
-  const dateRange: { from?: string; to?: string } = {};
-
-  if (encodedDates) {
-    try {
-      const decoded = JSON.parse(decodeURIComponent(encodedDates));
-      if (decoded?.from) dateRange.from = decoded.from;
-      if (decoded?.to) dateRange.to = decoded.to;
-    } catch (error) {
-      console.error("Invalid dates parameter:", error);
-    }
-  }
-
-  const filters = {
-    clinic_name: clinicNameParam || undefined,
-    category:
-      categoryParam && categoryParam !== "all" ? categoryParam : undefined,
-    date_range: Object.keys(dateRange).length > 0 ? dateRange : undefined,
-  };
-
-  return { page, limit, filters };
 }

@@ -6,7 +6,7 @@ interface TreatmentFilters {
 }
 
 const IMAGE_BUCKET = "treatment-images";
-const MAX_FILE_SIZE_MB = 50;
+const MAX_FILE_SIZE_MB = 50 * 1024 * 1024; // 50 MB
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function getPaginatedTreatments(
@@ -105,12 +105,12 @@ export async function uploadTreatmentImage(file: File) {
     throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`); //  "Unsupported image format: " + file.type);
   }
   // Validate file size
-  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+  if (file.size > MAX_FILE_SIZE_MB) {
     throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`); // "Image size must be less than " + MAX_FILE_SIZE_MB + "MB");
   }
   const fileExt = file.name.split(".").pop();
   const fileName = `${uuidv4()}.${fileExt}`;
-  const filePath = `treatment-images/${fileName}`;
+  const filePath = `${fileName}`;
   const { error: uploadError } = await supabaseClient.storage
     .from(IMAGE_BUCKET)
     .upload(filePath, file, {
@@ -130,13 +130,15 @@ export async function uploadTreatmentImage(file: File) {
 
 export async function removeTreatmentImage(imageUrl: string) {
   // Extract the path after /storage/v1/object/public/images/
-  const prefix = "/storage/v1/object/public/images/";
-  const idx = imageUrl.indexOf(prefix);
-  if (idx === -1) return;
-  const path = imageUrl.substring(idx + prefix.length);
+  const path = imageUrl.split("treatment-images/")[1];
+  console.log("----->Removing treatment image at path:", path);
+  // treatment-images/5c4e0526-2268-4d52-84d1-2a23b66f2aaf.png
   // Ensure we only remove from treatment-images/
-  if (!path.startsWith("treatment-images/")) return;
-  const { error } = await supabaseClient.storage.from("images").remove([path]);
+  const { error, data } = await supabaseClient.storage
+    .from(IMAGE_BUCKET)
+    .remove([path]);
+  console.log("----->Removed treatment image:", data);
+  console.log("----->Error removing treatment image:", error);
   if (error) throw error;
 }
 
@@ -183,20 +185,26 @@ export async function updateTreatment(
   let removeOldImage = false;
   let oldImageUrl: string | undefined | null = undefined;
 
+  console.log("Updating treatment with ID:", id);
+
   if (updates.image_url && updates.image_url instanceof File) {
     // Get old image_url from DB
-    const { data: old } = await supabaseClient
+    console.log("------>getting old image");
+    const { error, data: old } = await supabaseClient
       .from("treatment")
       .select("image_url")
       .eq("id", id)
       .single();
+    if (error) throw error;
     oldImageUrl = old?.image_url;
+    console.log("-----> uploadTreatmentImage: ", updates.image_url);
     imageUrl = await uploadTreatmentImage(updates.image_url);
     removeOldImage = !!oldImageUrl;
   } else if (typeof updates.image_url === "string") {
     imageUrl = updates.image_url;
   }
 
+  console.log("------>updating treatment with imageUrl:", imageUrl);
   const { data, error } = await supabaseClient
     .from("treatment")
     .update({
