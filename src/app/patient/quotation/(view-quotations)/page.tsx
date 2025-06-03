@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { EditIcon } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
-import BottomNavigation from "../../bottom-navigation";
+import BottomNavigation from "../../../../components/bottom-navigation";
 
 // Helper to fetch quotations for the current user
 async function fetchQuotations(userId: string) {

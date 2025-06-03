@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
+import MobileLayout from "@/components/layout/mobile-layout";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }),
@@ -78,7 +79,7 @@ export default function LoginForm() {
       if (userRole === "admin") {
         router.push("/admin");
       } else if (userRole === "patient") {
-        router.push("/patient/home");
+        router.push("/");
       } else if (userRole === "dentist") {
         router.push("/dentist");
       }
@@ -86,7 +87,7 @@ export default function LoginForm() {
   }, [userRole]);
 
   return (
-    <div className="flex min-h-svh w-full  justify-center p-6 md:p-10">
+    <MobileLayout className="min-h-dvh">
       <div className="w-full max-w-sm">
         <BackButton />
         <div className={"flex flex-col gap-6"}>
@@ -181,6 +182,6 @@ export default function LoginForm() {
           </Card>
         </div>
       </div>
-    </div>
+    </MobileLayout>
   );
 }

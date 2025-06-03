@@ -57,6 +57,11 @@ export default function ClinicCard(clinic: ClinicCardProps) {
     }
   };
 
+  const avgReviews = clinic.avg_reviews_per_treatment
+    ? clinic.avg_reviews_per_treatment.toFixed(1)
+    : "0.0";
+  const totalReviews = clinic.total_reviews || 0;
+
   return (
     <Link
       href={`/patient/home/${clinic.id}`}
@@ -86,23 +91,25 @@ export default function ClinicCard(clinic: ClinicCardProps) {
             }}
           />
         )}
-        <BookmarkButton
-          isActive={isFavorite}
-          handleBookmarkClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleBookmarkClick(e);
-          }}
-          notActiveStyle="text-white"
-          className="absolute top-2 right-2 z-10 rounded-full p-1"
-          data-bookmark
-        />
+        {user?.id && (
+          <BookmarkButton
+            isActive={isFavorite}
+            handleBookmarkClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleBookmarkClick(e);
+            }}
+            notActiveStyle="text-white"
+            className="absolute top-2 right-2 z-10 rounded-full p-1"
+            data-bookmark
+          />
+        )}
       </div>
       <div className="font-semibold text-lg">{clinic.clinic_name}</div>
       <div className="flex items-center text-gray-500 text-base mt-1">
         <span className="text-yellow-500 mr-1">★</span>
-        <span>{clinic.avg_reviews_per_treatment.toFixed(1)}</span>
-        <span className="ml-1">({clinic.total_reviews})</span>
+        <span>{avgReviews}</span>
+        <span className="ml-1">({totalReviews})</span>
       </div>
     </Link>
   );

@@ -89,6 +89,7 @@ export default function TreatmentCategoryScroll() {
                   src={treatment.image_url}
                   alt={treatment.treatment_name || "treatment"}
                   fill
+                  className="object-cover"
                 />
               ) : (
                 <span className="text-xs text-gray-500">Icon</span>

@@ -6,24 +6,23 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Image from "next/image";
-import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
+import { useEffect, useState } from "react";
 
 export default function MainBannerCarousel() {
   // Fetch banners with type "main"
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["banners", "main"],
     queryFn: async () => await getPaginatedBanners(1, 10, { type: "main" }),
-    staleTime: 1000 * 60 * 5,
   });
 
-  const banners = data?.data || [];
-  const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
   // Sync carousel state with API
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) return;
     setCurrent(api.selectedScrollSnap());
 
@@ -33,9 +32,9 @@ export default function MainBannerCarousel() {
   }, [api]);
 
   // Auto-scroll effect
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) return;
-    if (!banners.length) return;
+    if (!data?.data.length) return;
     const interval = setInterval(() => {
       if (api.selectedScrollSnap() === api.scrollSnapList().length - 1) {
         api.scrollTo(0);
@@ -44,12 +43,12 @@ export default function MainBannerCarousel() {
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [api, banners.length]);
+  }, [api, data?.data.length]);
 
   return (
-    <div className="w-full ">
+    <div className="relative max-w-[460px]">
       <Carousel setApi={setApi} className="w-full">
-        <CarouselContent className="w-full">
+        <CarouselContent className="min-w-full">
           {isLoading && (
             <CarouselItem>
               <div className="flex items-center justify-center h-[200px]">
@@ -64,9 +63,9 @@ export default function MainBannerCarousel() {
               </div>
             </CarouselItem>
           )}
-          {banners.map((banner, index: number) => (
+          {data?.data.map((banner, index: number) => (
             <CarouselItem key={index} className="w-full">
-              <div className="relative w-screen h-[200px]">
+              <div className="relative h-[200px]">
                 <Image
                   src={banner.image}
                   alt={banner.title || "Banner Image"}
@@ -78,10 +77,10 @@ export default function MainBannerCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="absolute bottom-2 rounded-full right-4 bg-black text-white px-3 py-1 text-sm z-10">
-          {banners.length ? `${current + 1} / ${data?.totalItems || 0}` : ""}
-        </div>
       </Carousel>
+      <div className="absolute bottom-2 right-2 rounded-full bg-black text-white px-3 py-1 text-sm z-10">
+        {data?.data.length ? `${current + 1} / ${data?.totalItems || 0}` : ""}
+      </div>
     </div>
   );
 }

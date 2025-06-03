@@ -8,7 +8,12 @@ interface MobileLayoutProps {
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children, className }) => {
   return (
-    <div className={cn(className, "px-5 pt-4 max-w-[450px] mx-auto")}>
+    <div
+      className={cn(
+        className,
+        "px-5 pt-4 max-w-[450px] min-h-dvh mx-auto bg-white"
+      )}
+    >
       {children}
     </div>
   );

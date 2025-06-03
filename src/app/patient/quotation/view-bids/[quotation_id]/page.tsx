@@ -6,7 +6,7 @@ import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import BottomNavigation from "@/app/patient/bottom-navigation";
+import BottomNavigation from "@/components/bottom-navigation";
 import BackButton from "@/components/back-button";
 
 // Helper to fetch bids for a quotation

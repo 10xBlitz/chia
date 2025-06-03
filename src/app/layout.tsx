@@ -32,7 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <CustomQueryClientProvider>
-          <UserStoreProvider>{children}</UserStoreProvider>
+          <UserStoreProvider>
+            <main className="bg-[#F1F1F5]">{children}</main>
+          </UserStoreProvider>
           <ToasterProvider />
         </CustomQueryClientProvider>
       </body>

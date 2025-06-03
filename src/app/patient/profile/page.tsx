@@ -1,6 +1,6 @@
 "use client";
 
-import BottomNavigation from "../bottom-navigation";
+import BottomNavigation from "../../../components/bottom-navigation";
 import { ReservationsIcon, FavoriteIcon, ReviewIcon } from "@/components/icons";
 
 import MyMenuPage from "@/components/my-menu-page";

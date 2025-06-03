@@ -14,10 +14,10 @@ import {
   removeClinicFromFavorites,
 } from "@/lib/supabase/services/favorites.service";
 import toast from "react-hot-toast";
-import BottomNavigation from "../../bottom-navigation";
 import Link from "next/link";
 import BackButton from "@/components/back-button";
 import BookmarkButton from "@/components/bookmark";
+import BottomNavigation from "@/components/bottom-navigation";
 
 const TABS = [
   { key: "info", label: "병원정보" },
@@ -541,7 +541,7 @@ export default function ClinicDetailPage() {
         <EditIcon />
         리뷰 쓰기 {/* Write a Review */}
       </Button>
-      <BottomNavigation />
+      {user?.id && <BottomNavigation />}
     </div>
   );
 }
