@@ -125,7 +125,6 @@ export type Database = {
           opening_date: string
           pictures: string[] | null
           region: string
-          views: number
         }
         Insert: {
           clinic_name: string
@@ -137,7 +136,6 @@ export type Database = {
           opening_date: string
           pictures?: string[] | null
           region: string
-          views?: number
         }
         Update: {
           clinic_name?: string
@@ -149,7 +147,6 @@ export type Database = {
           opening_date?: string
           pictures?: string[] | null
           region?: string
-          views?: number
         }
         Relationships: []
       }
@@ -177,6 +174,7 @@ export type Database = {
           created_at: string
           id: string
           price: number
+          status: Database["public"]["Enums"]["record_status"]
           treatment_id: string
         }
         Insert: {
@@ -184,6 +182,7 @@ export type Database = {
           created_at?: string
           id?: string
           price: number
+          status?: Database["public"]["Enums"]["record_status"]
           treatment_id: string
         }
         Update: {
@@ -191,6 +190,7 @@ export type Database = {
           created_at?: string
           id?: string
           price?: number
+          status?: Database["public"]["Enums"]["record_status"]
           treatment_id?: string
         }
         Relationships: [
@@ -602,18 +602,21 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          status: Database["public"]["Enums"]["record_status"]
           treatment_name: string
         }
         Insert: {
           created_at?: string
           id?: string
           image_url?: string | null
+          status?: Database["public"]["Enums"]["record_status"]
           treatment_name: string
         }
         Update: {
           created_at?: string
           id?: string
           image_url?: string | null
+          status?: Database["public"]["Enums"]["record_status"]
           treatment_name?: string
         }
         Relationships: []
@@ -709,6 +712,7 @@ export type Database = {
     }
     Enums: {
       banner_type: "main" | "sub"
+      record_status: "deleted" | "active"
       user_role: "patient" | "dentist" | "admin" | "dentist employee"
     }
     CompositeTypes: {
@@ -826,6 +830,7 @@ export const Constants = {
   public: {
     Enums: {
       banner_type: ["main", "sub"],
+      record_status: ["deleted", "active"],
       user_role: ["patient", "dentist", "admin", "dentist employee"],
     },
   },

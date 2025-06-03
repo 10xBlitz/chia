@@ -7,28 +7,50 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { EditIcon, EyeIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
+import { EditIcon, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { ClinicTable } from "./columns";
-import { TreatmentModal } from "./treatment-modal";
+import { ClinicModal } from "./clinic-modal";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { validateClinicQueryParams } from "./page";
 
 interface CellActionProps {
   data: ClinicTable;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
-  const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<ClinicTable | undefined>(undefined);
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const { page, limit, filters } = validateClinicQueryParams(searchParams);
 
   return (
     <>
       {selected !== undefined && (
-        <TreatmentModal
+        <ClinicModal
           data={selected}
-          open={open}
+          open={!!selected}
           onClose={() => {
-            setOpen(false);
             setSelected(undefined);
+          }}
+          onSuccess={() => {
+            setTimeout(() => {
+              const body = document.querySelector("body");
+              if (body) {
+                body.style.pointerEvents = "auto";
+              }
+            }, 500);
+            queryClient.invalidateQueries({
+              queryKey: [
+                "clinics",
+                page,
+                limit,
+                filters.clinic_name,
+                filters.category,
+                filters.date_range,
+              ],
+            });
           }}
         />
       )}
@@ -42,18 +64,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
+            className="cursor-pointer"
             onClick={() => {
-              setOpen(true);
               setSelected(data);
             }}
           >
-            <EyeIcon className="h-4 w-4" /> View Treatments
-          </DropdownMenuItem>
-          <DropdownMenuItem>
             <EditIcon className="h-4 w-4" /> Update
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Trash2Icon className="h-4 w-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

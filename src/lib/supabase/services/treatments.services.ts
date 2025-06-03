@@ -1,9 +1,13 @@
 import { supabaseClient } from "../client";
+import { v4 as uuidv4 } from "uuid";
 
 interface TreatmentFilters {
   treatment_name?: string;
-  // Add more filters as needed, e.g., category, etc.
 }
+
+const IMAGE_BUCKET = "treatment-images";
+const MAX_FILE_SIZE_MB = 50;
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function getPaginatedTreatments(
   page = 1,
@@ -21,7 +25,7 @@ export async function getPaginatedTreatments(
 
   let query = supabaseClient
     .from("treatment")
-    .select("id, treatment_name, image_url", { count: "exact" })
+    .select("*", { count: "exact" })
     .order("treatment_name", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -87,4 +91,126 @@ export async function getPaginatedClinicTreatments(
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
   };
+}
+
+/**
+ * Uploads a treatment image to Supabase Storage and returns the public URL.
+ * Validates file type and size.
+ * @param file - The image file to upload.
+ * @returns The public URL of the uploaded image.
+ */
+export async function uploadTreatmentImage(file: File) {
+  // Validate file type
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`); //  "Unsupported image format: " + file.type);
+  }
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+    throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`); // "Image size must be less than " + MAX_FILE_SIZE_MB + "MB");
+  }
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${uuidv4()}.${fileExt}`;
+  const filePath = `treatment-images/${fileName}`;
+  const { error: uploadError } = await supabaseClient.storage
+    .from(IMAGE_BUCKET)
+    .upload(filePath, file, {
+      contentType: file.type,
+      upsert: true,
+    });
+  if (uploadError)
+    throw new Error(`이미지 업로드 실패: ${uploadError.message}`); // "Image upload failed: " + uploadError.message);
+  const { data: publicUrlData } = supabaseClient.storage
+    .from(IMAGE_BUCKET)
+    .getPublicUrl(filePath);
+  if (!publicUrlData.publicUrl) {
+    throw new Error("이미지 URL 생성 실패"); // "Failed to generate image URL");
+  }
+  return publicUrlData.publicUrl;
+}
+
+export async function removeTreatmentImage(imageUrl: string) {
+  // Extract the path after /storage/v1/object/public/images/
+  const prefix = "/storage/v1/object/public/images/";
+  const idx = imageUrl.indexOf(prefix);
+  if (idx === -1) return;
+  const path = imageUrl.substring(idx + prefix.length);
+  // Ensure we only remove from treatment-images/
+  if (!path.startsWith("treatment-images/")) return;
+  const { error } = await supabaseClient.storage.from("images").remove([path]);
+  if (error) throw error;
+}
+
+/**
+ * Inserts a new treatment into the database, uploading the image if provided as File.
+ * @param treatment - Object containing treatment_name and optional image_url (File or string).
+ * @returns The inserted treatment data.
+ * @example
+ * await insertTreatment({ treatment_name: "Whitening", image_url: File });
+ */
+export async function insertTreatment(treatment: {
+  treatment_name: string;
+  image_url?: string | File;
+}) {
+  let imageUrl: string | undefined = undefined;
+  if (treatment.image_url && treatment.image_url instanceof File) {
+    imageUrl = await uploadTreatmentImage(treatment.image_url);
+  } else if (typeof treatment.image_url === "string") {
+    imageUrl = treatment.image_url;
+  }
+  const { data, error } = await supabaseClient
+    .from("treatment")
+    .insert([{ treatment_name: treatment.treatment_name, image_url: imageUrl }])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Updates an existing treatment in the database, replacing the image if a new File is provided.
+ * Removes the old image from storage if replaced.
+ * @param id - The treatment's ID.
+ * @param updates - Object containing fields to update (treatment_name, image_url as string or File).
+ * @returns The updated treatment data.
+ * @example
+ * await updateTreatment("123", { treatment_name: "Updated Name", image_url: File });
+ */
+export async function updateTreatment(
+  id: string,
+  updates: { treatment_name?: string; image_url?: string | File }
+) {
+  let imageUrl: string | undefined = undefined;
+  let removeOldImage = false;
+  let oldImageUrl: string | undefined | null = undefined;
+
+  if (updates.image_url && updates.image_url instanceof File) {
+    // Get old image_url from DB
+    const { data: old } = await supabaseClient
+      .from("treatment")
+      .select("image_url")
+      .eq("id", id)
+      .single();
+    oldImageUrl = old?.image_url;
+    imageUrl = await uploadTreatmentImage(updates.image_url);
+    removeOldImage = !!oldImageUrl;
+  } else if (typeof updates.image_url === "string") {
+    imageUrl = updates.image_url;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("treatment")
+    .update({
+      ...(updates.treatment_name && { treatment_name: updates.treatment_name }),
+      ...(imageUrl && { image_url: imageUrl }),
+    })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+
+  if (removeOldImage && oldImageUrl && imageUrl !== oldImageUrl) {
+    await removeTreatmentImage(oldImageUrl);
+  }
+
+  return data;
 }

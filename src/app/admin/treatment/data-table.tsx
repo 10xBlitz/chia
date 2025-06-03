@@ -11,7 +11,6 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -74,7 +73,6 @@ export function DataTable<TData, TValue>({
     []
   );
 
-  //-- Start search params states
   const pageParam = searchParam.get("page")
     ? Number(searchParam.get("page"))
     : 1;
@@ -84,19 +82,15 @@ export function DataTable<TData, TValue>({
   const [page, setPage] = React.useState(pageParam);
   const [limit, setLimit] = React.useState(limitParam);
 
-  const [clinicName, setClinicName] = React.useState(
-    searchParam.get("clinic_name") || ""
+  const [treatmentName, setTreatmentName] = React.useState(
+    searchParam.get("treatment_name") || ""
   );
-  // const [category, setCategory] = React.useState(
-  //   searchParam.get("category") || ""
-  // );
   const [dates, setDates] = React.useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 5),
   });
 
-  const debouncedClinicName = useDebounce(clinicName || "", 500);
-  //-- End search params states
+  const debouncedTreatmentName = useDebounce(treatmentName || "", 500);
 
   const table = useReactTable({
     data: paginatedData.data,
@@ -117,66 +111,37 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  //debounced the fullName so that it doesn't trigger the search params update on every keystroke
   React.useEffect(() => {
-    updateParam("clinic_name", debouncedClinicName);
-  }, [debouncedClinicName]);
+    updateParam("treatment_name", debouncedTreatmentName);
+  }, [debouncedTreatmentName]);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParam.toString());
-
-    //update or delete the param
     if (value) {
       params.set(key, value);
     } else {
       params.delete(key);
     }
-
-    //reset pagination when filter or limit changes
     if (key !== "page") {
       params.set("page", "1");
       setPage(1);
       setLimit(10);
     }
-
-    //update local state
     if (key === "page") setPage(Number(value));
-
     if (key === "limit") setLimit(Number(value));
-
     router.push(`?${params.toString()}`, { scroll: false });
   };
+
   return (
-    <div>
+    <div className="w-full flex-1">
       <div className="flex items-center justify-between gap-3 py-4">
         <div className="flex items-center gap-3">
           <Input
-            placeholder="Search by clinic name..."
-            value={clinicName}
-            onChange={(event) => setClinicName(event.target.value)}
+            placeholder="Search by treatment name..."
+            value={treatmentName}
+            onChange={(event) => setTreatmentName(event.target.value)}
             className="max-w-sm h-[45px]"
           />
-          {/* <Select
-          value={category}
-          defaultValue={category}
-          onValueChange={(value) => {
-            setCategory(value);
-            updateParam("category", value);
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="patient">Patient</SelectItem>
-              <SelectItem value="dentist">Dentist</SelectItem>
-              <SelectItem value="dentist_employee">Dentist Employee</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select> */}
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -218,7 +183,7 @@ export function DataTable<TData, TValue>({
           </Popover>
         </div>
         <Button onClick={onClickAdd}>
-          <PlusSquareIcon className="h-4 w-4" /> Add Clinic
+          <PlusSquareIcon className="h-4 w-4" /> Add Treatment
         </Button>
       </div>
       <div className="rounded-md border">
@@ -271,7 +236,6 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Rows per page</p>
@@ -293,8 +257,6 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
-            {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
-            {/* {table.getPageCount()} */}
             Page {page} of {paginatedData.totalPages}
           </div>
           <Button
@@ -306,7 +268,6 @@ export function DataTable<TData, TValue>({
             <span className="sr-only">Go to first page</span>
             <ChevronsLeft />
           </Button>
-
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
@@ -316,7 +277,6 @@ export function DataTable<TData, TValue>({
             <span className="sr-only">Go to previous page</span>
             <ChevronLeft />
           </Button>
-
           <Button
             variant="outline"
             className="h-8 w-8 p-0"

@@ -12,13 +12,7 @@ import MainBannerCarousel from "./main-banner-carousel";
 import SubBannerCarousel from "./sub-banner-carousel";
 import TreatmentCategoryScroll from "./treatment-category-scroll";
 import EventCarousel from "./event-scroll";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 
@@ -28,14 +22,15 @@ export default function MainPage() {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
 
-  const handleSortOptionChange = (option: string) => {
-    router.push(`?searchByAddress=${option}`, { scroll: false });
-    // You can also trigger a refetch of the clinic list here if needed
-  };
-
   useEffect(() => {
     if (user?.role === "patient") {
       router.push("/patient/home");
+    }
+    if (user?.role === "dentist") {
+      router.push("/dentist");
+    }
+    if (user?.role === "admin") {
+      router.push("/admin");
     }
   }, []);
 
@@ -83,15 +78,6 @@ export default function MainPage() {
           <div className="text-sm">
             지금 걸어갈 수 있는 병원 {/** Hospitals you can walk to now */}
           </div>
-          <Select value={filterOption} onValueChange={handleSortOptionChange}>
-            <SelectTrigger className="w-[100px] text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="근무지">근무지</SelectItem> {/** Workplace */}
-              <SelectItem value="거주">거주</SelectItem> {/** Residence */}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Custom clinic/event/sub-banner order */}

@@ -11,6 +11,7 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   isLong?: boolean;
+  isWide?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -19,6 +20,7 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   isLong,
+  isWide,
   children,
 }) => {
   const onChange = (open: boolean) => {
@@ -34,7 +36,8 @@ export const Modal: React.FC<ModalProps> = ({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         className={cn(
           "bg-white flex-col gap-10",
-          isLong && "max-h-[80vh] overflow-y-scroll"
+          isLong && "max-h-[80vh] overflow-y-scroll",
+          isWide && "min-w-[80dvw]"
         )}
       >
         <DialogTitle>

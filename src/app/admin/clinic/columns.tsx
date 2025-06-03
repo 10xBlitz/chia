@@ -3,25 +3,11 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { CellAction } from "./cell-actions";
+import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
 
-export type ClinicTable = {
-  id: string;
-  clinic_name: string;
-  location: string;
-  contact_number: string;
-  link: string | null;
-  pictures: string[] | null;
-  region: string;
-  views: number;
-  clinic_treatment: {
-    id: string;
-    treatment: {
-      id: string;
-      treatment_name: string;
-      image_url: string | null;
-    };
-  }[];
-};
+export type ClinicTable = Awaited<
+  ReturnType<typeof getPaginatedClinics>
+>["data"][number];
 
 export const columns: ColumnDef<ClinicTable>[] = [
   {
@@ -39,6 +25,7 @@ export const columns: ColumnDef<ClinicTable>[] = [
   {
     accessorKey: "views",
     header: "Views",
+    cell: ({ row }) => <>{row.original.clinic_view?.length}</>,
   },
 
   {

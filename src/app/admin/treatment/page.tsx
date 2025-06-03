@@ -1,7 +1,5 @@
 "use client";
 
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import {
   keepPreviousData,
@@ -9,43 +7,43 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import Loading from "@/components/loading";
-import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
-import { ClinicModal } from "./clinic-modal";
+import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { useState } from "react";
+import { TreatmentModal } from "./treatment-modal";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
-export default function ClinicPage() {
+export default function TreatmentsPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [openModal, setOpenModal] = useState(false);
-  const { page, limit, filters } = validateClinicQueryParams(searchParams);
+  const { page, limit, filters } = validateTreatmentQueryParams(searchParams);
 
   const { isError, error, data, isLoading } = useQuery({
     queryKey: [
-      "clinics",
+      "treatments",
       page,
       limit,
-      filters.clinic_name,
-      filters.category,
+      filters.treatment_name,
       filters.date_range,
     ],
-    queryFn: async () => await getPaginatedClinics(page, limit, filters),
+    queryFn: async () => await getPaginatedTreatments(page, limit, filters),
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   return (
     <div className="py-10">
-      <ClinicModal
+      <TreatmentModal
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSuccess={() =>
           queryClient.invalidateQueries({
             queryKey: [
-              "clinics",
+              "treatments",
               page,
               limit,
-              filters.clinic_name,
-              filters.category,
+              filters.treatment_name,
               filters.date_range,
             ],
           })
@@ -64,13 +62,12 @@ export default function ClinicPage() {
   );
 }
 
-export function validateClinicQueryParams(
+export function validateTreatmentQueryParams(
   searchParams: ReadonlyURLSearchParams
 ) {
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
-  const clinicNameParam = searchParams.get("clinic_name");
-  const categoryParam = searchParams.get("category");
+  const treatmentNameParam = searchParams.get("treatment_name");
   const encodedDates = searchParams.get("dates");
 
   const page = pageParam ? Number(pageParam) : 1;
@@ -90,9 +87,7 @@ export function validateClinicQueryParams(
   }
 
   const filters = {
-    clinic_name: clinicNameParam || undefined,
-    category:
-      categoryParam && categoryParam !== "all" ? categoryParam : undefined,
+    treatment_name: treatmentNameParam || undefined,
     date_range: Object.keys(dateRange).length > 0 ? dateRange : undefined,
   };
 

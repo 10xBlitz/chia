@@ -23,6 +23,7 @@ import {
   ChevronUp,
   HospitalIcon,
   SettingsIcon,
+  SyringeIcon,
   User2,
   Users,
 } from "lucide-react";
@@ -39,6 +40,11 @@ const items = [
     title: "Clinic Management",
     url: "/admin/clinic",
     icon: HospitalIcon,
+  },
+  {
+    title: "Treatments",
+    url: "/admin/treatment",
+    icon: SyringeIcon,
   },
   {
     title: "Reservation Management",
