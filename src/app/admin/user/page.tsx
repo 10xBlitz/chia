@@ -27,7 +27,7 @@ export default function UserPage() {
   });
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="py-10">
       {isError && <div className="bg-red-500/20">{error.message}</div>}
       {isLoading && <Loading />}
       {data && <DataTable columns={columns} paginatedData={data} />}

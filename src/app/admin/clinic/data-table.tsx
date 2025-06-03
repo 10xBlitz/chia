@@ -154,7 +154,7 @@ export function DataTable<TData, TValue>({
             placeholder="Search by clinic name..."
             value={clinicName}
             onChange={(event) => setClinicName(event.target.value)}
-            className="max-w-sm h-[45px]"
+            className="max-w-sm h-[45px] bg-white"
           />
           {/* <Select
           value={category}
@@ -217,11 +217,14 @@ export function DataTable<TData, TValue>({
             </PopoverContent>
           </Popover>
         </div>
-        <Button onClick={onClickAdd}>
+        <Button
+          onClick={onClickAdd}
+          className="bg-white text-black border-1 hover:bg-black/20"
+        >
           <PlusSquareIcon className="h-4 w-4" /> Add Clinic
         </Button>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -279,7 +282,7 @@ export function DataTable<TData, TValue>({
             value={`${limit}`}
             onValueChange={(value) => updateParam("limit", value)}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[70px] bg-white">
               <SelectValue placeholder={limit} />
             </SelectTrigger>
             <SelectContent side="top">

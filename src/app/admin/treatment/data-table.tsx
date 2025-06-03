@@ -133,14 +133,14 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="w-full flex-1">
-      <div className="flex items-center justify-between gap-3 py-4">
+    <div className="w-full flex-1 ">
+      <div className="flex items-center justify-between gap-3 py-4 ">
         <div className="flex items-center gap-3">
           <Input
             placeholder="Search by treatment name..."
             value={treatmentName}
             onChange={(event) => setTreatmentName(event.target.value)}
-            className="max-w-sm h-[45px]"
+            className="w-[300px] bg-white h-[45px]"
           />
           <Popover>
             <PopoverTrigger asChild>
@@ -182,11 +182,14 @@ export function DataTable<TData, TValue>({
             </PopoverContent>
           </Popover>
         </div>
-        <Button onClick={onClickAdd}>
+        <Button
+          onClick={onClickAdd}
+          className="bg-white text-black border-1 hover:bg-black/20"
+        >
           <PlusSquareIcon className="h-4 w-4" /> Add Treatment
         </Button>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -243,7 +246,7 @@ export function DataTable<TData, TValue>({
             value={`${limit}`}
             onValueChange={(value) => updateParam("limit", value)}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[70px] bg-white">
               <SelectValue placeholder={limit} />
             </SelectTrigger>
             <SelectContent side="top">

@@ -34,7 +34,7 @@ export default function TreatmentsPage() {
   });
 
   return (
-    <div className="py-10">
+    <div className="py-10 ">
       <TreatmentModal
         open={openModal}
         onClose={() => setOpenModal(false)}
