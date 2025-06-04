@@ -37,16 +37,21 @@ import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { ConfirmDeleteModal } from "@/components/confirm-modal";
 import {
+  CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+  CLINIC_IMAGE_BUCKET,
+  CLINIC_IMAGE_MAX_FILE_SIZE_MB,
   insertClinic,
-  removeClinicImagesFromStorage,
   updateClinic,
-  uploadClinicImages,
 } from "@/lib/supabase/services/clinics.services";
 import {
   insertClinicTreatment,
   markClinicTreatmentDeleted,
   updateClinicTreatment,
 } from "@/lib/supabase/services/clinic-treatments.service";
+import {
+  deleteFileFromSupabase,
+  uploadFileToSupabase,
+} from "@/lib/supabase/services/upload-file.services";
 
 const formSchema = z.object({
   clinic_name: z.string().min(1, "Clinic name is required"),
@@ -164,9 +169,11 @@ export const ClinicModal = ({
       // Attach pictures to values
       values.pictures =
         clinicImageFiles.length > 0 ? clinicImageFiles : data?.pictures || [];
-      return upsertClinicAndTreatments(values, data?.id, setUploadingFileIndex);
+      console.log("---->values to save: ", values);
+      return saveClinicAndTreatments(values, data?.id, setUploadingFileIndex);
     },
     onSuccess: () => {
+      form.reset();
       setLoading(false);
       setUploadingFileIndex(null);
       toast.success(data ? "Clinic updated" : "Clinic created");
@@ -480,10 +487,15 @@ export const ClinicModal = ({
                                   {...field}
                                   onChange={(e) => {
                                     field.onChange(e);
-                                    form.setValue(
-                                      `treatments.${index}.action`,
-                                      "updated"
+                                    const currentTreatment = form.getValues(
+                                      `treatments.${index}.action`
                                     );
+                                    if (currentTreatment === "old") {
+                                      form.setValue(
+                                        `treatments.${index}.action`,
+                                        "updated"
+                                      );
+                                    }
                                   }}
                                   type="number"
                                   className="w-full h-[45px]"
@@ -577,7 +589,10 @@ export const ClinicModal = ({
             </div>
             <div className="pt-4 space-x-2 flex items-center justify-end">
               <Button type="submit" className="w-full" disabled={loading}>
-                {buttonText}
+                {buttonText}{" "}
+                {uploadingFileIndex
+                  ? `Uploading image ${uploadingFileIndex + 1}`
+                  : ""}
               </Button>
             </div>
           </form>
@@ -588,88 +603,128 @@ export const ClinicModal = ({
 };
 
 /**
- * Upserts a clinic and its treatments.
- * Handles image upload, clinic creation or update, and treatments upsert.
- * If updating and new images are provided, removes old images from storage.
+ * Saves a clinic and its treatments.
+ * If clinicId is provided, updates the clinic and its images.
+ * If clinicId is not provided, creates a new clinic and uploads images.
  *
- * @param values - Clinic form values including treatments and pictures.
- * @param clinicId - Optional clinic ID for update (if not provided, creates new).
- * @param setUploadingFileIndex - Optional callback to set uploading file index for UI feedback.
- * @returns Promise resolving to { success: true } on completion.
+ * @param values - Clinic form values including treatments and pictures (always File[])
+ * @param clinicId - Optional clinic ID for update (if not provided, creates new)
+ * @param setUploadingFileIndex - Optional callback for UI feedback during image upload
+ * @returns Promise resolving to { success: true }
  */
-async function upsertClinicAndTreatments(
+async function saveClinicAndTreatments(
   values: z.infer<typeof formSchema>,
   clinicId?: string,
   setUploadingFileIndex?: (idx: number | null) => void
 ) {
-  let newClinicId = clinicId;
-  let clinicPictures: string[] = [];
-  // Upload clinic images if any
-  if (
-    Array.isArray(values.pictures) &&
-    values.pictures.length > 0 &&
-    values.pictures[0] instanceof File
-  ) {
-    // If updating, remove old images from storage
-    if (
-      clinicId &&
-      Array.isArray(values.pictures) &&
-      values.pictures.length > 0
-    ) {
-      // Fetch current pictures from DB
-      const { data: clinic } = await supabaseClient
-        .from("clinic")
-        .select("pictures")
-        .eq("id", clinicId)
-        .single();
-      if (clinic?.pictures && clinic.pictures.length > 0) {
-        await removeClinicImagesFromStorage(clinic.pictures);
-      }
-    }
-    clinicPictures = await uploadClinicImages(
-      values.pictures as File[],
-      newClinicId || "temp",
-      setUploadingFileIndex
-    );
-  } else if (Array.isArray(values.pictures)) {
-    clinicPictures = values.pictures as string[];
-  }
-  if (newClinicId) {
-    await updateClinic(
-      newClinicId,
-      {
-        ...values,
-        link: values.link || "",
-        pictures: values.pictures ? values.pictures : [],
-        opening_date: values.opening_date.toDateString(),
-      },
-      clinicPictures
-    );
+  if (clinicId) {
+    console.log("--->updating clinic with id: ", clinicId);
+    await updateClinicWithImages(values, clinicId, setUploadingFileIndex);
   } else {
-    newClinicId = await insertClinic(
-      {
-        ...values,
-        link: values.link || "",
-        pictures: values.pictures ? values.pictures : [],
-        opening_date: values.opening_date.toDateString(),
-      },
-      clinicPictures
-    );
+    await addClinicWithImages(values, setUploadingFileIndex);
   }
-
-  await upsertTreatmentsForClinic(values.treatments, newClinicId);
   return { success: true };
 }
 
 /**
- * Upserts treatments for a clinic.
- * Handles inserting, updating, or marking treatments as deleted based on their action.
+ * Handles updating a clinic, including deleting old images, uploading new ones, and updating treatments.
+ */
+async function updateClinicWithImages(
+  values: z.infer<typeof formSchema>,
+  clinicId: string,
+  setUploadingFileIndex?: (idx: number | null) => void
+) {
+  // Remove old images
+  const { data: clinic } = await supabaseClient
+    .from("clinic")
+    .select("pictures")
+    .eq("id", clinicId)
+    .single();
+
+  if (clinic?.pictures && clinic.pictures.length > 0) {
+    console.log("----->deleting old clinic images: ", clinic.pictures);
+    for (let idx = 0; idx < clinic.pictures.length; idx++) {
+      const pic = clinic.pictures[idx];
+      await deleteFileFromSupabase(pic, {
+        bucket: CLINIC_IMAGE_BUCKET,
+      });
+    }
+  }
+
+  // Upload new images
+  const clinicPictures: string[] = [];
+  console.log("------->uploading new clinic images: ", values.pictures);
+  for (let i = 0; i < values.pictures.length; i++) {
+    const file = values.pictures[i] as File;
+    if (setUploadingFileIndex) setUploadingFileIndex(i);
+    const publicUrl = await uploadFileToSupabase(file, {
+      bucket: CLINIC_IMAGE_BUCKET,
+      allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+      maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+    });
+    clinicPictures.push(publicUrl);
+  }
+  if (setUploadingFileIndex) setUploadingFileIndex(null);
+
+  // Update clinic
+  const clinicPayload = {
+    ...values,
+    link: values.link || "",
+    pictures: clinicPictures,
+    opening_date: values.opening_date.toDateString(),
+  };
+
+  console.log("----->updating clinic: ", clinicPayload);
+  await updateClinic(clinicId, clinicPayload, clinicPictures);
+
+  console.log("-----> saving treatments for clinic");
+  // Save treatments
+  await saveTreatmentsForClinic(values.treatments, clinicId);
+}
+
+/**
+ * Handles adding a new clinic, uploading images, and saving treatments.
+ */
+async function addClinicWithImages(
+  values: z.infer<typeof formSchema>,
+  setUploadingFileIndex?: (idx: number | null) => void
+) {
+  // Upload images
+  const clinicPictures: string[] = [];
+  for (let i = 0; i < values.pictures.length; i++) {
+    const file = values.pictures[i] as File;
+    if (setUploadingFileIndex) setUploadingFileIndex(i);
+    const publicUrl = await uploadFileToSupabase(file, {
+      bucket: CLINIC_IMAGE_BUCKET,
+      allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+      maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+    });
+    clinicPictures.push(publicUrl);
+  }
+  if (setUploadingFileIndex) setUploadingFileIndex(null);
+
+  // Create clinic
+  const clinicPayload = {
+    ...values,
+    link: values.link || "",
+    pictures: clinicPictures,
+    opening_date: values.opening_date.toDateString(),
+  };
+  const newClinicId = await insertClinic(clinicPayload, clinicPictures);
+
+  // Save treatments
+  await saveTreatmentsForClinic(values.treatments, newClinicId);
+}
+
+/**
+ * Saves treatments for a clinic.
+ * Handles adding, updating, or marking treatments as deleted based on their action.
  *
  * @param treatments - Array of treatment objects with action flags.
  * @param clinicId - The clinic ID to associate treatments with.
  * @param setUploadingFileIndex - Optional callback to set uploading file index for UI feedback.
  */
-async function upsertTreatmentsForClinic(
+async function saveTreatmentsForClinic(
   treatments: z.infer<typeof formSchema>["treatments"],
   clinicId: string,
   setUploadingFileIndex?: (idx: number | null) => void

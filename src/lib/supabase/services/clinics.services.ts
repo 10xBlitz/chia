@@ -12,6 +12,14 @@ interface Filters {
   };
 }
 
+export const CLINIC_IMAGE_BUCKET = "clinic-images";
+export const CLINIC_IMAGE_MAX_FILE_SIZE_MB = 50 * 1024 * 1024; // 50 MB
+export const CLINIC_IMAGE_ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+
 export async function getPaginatedClinics(
   page = 1,
   limit = 10,
@@ -179,49 +187,6 @@ export async function getPaginatedClinicsWthReviews(
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
   };
-}
-
-// --- Clinic Images Storage Helpers ---
-export async function uploadClinicImages(
-  files: File[],
-  clinicId: string,
-  setUploadingFileIndex?: (idx: number | null) => void
-): Promise<string[]> {
-  const urls: string[] = [];
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    if (setUploadingFileIndex) setUploadingFileIndex(i);
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2)}.${fileExt}`;
-    const filePath = `clinic-images/${clinicId}/${fileName}`;
-    const { error } = await supabaseClient.storage
-      .from("clinic-images")
-      .upload(filePath, file, { upsert: true });
-    if (error) throw error;
-    const { data } = supabaseClient.storage
-      .from("clinic-images")
-      .getPublicUrl(filePath);
-    if (!data?.publicUrl) throw new Error("Failed to get image URL");
-    urls.push(data.publicUrl);
-  }
-  if (setUploadingFileIndex) setUploadingFileIndex(null);
-  return urls;
-}
-
-export async function removeClinicImagesFromStorage(imageUrls: string[]) {
-  if (!imageUrls || imageUrls.length === 0) return;
-  const paths = imageUrls
-    .map((url) => {
-      // Extract the path after the bucket name (clinic-images/)
-      const match = url.match(/clinic-images\/(.+)$/);
-      return match ? match[1] : null;
-    })
-    .filter(Boolean) as string[];
-  if (paths.length > 0) {
-    await supabaseClient.storage.from("clinic-images").remove(paths);
-  }
 }
 
 export async function updateClinic(
