@@ -10,7 +10,7 @@ export default function BottomNavigation() {
   const navItems = [
     {
       label: "홈", //Home
-      path: "/patient/home",
+      path: "/",
       icon: (isActive: boolean) => (
         <svg
           width="18"
@@ -127,7 +127,7 @@ export default function BottomNavigation() {
   return (
     <div className="fixed max-w-[450px] z-[999] mx-auto bottom-0 left-0 right-0 bg-white flex justify-around items-center p-3">
       {navItems.map((item) => {
-        const isActive = pathname.startsWith(item.path);
+        const isActive = pathname === item.path;
         return (
           <div
             key={item.path}

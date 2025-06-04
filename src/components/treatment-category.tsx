@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function TreatmentCategoryScroll() {
   const treatmentQuery = useQuery({
@@ -79,13 +80,15 @@ export default function TreatmentCategoryScroll() {
       )}
       {treatmentQuery.data &&
         treatmentQuery.data.data.map((treatment) => (
-          <div
+          <Link
+            href={`/clinics/${treatment.id}`}
             key={treatment.id}
             className="flex flex-col items-center flex-shrink-0"
           >
             <div className="relative w-13 h-13 rounded-full overflow-hidden">
               {treatment.image_url ? (
                 <Image
+                  draggable={false}
                   src={treatment.image_url}
                   alt={treatment.treatment_name || "treatment"}
                   fill
@@ -98,7 +101,7 @@ export default function TreatmentCategoryScroll() {
             <span className="text-xs mt-1 w-16 text-center ">
               {treatment.treatment_name}
             </span>
-          </div>
+          </Link>
         ))}
     </div>
   );

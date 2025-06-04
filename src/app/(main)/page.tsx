@@ -61,9 +61,9 @@ export default function MainPage() {
   });
 
   return (
-    <MobileLayout>
+    <MobileLayout className="!px-0">
       <div className="flex flex-col">
-        <header className="pb-3 flex justify-between items-center">
+        <header className="pb-3 flex justify-between items-center px-4">
           <Image
             src={"/images/chia-logo.svg"}
             height={54}
@@ -75,7 +75,10 @@ export default function MainPage() {
               <UserIcon className="min-w-7 min-h-7" />
             </Link>
           ) : (
-            <Button className="bg-white text-black border-1 hover:bg-black/20">
+            <Button
+              className="bg-white text-black border-1 hover:bg-black/20"
+              onClick={() => router.push("/auth/login")}
+            >
               로그인 {/**Login */}
             </Button>
           )}
@@ -109,7 +112,7 @@ export default function MainPage() {
           </div>
 
           {/* Custom clinic/event/sub-banner order */}
-          <div className="flex flex-col gap-4 flex-1 overflow-auto px-2">
+          <div className="flex flex-col gap-4 flex-1 px-2">
             {/* 1. First 2 clinics */}
             {clinicsLoading && <p>Loading clinics...</p>}
             {clinicsError && (
@@ -137,6 +140,7 @@ export default function MainPage() {
               <InfiniteList
                 key={filterOption} // Reset list when sort changes
                 tableName="clinic"
+                className="px-4"
                 columns={`
                       *,
                       clinic_treatment(

@@ -2,38 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { EditIcon } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
-
-// Helper to fetch quotations for the current user
-async function fetchQuotations(userId: string) {
-  const { data, error } = await supabaseClient
-    .from("quotation")
-    .select("*, treatment(*), bid(*)")
-    .eq("patient_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
-  return data;
-}
+import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
 
 export default function ViewQuotationPage() {
   const router = useRouter();
-  const userId = useUserStore((selector) => selector.user?.id as string);
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    if (userId) setEnabled(true);
-  }, [userId]);
+  const userId = useUserStore((selector) => selector.user?.id);
 
   const { data: quotations, isLoading } = useQuery({
     queryKey: ["quotations", userId],
-    queryFn: () => fetchQuotations(userId),
-    enabled: enabled && !!userId,
+    queryFn: () => getPaginatedQuotations(1, 1000, { patient_id: userId }),
+    enabled: !!userId,
   });
 
   const handleQuotationClick = (
@@ -63,13 +45,13 @@ export default function ViewQuotationPage() {
       </h2>
       {isLoading && <div>로딩 중... {/* Loading... */}</div>}
 
-      {quotations?.length === 0 && (
+      {quotations?.data.length === 0 && (
         <div>견적이 없습니다. {/* No quotations. */}</div>
       )}
 
-      {quotations && (
+      {quotations?.data && (
         <div className="flex flex-col gap-3">
-          {quotations.map((q) => (
+          {quotations.data.map((q) => (
             <div
               key={q.id}
               className="flex text-sm items-center w-full py-1 cursor-pointer"

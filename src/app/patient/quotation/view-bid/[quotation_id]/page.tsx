@@ -2,35 +2,14 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { supabaseClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import HeaderWithBackButton from "@/components/header-with-back-button";
-
-// Fetch bid and related data
-async function fetchBid(bidId: string) {
-  const { data, error } = await supabaseClient
-    .from("bid")
-    .select("*, clinic_treatment(*, clinic(*), treatment(*)), quotation(*)")
-    .eq("id", bidId)
-    .single();
-
-  if (error) throw new Error(error.message);
-  return data;
-}
+import { getSingleBid } from "@/lib/supabase/services/bids.services";
+import { getSingleQuotation } from "@/lib/supabase/services/quotation.services";
 
 // Fetch quotation details
-async function fetchQuotation(quotationId: string) {
-  const { data, error } = await supabaseClient
-    .from("quotation")
-    .select("*, treatment(*)")
-    .eq("id", quotationId)
-    .single();
-
-  if (error) throw new Error(error.message);
-  return data;
-}
 
 export default function ViewBidPage() {
   const searchParams = useSearchParams();
@@ -45,14 +24,14 @@ export default function ViewBidPage() {
 
   const { data: bid, isLoading } = useQuery({
     queryKey: ["bid", bidId],
-    queryFn: () => fetchBid(bidId),
+    queryFn: () => getSingleBid(bidId),
     enabled: enabled,
   });
 
   // Fetch quotation details
   const { data: quotation } = useQuery({
     queryKey: ["quotation", quotationId],
-    queryFn: () => fetchQuotation(quotationId),
+    queryFn: () => getSingleQuotation(quotationId),
     enabled: enabled && !!quotationId,
   });
 

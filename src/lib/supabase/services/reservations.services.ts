@@ -1,40 +1,47 @@
 import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
+import { Tables } from "../types";
 
-interface Filters {
-  full_name?: string | null;
-  treatment_id?: number | null;
-  date_range?: {
-    from?: string;
-    to?: string;
-  };
-}
+// Helper to fetch reservations for the current user
+// async function fetchReservations(userId: string) {
+//   const { data, error } = await supabaseClient
+//     .from("reservation")
+//     .select(
+//       `
+//       *,
+//       clinic_treatment(
+//         *,
+//         clinic(clinic_name),
+//         treatment(treatment_name)
+//       ),
+//       payment(*)
+//     `
+//     )
+//     .eq("patient_id", userId)
+//     .order("reservation_date", { ascending: false })
+//     .order("reservation_time", { ascending: false });
+
+//   if (error) throw new Error(error.message);
+//   return data;
+// }
 
 export async function getPaginatedReservations(
   page = 1,
   limit = 10,
-  filters: Filters = {}
+  filters: Partial<Tables<"reservation">> & {
+    date_range?: { from?: string; to?: string };
+  } & Partial<Tables<"user">>
 ) {
   if (limit > 1000) throw Error("limit exceeds 1000");
   if (limit < 1) throw Error("limit must be a positive number");
 
   const offset = (page - 1) * limit;
 
-//   export type ReservationTable = {
-//   id: number;
-//   category: string;
-//   name: string;
-//   residence: string;
-//   workplace: string;
-//   contact_number: string;
-//   clinic_name: string;
-// };
-
   let query = supabaseClient
     .from("reservation")
-    .select(`
-      id,
-      reservation_date,
+    .select(
+      `
+      *,
       patient:user!patient_id ( 
         id, 
         full_name, 
@@ -44,16 +51,15 @@ export async function getPaginatedReservations(
         contact_number
        ),
       clinic_treatment(
-        id,
-        treatment(
-          treatment_name
-        ),
-        clinic(
-          clinic_name
-        )
-      )
-    `, { count: "exact" }) // dot-less select implies INNER JOIN
-    .order("id", { ascending: true })
+        *,
+        treatment(*),
+        clinic(*)
+      ),
+      payment(*)
+    `,
+      { count: "exact" }
+    ) // dot-less select implies INNER JOIN
+    .order("reservation_date", { ascending: false })
     .range(offset, offset + limit - 1);
 
   // Filters
@@ -66,13 +72,18 @@ export async function getPaginatedReservations(
     query = query.not("patient", "is", null);
   }
 
-
- // Date range filter
-  if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte("reservation_date", (startOfDay(filters.date_range.from)).toISOString());
-    query = query.lte("reservation_date", filters.date_range.to);
+  if (filters.patient_id) {
+    query = query.eq("patient_id", filters.patient_id);
   }
 
+  // Date range filter
+  if (filters.date_range?.from && filters.date_range?.to) {
+    query = query.gte(
+      "reservation_date",
+      startOfDay(filters.date_range.from).toISOString()
+    );
+    query = query.lte("reservation_date", filters.date_range.to);
+  }
 
   const { data, error, count } = await query;
   console.log("getPaginatedClinics", data, count, filters);

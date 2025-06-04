@@ -1,36 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { useSearchParams } from "next/navigation";
-
-// Helper to fetch reservations for the current user
-async function fetchReservations(userId: string) {
-  const { data, error } = await supabaseClient
-    .from("reservation")
-    .select(
-      `
-      *,
-      clinic_treatment(
-        *,
-        clinic(clinic_name),
-        treatment(treatment_name)
-      ),
-      payment(*)
-    `
-    )
-    .eq("patient_id", userId)
-    .order("reservation_date", { ascending: false })
-    .order("reservation_time", { ascending: false });
-
-  if (error) throw new Error(error.message);
-  return data;
-}
+import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
 
 export default function ReservationListPage() {
   const userId = useUserStore((selector) => selector.user?.id as string);
@@ -45,7 +22,7 @@ export default function ReservationListPage() {
 
   const { data: reservations, isLoading } = useQuery({
     queryKey: ["reservations", userId],
-    queryFn: () => fetchReservations(userId),
+    queryFn: () => getPaginatedReservations(1, 1000, { patient_id: userId }),
     enabled: enabled && !!userId,
   });
 
@@ -54,13 +31,13 @@ export default function ReservationListPage() {
       <HeaderWithBackButton title="예약 목록" />
       {isLoading && <div>로딩 중... {/* Loading... */}</div>}
 
-      {reservations?.length === 0 && (
+      {reservations?.data.length === 0 && (
         <div>예약이 없습니다. {/* No reservations. */}</div>
       )}
 
       {reservations && (
         <div className="flex flex-col gap-4">
-          {reservations.map((r) => (
+          {reservations.data.map((r) => (
             <div
               key={r.id}
               className="flex items-center w-full py-1 text-base cursor-pointer"

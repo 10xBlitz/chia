@@ -8,6 +8,7 @@ import {
 } from "@/lib/supabase/services/favorites.service";
 import Link from "next/link";
 import BookmarkButton from "@/components/bookmark";
+import { cn } from "@/lib/utils";
 
 interface ClinicCardProps {
   total_reviews: number;
@@ -21,9 +22,10 @@ interface ClinicCardProps {
   opening_date: string;
   pictures: string[] | null;
   region: string;
+  className?: string;
 }
 
-export default function ClinicCard(clinic: ClinicCardProps) {
+export default function ClinicCard(props: ClinicCardProps) {
   const user = useUserStore((state) => state.user);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
@@ -33,13 +35,13 @@ export default function ClinicCard(clinic: ClinicCardProps) {
       if (!user?.id) return;
       const { isFavorite, favoriteId } = await checkIfClinicIsFavorite(
         user.id,
-        clinic.id
+        props.id
       );
       setIsFavorite(isFavorite);
       setFavoriteId(favoriteId);
     };
     checkFavorite();
-  }, [clinic.id, user?.id]);
+  }, [props.id, user?.id]);
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -49,7 +51,7 @@ export default function ClinicCard(clinic: ClinicCardProps) {
       setIsFavorite(false);
       setFavoriteId(null);
     } else {
-      const data = await addClinicToFavorites(user.id, clinic.id);
+      const data = await addClinicToFavorites(user.id, props.id);
       if (data) {
         setIsFavorite(true);
         setFavoriteId(data);
@@ -57,15 +59,15 @@ export default function ClinicCard(clinic: ClinicCardProps) {
     }
   };
 
-  const avgReviews = clinic.avg_reviews_per_treatment
-    ? clinic.avg_reviews_per_treatment.toFixed(1)
+  const avgReviews = props.avg_reviews_per_treatment
+    ? props.avg_reviews_per_treatment.toFixed(1)
     : "0.0";
-  const totalReviews = clinic.total_reviews || 0;
+  const totalReviews = props.total_reviews || 0;
 
   return (
     <Link
-      href={`/patient/home/${clinic.id}`}
-      className="p-4 border-b"
+      href={`/${props.id}`}
+      className={cn("p-4 border-b", props.className)}
       onClick={(e) => {
         // Prevent navigation if the click originated from the bookmark button
         const target = e.target as HTMLElement;
@@ -79,10 +81,10 @@ export default function ClinicCard(clinic: ClinicCardProps) {
       }}
     >
       <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-gray-200 mb-3">
-        {clinic.pictures && clinic.pictures[0] && (
+        {props.pictures && props.pictures[0] && (
           <Image
-            src={clinic.pictures[0]}
-            alt={clinic.clinic_name}
+            src={props.pictures[0]}
+            alt={props.clinic_name}
             fill
             className="object-cover"
             onError={(e) => {
@@ -105,7 +107,7 @@ export default function ClinicCard(clinic: ClinicCardProps) {
           />
         )}
       </div>
-      <div className="font-semibold text-lg">{clinic.clinic_name}</div>
+      <div className="font-semibold text-lg">{props.clinic_name}</div>
       <div className="flex items-center text-gray-500 text-base mt-1">
         <span className="text-yellow-500 mr-1">★</span>
         <span>{avgReviews}</span>

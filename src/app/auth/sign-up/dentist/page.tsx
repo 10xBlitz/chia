@@ -56,7 +56,7 @@ export default function DentistSignupPage() {
     },
   });
 
-  // Fetch treatments
+  // Fetch departments
   const { data: departments, isLoading: departmentsLoading } = useQuery({
     queryKey: ["departments"],
     queryFn: async () => {
@@ -64,8 +64,6 @@ export default function DentistSignupPage() {
       return result.data || [];
     },
   });
-
-  console.log("---->departments", departments);
 
   const form = useForm<z.infer<typeof DentistSignupFormSchema>>({
     resolver: zodResolver(DentistSignupFormSchema),

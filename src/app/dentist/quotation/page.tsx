@@ -24,7 +24,7 @@ export default function ViewQuotationPage() {
     queryFn: async () =>
       await fetchQuotations(
         user?.clinic_id,
-        user?.clinic?.region,
+        user?.clinic?.region.split(",")[1],
         treatments?.map((t) => t.treatment_id)
       ),
     enabled:
@@ -118,9 +118,13 @@ async function fetchQuotations(
   const filter = `clinic_id.eq.${clinic_id},and(clinic_id.is.null,region.eq.${region},treatment_id.in.(${treatments
     .map((id) => `"${id}"`)
     .join(",")}))`;
+
+  console.log("---->filter: ", filter);
   query = query.or(filter);
 
   const { data, error } = await query;
+
+  console.log("---->data: ", data);
 
   if (error) throw new Error(error.message);
   return data;

@@ -113,6 +113,11 @@ export async function registerUser(
   const { data: authUser, error } = await supabaseClient.auth.signUp({
     email: data.email,
     password: data.password,
+    options: {
+      data: {
+        role: data.role, // Default role, can be overridden later
+      },
+    },
   });
   if (error) throw error;
 

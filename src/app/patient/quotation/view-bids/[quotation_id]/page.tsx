@@ -2,24 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import BottomNavigation from "@/components/bottom-navigation";
 import BackButton from "@/components/back-button";
-
-// Helper to fetch bids for a quotation
-async function fetchBids(quotationId: string) {
-  const { data, error } = await supabaseClient
-    .from("bid")
-    .select("*, clinic_treatment(*, clinic(*))")
-    .eq("quotation_id", quotationId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw new Error(error.message);
-  return data;
-}
+import { getPaginatedBids } from "@/lib/supabase/services/bids.services";
 
 export default function BidsPage() {
   const router = useRouter();
@@ -35,7 +22,7 @@ export default function BidsPage() {
 
   const { data: bids, isLoading } = useQuery({
     queryKey: ["bids", quotationId],
-    queryFn: () => fetchBids(quotationId),
+    queryFn: () => getPaginatedBids(1, 100, { quotation_id: quotationId }),
     enabled: enabled && !!quotationId,
     refetchOnMount: "always",
     refetchOnWindowFocus: "always",
@@ -56,12 +43,12 @@ export default function BidsPage() {
       </header>
       {/* Public Quotation Biddings */}
       {isLoading && <div>로딩 중... {/* Loading... */}</div>}
-      {bids?.length === 0 && (
+      {bids?.data.length === 0 && (
         <div>입찰이 없습니다. {/* There is no bids. */}</div>
       )}
       {bids && (
         <div className="flex flex-col gap-3">
-          {bids.map((b) => (
+          {bids.data.map((b) => (
             <div
               key={b.id}
               className="flex text-sm items-center w-full py-1 cursor-pointer"
@@ -99,7 +86,6 @@ export default function BidsPage() {
           ))}
         </div>
       )}
-      <BottomNavigation />
     </div>
   );
 }

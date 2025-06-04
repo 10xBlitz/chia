@@ -204,28 +204,31 @@ export default function CreateReservation() {
                                 {/**No treatment found. */}
                               </CommandEmpty>
                               <CommandGroup>
-                                {treatments.data.map((treatment) => (
-                                  <CommandItem
-                                    value={treatment?.treatment.treatment_name}
-                                    key={treatment.id}
-                                    onSelect={() => {
-                                      form.setValue(
-                                        "clinicTreatment",
-                                        treatment.id
-                                      );
-                                    }}
-                                  >
-                                    {treatment.treatment.treatment_name}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto",
-                                        treatment.id === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
+                                {treatments.data &&
+                                  treatments.data.map((treatment) => (
+                                    <CommandItem
+                                      value={
+                                        treatment?.treatment.treatment_name
+                                      }
+                                      key={treatment.id}
+                                      onSelect={() => {
+                                        form.setValue(
+                                          "clinicTreatment",
+                                          treatment.id
+                                        );
+                                      }}
+                                    >
+                                      {treatment.treatment.treatment_name}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          treatment.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
                               </CommandGroup>
                             </CommandList>
                           </Command>
