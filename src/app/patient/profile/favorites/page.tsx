@@ -7,7 +7,7 @@ import RemoveFavoriteModal from "./remove-favorite-modal";
 import { useState } from "react";
 import { removeClinicFromFavorites } from "@/lib/supabase/services/favorites.service";
 import { getPaginatedFavoriteClinics } from "@/lib/supabase/services/favorite-clinics.services";
-import ClinicCard from "@/app/patient/home/components/clinic-card";
+import ClinicCard from "@/components/clinic-card";
 
 export default function FavoriteClinicsPage() {
   const user = useUserStore((state) => state.user);
@@ -99,7 +99,6 @@ export default function FavoriteClinicsPage() {
                   }}
                   aria-label="Remove from favorites"
                 >
-                  {/* You can use an icon here if you want */}
                   <span className="text-red-500 font-bold">✕</span>
                 </button>
               </div>
