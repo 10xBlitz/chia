@@ -66,7 +66,7 @@ export default function ClinicCard(props: ClinicCardProps) {
 
   return (
     <Link
-      href={`/${props.id}`}
+      href={`/clinic/${props.id}`}
       className={cn("p-4 border-b", props.className)}
       onClick={(e) => {
         // Prevent navigation if the click originated from the bookmark button
