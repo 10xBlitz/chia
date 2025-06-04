@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
 import HeaderWithBackButton from "@/components/header-with-back-button";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
 
 export default function ReservationListPage() {
   const userId = useUserStore((selector) => selector.user?.id as string);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
   const [enabled, setEnabled] = useState(false);
@@ -65,6 +66,7 @@ export default function ReservationListPage() {
                   className="rounded-md px-4 h-8 text-sm font-medium border border-gray-200 bg-gray-50 text-gray-500"
                   variant="default"
                   tabIndex={-1}
+                  onClick={() => router.push(`/patient/reservation/payment`)}
                 >
                   결제하기 {/* Pay */}
                 </Button>
