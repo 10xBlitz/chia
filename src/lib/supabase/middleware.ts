@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/clinics") &&
-    !(request.nextUrl.pathname === "/clinic") &&
+    !request.nextUrl.pathname.startsWith("/clinic") &&
     !(request.nextUrl.pathname === "/")
   ) {
     // no user, potentially respond by redirecting the user to the login page
@@ -54,31 +54,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // const role = user?.user_metadata?.role;
+
   // if (user) {
-  //   if (
-  //     request.nextUrl.pathname.startsWith("/patient") &&
-  //     user.role !== "patient"
-  //   ) {
+  //   if (request.nextUrl.pathname.startsWith("/patient") && role !== "patient") {
   //     // User is not a patient, redirect to forbidden page
   //     const url = request.nextUrl.clone();
   //     url.pathname = "/forbidden";
   //     return NextResponse.redirect(url);
   //   }
 
-  //   if (
-  //     request.nextUrl.pathname.startsWith("/dentist") &&
-  //     user.role !== "dentist"
-  //   ) {
+  //   if (request.nextUrl.pathname.startsWith("/dentist") && role !== "dentist") {
   //     // User is not a dentist, redirect to forbidden page
   //     const url = request.nextUrl.clone();
   //     url.pathname = "/forbidden";
   //     return NextResponse.redirect(url);
   //   }
 
-  //   if (
-  //     request.nextUrl.pathname.startsWith("/admin") &&
-  //     user.role !== "admin"
-  //   ) {
+  //   if (request.nextUrl.pathname.startsWith("/admin") && role !== "admin") {
   //     // User is not an admin, redirect to forbidden page
   //     const url = request.nextUrl.clone();
   //     url.pathname = "/forbidden";

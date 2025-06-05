@@ -23,10 +23,12 @@ interface ClinicCardProps {
   pictures: string[] | null;
   region: string;
   className?: string;
+  showBookmark?: boolean;
 }
 
 export default function ClinicCard(props: ClinicCardProps) {
   const user = useUserStore((state) => state.user);
+  const showBookmark = props.showBookmark ?? true;
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
 
@@ -87,13 +89,13 @@ export default function ClinicCard(props: ClinicCardProps) {
             alt={props.clinic_name}
             fill
             className="object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "/images/auth-main.svg";
-            }}
+            // onError={(e) => {
+            //   const target = e.target as HTMLImageElement;
+            //   target.src = "/images/auth-main.svg";
+            // }}
           />
         )}
-        {user?.id && (
+        {user?.id && showBookmark && (
           <BookmarkButton
             isActive={isFavorite}
             handleBookmarkClick={(e) => {

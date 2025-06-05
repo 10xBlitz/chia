@@ -29,6 +29,7 @@ import {
 import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
+import FormInput from "@/components/form-ui/form-input";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }),
@@ -103,35 +104,21 @@ export default function LoginForm() {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleLogin)}>
                   <div className="flex flex-col gap-6">
-                    <FormField
+                    <FormInput
                       control={form.control}
                       name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {/* Email */}
-                            이메일
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              // 이메일을 입력하세요 (Enter your email)
-                              placeholder="이메일을 입력하세요"
-                              className="h-[45px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      type="email"
+                      label="이메일" //Email
+                      placeholder="이메일을 입력하세요." //(Enter your email)
                     />
+
                     <FormField
                       control={form.control}
                       name="password"
                       render={({ field }) => (
                         <FormItem>
                           <div className="flex items-center">
-                            <FormLabel>
+                            <FormLabel className="text-[16px] font-pretendard-600">
                               {/* Password */}
                               비밀번호
                             </FormLabel>

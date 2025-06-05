@@ -29,14 +29,14 @@ export function ConfirmDeleteModal({
             className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
             onClick={onConfirm}
           >
-            Delete
+            삭제 {/**Delete */}
           </Button>
           <Button
             type="button"
             className="px-4 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300"
             onClick={onCancel}
           >
-            Cancel
+            취소 {/**Cancel */}
           </Button>
         </div>
       </div>

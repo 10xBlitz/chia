@@ -471,6 +471,7 @@ const MultipleSelector = React.forwardRef<
         >
           <div className="relative flex flex-wrap gap-1">
             {selected.map((option) => {
+              console.log("---->selected: ", option);
               return (
                 <Badge
                   key={option.value}

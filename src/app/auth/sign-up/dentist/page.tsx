@@ -4,36 +4,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
+import { SelectItem } from "@/components/ui/select";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabase/client";
-import MultipleSelector from "@/components/ui/multiple-selector";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import toast from "react-hot-toast";
 import { registerDentist } from "@/lib/supabase/services/users.services";
 import { DentistSignupFormSchema } from "./schema";
 import { getClinicDepartments } from "@/lib/supabase/services/clinic-departments.services";
+import FormInput from "@/components/form-ui/form-input";
+import FormSelect from "@/components/form-ui/form-select";
+import FormMultiSelect from "@/components/form-ui/form-select-multi";
+import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 
 export default function DentistSignupPage() {
   const router = useRouter();
 
   // Fetch hospitals
-  const { data: hospitals, isLoading: hospitalsLoading } = useQuery({
+  const { data: hospitals } = useQuery({
     queryKey: ["hospitals"],
     queryFn: async () => {
       const { data } = await supabaseClient
@@ -48,16 +37,13 @@ export default function DentistSignupPage() {
   const { data: treatments } = useQuery({
     queryKey: ["treatments"],
     queryFn: async () => {
-      const { data } = await supabaseClient
-        .from("treatment")
-        .select("id, treatment_name")
-        .order("treatment_name", { ascending: true });
-      return data || [];
+      const result = await getPaginatedTreatments(1, 1000, {});
+      return result.data;
     },
   });
 
   // Fetch departments
-  const { data: departments, isLoading: departmentsLoading } = useQuery({
+  const { data: departments } = useQuery({
     queryKey: ["departments"],
     queryFn: async () => {
       const result = await getClinicDepartments(1, 1000, {});
@@ -88,7 +74,7 @@ export default function DentistSignupPage() {
     },
     onError: (error) => {
       console.log("---->error: ", error);
-      toast.error(error?.message || "회원가입에 실패했습니다.");
+      toast.error(error?.message || "회원가입에 실패했습니다."); //Failed to register.
     },
   });
 
@@ -97,7 +83,7 @@ export default function DentistSignupPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-svh px-4 pt-6 pb-2 bg-white max-w-lg mx-auto">
+    <div className="flex flex-col min-h-dvh px-4 pt-6 pb-2 bg-white max-w-lg mx-auto">
       {/* 아래 정보를 입력해주세요. (Please enter the information below.) */}
       <HeaderWithBackButton title="아래 정보를 입력해주세요." />
       <Form {...form}>
@@ -105,192 +91,86 @@ export default function DentistSignupPage() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-7 flex-1"
         >
-          <FormField
+          <FormInput
             control={form.control}
             name="full_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>이름 {/* 이름 (Name) */}</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="이름을 입력해주세요." //(Please enter your name.)
-                    className="h-[45px]"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="이름" //Name
+            placeholder="이름을 입력해주세요." //Please enter your name
           />
 
-          <FormField
+          <FormInput
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>이메일 주소 {/**Email address */}</FormLabel>
-                <FormControl>
-                  <Input
-                    className="h-[45px]"
-                    placeholder="이메일 주소를 입력해주세요." //Please enter your email address.
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            type="email"
+            label="이메일 주소" //Email address
+            placeholder="이름을 입력해주세요." //Please enter your email address.
           />
 
-          <FormField
+          <FormInput
             control={form.control}
             name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>비밀번호 {/**password */}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    className="h-[45px]"
-                    placeholder="여기에 비밀번호를 입력하세요" //Enter password here
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="비밀번호" //Password
+            type="password"
+            placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
           />
 
-          <FormField
+          <FormInput
             control={form.control}
             name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>비밀번호 확인 {/**verify password */}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    className="h-[45px]"
-                    placeholder="비밀번호를 확인해주세요." //Please confirm your password.
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="비밀번호" //Verify password
+            type="password"
+            placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
           />
 
-          <FormField
+          <FormSelect
             control={form.control}
             name="clinic_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>병원명 {/*  (Hospital Name) */}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  defaultValue={field.value}
-                  disabled={hospitalsLoading}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full min-h-[45px]">
-                      {/* 병원명을 입력해주세요. (Please select hospital.) */}
-                      <SelectValue placeholder="병원명을 입력해주세요." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {hospitals?.map((h) => (
-                      <SelectItem key={h.id} value={h.id}>
-                        {h.clinic_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            label="병원명" // Hospital Name
+            placeholder="병원명을 입력해주세요." // Please select hospital
+          >
+            {hospitals?.map((h) => (
+              <SelectItem key={h.id} value={h.id}>
+                {h.clinic_name}
+              </SelectItem>
+            ))}
+          </FormSelect>
 
-          <FormField
+          <FormMultiSelect
             control={form.control}
             name="treatments"
-            render={() => (
-              <FormItem>
-                <FormLabel>치료 {/*Treatments */}</FormLabel>
-                <div>
-                  {!treatments ? (
-                    <span className="text-gray-400 text-sm">
-                      치료법을 로딩 중입니다... {/**Loading treatments... */}
-                    </span>
-                  ) : (
-                    <MultipleSelector
-                      selectFirstItem={false}
-                      defaultOptions={treatments?.map((item) => ({
-                        label: item?.treatment_name,
-                        value: item.id,
-                      }))}
-                      placeholder="여기에서 치료를 선택하세요" // Select treatments here
-                      hidePlaceholderWhenSelected={true}
-                      onChange={(e) =>
-                        form.setValue(
-                          "treatments",
-                          e.map((item) => item.value),
-                          { shouldValidate: true }
-                        )
-                      }
-                      emptyIndicator={
-                        // no results found.
-                        <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                          결과가 없습니다.
-                        </p>
-                      }
-                    />
-                  )}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="치료" // Treatment
+            placeholder="여기에서 치료를 선택하세요" // Select treatments here
+            options={treatments?.map((item) => ({
+              label: item.treatment_name,
+              value: item.id,
+            }))}
+            loading={!treatments}
+            onChange={(selected) => {
+              form.setValue(
+                "treatments",
+                selected.map((item) => item.value),
+                { shouldValidate: true }
+              );
+            }}
           />
 
-          {/* 진료과목 (Departments) */}
-          <FormField
+          <FormMultiSelect
             control={form.control}
             name="departments"
-            render={() => (
-              <FormItem>
-                <FormLabel>진료과목 {/**Departments */}</FormLabel>
-                <div>
-                  {departmentsLoading ? (
-                    <span className="text-gray-400 text-sm">
-                      적재 부서... {/**Loading departments... */}
-                    </span>
-                  ) : (
-                    <MultipleSelector
-                      selectFirstItem={false}
-                      defaultOptions={departments?.map((item) => ({
-                        label: item.department_name,
-                        value: item.id,
-                      }))}
-                      placeholder="여기에서 부서를 선택하세요" // Select departments here
-                      hidePlaceholderWhenSelected={true}
-                      onChange={(e) =>
-                        form.setValue(
-                          "departments",
-                          e.map((item) => item.value),
-                          { shouldValidate: true }
-                        )
-                      }
-                      emptyIndicator={
-                        // no results found.
-                        <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                          결과가 없습니다.
-                        </p>
-                      }
-                    />
-                  )}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="진료과목" // Departments
+            placeholder="여기에서 부서를 선택하세요" // Select departments here
+            options={departments?.map((item) => ({
+              label: item.department_name,
+              value: item.id,
+            }))}
+            loading={!departments}
+            onChange={(e) =>
+              form.setValue(
+                "departments",
+                e.map((item) => item.value),
+                { shouldValidate: true }
+              )
+            }
           />
 
           <Button

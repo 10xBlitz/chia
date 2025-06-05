@@ -79,7 +79,7 @@ export default function TreatmentCategoryScroll() {
         <p>Error loading treatments: {treatmentQuery.error.message}</p>
       )}
       {treatmentQuery.data &&
-        treatmentQuery.data.data.map((treatment) => (
+        treatmentQuery.data?.data.map((treatment) => (
           <Link
             href={`/clinics/${treatment.id}`}
             key={treatment.id}

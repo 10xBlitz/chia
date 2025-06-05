@@ -13,9 +13,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import Step3 from "./step-3";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import BackButton from "@/components/back-button";
 import { useMutation } from "@tanstack/react-query";
 import { registerUser } from "@/lib/supabase/services/users.services";
+import MobileLayout from "@/components/layout/mobile-layout";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 
 const steps = [
   { label: "계정" }, // Account
@@ -82,7 +83,7 @@ const SignupPage = () => {
     },
     onSuccess: () => {
       toast.success("회원가입이 완료되었습니다!"); // Sign up completed successfully
-      router.push("/patient/home");
+      router.push("/");
     },
     onError: (error) => {
       toast.error(error?.message || "회원가입에 실패했습니다.");
@@ -119,21 +120,16 @@ const SignupPage = () => {
     }),
   };
   return (
-    <div className="flex flex-col gap-6 flex-1 overflow-x-hidden max-w-[460px] px-[20px] py-[16px] mx-auto">
-      <BackButton />
-
+    <MobileLayout className="flex flex-col gap-6 overflow-x-hidden">
+      <HeaderWithBackButton title="이메일로 로그인하기" />{" "}
+      {/**Login with email */}
       <div className="flex items-center mt-3 justify-center w-full">
         <Stepper steps={steps} currentStep={currentStep} />
       </div>
-
-      <span className="font-pretendard-600 mt-4 text-[20px]">
-        이메일로 로그인하기
-      </span>
-
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-10 flex-1"
+          className="flex flex-col gap-10 flex-1 pb-10"
         >
           <AnimatePresence initial={false} mode="wait" custom={direction}>
             {currentStep === 1 && (
@@ -220,7 +216,7 @@ const SignupPage = () => {
           </div>
         </form>
       </Form>
-    </div>
+    </MobileLayout>
   );
 };
 

@@ -57,6 +57,11 @@ const items = [
     icon: BookMarked,
   },
   {
+    title: "Customer Service",
+    url: "/admin/customer-service",
+    icon: BookMarked,
+  },
+  {
     title: "Settings",
     url: "/admin/settings",
     icon: SettingsIcon,

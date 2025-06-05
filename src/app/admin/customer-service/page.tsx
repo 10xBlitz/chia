@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useUserStore } from "@/providers/user-store-provider";
-import { RealtimeChat } from "../patient/profile/chat/components/realtime-chat";
-import { ChatMessage } from "../patient/profile/chat/hooks/use-realtime-chat";
+import { RealtimeChat } from "../../patient/profile/chat/components/realtime-chat";
+import { ChatMessage } from "../../patient/profile/chat/hooks/use-realtime-chat";
 
 export default function CustomerServiceChatListener() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

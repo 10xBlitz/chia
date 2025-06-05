@@ -1,20 +1,19 @@
 import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
-
-interface Filters {
-  clinic_name?: string | null;
-  treatment_id?: number | null;
-  region?: string | null;
-  date_range?: {
-    from?: string;
-    to?: string;
-  };
-}
+import { Tables } from "../types";
 
 export async function getPaginatedFavoriteClinics(
   page = 1,
   limit = 10,
-  filters: Filters = {}
+  filters: Partial<
+    Tables<"clinic"> & {
+      user_id: string;
+      date_range?: {
+        from?: string;
+        to?: string;
+      };
+    }
+  >
 ) {
   if (limit > 1000) throw Error("limit exceeds 1000");
   if (limit < 1) throw Error("limit must be a positive number");
@@ -22,31 +21,68 @@ export async function getPaginatedFavoriteClinics(
   const offset = (page - 1) * limit;
 
   // Query clinics (no clinic_treatment)
-  let clinicQuery = supabaseClient
-    .from("clinic")
-    .select("*", { count: "exact" })
+  let favoriteClinicsQuery = supabaseClient
+    .from("favorite_clinic")
+    .select("*, clinic(*)", { count: "exact" })
+    .filter("patient_id", "eq", filters.user_id)
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
   if (filters.region) {
-    clinicQuery = clinicQuery.eq("region", filters.region);
+    favoriteClinicsQuery = favoriteClinicsQuery.eq("region", filters.region);
   }
 
   if (filters.clinic_name) {
-    clinicQuery = clinicQuery.ilike("clinic_name", `%${filters.clinic_name}%`);
+    favoriteClinicsQuery = favoriteClinicsQuery.ilike(
+      "clinic_name",
+      `%${filters.clinic_name}%`
+    );
   }
 
   // Date range filter
   if (filters.date_range?.from && filters.date_range?.to) {
-    clinicQuery = clinicQuery.gte(
+    favoriteClinicsQuery = favoriteClinicsQuery.gte(
       "created_at",
       startOfDay(filters.date_range.from).toISOString()
     );
-    clinicQuery = clinicQuery.lte("created_at", filters.date_range.to);
+    favoriteClinicsQuery = favoriteClinicsQuery.lte(
+      "created_at",
+      filters.date_range.to
+    );
   }
 
-  const { data: clinics, error, count } = await clinicQuery;
+  const { data: favoriteClinics, error, count } = await favoriteClinicsQuery;
   if (error) throw error;
+
+  //   interface ClinicCardProps {
+  //   total_reviews: number;
+  //   avg_reviews_per_treatment: number;
+  //   clinic_name: string;
+  //   contact_number: string;
+  //   created_at: string;
+  //   id: string;
+  //   link: string | null;
+  //   location: string;
+  //   opening_date: string;
+  //   pictures: string[] | null;
+  //   region: string;
+  //   className?: string;
+  //   showBookmark?: boolean;
+  // }
+
+  const clinics = favoriteClinics.map((item) => ({
+    clinic_name: item.clinic.clinic_name,
+    contact_number: item.clinic.contact_number,
+    created_at: item.clinic.created_at,
+    id: item.id,
+    link: item.clinic.link,
+    location: item.clinic.location,
+    opening_date: item.clinic.opening_date,
+    pictures: item.clinic.pictures,
+    region: item.clinic.region,
+  }));
+
+  console.log("---->clinics", favoriteClinics);
 
   // For each clinic, get all clinic_treatment ids, then get total reviews and average reviews per treatment
   const clinicIds = clinics.map((clinic) => clinic.id);
