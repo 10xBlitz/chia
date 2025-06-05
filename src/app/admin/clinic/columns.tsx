@@ -12,19 +12,19 @@ export type ClinicTable = Awaited<
 export const columns: ColumnDef<ClinicTable>[] = [
   {
     accessorKey: "clinic_name",
-    header: "Clinic Name",
+    header: "병원 이름", // Clinic Name
   },
   {
     accessorKey: "location",
-    header: "Location",
+    header: "위치", // Location
   },
   {
     accessorKey: "contact_number",
-    header: "Contact",
+    header: "연락하다", // Contact Number
   },
   {
     accessorKey: "views",
-    header: "Views",
+    header: "조회수", // Views
     cell: ({ row }) => <>{row.original.clinic_view?.length}</>,
   },
 

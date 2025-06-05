@@ -13,7 +13,7 @@ export type UserTable = Tables<"user">;
 export const columns: ColumnDef<UserTable>[] = [
   {
     accessorKey: "category",
-    header: "Category",
+    header: "범주", // Category
     cell: ({ row }) => (
       <div>{`${row.original.role[0].toUpperCase()}${row.original.role.substring(
         1
@@ -28,7 +28,7 @@ export const columns: ColumnDef<UserTable>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Age
+          나이 {/**age */}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -37,20 +37,20 @@ export const columns: ColumnDef<UserTable>[] = [
   },
   {
     accessorKey: "full_name",
-    header: "Name",
+    header: "성명", // Full Name
   },
   {
     accessorKey: "residence",
-    header: "Residence",
+    header: "거주", //residence
   },
   {
     accessorKey: "work_place",
-    header: "Work Place",
+    header: "직장", //workplace
   },
 
   {
     accessorKey: "contact_number",
-    header: "Contact",
+    header: "연락처", // Contact Number
   },
 
   {

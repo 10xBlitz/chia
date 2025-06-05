@@ -151,7 +151,7 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-between gap-3 py-4">
         <div className="flex items-center gap-3">
           <Input
-            placeholder="Search by clinic name..."
+            placeholder="병원 이름으로 검색" // "Search by clinic name"
             value={clinicName}
             onChange={(event) => setClinicName(event.target.value)}
             className="max-w-sm h-[45px] bg-white"
@@ -221,7 +221,7 @@ export function DataTable<TData, TValue>({
           onClick={onClickAdd}
           className="bg-white text-black border-1 hover:bg-black/20"
         >
-          <PlusSquareIcon className="h-4 w-4" /> Add Clinic
+          <PlusSquareIcon className="h-4 w-4" /> 클리닉 추가 {/**Add Clinic */}
         </Button>
       </div>
       <div className="rounded-md border bg-white">
@@ -277,7 +277,9 @@ export function DataTable<TData, TValue>({
 
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium">
+            페이지당 행 수 {/**rows per page */}
+          </p>
           <Select
             value={`${limit}`}
             onValueChange={(value) => updateParam("limit", value)}
@@ -298,7 +300,7 @@ export function DataTable<TData, TValue>({
           <div className="flex items-center justify-center text-sm font-medium">
             {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
             {/* {table.getPageCount()} */}
-            Page {page} of {paginatedData.totalPages}
+            {page} / {paginatedData.totalPages} 페이지
           </div>
           <Button
             variant="outline"

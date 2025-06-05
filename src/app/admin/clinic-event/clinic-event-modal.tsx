@@ -118,7 +118,9 @@ export const ClinicEventModal = ({
       }
     },
     onSuccess: () => {
-      toast.success(data ? "Treatment updated" : "Treatment created");
+      toast.success(
+        data ? "클리닉 이벤트 업데이트" : "클리닉 이벤트가 생성되었습니다"
+      ); // "Clinic event updated" or "Clinic event created"
       onSuccess();
       onClose();
     },
@@ -164,7 +166,7 @@ export const ClinicEventModal = ({
     queryKey: ["treatments_by_clinic", selectedClinicId],
     queryFn: async () =>
       await getPaginatedClinicTreatments(selectedClinicId, 1, 1000, {}),
-    enabled: !!selectedClinicId,
+    enabled: !!selectedClinicId || !!form.getValues("clinic_id"),
   });
 
   console.log("---->treatments: ", treatments);
@@ -289,9 +291,6 @@ export const ClinicEventModal = ({
           />
           <div className="pt-4 flex items-center justify-end">
             <Button
-              onClick={() =>
-                console.log("---->dirty fields", form.formState.errors)
-              }
               type="submit"
               className="w-full"
               disabled={mutation.status === "pending"}

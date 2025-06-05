@@ -14,27 +14,27 @@ export type ClinicEventTable = Awaited<
 export const columns: ColumnDef<ClinicEventTable>[] = [
   {
     accessorKey: "clinic_name",
-    header: "Clinic Name",
+    header: "병원 이름", // Clinic Name
     cell: ({ row }) => (
       <>{row.original.clinic_treatment?.clinic?.clinic_name}</>
     ),
   },
   {
     accessorKey: "title",
-    header: "Title",
+    header: "제목", // Title
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: "설명", //description
   },
   {
     accessorKey: "discount",
-    header: "Discount",
+    header: "할인", //discount
     cell: ({ row }) => <>{row.original.discount.toFixed(2)}</>,
   },
   {
     accessorKey: "date_rage",
-    header: "Date Range",
+    header: "날짜 범위", //date range
     cell: ({ row }) => {
       const dates = parseDateFromSupabase(row.original.date_range as string);
 
@@ -54,7 +54,7 @@ export const columns: ColumnDef<ClinicEventTable>[] = [
   },
   {
     accessorKey: "image",
-    header: "Image",
+    header: "영상", //image
     cell: ({ row }) => (
       <>
         {row.original.image_url ? (
