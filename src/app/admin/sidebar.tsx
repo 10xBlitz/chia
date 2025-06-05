@@ -42,6 +42,11 @@ const items = [
     icon: HospitalIcon,
   },
   {
+    title: "Clinic Event ",
+    url: "/admin/clinic-event",
+    icon: HospitalIcon,
+  },
+  {
     title: "Treatments",
     url: "/admin/treatment",
     icon: SyringeIcon,

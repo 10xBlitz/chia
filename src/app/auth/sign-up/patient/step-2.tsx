@@ -1,7 +1,7 @@
 import { StepInterface } from "./schema";
 import FormGender from "@/components/form-ui/form-gender";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
-import FormBirthdate from "@/components/form-ui/form-birthdate";
+import FormBirthdate from "@/components/form-ui/form-date-picker-single";
 import FormAddress from "@/components/form-ui/form-address";
 
 const Step2: React.FC<StepInterface> = ({ form }) => {

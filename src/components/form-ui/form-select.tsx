@@ -20,6 +20,7 @@ type FormSelectProps<T extends FieldValues> = {
   label: string;
   placeholder?: string;
   formLabelClassName?: string;
+  loading?: boolean;
   children: React.ReactNode;
 };
 

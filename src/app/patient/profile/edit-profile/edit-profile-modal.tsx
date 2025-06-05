@@ -18,7 +18,7 @@ import { useState } from "react";
 import { UserState } from "@/stores/user-store";
 import { PhoneInput } from "@/components/phone-input";
 import AddressSelector from "@/components/address-selector";
-import { KoreanDatePicker } from "@/components/date-picker-v2";
+import { KoreanDatePicker } from "@/components/korean-date-picker-single";
 import GenderSelector from "@/components/gender-selector";
 import toast from "react-hot-toast";
 import { updateUserProfile } from "@/lib/supabase/services/users.services";

@@ -7,28 +7,23 @@ import {
   FormMessage,
 } from "../ui/form";
 import { cn } from "@/lib/utils";
-import { PhoneInput } from "../phone-input";
-import { Country } from "react-phone-number-input";
+import { KoreanDateRangePicker } from "../korean-date-picker-range";
 
-type FormContactNumberProps<T extends FieldValues> = {
+type FormDateRangePickerProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
-  placeholder?: string;
-  type?: string;
-  defaultCountry?: Country;
   formItemClassName?: string;
   formLabelClassName?: string;
 };
 
-export default function FormContactNumber<T extends FieldValues>({
+export default function FormDateRangePicker<T extends FieldValues>({
   control,
   name,
   label,
-  defaultCountry = "KR",
   formItemClassName,
   formLabelClassName,
-}: FormContactNumberProps<T>) {
+}: FormDateRangePickerProps<T>) {
   return (
     <FormField
       control={control}
@@ -44,10 +39,10 @@ export default function FormContactNumber<T extends FieldValues>({
             {label}
           </FormLabel>
           <FormControl>
-            <PhoneInput
-              defaultCountry={defaultCountry}
+            <KoreanDateRangePicker
               onChange={field.onChange}
               value={field.value}
+              disabled={false}
             />
           </FormControl>
           <FormMessage />

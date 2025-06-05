@@ -284,30 +284,30 @@ export type Database = {
           clinic_treatment_id: string
           created_at: string
           date_range: unknown
-          description: string
+          description: string | null
+          discount: number
           id: string
           image_url: string | null
-          price: number
           title: string
         }
         Insert: {
           clinic_treatment_id: string
           created_at?: string
           date_range: unknown
-          description: string
+          description?: string | null
+          discount: number
           id?: string
           image_url?: string | null
-          price: number
           title: string
         }
         Update: {
           clinic_treatment_id?: string
           created_at?: string
           date_range?: unknown
-          description?: string
+          description?: string | null
+          discount?: number
           id?: string
           image_url?: string | null
-          price?: number
           title?: string
         }
         Relationships: [

@@ -8,13 +8,14 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
+import { HTMLInputTypeAttribute } from "react";
 
 type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
   placeholder?: string;
-  type?: string;
+  type?: HTMLInputTypeAttribute;
   formItemClassName?: string;
   formLabelClassName?: string;
   inputClassName?: string;

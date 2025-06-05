@@ -32,11 +32,13 @@ export async function uploadFileToSupabase(
 
   // Validate file type
   if (!allowedMimeTypes.includes(file.type)) {
+    console.log("----> not allowed file type", file.type);
     throw new Error("허용되지 않는 파일 형식입니다."); // "File type not allowed."
   }
 
   // Validate file size
   if (file.size > maxSizeMB * 1024 * 1024) {
+    console.log("----> file size reached max limit: ", file.size, maxSizeMB);
     throw new Error(`파일 크기는 ${maxSizeMB}MB를 초과할 수 없습니다.`); // "File size exceeds limit."
   }
 
@@ -44,6 +46,7 @@ export async function uploadFileToSupabase(
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
   const filePath = folder ? `${folder}/${fileName}` : fileName;
 
+  console.log("-----> uploadingfile to supabase:", { bucket, filePath, file });
   const { error: uploadError } = await supabaseClient.storage
     .from(bucket)
     .upload(filePath, file, {
@@ -52,14 +55,17 @@ export async function uploadFileToSupabase(
     });
 
   if (uploadError) {
+    console.error(uploadError);
     throw new Error(`파일 업로드 실패: ${uploadError.message}`);
   }
 
+  console.log("-----> getting public URL for file");
   const { data: publicUrlData } = supabaseClient.storage
     .from(bucket)
     .getPublicUrl(filePath);
 
   if (!publicUrlData.publicUrl) {
+    console.error("There is no URL");
     throw new Error("파일 URL 생성 실패");
   }
 

@@ -7,23 +7,27 @@ import {
   FormMessage,
 } from "../ui/form";
 import { cn } from "@/lib/utils";
-import { KoreanDatePicker } from "../date-picker-v2";
+import { Textarea } from "../ui/textarea";
 
-type FormBirthdateProps<T extends FieldValues> = {
+type FormTextareaProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
+  placeholder?: string;
   formItemClassName?: string;
   formLabelClassName?: string;
+  inputClassName?: string;
 };
 
-export default function FormBirthdate<T extends FieldValues>({
+export default function FormTextarea<T extends FieldValues>({
   control,
   name,
   label,
+  placeholder,
   formItemClassName,
   formLabelClassName,
-}: FormBirthdateProps<T>) {
+  inputClassName,
+}: FormTextareaProps<T>) {
   return (
     <FormField
       control={control}
@@ -39,10 +43,10 @@ export default function FormBirthdate<T extends FieldValues>({
             {label}
           </FormLabel>
           <FormControl>
-            <KoreanDatePicker
-              onChange={field.onChange}
-              value={field.value}
-              disabled={field.disabled}
+            <Textarea
+              className={cn("h-[45px]", inputClassName)}
+              placeholder={placeholder}
+              {...field}
             />
           </FormControl>
           <FormMessage />

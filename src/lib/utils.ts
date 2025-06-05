@@ -16,3 +16,19 @@ export function calculateAge(birthDate: Date): number {
 
   return age;
 }
+
+/**
+ * Parses a date range string like "[2025-06-01,2025-07-02)" and returns { from, to } as Date objects.
+ */
+export function parseDateFromSupabase(
+  range: string
+): { from: Date; to: Date } | null {
+  if (!range) return null;
+  // Remove brackets/parentheses and split
+  const [fromStr, toStr] = range.replace(/[\[\]\(\)]/g, "").split(",");
+  if (!fromStr || !toStr) return null;
+  const from = new Date(fromStr);
+  const to = new Date(toStr);
+  if (isNaN(from.getTime()) || isNaN(to.getTime())) return null;
+  return { from, to };
+}

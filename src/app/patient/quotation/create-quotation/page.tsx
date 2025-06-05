@@ -23,7 +23,7 @@ import { X } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
 import AddressSelector from "@/components/address-selector";
 import GenderSelector from "@/components/gender-selector";
-import { KoreanDatePicker } from "@/components/date-picker-v2";
+import { KoreanDatePicker } from "@/components/korean-date-picker-single";
 import {
   getPaginatedClinicTreatments,
   getPaginatedTreatments,

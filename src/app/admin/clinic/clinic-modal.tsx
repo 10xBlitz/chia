@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 
-import { CheckIcon, PlusSquareIcon, Trash2Icon } from "lucide-react";
+import { CheckIcon, Trash2Icon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -22,9 +22,6 @@ import { supabaseClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
-import AddressSelector from "@/components/address-selector";
-import { KoreanDatePicker } from "@/components/date-picker-v2";
-import { PhoneInput } from "@/components/phone-input";
 
 import {
   Combobox,
@@ -52,6 +49,10 @@ import {
   deleteFileFromSupabase,
   uploadFileToSupabase,
 } from "@/lib/supabase/services/upload-file.services";
+import FormInput from "@/components/form-ui/form-input";
+import FormContactNumber from "@/components/form-ui/form-contact-number";
+import FormAddress from "@/components/form-ui/form-address";
+import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 
 const formSchema = z.object({
   clinic_name: z.string().min(1, "Clinic name is required"),
@@ -85,9 +86,7 @@ export const ClinicModal = ({
 }) => {
   const [confirmModal, setConfirmModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [uploadingFileIndex, setUploadingFileIndex] = useState<number | null>(
-    null
-  );
+  const [progress, setProgress] = useState<string | null>(null);
   const [clinicImagePreviews, setClinicImagePreviews] = useState<string[]>(
     data?.pictures || []
   );
@@ -99,12 +98,6 @@ export const ClinicModal = ({
       queryKey: ["all_treatments"],
       queryFn: async () => await getPaginatedTreatments(1, 1000),
     });
-
-  const title = data ? `Edit ${data.clinic_name}` : "Add Clinic";
-  const description = data
-    ? `Edit the clinic and its treatments`
-    : `Add a new clinic and treatments`;
-  const buttonText = data ? "Save Changes" : "Add Clinic";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -169,20 +162,18 @@ export const ClinicModal = ({
       // Attach pictures to values
       values.pictures =
         clinicImageFiles.length > 0 ? clinicImageFiles : data?.pictures || [];
-      console.log("---->values to save: ", values);
-      return saveClinicAndTreatments(values, data?.id, setUploadingFileIndex);
+
+      return saveClinicAndTreatments(values, data?.id, setProgress);
     },
     onSuccess: () => {
       form.reset();
       setLoading(false);
-      setUploadingFileIndex(null);
       toast.success(data ? "Clinic updated" : "Clinic created");
       onSuccess();
       onClose();
     },
     onError: (error) => {
       setLoading(false);
-      setUploadingFileIndex(null);
       toast.error(error.message || "Something went wrong.");
     },
   });
@@ -206,130 +197,56 @@ export const ClinicModal = ({
   return (
     <>
       <Modal
-        title={title}
-        description={description}
+        title={data ? "병원 편집" : "병원 추가"} // "Edit Clinic" or "Add Clinic"
+        description={""}
         isOpen={open}
         isLong={true}
         onClose={onClose}
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="py-2">
-            {typeof uploadingFileIndex === "number" &&
-              clinicImageFiles.length > 0 && (
-                <div className="w-full text-center text-blue-600 text-sm mb-2">
-                  병원 이미지 업로드 중... 파일 {uploadingFileIndex + 1} /{" "}
-                  {clinicImageFiles.length}
-                </div>
-              )}
             <div className="flex flex-col gap-8 w-full items-start justify-center">
               {/* Left: Clinic Info */}
               <div className="flex flex-col gap-5 w-full">
-                <FormField
+                <FormInput
                   control={form.control}
                   name="clinic_name"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Clinic Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter clinic name"
-                          className="h-[45px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="병원 이름" //Clinic Name
+                  placeholder="여기에 병원 이름을 입력하세요." //Enter clinic name here
                 />
-                <FormField
+                <FormInput
                   control={form.control}
                   name="link"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Clinic Link</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter link name"
-                          className="h-[45px]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="클리닉 링크" //Clinic Link
+                  placeholder="여기에 클리닉 링크를 입력하세요." //Enter clinic link here
+                  type="url"
                 />
-                <FormField
+
+                <FormContactNumber
                   control={form.control}
                   name="contact_number"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Contact Number</FormLabel>
-                      <FormControl>
-                        <PhoneInput
-                          defaultCountry="KR"
-                          onChange={field.onChange}
-                          value={field.value}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="연락처" //Contact Number
+                  placeholder="연락처를 입력하세요." //Enter contact number here
                 />
-                <FormField
+
+                <FormAddress
                   control={form.control}
                   name="location"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <AddressSelector
-                          onAddressSelect={(city, region) =>
-                            field.onChange(`${city},${region}`)
-                          }
-                          initialCity={field.value.split(",")[0]}
-                          initialRegion={field.value.split(",")[1]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="위치" //Location
                 />
-                <FormField
+
+                <FormAddress
                   control={form.control}
                   name="region"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Region</FormLabel>
-                      <FormControl>
-                        <AddressSelector
-                          onAddressSelect={(city, region) =>
-                            field.onChange(`${city},${region}`)
-                          }
-                          initialCity={field.value.split(",")[0]}
-                          initialRegion={field.value.split(",")[1]}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="지역" //Region
                 />
-                <FormField
+
+                <FormDatePicker
                   control={form.control}
                   name="opening_date"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Opening Date</FormLabel>
-                      <FormControl>
-                        <KoreanDatePicker
-                          value={field.value}
-                          onChange={(e) => field.onChange(e)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="개원일" //Opening Date
                 />
-                {/* Clinic Images */}
+
                 <div>
                   <FormLabel>Clinic Images</FormLabel>
                   <input
@@ -573,6 +490,7 @@ export const ClinicModal = ({
                 <Button
                   type="button"
                   className="w-full mt-4"
+                  disabled={mutation.status === "pending"}
                   onClick={() =>
                     append({
                       treatment_id: "",
@@ -583,16 +501,15 @@ export const ClinicModal = ({
                     })
                   }
                 >
-                  <PlusSquareIcon className="h-4 w-4" /> Add Treatment
+                  치료 추가 {/* Add Treatment */}
                 </Button>
               </div>
             </div>
             <div className="pt-4 space-x-2 flex items-center justify-end">
               <Button type="submit" className="w-full" disabled={loading}>
-                {buttonText}{" "}
-                {uploadingFileIndex
-                  ? `Uploading image ${uploadingFileIndex + 1}`
-                  : ""}
+                {data ? "변경 사항 저장" : "병원 추가"}{" "}
+                {/* "Save Changes" or "Add Clinic" */}
+                {progress}
               </Button>
             </div>
           </form>
@@ -615,13 +532,14 @@ export const ClinicModal = ({
 async function saveClinicAndTreatments(
   values: z.infer<typeof formSchema>,
   clinicId?: string,
-  setUploadingFileIndex?: (idx: number | null) => void
+  setProgress?: (prog: string | null) => void
 ) {
   if (clinicId) {
     console.log("--->updating clinic with id: ", clinicId);
-    await updateClinicWithImages(values, clinicId, setUploadingFileIndex);
+    await updateClinicWithImages(values, clinicId, setProgress);
   } else {
-    await addClinicWithImages(values, setUploadingFileIndex);
+    console.log("--->adding new clinic");
+    await addClinicWithImages(values, setProgress);
   }
   return { success: true };
 }
@@ -632,7 +550,7 @@ async function saveClinicAndTreatments(
 async function updateClinicWithImages(
   values: z.infer<typeof formSchema>,
   clinicId: string,
-  setUploadingFileIndex?: (idx: number | null) => void
+  setProgress?: (prog: string | null) => void
 ) {
   // Remove old images
   const { data: clinic } = await supabaseClient
@@ -656,7 +574,8 @@ async function updateClinicWithImages(
   console.log("------->uploading new clinic images: ", values.pictures);
   for (let i = 0; i < values.pictures.length; i++) {
     const file = values.pictures[i] as File;
-    if (setUploadingFileIndex) setUploadingFileIndex(i);
+    setProgress?.("클리닉 이미지 업로드 중: " + (i + 1)); //Uploading Clinic Image
+    console.log("------->uploading clinic image: ", i);
     const publicUrl = await uploadFileToSupabase(file, {
       bucket: CLINIC_IMAGE_BUCKET,
       allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
@@ -664,7 +583,7 @@ async function updateClinicWithImages(
     });
     clinicPictures.push(publicUrl);
   }
-  if (setUploadingFileIndex) setUploadingFileIndex(null);
+  setProgress?.(null);
 
   // Update clinic
   const clinicPayload = {
@@ -675,10 +594,12 @@ async function updateClinicWithImages(
   };
 
   console.log("----->updating clinic: ", clinicPayload);
+  setProgress?.("병원 업데이트 중..."); // "Updating clinic..."
   await updateClinic(clinicId, clinicPayload, clinicPictures);
-
   console.log("-----> saving treatments for clinic");
   // Save treatments
+  setProgress?.("트리트먼트 저장 중..."); // "Saving treatments..."
+  console.log("----->saving treatments: ", clinicId);
   await saveTreatmentsForClinic(values.treatments, clinicId);
 }
 
@@ -687,13 +608,14 @@ async function updateClinicWithImages(
  */
 async function addClinicWithImages(
   values: z.infer<typeof formSchema>,
-  setUploadingFileIndex?: (idx: number | null) => void
+  setProgress?: (prog: string | null) => void
 ) {
   // Upload images
   const clinicPictures: string[] = [];
   for (let i = 0; i < values.pictures.length; i++) {
     const file = values.pictures[i] as File;
-    if (setUploadingFileIndex) setUploadingFileIndex(i);
+    if (setProgress) setProgress("클리닉 이미지 업로드 중: " + (i + 1)); //Uploading Clinic Image
+    console.log("------->uploading clinic image: ", i);
     const publicUrl = await uploadFileToSupabase(file, {
       bucket: CLINIC_IMAGE_BUCKET,
       allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
@@ -701,7 +623,7 @@ async function addClinicWithImages(
     });
     clinicPictures.push(publicUrl);
   }
-  if (setUploadingFileIndex) setUploadingFileIndex(null);
+  if (setProgress) setProgress(null);
 
   // Create clinic
   const clinicPayload = {

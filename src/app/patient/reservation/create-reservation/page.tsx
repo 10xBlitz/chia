@@ -46,7 +46,7 @@ import { PhoneInput } from "@/components/phone-input";
 import { supabaseClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { KoreanDatePicker } from "@/components/date-picker-v2";
+import { KoreanDatePicker } from "@/components/korean-date-picker-single";
 import { KoreanTimePicker } from "@/components/time-picker";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 

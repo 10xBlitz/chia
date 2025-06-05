@@ -1,5 +1,5 @@
 import { supabaseClient } from "../client";
-import { v4 as uuidv4 } from "uuid";
+import { uploadFileToSupabase } from "./upload-file.services";
 
 interface TreatmentFilters {
   treatment_name?: string;
@@ -56,7 +56,7 @@ export async function getPaginatedClinicTreatments(
   limit = 10,
   filters: TreatmentFilters = {}
 ) {
-  if (limit > 100) {
+  if (limit > 1000) {
     throw Error("Limit exceeds 100");
   }
   if (limit < 1) {
@@ -73,7 +73,7 @@ export async function getPaginatedClinicTreatments(
     .range(offset, offset + limit - 1);
 
   // Filters
-  if (filters.treatment_name) {
+  if (filters?.treatment_name) {
     query = query.ilike("treatment_name", `%${filters.treatment_name}%`);
   }
   // Add more filters here as needed
@@ -99,34 +99,34 @@ export async function getPaginatedClinicTreatments(
  * @param file - The image file to upload.
  * @returns The public URL of the uploaded image.
  */
-export async function uploadTreatmentImage(file: File) {
-  // Validate file type
-  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`); //  "Unsupported image format: " + file.type);
-  }
-  // Validate file size
-  if (file.size > MAX_FILE_SIZE_MB) {
-    throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`); // "Image size must be less than " + MAX_FILE_SIZE_MB + "MB");
-  }
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${uuidv4()}.${fileExt}`;
-  const filePath = `${fileName}`;
-  const { error: uploadError } = await supabaseClient.storage
-    .from(IMAGE_BUCKET)
-    .upload(filePath, file, {
-      contentType: file.type,
-      upsert: true,
-    });
-  if (uploadError)
-    throw new Error(`이미지 업로드 실패: ${uploadError.message}`); // "Image upload failed: " + uploadError.message);
-  const { data: publicUrlData } = supabaseClient.storage
-    .from(IMAGE_BUCKET)
-    .getPublicUrl(filePath);
-  if (!publicUrlData.publicUrl) {
-    throw new Error("이미지 URL 생성 실패"); // "Failed to generate image URL");
-  }
-  return publicUrlData.publicUrl;
-}
+// export async function uploadTreatmentImage(file: File) {
+//   // Validate file type
+//   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+//     throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`); //  "Unsupported image format: " + file.type);
+//   }
+//   // Validate file size
+//   if (file.size > MAX_FILE_SIZE_MB) {
+//     throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`); // "Image size must be less than " + MAX_FILE_SIZE_MB + "MB");
+//   }
+//   const fileExt = file.name.split(".").pop();
+//   const fileName = `${uuidv4()}.${fileExt}`;
+//   const filePath = `${fileName}`;
+//   const { error: uploadError } = await supabaseClient.storage
+//     .from(IMAGE_BUCKET)
+//     .upload(filePath, file, {
+//       contentType: file.type,
+//       upsert: true,
+//     });
+//   if (uploadError)
+//     throw new Error(`이미지 업로드 실패: ${uploadError.message}`); // "Image upload failed: " + uploadError.message);
+//   const { data: publicUrlData } = supabaseClient.storage
+//     .from(IMAGE_BUCKET)
+//     .getPublicUrl(filePath);
+//   if (!publicUrlData.publicUrl) {
+//     throw new Error("이미지 URL 생성 실패"); // "Failed to generate image URL");
+//   }
+//   return publicUrlData.publicUrl;
+// }
 
 export async function removeTreatmentImage(imageUrl: string) {
   const path = imageUrl.split("treatment-images/")[1];
@@ -143,21 +143,33 @@ export async function removeTreatmentImage(imageUrl: string) {
  * @example
  * await insertTreatment({ treatment_name: "Whitening", image_url: File });
  */
-export async function insertTreatment(treatment: {
-  treatment_name: string;
-  image_url?: string | File;
-}) {
+export async function insertTreatment(
+  treatment: {
+    treatment_name: string;
+    image_url?: string | File;
+  },
+  progress?: (prog: string | null) => void
+) {
   let imageUrl: string | undefined = undefined;
   if (treatment.image_url && treatment.image_url instanceof File) {
-    imageUrl = await uploadTreatmentImage(treatment.image_url);
+    progress?.("이미지 업로드 중..."); // "Uploading image..."
+    console.log("-----> uploading file to supabase from insert treatment");
+    imageUrl = await uploadFileToSupabase(treatment.image_url, {
+      bucket: IMAGE_BUCKET,
+      allowedMimeTypes: ALLOWED_MIME_TYPES,
+      maxSizeMB: MAX_FILE_SIZE_MB / 1024 / 1024, // Convert MB to bytes
+    });
   } else if (typeof treatment.image_url === "string") {
     imageUrl = treatment.image_url;
   }
+  progress?.("트리트먼트 추가 중..."); // "Adding treatment..."
   const { data, error } = await supabaseClient
     .from("treatment")
     .insert([{ treatment_name: treatment.treatment_name, image_url: imageUrl }])
     .select()
     .single();
+  progress?.(null);
+
   if (error) throw error;
   return data;
 }
@@ -188,7 +200,11 @@ export async function updateTreatment(
       .single();
     if (error) throw error;
     oldImageUrl = old?.image_url;
-    imageUrl = await uploadTreatmentImage(updates.image_url);
+    imageUrl = await uploadFileToSupabase(updates.image_url, {
+      bucket: IMAGE_BUCKET,
+      allowedMimeTypes: ALLOWED_MIME_TYPES,
+      maxSizeMB: MAX_FILE_SIZE_MB / 1024 / 1024, // Convert MB to bytes
+    });
     removeOldImage = !!oldImageUrl;
   } else if (typeof updates.image_url === "string") {
     imageUrl = updates.image_url;
