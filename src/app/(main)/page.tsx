@@ -71,7 +71,7 @@ export default function MainPage() {
             alt="logo"
           />
           {user?.id ? (
-            <Link href="/patient/profile">
+            <Link href={user.role === "admin" ? "/admin" : "/patient/profile"}>
               <UserIcon className="min-w-7 min-h-7" />
             </Link>
           ) : (
