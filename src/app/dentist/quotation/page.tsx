@@ -24,7 +24,7 @@ export default function ViewQuotationPage() {
     queryFn: async () =>
       await fetchQuotations(
         user?.clinic_id,
-        user?.clinic?.region.split(",")[1],
+        user?.clinic?.region,
         treatments?.map((t) => t.treatment_id)
       ),
     enabled:

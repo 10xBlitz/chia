@@ -43,6 +43,8 @@ export default function FormAddress<T extends FieldValues>({
               onAddressSelect={(city, region) =>
                 field.onChange(`${city},${region}`)
               }
+              initialCity={field.value?.split(",")[0] || ""}
+              initialRegion={field.value?.split(",")[1] || ""}
             />
           </FormControl>
           <FormMessage />

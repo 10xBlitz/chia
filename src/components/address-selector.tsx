@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AddressSelectorProps {
   onAddressSelect: (city: string, region: string) => void;
@@ -61,6 +61,14 @@ export default function AddressSelector({
     setIsRegionDialogOpen(false); // Close region dialog
     setIsCityDialogOpen(true); // Open city dialog
   };
+
+  // Sync local state with prop changes
+  useEffect(() => {
+    setSelectedCity(initialCity || null);
+  }, [initialCity]);
+  useEffect(() => {
+    setSelectedRegion(initialRegion || null);
+  }, [initialRegion]);
 
   return (
     <>
