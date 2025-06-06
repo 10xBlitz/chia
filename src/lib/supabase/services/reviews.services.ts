@@ -9,6 +9,7 @@ const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 interface Filters {
   full_name?: string | null;
   treatment_id?: number | null;
+  patient_id?: string | null;
   date_range?: {
     from?: string;
     to?: string;
@@ -29,9 +30,7 @@ export async function getPaginatedReviews(
     .from("review")
     .select(
       `
-      id,
-      rating,
-      review,
+      *,
       patient:patient_id ( 
           id, 
           full_name, 
@@ -52,7 +51,7 @@ export async function getPaginatedReviews(
     `,
       { count: "exact" }
     ) // dot-less select implies INNER JOIN
-    .order("id", { ascending: true })
+    .order("created_at", { ascending: true })
     .range(offset, offset + limit - 1);
 
   // Filters
@@ -76,6 +75,10 @@ export async function getPaginatedReviews(
       startOfDay(filters.date_range.from).toISOString()
     );
     query = query.lte("created_at", filters.date_range.to);
+  }
+
+  if (filters.patient_id) {
+    query = query.eq("patient_id", filters.patient_id);
   }
 
   const { data, error, count } = await query;

@@ -69,32 +69,28 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         console.error("Error fetching user profile:", profileError.message);
         // Fallback to updating with auth data if profile fetch fails
         storeRef.current.getState().updateUser({
-          user: {
-            ...defaultUserState,
-            id: userId,
-            role: "",
-            email: userEmail || "", // Prefer auth email, fallback to profile email
-          },
+          ...defaultUserState,
+          id: userId,
+          role: "",
+          email: userEmail || "", // Prefer auth email, fallback to profile email
         });
         return;
       }
 
       if (userProfileData) {
         storeRef.current.getState().updateUser({
-          user: {
-            id: userProfileData.id,
-            email: userEmail || "",
-            full_name: userProfileData.full_name,
-            gender: userProfileData.gender,
-            birthdate: userProfileData.birthdate,
-            contact_number: userProfileData.contact_number,
-            residence: userProfileData.residence,
-            work_place: userProfileData.work_place,
-            role: userProfileData.role,
-            created_at: userProfileData.created_at,
-            clinic_id: userProfileData.clinic_id,
-            clinic: userProfileData.clinic || null, // Attach clinic info if available
-          },
+          id: userProfileData.id,
+          email: userEmail || "",
+          full_name: userProfileData.full_name,
+          gender: userProfileData.gender,
+          birthdate: userProfileData.birthdate,
+          contact_number: userProfileData.contact_number,
+          residence: userProfileData.residence,
+          work_place: userProfileData.work_place,
+          role: userProfileData.role,
+          created_at: userProfileData.created_at,
+          clinic_id: userProfileData.clinic_id,
+          clinic: userProfileData.clinic || null, // Attach clinic info if available
         });
       } else {
         // User is authenticated, but no profile found (e.g., new user before profile creation)
@@ -102,12 +98,10 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           `User profile not found for ID: ${userId}. Updating store with auth details only.`
         );
         storeRef.current.getState().updateUser({
-          user: {
-            ...defaultUserState,
-            id: userId,
-            email: userEmail || "",
-            role: "", // Or a 'guest' role
-          },
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+          role: "", // Or a 'guest' role
         });
       }
     } catch (e) {
@@ -115,12 +109,10 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
       // Fallback to minimal update
       if (storeRef.current) {
         storeRef.current.getState().updateUser({
-          user: {
-            ...defaultUserState,
-            id: userId,
-            email: userEmail || "",
-            role: "", // Or a 'guest' role
-          },
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+          role: "", // Or a 'guest' role
         });
       }
     }
@@ -210,7 +202,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           } else {
             console.log("Store already exists, updating state.");
             // If store already exists (e.g., due to HMR or re-render), update its state
-            storeRef.current.getState().updateUser(initialDataForStore);
+            storeRef.current.getState().updateUser(initialDataForStore.user);
           }
           setIsStoreInitialized(true);
         }
@@ -231,7 +223,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         if (event === "SIGNED_IN" && session?.user) {
           await fetchProfileAndUpdateStore(session.user.id, session.user.email);
         } else if (event === "SIGNED_OUT") {
-          storeRef.current.getState().updateUser({ user: defaultUserState });
+          storeRef.current.getState().updateUser(defaultUserState);
         } else if (event === "USER_UPDATED" && session?.user) {
           // If user's auth details change (e.g. email verified), re-fetch profile
           await fetchProfileAndUpdateStore(session.user.id, session.user.email);

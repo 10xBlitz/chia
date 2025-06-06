@@ -45,7 +45,7 @@ function InfoRow({
 
 export default function EditProfilePage() {
   const user = useUserStore((state) => state.user);
-  const updateUser = useUserStore((state) => state.updateUser);
+
   const [openProfile, setOpenProfile] = useState(false);
 
   return (
@@ -93,7 +93,6 @@ export default function EditProfilePage() {
         open={openProfile}
         onClose={() => setOpenProfile(false)}
         userData={{ user }}
-        onUserUpdated={updateUser}
       />
     </div>
   );

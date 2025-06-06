@@ -10,6 +10,7 @@ import ClinicCard from "@/components/clinic-card";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { ConfirmDeleteModal } from "@/components/confirm-modal";
+import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 
 export default function FavoriteClinicsPage() {
   const user = useUserStore((state) => state.user);
@@ -24,10 +25,8 @@ export default function FavoriteClinicsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["favorite-clinics", user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
-      // You can add pagination/filters as needed
       const result = await getPaginatedFavoriteClinics(1, 1000, {
-        user_id: user.id,
+        user_id: user?.id,
       });
       // Map to expected FavoriteClinic shape
       return result.data;
@@ -82,13 +81,12 @@ export default function FavoriteClinicsPage() {
         </div>
       </header>
       <main className="flex-1 flex flex-col">
-        {isLoading ? (
-          <div className="text-center py-10">로딩 중... {/* Loading... */}</div>
-        ) : !data || data.length === 0 ? (
-          <div className="text-center py-10">
-            즐겨찾는 병원이 없습니다. {/* No favorites */}
-          </div>
-        ) : (
+        {isLoading &&
+          Array.from({ length: 3 }).map((_, index) => (
+            <ClinicCardSkeleton key={index} />
+          ))}
+
+        {data && (
           <div className="flex flex-col gap-6">
             {data.map((fav) => (
               <div key={fav.id} className="relative">

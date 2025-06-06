@@ -7,6 +7,7 @@ import { EditIcon } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
 import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
+import { QuotationListItemSkeleton } from "@/components/loading-skeletons/quotation-skeleton";
 
 export default function ViewQuotationPage() {
   const router = useRouter();
@@ -43,62 +44,25 @@ export default function ViewQuotationPage() {
       <h2 className="font-bold text-xl mb-4">
         견적 목록 {/* List of Quotes */}
       </h2>
-      {isLoading && <div>로딩 중... {/* Loading... */}</div>}
+      {isLoading &&
+        Array.from({ length: 3 }).map((_, i) => (
+          <QuotationListItemSkeleton key={i} />
+        ))}
 
       {quotations?.data.length === 0 && (
-        <div>견적이 없습니다. {/* No quotations. */}</div>
+        <div className="mt-10 text-center">
+          견적이 없습니다. {/* No quotations. */}
+        </div>
       )}
 
       {quotations?.data && (
         <div className="flex flex-col gap-3">
-          {quotations.data.map((q) => (
-            <div
+          {quotations.data.map((q: Quotation) => (
+            <QuotationListItem
               key={q.id}
-              className="flex text-sm items-center w-full py-1 cursor-pointer"
-              style={{ minHeight: 48 }}
-              onClick={() => {
-                const detail = `${
-                  q.region?.split(",")[1]?.trim() || q.region
-                } · ${q.treatment.treatment_name} 공개견적`;
-
-                handleQuotationClick(
-                  q.id,
-                  detail,
-                  q?.clinic_id,
-                  q.bid?.[0]?.id
-                );
-              }}
-            >
-              <span className="font-bold text-black text-left whitespace-nowrap mr-4">
-                {new Date(q.created_at).toLocaleDateString("ko-KR", {
-                  month: "numeric",
-                  day: "numeric",
-                })}
-              </span>
-              <span className="text-gray-600 truncate flex-1 mr-4 whitespace-nowrap">
-                {q.region?.split(",")[1]?.trim() || q.region} ·{" "}
-                {q.treatment.treatment_name}{" "}
-                {
-                  q.clinic_id
-                    ? "치과" /* Dental Clinic */
-                    : "공개견적" /* Public Quotation */
-                }
-              </span>
-              <Button
-                className={`rounded-md px-4 h-9 font-medium ${
-                  q.bid.length > 0
-                    ? "bg-blue-600 text-white"
-                    : "border border-gray-200 bg-white text-gray-500"
-                }`}
-                variant={q.bid ? "outline" : "default"}
-                tabIndex={-1}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {q.bid.length > 0 ? "답변완료" : "답변 없음"}
-                {/* Answered */} {/* No answer */}
-                {}
-              </Button>
-            </div>
+              quotation={q}
+              onClick={handleQuotationClick}
+            />
           ))}
         </div>
       )}
@@ -115,5 +79,68 @@ export default function ViewQuotationPage() {
       </Button>
       <BottomNavigation />
     </>
+  );
+}
+
+export interface Quotation {
+  id: string;
+  created_at: string | Date;
+  region: string;
+  treatment: {
+    treatment_name: string;
+  };
+  clinic_id: string | null;
+  bid: { id: string }[];
+}
+
+interface QuotationListItemProps {
+  quotation: Quotation;
+  onClick: (
+    quotation_id: string,
+    quotation_details: string,
+    clinic_id: string | null,
+    bid_id: string | null
+  ) => void;
+}
+
+export function QuotationListItem({
+  quotation: q,
+  onClick,
+}: QuotationListItemProps) {
+  const detail = `${q.region?.split(",")[1]?.trim() || q.region} · ${
+    q.treatment.treatment_name
+  } 공개견적`;
+
+  return (
+    <div
+      className="flex text-sm items-center w-full py-1 cursor-pointer"
+      style={{ minHeight: 48 }}
+      onClick={() => {
+        onClick(q.id, detail, q.clinic_id, q.bid?.[0]?.id ?? null);
+      }}
+    >
+      <span className="font-bold text-black text-left whitespace-nowrap mr-4">
+        {new Date(q.created_at).toLocaleDateString("ko-KR", {
+          month: "numeric",
+          day: "numeric",
+        })}
+      </span>
+      <span className="text-gray-600 truncate flex-1 mr-4 whitespace-nowrap">
+        {q.region?.split(",")[1]?.trim() || q.region} ·{" "}
+        {q.treatment.treatment_name} {q.clinic_id ? "치과" : "공개견적"}
+      </span>
+      <Button
+        className={`rounded-md px-4 h-9 font-medium ${
+          q.bid.length > 0
+            ? "bg-blue-600 text-white"
+            : "border border-gray-200 bg-white text-gray-500"
+        }`}
+        variant={q.bid.length > 0 ? "outline" : "default"}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {q.bid.length > 0 ? "답변완료" : "답변 없음"}
+      </Button>
+    </div>
   );
 }

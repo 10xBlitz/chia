@@ -2,55 +2,38 @@
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { UserState } from "@/stores/user-store";
-import { PhoneInput } from "@/components/phone-input";
-import AddressSelector from "@/components/address-selector";
-import { KoreanDatePicker } from "@/components/korean-date-picker-single";
-import GenderSelector from "@/components/gender-selector";
+
 import toast from "react-hot-toast";
 import { updateUserProfile } from "@/lib/supabase/services/users.services";
 import { format } from "date-fns";
-import { AuthError } from "@supabase/supabase-js";
-
-// Zod schema for validation
-const profileSchema = z.object({
-  full_name: z.string().min(2, "이름을 2자 이상 입력해주세요."), // Name at least 2 chars
-  contact_number: z.string().min(9, "연락처를 올바르게 입력해주세요."), // Simple length check
-  residence: z.string({ required_error: "주소를 입력해주세요." }), //Please enter your address.
-  birthdate: z.date({ required_error: "생년월일을 입력하세요." }), //Please enter your date of birth.
-  gender: z.string({ required_error: "성별을 입력해주세요." }), //Please enter your gender
-  work_place: z.string({ required_error: "귀하의 근무지를 입력해 주세요." }),
-});
+import { useMutation } from "@tanstack/react-query";
+import { useUserStore } from "@/providers/user-store-provider";
+import FormInput from "@/components/form-ui/form-input";
+import FormContactNumber from "@/components/form-ui/form-contact-number";
+import FormAddress from "@/components/form-ui/form-address";
+import FormDatePicker from "@/components/form-ui/form-date-picker-single";
+import FormGender from "@/components/form-ui/form-gender";
+import { editPatientProfileSchema } from "./edit-profile-schema";
 
 export function EditProfileModal({
   open,
   onClose,
-  onUserUpdated,
   userData,
 }: {
   open: boolean;
   onClose: () => void;
   userData: UserState;
-  onUserUpdated: (userDataParam: Partial<UserState>) => void;
 }) {
-  const [loading, setLoading] = useState(false);
   const user = userData.user;
+  const updateUser = useUserStore((state) => state.updateUser);
 
-  const form = useForm<z.infer<typeof profileSchema>>({
-    resolver: zodResolver(profileSchema),
+  const form = useForm<z.infer<typeof editPatientProfileSchema>>({
+    resolver: zodResolver(editPatientProfileSchema),
     defaultValues: {
       full_name: user?.full_name || "",
       contact_number: user?.contact_number || "",
@@ -61,53 +44,35 @@ export function EditProfileModal({
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof profileSchema>) => {
-    if (!user) {
-      throw new Error("사용자 정보가 없습니다."); // No user information available
-    }
-    setLoading(true);
-    try {
-      // Remove fields that should not be updated
+  const mutation = useMutation({
+    mutationFn: async (values: z.infer<typeof editPatientProfileSchema>) => {
+      if (!user) throw new Error("사용자 정보가 없습니다."); // User information is missing.
       const { ...updatable } = values;
-      console.log("Updating profile with values:", updatable);
       await updateUserProfile(user.id, updatable);
-      console.log("Profile updated successfully", updatable);
-      onUserUpdated({
-        user: {
-          ...user,
-          ...updatable,
-          birthdate: format(updatable.birthdate, "yyyy.MM.dd"),
-        },
+      return updatable;
+    },
+    onSuccess: (updatable) => {
+      updateUser({
+        ...updatable,
+        birthdate: format(updatable.birthdate, "yyyy-MM-dd"),
       });
-      setLoading(false);
-      toast.success("정보가 성공적으로 수정되었습니다."); // Info updated successfully.
-      onClose();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      // Supabase error: has 'status' and 'message' fields
 
-      if (err instanceof AuthError) {
-        // Supabase duplicate email error
-        if (
-          err.message?.toLowerCase().includes("already registered") ||
-          err.status === 422 ||
-          err.message?.toLowerCase().includes("duplicate") ||
-          err.message?.toLowerCase().includes("unique constraint")
-        ) {
-          toast.error("이미 사용 중인 이메일입니다."); // Email already in use.
-        } else {
-          toast.error("정보 수정 중 오류가 발생했습니다."); // Error updating info.
-        }
-      } else {
-        toast.error("알 수 없는 오류가 발생했습니다."); // Unknown error occurred.
-      }
-      setLoading(false);
-    }
+      toast.success("정보가 성공적으로 수정되었습니다."); // Your information has been successfully updated.
+      onClose();
+    },
+    onError: (err) => {
+      console.error("Error updating profile:", err);
+      toast.error("알 수 없는 오류가 발생했습니다."); // An unknown error occurred.
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof editPatientProfileSchema>) => {
+    mutation.mutate(values);
   };
 
   return (
     <Modal
-      title="정보 수정" // Edit Info
+      title="정보 수정" // Edit Profile
       description="기본 정보를 수정합니다." // Edit your basic information.
       isOpen={open}
       isLong={true}
@@ -118,105 +83,42 @@ export function EditProfileModal({
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-4 py-2"
         >
-          <FormField
+          <FormInput
             control={form.control}
             name="full_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>이름 {/* Name */}</FormLabel>
-                <FormControl>
-                  <Input className="h-[45px]" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="이름" // Name
+            placeholder="여기에 이름을 입력하세요" // Enter your name here
           />
-          <FormField
+
+          <FormContactNumber
             control={form.control}
             name="contact_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>연락처 {/* Contact */}</FormLabel>
-                <FormControl>
-                  {/* <Input {...field} /> */}
-                  <PhoneInput {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="연락처" // Contact Number
+            placeholder="여기에 연락처 번호를 입력하세요" // Enter your contact number here
           />
-          <FormField
+
+          <FormAddress
             control={form.control}
             name="residence"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>주소 {/* Address */}</FormLabel>
-                <FormControl>
-                  <AddressSelector
-                    onAddressSelect={(city, region) =>
-                      field.onChange(`${city},${region}`)
-                    }
-                    initialCity={field.value.split(",")[0] || ""}
-                    initialRegion={field.value.split(",")[1] || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="주소" // Address
           />
-          <FormField
+
+          <FormDatePicker
             control={form.control}
             name="birthdate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>생년월일 {/* Birthdate */}</FormLabel>
-                <FormControl>
-                  <KoreanDatePicker
-                    onChange={(date) => {
-                      if (date) field.onChange(date);
-                    }}
-                    value={field.value}
-                    disabled={field.disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="생년월일" // Birthdate
           />
-          <FormField
+
+          <FormGender
             control={form.control}
             name="gender"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>성별 {/* Gender */}</FormLabel>
-                <FormControl>
-                  <GenderSelector
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="성별" // Gender
           />
-          <FormField
+
+          <FormAddress
             control={form.control}
             name="work_place"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>직장 {/* Work Place */}</FormLabel>
-                <FormControl>
-                  <AddressSelector
-                    onAddressSelect={(city, region) =>
-                      field.onChange(`${city},${region}`)
-                    }
-                    initialCity={field.value.split(",")[0] || ""}
-                    initialRegion={field.value.split(",")[1] || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="근무지" // Workplace
           />
           <div className="flex w-full gap-2 pt-2">
             <Button
@@ -224,16 +126,17 @@ export function EditProfileModal({
               variant="outline"
               className="flex-1"
               onClick={onClose}
-              disabled={loading}
+              disabled={mutation.isPending}
             >
-              취소 {/* Cancel */}
+              취소
+              {/* Cancel */}
             </Button>
             <Button
               className="btn-primary flex-1"
               type="submit"
-              disabled={loading}
+              disabled={mutation.isPending}
             >
-              {loading ? "수정 중..." : "수정하기"} {/* Update */}
+              {mutation.isPending ? "수정 중..." : "수정하기"}
             </Button>
           </div>
         </form>

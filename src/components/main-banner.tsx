@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { useEffect, useState } from "react";
+import ImageSkeleton from "./loading-skeletons/image-skeleton";
 
 export default function MainBannerCarousel() {
   // Fetch banners with type "main"
@@ -51,9 +52,7 @@ export default function MainBannerCarousel() {
         <CarouselContent className="min-w-full">
           {isLoading && (
             <CarouselItem>
-              <div className="flex items-center justify-center h-[200px]">
-                Loading...
-              </div>
+              <ImageSkeleton />
             </CarouselItem>
           )}
           {error && (

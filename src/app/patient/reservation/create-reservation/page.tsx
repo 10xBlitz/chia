@@ -164,7 +164,7 @@ export default function CreateReservation() {
               </div>
             </div>
             <div>
-              {treatments?.data && (
+              {treatments?.data && treatments.data.length > 0 && (
                 <FormField
                   control={form.control}
                   name="clinicTreatment"
@@ -312,8 +312,8 @@ export default function CreateReservation() {
             className="h-[45px] btn-primary"
             disabled={loading}
           >
-            {loading ? "요청 중..." : "요청하기"}
-            {/**loading ? Loading... : Make a request */}
+            {loading ? "요청 중..." : "작성하기"}
+            {/**loading ? Loading... : Write */}
           </Button>
         </form>
       </Form>

@@ -229,3 +229,31 @@ export async function insertClinic(
   if (error) throw error;
   return insertedClinic.id;
 }
+
+export async function fetchClinicDetail(clinic_id: string) {
+  const { data, error } = await supabaseClient
+    .from("clinic")
+    .select(
+      `
+        *,
+        clinic_view(*),
+        working_hour(*),
+        clinic_treatment (
+            id,
+            treatment (
+                id,
+                treatment_name,
+                image_url
+            ),
+            review (
+              *,
+              user:patient_id(*)
+            )
+        )
+      `
+    )
+    .eq("id", clinic_id)
+    .single();
+  if (error) throw error;
+  return data;
+}

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
+import ImageSkeleton from "./loading-skeletons/image-skeleton";
 
 export default function SubBannerCarousel() {
   // Fetch banners with type "sub"
@@ -64,9 +65,7 @@ export default function SubBannerCarousel() {
         <CarouselContent>
           {isLoading && (
             <CarouselItem>
-              <div className="flex items-center justify-center h-[120px]">
-                Loading...
-              </div>
+              <ImageSkeleton />
             </CarouselItem>
           )}
           {error && (

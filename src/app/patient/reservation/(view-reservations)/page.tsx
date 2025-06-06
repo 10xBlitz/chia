@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
-import HeaderWithBackButton from "@/components/header-with-back-button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
+import { ReservationListSkeleton } from "@/components/loading-skeletons/reservation-skeleton";
+import HeaderWithBackButton from "@/components/header-with-back-button";
 
 export default function ReservationListPage() {
   const userId = useUserStore((selector) => selector.user?.id as string);
@@ -15,25 +15,29 @@ export default function ReservationListPage() {
   const router = useRouter();
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    if (userId) setEnabled(true);
-  }, [userId]);
 
   const { data: reservations, isLoading } = useQuery({
     queryKey: ["reservations", userId],
-    queryFn: () => getPaginatedReservations(1, 1000, { patient_id: userId }),
-    enabled: enabled && !!userId,
+    queryFn: async () =>
+      await getPaginatedReservations(1, 1000, { patient_id: userId }),
+    enabled: !!userId,
   });
 
   return (
     <>
-      <HeaderWithBackButton title="예약 목록" />
-      {isLoading && <div>로딩 중... {/* Loading... */}</div>}
+      {accessedFromProfile ? (
+        <HeaderWithBackButton title="예약 목록" />
+      ) : (
+        <header className="flex flex-col gap-4 mb-5 font-bold font-pretendard-600 text-lg">
+          예약 목록
+        </header>
+      )}
+      {isLoading && <ReservationListSkeleton />}
 
       {reservations?.data.length === 0 && (
-        <div>예약이 없습니다. {/* No reservations. */}</div>
+        <div className="text-center ">
+          예약이 없습니다. {/* No reservations. */}
+        </div>
       )}
 
       {reservations && (

@@ -13,24 +13,19 @@ export type UserState = {
 };
 
 export type UserAction = {
-  updateUser: (userData: Partial<UserState>) => void;
+  updateUser: (userData: Partial<UserState["user"]>) => void;
 };
 
 export type UserStore = UserState & UserAction;
 
 export const createUserStore = (initState: UserState) => {
-  // return createStore<UserStore>()(
-  //   persist(
-  //     (set) => ({
-  //       ...initState,
-  //       updateUser: (userData) => set(() => userData),
-  //     }),
-  //     { name: "user-store" }
-  //   )
-  // );
-
   return createStore<UserStore>()((set) => ({
     ...initState,
-    updateUser: (userData) => set(() => userData),
+    updateUser: (userData) =>
+      set((state) => ({
+        user: state.user
+          ? { ...state.user, ...userData }
+          : (userData as UserState["user"]),
+      })),
   }));
 };

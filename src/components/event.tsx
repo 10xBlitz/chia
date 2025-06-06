@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { supabaseClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export default function EventCarousel() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -116,13 +117,18 @@ export default function EventCarousel() {
             <div key={event.id} className="flex-shrink-0 w-[180px]">
               <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
                 {event.image_url ? (
-                  <Image
-                    src={event.image_url}
-                    alt={event.title || "event"}
-                    width={300}
-                    height={300}
-                    className="object-cover w-full h-full"
-                  />
+                  <Link
+                    href={`/patient/reservation/payment?orderId${event.id}`}
+                    className="block h-full"
+                  >
+                    <Image
+                      src={event.image_url}
+                      alt={event.title || "event"}
+                      width={300}
+                      height={300}
+                      className="object-cover w-full h-full"
+                    />
+                  </Link>
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <span className="text-gray-500">No Image</span>

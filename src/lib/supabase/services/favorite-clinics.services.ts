@@ -54,22 +54,6 @@ export async function getPaginatedFavoriteClinics(
   const { data: favoriteClinics, error, count } = await favoriteClinicsQuery;
   if (error) throw error;
 
-  //   interface ClinicCardProps {
-  //   total_reviews: number;
-  //   avg_reviews_per_treatment: number;
-  //   clinic_name: string;
-  //   contact_number: string;
-  //   created_at: string;
-  //   id: string;
-  //   link: string | null;
-  //   location: string;
-  //   opening_date: string;
-  //   pictures: string[] | null;
-  //   region: string;
-  //   className?: string;
-  //   showBookmark?: boolean;
-  // }
-
   const clinics = favoriteClinics.map((item) => ({
     clinic_name: item.clinic.clinic_name,
     contact_number: item.clinic.contact_number,

@@ -24,6 +24,7 @@ import SubBannerCarousel from "@/components/sub-banner";
 import MobileLayout from "@/components/layout/mobile-layout";
 import BottomNavigation from "@/components/bottom-navigation";
 import { Button } from "@/components/ui/button";
+import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 
 export default function MainPage() {
   const searchParams = useSearchParams();
@@ -38,7 +39,7 @@ export default function MainPage() {
   // Fetch first 3 clinics for custom placement
   const {
     data: clinicsData,
-    isFetching: clinicsLoading,
+    isLoading: clinicsLoading,
     error: clinicsError,
   } = useQuery({
     queryKey: ["clinics-initial", filterOption],
@@ -114,9 +115,15 @@ export default function MainPage() {
           {/* Custom clinic/event/sub-banner order */}
           <div className="flex flex-col gap-4 flex-1 px-2">
             {/* 1. First 2 clinics */}
-            {clinicsLoading && <p>Loading clinics...</p>}
+            {clinicsLoading &&
+              Array.from({ length: 2 }).map((_, i) => (
+                <ClinicCardSkeleton key={i} />
+              ))}
             {clinicsError && (
-              <p>Error loading clinics: {clinicsError.message}</p>
+              <p>
+                클리닉을 로딩하는 중 오류가 발생했습니다: {clinicsError.message}
+              </p>
+              //Error loading clinics
             )}
             {clinicsData &&
               clinicsData

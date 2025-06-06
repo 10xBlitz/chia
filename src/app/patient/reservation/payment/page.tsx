@@ -5,15 +5,22 @@ import {
   loadTossPayments,
   TossPaymentsWidgets,
 } from "@tosspayments/tosspayments-sdk";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
-const customerKey = "vjpCqzfGj68N0soX20P3K";
+const customerKey = "OBmoWkSbdDA0OTQwo23_q";
 
 export default function CheckoutPage() {
+  const searchParams = useSearchParams();
+  const amountParams = searchParams.get("amount")
+    ? parseInt(searchParams.get("amount") as string, 10)
+    : 50; // 기본 금액 50원
+
+  const orderId = searchParams.get("orderId") || "-xZTsRbXHDRL30IBrjM0t";
   const [amount, setAmount] = useState({
     currency: "KRW",
-    value: 1,
+    value: amountParams, // 기본 금액 50원
   });
   const [ready, setReady] = useState(false);
   const [widgets, setWidgets] = useState<TossPaymentsWidgets>();
@@ -116,7 +123,7 @@ export default function CheckoutPage() {
                   orderName: "토스 티셔츠 외 2건",
                   successUrl:
                     window.location.origin +
-                    "/patient/reservation/payment/success",
+                    `/patient/reservation/payment/success?amount=${amount.value}&orderId=${orderId}`,
                   failUrl:
                     window.location.origin +
                     "/patient/reservation/payment/fail",

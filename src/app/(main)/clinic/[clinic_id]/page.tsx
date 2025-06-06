@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import BackButton from "@/components/back-button";
 import BookmarkButton from "@/components/bookmark";
 import BottomNavigation from "@/components/bottom-navigation";
 import MobileLayout from "@/components/layout/mobile-layout";
+import ClinicReviewCard from "@/components/clinic-review-card";
+import ClinicDetailSkeleton from "./page-skeleton";
 
 const TABS = [
   { key: "info", label: "병원정보" },
@@ -27,28 +29,21 @@ const TABS = [
   { key: "reviews", label: "리뷰" },
 ];
 
-// Dynamically import map if needed
-// const Map = dynamic(() => import("@/components/map"), { ssr: false });
-
+// Fetch clinic detail (no reviews, no views)
 async function fetchClinicDetail(clinic_id: string) {
   const { data, error } = await supabaseClient
     .from("clinic")
     .select(
       `
         *,
-        clinic_view(*),
         working_hour(*),
         clinic_treatment (
+          id,
+          treatment (
             id,
-            treatment (
-                id,
-                treatment_name,
-                image_url
-            ),
-            review (
-              *,
-              user:patient_id(*)
-            )
+            treatment_name,
+            image_url
+          )
         )
       `
     )
@@ -56,6 +51,40 @@ async function fetchClinicDetail(clinic_id: string) {
     .single();
   if (error) throw error;
   return data;
+}
+
+// Infinite fetch reviews for this clinic
+const PAGE_SIZE = 2;
+async function fetchClinicReviews({
+  pageParam = 0,
+  clinic_id,
+}: {
+  pageParam?: number;
+  clinic_id: string;
+}) {
+  // Get all clinic_treatment ids for this clinic
+  const { data: treatments, error: treatmentError } = await supabaseClient
+    .from("clinic_treatment")
+    .select("id")
+    .eq("clinic_id", clinic_id);
+
+  if (treatmentError) throw treatmentError;
+  const treatmentIds = treatments?.map((t) => t.id) || [];
+  if (treatmentIds.length === 0) return { reviews: [], hasMore: false };
+
+  // Fetch reviews for these treatments, paginated
+  const { data: reviews, error: reviewError } = await supabaseClient
+    .from("review")
+    .select("*, user:patient_id(*)")
+    .in("clinic_treatment_id", treatmentIds)
+    .order("created_at", { ascending: false })
+    .range(pageParam * PAGE_SIZE, pageParam * PAGE_SIZE + PAGE_SIZE - 1);
+
+  if (reviewError) throw reviewError;
+  return {
+    reviews: reviews || [],
+    hasMore: (reviews?.length || 0) === PAGE_SIZE,
+  };
 }
 
 export default function ClinicDetailPage() {
@@ -73,27 +102,46 @@ export default function ClinicDetailPage() {
     reviews: "clinic-reviews",
   };
 
-  const { data: clinic, error } = useQuery({
+  // Fetch clinic detail
+  const {
+    data: clinic,
+    error: clinicError,
+    isLoading: clinicLoading,
+  } = useQuery({
     queryKey: ["clinic-detail", clinic_id],
     queryFn: () => fetchClinicDetail(clinic_id),
     enabled: !!clinic_id,
-    refetchInterval: 60000, // Refetch every minute
-    refetchOnWindowFocus: true, // Refetch on window focus
-    refetchOnReconnect: true, // Refetch on reconnect
-    refetchOnMount: true, //  refetch on mount
-    staleTime: 60000, // Data is fresh for 1 minute
   });
 
-  // Flatten reviews: collect all reviews from all reservations in all clinic_treatment
+  // Infinite query for reviews
+  const {
+    data: reviewsPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingReviews,
+  } = useInfiniteQuery({
+    queryKey: ["clinic-reviews", clinic_id],
+    queryFn: ({ pageParam = 0 }) =>
+      fetchClinicReviews({ pageParam, clinic_id }),
+    enabled: !!clinic_id,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.reviews.length / PAGE_SIZE : undefined,
+    initialPageParam: 0,
+  });
+
+  // Flatten reviews
   const reviews =
-    clinic?.clinic_treatment
-      ?.flatMap((ct) =>
-        (ct.review || []).map((review) => ({
-          ...review,
-          user: review.user,
-        }))
-      )
-      .filter(Boolean) || [];
+    reviewsPages?.pages.flatMap((page) =>
+      page.reviews.map((review) => ({
+        id: review.id,
+        full_name: review.user?.full_name || "익명", // Anonymous if no user
+        images: review.images || [],
+        rating: review.rating || "0",
+        created_at: review.created_at,
+        review: review.review || "리뷰 내용이 없습니다.", // Default message if no review text
+      }))
+    ) || [];
 
   // Refs for tab sections
   const infoRef = useRef<HTMLDivElement>(null);
@@ -156,7 +204,7 @@ export default function ClinicDetailPage() {
       }
     };
     addViewCount();
-  }, []);
+  }, [clinic_id, user?.id]);
 
   // Copy address to clipboard
   const handleCopyAddress = () => {
@@ -166,10 +214,12 @@ export default function ClinicDetailPage() {
     }
   };
 
-  if (!clinic) return <div className="p-8 text-center">Loading...</div>;
-  if (error || !clinic)
+  if (clinicLoading) return <ClinicDetailSkeleton />;
+
+  if (clinicError || !clinic)
     return (
       <div className="p-8 text-center">병원 정보를 불러올 수 없습니다.</div>
+      //Unable to retrieve hospital information.
     );
 
   return (
@@ -206,7 +256,7 @@ export default function ClinicDetailPage() {
                 {reviews.length > 0
                   ? (
                       reviews.reduce(
-                        (sum: number, r) => sum + (r.rating ?? 0),
+                        (sum: number, r) => sum + (Number(r.rating) ?? 0),
                         0
                       ) / reviews.length
                     ).toFixed(1)
@@ -214,6 +264,9 @@ export default function ClinicDetailPage() {
               </span>
               <span className="text-gray-500 text-base ml-1">
                 ({reviews.length > 0 ? reviews.length : "0"})
+              </span>
+              <span className="text-gray-400 text-sm ml-2">
+                리뷰 {/**Reviews */} {reviews.length ?? 0}
               </span>
             </div>
           </div>
@@ -269,7 +322,7 @@ export default function ClinicDetailPage() {
           <div id={tabAnchors.info} ref={infoRef} className="scroll-mt-16">
             {/* 진료 시간 (Opening Hours) */}
             <div className="mt-6">
-              <div className="font-semibold mb-2">진료 시간</div>
+              <div className="font-semibold text-xl mb-2">진료 시간</div>
               {/* Today section */}
               <div className="bg-blue-50 rounded-xl p-4 flex justify-between items-center mb-4">
                 <div>
@@ -301,8 +354,9 @@ export default function ClinicDetailPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium">점심 시간</div>{" "}
-                  {/* Lunch time */}
+                  <div className="font-medium">
+                    점심 시간 {/* Lunch time */}
+                  </div>
                   <div className="text-base mt-1">
                     전화 문의{/**Phone Inquiry */}
                   </div>
@@ -332,7 +386,9 @@ export default function ClinicDetailPage() {
             </div>
             {/* 위치 (Location) */}
             <div className="mt-6">
-              <div className="font-semibold mb-2">위치 {/**Location */}</div>
+              <div className="font-semibold mb-2 text-xl">
+                위치 {/**Location */}
+              </div>
               <div className="rounded-lg overflow-hidden">
                 <div className="w-full h-40 bg-gray-200 mb-2 relative">
                   <iframe
@@ -366,7 +422,13 @@ export default function ClinicDetailPage() {
             </div>
             {/* 시설 (Facilities) */}
             <div className="mt-6">
-              <div className="font-semibold mb-2">시설</div>
+              <div className="font-semibold mb-2 text-xl">
+                시설 {/**Treatments */}
+              </div>
+              <div className=" mb-2">
+                총 {clinic.clinic_treatment.length}개{" "}
+                {/**A total of {number} */}
+              </div>
               <div className="flex flex-wrap gap-2">
                 {clinic.clinic_treatment?.map((ct) => (
                   <span
@@ -386,7 +448,8 @@ export default function ClinicDetailPage() {
             ref={photosRef}
             className="scroll-mt-16 mt-10"
           >
-            <div className="font-semibold mb-2">사진</div> {/* Photos */}
+            <div className="font-semibold text-xl mb-2">사진</div>{" "}
+            {/* Photos */}
             <div className="grid grid-cols-3 gap-2">
               {clinic.pictures?.map((pic: string, idx: number) => (
                 <div
@@ -424,88 +487,33 @@ export default function ClinicDetailPage() {
             ref={reviewsRef}
             className="scroll-mt-16 mt-10"
           >
-            <div className="font-semibold mb-2">
+            <div className="font-semibold mb-2 text-xl">
               방문자 리뷰 {reviews.length} {/* Visitor Reviews */}
             </div>
             <div className="flex flex-col gap-6">
-              {reviews.length === 0 && (
+              {isLoadingReviews && (
+                <div className="text-center text-gray-400 py-8">
+                  리뷰를 불러오는 중입니다...
+                </div>
+              )}
+              {!isLoadingReviews && reviews.length === 0 && (
                 <div className="text-gray-400 text-center py-8">
                   아직 리뷰가 없습니다. {/* No reviews yet */}
                 </div>
               )}
-              {reviews.map((review, idx: number) => (
-                <div
-                  key={review.id || idx}
-                  className="bg-[#F6FAFF] rounded-xl px-4 py-6"
-                >
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-[#E9EEF3] flex items-center justify-center">
-                      <span className="text-2xl text-gray-400">
-                        {/* User icon */}
-                        <svg
-                          width="28"
-                          height="28"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle cx="12" cy="8" r="4" fill="#B0B8C1" />
-                          <rect
-                            x="4"
-                            y="16"
-                            width="16"
-                            height="6"
-                            rx="3"
-                            fill="#B0B8C1"
-                          />
-                        </svg>
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-base">
-                        {review.user?.full_name || "김00"}
-                      </div>
-                    </div>
-                  </div>
-                  {/* Images */}
-                  {Array.isArray(review.images) && review.images.length > 0 && (
-                    <div className="flex gap-3 mb-3 flex-wrap">
-                      {review.images.map((img: string, i: number) => (
-                        <div
-                          key={i}
-                          className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0"
-                        >
-                          <Image
-                            src={img}
-                            alt={`review-img-${i}`}
-                            width={128}
-                            height={128}
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-yellow-500 flex items-center gap-1 font-medium text-base">
-                      <Star size={18} fill="currentColor" />
-                      {review.rating || "4.2"}
-                    </span>
-                    <span className="text-xs text-gray-400 ml-2">
-                      {review.created_at
-                        ? (() => {
-                            const d = new Date(review.created_at);
-                            return `${d.getFullYear()}. ${
-                              d.getMonth() + 1
-                            }. ${d.getDate()}`;
-                          })()
-                        : ""}
-                    </span>
-                  </div>
-                  <div className="text-[15px] leading-relaxed whitespace-pre-line">
-                    {review.review}
-                  </div>
-                </div>
+              {reviews.map((review) => (
+                <ClinicReviewCard {...review} key={review.id} />
               ))}
+              {hasNextPage && (
+                <Button
+                  className="mx-auto mt-4"
+                  variant="outline"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "로딩 중..." : "리뷰 더보기"}
+                </Button>
+              )}
             </div>
           </div>
         </div>
