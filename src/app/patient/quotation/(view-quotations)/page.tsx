@@ -103,10 +103,7 @@ interface QuotationListItemProps {
   ) => void;
 }
 
-export function QuotationListItem({
-  quotation: q,
-  onClick,
-}: QuotationListItemProps) {
+function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
   const detail = `${q.region?.split(",")[1]?.trim() || q.region} · ${
     q.treatment.treatment_name
   } 공개견적`;

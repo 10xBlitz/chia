@@ -3,6 +3,7 @@ import { uploadFileToSupabase } from "./upload-file.services";
 
 interface TreatmentFilters {
   treatment_name?: string;
+  clinic_id?: string;
 }
 
 const IMAGE_BUCKET = "treatment-images";

@@ -107,7 +107,8 @@ async function fetchQuotations(
   let query = supabaseClient
     .from("quotation")
     .select("*, treatment(*), bid(*)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   // Logic:
   // 1. If clinic_id is present in quotation, get if clinic_id matches.

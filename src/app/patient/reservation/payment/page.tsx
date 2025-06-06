@@ -40,6 +40,7 @@ export default function CheckoutPage() {
     }
 
     fetchPaymentWidgets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientKey, customerKey]);
 
   useEffect(() => {

@@ -13,6 +13,7 @@ type FormTextareaProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
+  disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
   formItemClassName?: string;
@@ -25,6 +26,7 @@ export default function FormTextarea<T extends FieldValues>({
   name,
   label,
   maxLength = 1000, // Default max length
+  disabled = false,
   placeholder,
   formItemClassName,
   formLabelClassName,
@@ -49,6 +51,7 @@ export default function FormTextarea<T extends FieldValues>({
               className={cn("h-[45px]", inputClassName)}
               placeholder={placeholder}
               maxLength={maxLength}
+              disabled={disabled}
               {...field}
             />
           </FormControl>

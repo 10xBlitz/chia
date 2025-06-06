@@ -18,6 +18,7 @@ type FormSelectProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
+  disabled?: boolean;
   placeholder?: string;
   formLabelClassName?: string;
   loading?: boolean;
@@ -28,6 +29,7 @@ export default function FormSelect<T extends FieldValues>({
   control,
   name,
   label,
+  disabled = false,
   placeholder,
   formLabelClassName,
   children,
@@ -50,7 +52,7 @@ export default function FormSelect<T extends FieldValues>({
             onValueChange={field.onChange}
             value={field.value}
             defaultValue={field.value}
-            disabled={field.disabled}
+            disabled={disabled}
           >
             <FormControl>
               <SelectTrigger className="w-full min-h-[45px]">

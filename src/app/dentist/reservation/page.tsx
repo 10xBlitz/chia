@@ -103,6 +103,7 @@ async function fetchReservations(
     .select("*, clinic_treatment(*, treatment(*)), user!patient_id(*)")
     .eq("reservation_date", dateStr)
     .eq("clinic_treatment.clinic_id", clinicId)
-    .order("reservation_time", { ascending: true });
+    .order("reservation_time", { ascending: true })
+    .limit(100);
   return data ? (Array.isArray(data) ? data : [data]) : [];
 }

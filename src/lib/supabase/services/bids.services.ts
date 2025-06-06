@@ -1,6 +1,6 @@
 import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
-import { Tables } from "../types";
+import { Tables, TablesInsert } from "../types";
 
 export async function getPaginatedBids(
   page = 1,
@@ -51,6 +51,28 @@ export async function getPaginatedBids(
   };
 }
 
+// Separate insert function for bid
+export async function insertBid(values: TablesInsert<"bid">) {
+  const { error: insertError, data } = await supabaseClient
+    .from("bid")
+    .insert({
+      quotation_id: values.quotation_id,
+      clinic_treatment_id: values.clinic_treatment_id,
+      expected_price: values.expected_price,
+      additional_explanation: values.additional_explanation || null,
+      recommend_quick_visit: values.recommend_quick_visit,
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    console.error("Insert bid error:", insertError);
+    throw new Error("등록에 실패했습니다. 다시 시도해주세요."); // Registration failed. Please try again.
+  }
+
+  return data;
+}
+
 export async function getSingleBid(bidId: string) {
   const { data, error } = await supabaseClient
     .from("bid")
@@ -60,4 +82,19 @@ export async function getSingleBid(bidId: string) {
 
   if (error) throw new Error(error.message);
   return data;
+}
+
+export async function checkIfClinicHasBidOnQuotation(
+  quotationId: string,
+  clinicId: string
+) {
+  if (!clinicId) return null;
+  const { data: bid, error: bidError } = await supabaseClient
+    .from("bid")
+    .select("*, clinic_treatment(*)")
+    .eq("quotation_id", quotationId)
+    .eq("clinic_treatment.clinic_id", clinicId)
+    .single();
+  if (bidError || !bid) return null;
+  return bid;
 }

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-hot-toast";
 import { createReview } from "@/lib/supabase/services/reviews.services";
 import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
-import { Star, ChevronLeft, X } from "lucide-react";
+import { Star, X } from "lucide-react";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {

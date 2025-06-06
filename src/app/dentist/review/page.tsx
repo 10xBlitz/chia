@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { Star } from "lucide-react";
 import Image from "next/image";
-import { getClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { useUserStore } from "@/providers/user-store-provider";
+import { getPaginatedReviews } from "@/lib/supabase/services/reviews.services";
+import { getViewCountOfClinic } from "@/lib/supabase/services/views.service";
 
 export default function DentistReviewPage() {
   const user = useUserStore((state) => state.user);
@@ -14,18 +15,27 @@ export default function DentistReviewPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["clinic-reviews", clinicId],
     queryFn: async () => {
-      if (!clinicId) return { reviews: [], views: 0 };
-      return await getClinicReviews(clinicId);
+      const result = await getPaginatedReviews(1, 1000, {
+        clinic_id: clinicId as string,
+      });
+
+      return result.data;
     },
     enabled: !!clinicId,
   });
 
-  const reviews = (data?.reviews || []).map((review) => ({
+  const { data: viewCount } = useQuery({
+    queryKey: ["clinic-views", clinicId],
+    queryFn: async () => getViewCountOfClinic(clinicId as string),
+    enabled: !!clinicId,
+  });
+
+  const reviews = data?.map((review) => ({
     ...review,
     review: review.review ?? "", // Ensure review is always a string
     images: review.images ?? [],
   }));
-  const views = data?.views ?? 0;
+  const views = viewCount ?? 0;
 
   return (
     <div className="flex flex-col">
@@ -41,12 +51,12 @@ export default function DentistReviewPage() {
             <div className="text-center py-8 text-gray-400">
               로딩 중... {/* Loading... */}
             </div>
-          ) : reviews.length === 0 ? (
+          ) : reviews?.length === 0 ? (
             <div className="text-gray-400 text-center py-8">
               아직 리뷰가 없습니다. {/* No reviews yet. */}
             </div>
           ) : (
-            reviews.map((review) => (
+            reviews?.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))
           )}

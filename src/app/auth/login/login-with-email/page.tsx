@@ -85,7 +85,8 @@ export default function LoginForm() {
         router.push("/dentist");
       }
     }
-  }, [userRole]);
+    // README: unsure about the router in deps, if there re-render issues, remove it
+  }, [userRole, router]);
 
   return (
     <MobileLayout className="min-h-dvh">

@@ -10,6 +10,7 @@ interface Filters {
   full_name?: string | null;
   treatment_id?: number | null;
   patient_id?: string | null;
+  clinic_id?: string;
   date_range?: {
     from?: string;
     to?: string;
@@ -66,6 +67,10 @@ export async function getPaginatedReviews(
     );
     query = query.not("reservation", "is", null);
     query = query.not("reservation.patient", "is", null);
+  }
+
+  if (filters.clinic_id) {
+    query = query.eq("clinic_treatment.clinic_id", filters.clinic_id);
   }
 
   // Date range filter
@@ -177,38 +182,38 @@ export async function createReview({
  * Fetch all reviews for a clinic, including review images and patient info.
  * @param clinicId The clinic id
  */
-export async function getClinicReviews(clinicId: string) {
-  // Fetch all reviews where the related clinic_treatment.clinic_id matches
-  const { data: reviews, error: reviewsError } = await supabaseClient
-    .from("review")
-    .select(
-      `
-        *,
-        user:patient_id (
-          id,
-          full_name
-        ),
-        clinic_treatment (
-          id,
-          clinic_id
-        )
-      `
-    )
-    .eq("clinic_treatment.clinic_id", clinicId)
-    .order("created_at", { ascending: false });
+// export async function getClinicReviews(clinicId: string) {
+//   // Fetch all reviews where the related clinic_treatment.clinic_id matches
+//   const { data: reviews, error: reviewsError } = await supabaseClient
+//     .from("review")
+//     .select(
+//       `
+//         *,
+//         user:patient_id (
+//           id,
+//           full_name
+//         ),
+//         clinic_treatment (
+//           id,
+//           clinic_id
+//         )
+//       `
+//     )
+//     .eq("clinic_treatment.clinic_id", clinicId)
+//     .order("created_at", { ascending: false });
 
-  if (reviewsError) throw reviewsError;
+//   if (reviewsError) throw reviewsError;
 
-  // Fetch clinic views count only
-  const { count: viewsCount, error: clinicError } = await supabaseClient
-    .from("clinic_view")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId);
+//   // Fetch clinic views count only
+//   const { count: viewsCount, error: clinicError } = await supabaseClient
+//     .from("clinic_view")
+//     .select("*", { count: "exact", head: true })
+//     .eq("clinic_id", clinicId);
 
-  if (clinicError) throw clinicError;
+//   if (clinicError) throw clinicError;
 
-  return {
-    reviews: reviews || [],
-    views: viewsCount ?? 0,
-  };
-}
+//   return {
+//     reviews: reviews || [],
+//     views: viewsCount ?? 0,
+//   };
+// }
