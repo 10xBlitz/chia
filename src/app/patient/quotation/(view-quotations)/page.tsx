@@ -17,7 +17,7 @@ export default function ViewQuotationPage() {
     queryKey: ["quotations", userId],
     queryFn: () => getPaginatedQuotations(1, 1000, { patient_id: userId }),
     enabled: !!userId,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    retry: 1,
   });
 
   const handleQuotationClick = (

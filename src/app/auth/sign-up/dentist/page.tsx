@@ -136,7 +136,7 @@ export default function DentistSignupPage() {
             ))}
           </FormSelect>
 
-          {treatments && (
+          {treatments && Array.isArray(treatments) && (
             <FormMultiSelect
               control={form.control}
               name="treatments"

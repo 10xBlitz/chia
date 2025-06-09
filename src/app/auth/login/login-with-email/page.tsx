@@ -84,6 +84,7 @@ export default function LoginForm() {
   };
 
   useEffect(() => {
+    console.log("----> user role: ", userRole);
     if (userRole) {
       if (userRole === "admin") {
         router.push("/admin");

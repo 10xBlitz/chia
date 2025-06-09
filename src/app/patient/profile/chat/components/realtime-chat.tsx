@@ -9,12 +9,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useChatScroll } from "../hooks/use-chat-scroll";
 import { ChatMessageItem } from "./chat-message";
 import BackButton from "@/components/back-button";
+import Image from "next/image";
 
 interface RealtimeChatProps {
   roomName: string;
   username: string;
   onMessage?: (message: string) => void;
   messages?: ChatMessage[];
+  onSelectRoomCategory: (roomCategory: string | undefined) => void;
 }
 
 /**
@@ -30,6 +32,7 @@ export const RealtimeChat = ({
   username,
   onMessage,
   messages: initialMessages = [],
+  onSelectRoomCategory, // Default no-op function
 }: RealtimeChatProps) => {
   const { containerRef, scrollToBottom } = useChatScroll();
 
@@ -79,59 +82,77 @@ export const RealtimeChat = ({
     [newMessage, isConnected, sendMessage, onMessage]
   );
 
-  // System message content and object
-  const systemMessageContent = [
-    "안녕하세요, 고객님",
-    "치아 1:1 채팅 고객센터입니다.",
-    "",
-    "궁금하신 사항을 선택해 주세요.",
-    "해당하는 문의가 없는 경우에는 [기타]를 선택해 주세요.",
-    "",
-    "운영시간 (토,일, 공휴일 제외)",
-    "- 월~금 : 10:00 ~ 18:00",
-    "- 점심시간 : 13:00 ~ 14:00",
-  ].join("\n");
-
   const systemMessage = {
-    id: "system-welcome",
-    content: systemMessageContent,
-    user: { name: "치아" },
+    id: "system-message",
+    content: `안녕하세요, 고객님
+                          치아 1:1 채팅 고객센터입니다.
+
+                          궁금하신 사항을 선택해 주세요.
+                          해당하는 문의가 없는 경우에는 [기타]를
+                          선택해 주세요.
+
+                          운영시간 (토,일. 공휴일 제외)
+                          - ﻿월~ 금 : 10:00 ~ 18:00
+                          - 점심시간 : 13:00 ~ 14:00`,
+    user: { name: "고객센터" }, // Customer Service
     createdAt: new Date().toISOString(),
   };
 
   return (
-    <div className="flex flex-col h-full w-full text-foreground antialiased">
+    <div className="flex flex-col h-dvh pb-5 w-full text-foreground antialiased">
       {/* Header */}
-      <div className="flex items-center px-6 py-4 bg-white rounded-t-3xl">
-        <BackButton className="" />
+      <div className="flex items-center px-4 py-4 bg-white rounded-t-3xl">
+        {roomName === "no room" ? (
+          <BackButton />
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            type="button"
+            onClick={() => onSelectRoomCategory(undefined)}
+          >
+            <Image
+              src="/icons/chevron-left.svg"
+              alt="back"
+              height={20}
+              width={12}
+            />
+          </Button>
+        )}
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-white border border-[#E6F0FF] flex items-center justify-center">
             <span className="text-blue-600 font-bold text-sm">Chia!</span>
           </div>
-          <span className="font-semibold text-xl text-black">치아</span>
+          <span className="font-semibold text-xl text-black">
+            치아 {/**Teeth */}
+          </span>
         </div>
       </div>
       {/* Chat area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto flex flex-col items-center px-4 pt-6 pb-2"
+        className="flex-1  overflow-y-auto flex flex-col items-center px-4 pt-6 pb-2"
       >
         {/* Avatar */}
         <div className="flex flex-col items-center mb-2">
-          <div className="w-16 h-16 rounded-full p-10 flex items-center justify-center text-blue-600 text-2xl font-bold mb-2 border border-[#D6E6FF]">
+          <div className="w-16 h-16 rounded-full p-10 flex items-center justify-center text-2xl font-bold mb-2 border border-[#D6E6FF]">
             Chia!
           </div>
           <div className="font-semibold text-base mb-1">Contact 치아</div>
           <div className="text-xs text-muted-foreground mb-4">1:18 PM</div>
         </div>
-        {/* System welcome message using ChatMessageItem */}
-        <div className="w-full flex justify-start mb-2">
-          <ChatMessageItem
-            message={systemMessage}
-            isOwnMessage={false}
-            showHeader={true}
-          />
-        </div>
+
+        {/**System message if there is no room yet */}
+        {roomName === "no room" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <ChatMessageItem
+              message={systemMessage}
+              isOwnMessage={false}
+              showHeader={true}
+            />
+          </div>
+        )}
+
         {/* User & other messages */}
         <div className="w-full space-y-1">
           {allMessages.map((message, index) => {
@@ -156,31 +177,73 @@ export const RealtimeChat = ({
       </div>
 
       {/* Input only, no options */}
-      <form
-        onSubmit={handleSendMessage}
-        className="flex w-full gap-2 border-t border-border bg-white p-4"
-      >
-        <Input
-          className={cn(
-            "rounded-md bg-[#F7F7F9] text-sm transition-all duration-300 border-none focus:ring-0 focus:outline-none",
-            isConnected && newMessage.trim() ? "w-[calc(100%-36px)]" : "w-full"
-          )}
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
-          disabled={!isConnected}
+      {roomName === "no room" ? (
+        <div className="flex gap-3 flex-wrap justify-end">
+          {[
+            "회원/계정",
+            "후기 관리",
+            "상담 신청",
+            "앱결제",
+            "오류",
+            "기타",
+          ].map((item) => (
+            <Button
+              variant="outline"
+              key={item}
+              onClick={() => onSelectRoomCategory(item)}
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+      ) : (
+        <ChatForm
+          handleSendMessage={handleSendMessage}
+          isConnected={isConnected}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
         />
-        {isConnected && newMessage.trim() && (
-          <Button
-            className="aspect-square rounded-full animate-in fade-in slide-in-from-right-4 duration-300 bg-blue-600 hover:bg-blue-700 text-white"
-            type="submit"
-            disabled={!isConnected}
-          >
-            <Send className="size-4" />
-          </Button>
-        )}
-      </form>
+      )}
     </div>
   );
 };
+
+function ChatForm({
+  handleSendMessage,
+  isConnected,
+  newMessage,
+  setNewMessage,
+}: {
+  handleSendMessage: (e: React.FormEvent) => void;
+  isConnected: boolean;
+  newMessage: string;
+  setNewMessage: (message: string) => void;
+}) {
+  return (
+    <form
+      onSubmit={handleSendMessage}
+      className="flex w-full gap-2 border-t border-border  p-4"
+    >
+      <Input
+        className={cn(
+          "rounded-md bg-[#F7F7F9] text-sm transition-all duration-300 border-none focus:ring-0 focus:outline-none",
+          isConnected && newMessage.trim() ? "w-[calc(100%-36px)]" : "w-full"
+        )}
+        type="text"
+        value={newMessage}
+        onChange={(e) => setNewMessage(e.target.value)}
+        placeholder="Type a message..."
+        disabled={!isConnected}
+      />
+      {isConnected && newMessage.trim() && (
+        <Button
+          className="aspect-square rounded-full animate-in fade-in slide-in-from-right-4 duration-300 bg-blue-600 hover:bg-blue-700 text-white"
+          type="submit"
+          disabled={!isConnected}
+        >
+          <Send className="size-4" />
+        </Button>
+      )}
+    </form>
+  );
+}

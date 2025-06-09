@@ -80,31 +80,24 @@ export type Database = {
       }
       chat_room: {
         Row: {
-          clinic_id: string | null
+          category: string
           created_at: string
           id: string
           patient_id: string
         }
         Insert: {
-          clinic_id?: string | null
+          category: string
           created_at?: string
           id?: string
           patient_id: string
         }
         Update: {
-          clinic_id?: string | null
+          category?: string
           created_at?: string
           id?: string
           patient_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "chat_room_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
-            referencedRelation: "clinic"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "chat_room_patient_id_fkey"
             columns: ["patient_id"]
@@ -362,21 +355,21 @@ export type Database = {
           content: string
           created_at: string
           id: string
-          user_id: string
+          sender_id: string
         }
         Insert: {
           chat_room_id: string
           content: string
           created_at?: string
           id?: string
-          user_id: string
+          sender_id: string
         }
         Update: {
           chat_room_id?: string
           content?: string
           created_at?: string
           id?: string
-          user_id?: string
+          sender_id?: string
         }
         Relationships: [
           {
@@ -387,8 +380,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "message_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "message_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "user"
             referencedColumns: ["id"]

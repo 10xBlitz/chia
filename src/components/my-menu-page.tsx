@@ -87,7 +87,6 @@ export default function MyMenuPage({
             <Button
               variant={"ghost"}
               onClick={async () => {
-                await supabaseClient.auth.signOut();
                 router.push("/auth/withdraw");
               }}
               className="flex items-center w-full justify-between "
@@ -107,7 +106,6 @@ export default function MyMenuPage({
             <Button
               variant={"ghost"}
               onClick={async () => {
-                await supabaseClient.auth.signOut();
                 router.push("/patient/profile/chat");
               }}
               className="flex items-center w-full justify-between "

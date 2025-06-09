@@ -47,10 +47,10 @@ export default function MainPage() {
       let regionFilter = "";
       if (filterOption === "근무지") {
         //workplace
-        regionFilter = user?.work_place.split(",")[1] || "";
+        regionFilter = user?.work_place || "";
       } else if (filterOption === "거주") {
         //residence
-        regionFilter = user?.residence.split(",")[1] || "";
+        regionFilter = user?.residence || "";
       }
       const res = await getPaginatedClinicsWthReviews(1, 3, {
         region: regionFilter,
