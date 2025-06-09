@@ -17,6 +17,8 @@ export default function MainBannerCarousel() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["banners", "main"],
     queryFn: async () => await getPaginatedBanners(1, 10, { type: "main" }),
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    retry: 1,
   });
 
   const [api, setApi] = useState<CarouselApi>();

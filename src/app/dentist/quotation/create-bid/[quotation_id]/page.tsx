@@ -17,7 +17,7 @@ import FormTextarea from "@/components/form-ui/form-textarea";
 import FormCheckbox from "@/components/form-ui/form-checkbox";
 import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
 import {
-  checkIfClinicHasBidOnQuotation,
+  getClinicBidOnQuotation,
   insertBid,
 } from "@/lib/supabase/services/bids.services";
 
@@ -40,7 +40,7 @@ export default function CreateBidPage() {
   const { data: existingBid, isLoading: existingBidLoading } = useQuery({
     queryKey: ["existing_bid", quotationId, user?.clinic_id],
     queryFn: () =>
-      checkIfClinicHasBidOnQuotation(quotationId, user?.clinic_id as string),
+      getClinicBidOnQuotation(quotationId, user?.clinic_id as string),
     enabled: !!user?.clinic_id && !!quotationId,
   });
 

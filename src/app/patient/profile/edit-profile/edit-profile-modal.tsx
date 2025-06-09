@@ -27,9 +27,9 @@ export function EditProfileModal({
 }: {
   open: boolean;
   onClose: () => void;
-  userData: UserState;
+  userData: UserState["user"];
 }) {
-  const user = userData.user;
+  const user = userData;
   const updateUser = useUserStore((state) => state.updateUser);
 
   const form = useForm<z.infer<typeof editPatientProfileSchema>>({

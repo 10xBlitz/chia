@@ -72,7 +72,10 @@ export default function CreateReservation() {
     queryKey: ["treatments"],
     queryFn: async () =>
       await getPaginatedClinicTreatments(clinic_id as string, 1, 100),
-    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   const user = useUserStore((state) => state.user);

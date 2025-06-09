@@ -24,8 +24,10 @@ export default function BidsPage() {
     queryKey: ["bids", quotationId],
     queryFn: () => getPaginatedBids(1, 100, { quotation_id: quotationId }),
     enabled: enabled && !!quotationId,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   return (

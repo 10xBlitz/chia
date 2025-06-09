@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/combobox";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
-import { ConfirmDeleteModal } from "@/components/confirm-modal";
+import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import {
   CLINIC_IMAGE_ALLOWED_MIME_TYPES,
   CLINIC_IMAGE_BUCKET,

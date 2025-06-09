@@ -13,7 +13,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
 import { TreatmentModal } from "./treatment-modal";
 import { TreatmentTable } from "./columns";
-import { ConfirmDeleteModal } from "@/components/confirm-modal";
+import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import { supabaseClient } from "@/lib/supabase/client";
 interface CellActionProps {
   data: TreatmentTable;

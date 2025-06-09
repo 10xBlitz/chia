@@ -86,7 +86,13 @@ const SignupPage = () => {
       router.push("/");
     },
     onError: (error) => {
-      toast.error(error?.message || "회원가입에 실패했습니다.");
+      if (error instanceof Error) {
+        if (error.message.includes("already registered")) {
+          toast.error("이미 등록된 이메일입니다. 다른 이메일을 사용해주세요."); // Email already registered
+        } else {
+          toast.error(error?.message || "회원가입에 실패했습니다.");
+        }
+      }
     },
   });
 

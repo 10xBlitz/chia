@@ -1,6 +1,6 @@
 // filepath: /Users/dev7/Desktop/real-projects/chia/src/app/admin/clinic/confirm-delete-modal.tsx
 import { Modal } from "@/components/ui/modal";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 export function ConfirmDeleteModal({
   open,

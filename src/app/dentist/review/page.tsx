@@ -66,6 +66,15 @@ export default function DentistReviewPage() {
   );
 }
 
+// interface ClinicReviewCardProps {
+//   id: string | number;
+//   full_name?: string;
+//   images?: string[];
+//   rating?: number | string;
+//   created_at?: string | Date;
+//   review?: string;
+// }
+
 // Reusable: Review Card (with images and patient info)
 function ReviewCard({
   review,

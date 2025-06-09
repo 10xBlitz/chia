@@ -16,12 +16,20 @@ export default function ReservationListPage() {
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
 
-  const { data: reservations, isLoading } = useQuery({
+  const {
+    data: reservations,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["reservations", userId],
     queryFn: async () =>
       await getPaginatedReservations(1, 1000, { patient_id: userId }),
     enabled: !!userId,
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
   });
+
+  console.log("---> error: ", error);
 
   return (
     <>

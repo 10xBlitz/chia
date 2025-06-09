@@ -40,16 +40,7 @@ export default function MyMenuPage({
             <div className="font-semibold text-base">
               {user?.full_name || "김00" /* Kim 00 */}
             </div>
-            <div className="text-xs text-gray-500">
-              {
-                user?.birthdate
-                  ? `${user.birthdate.slice(0, 4)}년 ${user.birthdate.slice(
-                      5,
-                      7
-                    )}월 ${user.birthdate.slice(8, 10)}일`
-                  : "0000년 0월 00일" /* 0000 year 0 month 00 day */
-              }
-            </div>
+            <div className="text-xs text-gray-500">{user?.email}</div>
           </div>
           <Button
             variant="outline"
@@ -81,24 +72,29 @@ export default function MyMenuPage({
             계정 관리 {/* Account Management */}
           </div>
           <div className="bg-white">
-            <Link
-              href="#"
+            <Button
+              variant={"ghost"}
               onClick={async () => {
                 await supabaseClient.auth.signOut();
                 router.push("/");
               }}
-              className="flex items-center justify-between px-5 py-3 text-sm "
+              className="flex items-center w-full justify-between "
             >
-              로그아웃 {/* Logout */}
-              <ChevronRightIcon />
-            </Link>
-            <Link
-              href="/auth/withdraw"
-              className="flex items-center justify-between px-5 py-3 text-sm"
+              <span className="ml-2">로그아웃 {/* Logout */}</span>
+              <ChevronRightIcon className="min-h-5 min-w-5 mr-2" />
+            </Button>
+
+            <Button
+              variant={"ghost"}
+              onClick={async () => {
+                await supabaseClient.auth.signOut();
+                router.push("/auth/withdraw");
+              }}
+              className="flex items-center w-full justify-between "
             >
-              회원탈퇴 {/* Withdraw Membership */}
-              <ChevronRightIcon />
-            </Link>
+              <span className="ml-2">회원탈퇴 {/* Withdraw Membership */}</span>
+              <ChevronRightIcon className="min-h-5 min-w-5 mr-2 " />
+            </Button>
           </div>
         </section>
 
@@ -108,13 +104,20 @@ export default function MyMenuPage({
             고객센터 {/* Customer Center */}
           </div>
           <div className="bg-white">
-            <Link
-              href="/patient/profile/chat"
-              className="flex items-center justify-between px-5 py-3 text-sm"
+            <Button
+              variant={"ghost"}
+              onClick={async () => {
+                await supabaseClient.auth.signOut();
+                router.push("/patient/profile/chat");
+              }}
+              className="flex items-center w-full justify-between "
             >
-              서비스 이용 문의 {/* Service Inquiry */}
-              <ChevronRightIcon />
-            </Link>
+              <span className="ml-2">
+                {" "}
+                서비스 이용 문의 {/* Service Inquiry */}
+              </span>
+              <ChevronRightIcon className="min-h-5 min-w-5 mr-2" />
+            </Button>
           </div>
         </section>
       </main>

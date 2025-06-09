@@ -80,6 +80,7 @@ export default function DentistSignupPage() {
 
   const onSubmit = (data: z.infer<typeof DentistSignupFormSchema>) => {
     mutate(data);
+    // console.log("---->data: ", data);
   };
 
   return (
@@ -135,24 +136,26 @@ export default function DentistSignupPage() {
             ))}
           </FormSelect>
 
-          <FormMultiSelect
-            control={form.control}
-            name="treatments"
-            label="치료" // Treatment
-            placeholder="여기에서 치료를 선택하세요" // Select treatments here
-            options={treatments?.map((item) => ({
-              label: item.treatment_name,
-              value: item.id,
-            }))}
-            loading={!treatments}
-            onChange={(selected) => {
-              form.setValue(
-                "treatments",
-                selected.map((item) => item.value),
-                { shouldValidate: true }
-              );
-            }}
-          />
+          {treatments && (
+            <FormMultiSelect
+              control={form.control}
+              name="treatments"
+              label="치료" // Treatment
+              placeholder="여기에서 치료를 선택하세요" // Select treatments here
+              options={treatments?.map((item) => ({
+                label: item.treatment_name,
+                value: item.id,
+              }))}
+              loading={!treatments}
+              onChange={(selected) => {
+                form.setValue(
+                  "treatments",
+                  selected.map((item) => item.value),
+                  { shouldValidate: true }
+                );
+              }}
+            />
+          )}
 
           <FormMultiSelect
             control={form.control}

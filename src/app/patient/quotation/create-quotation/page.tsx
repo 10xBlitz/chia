@@ -60,6 +60,10 @@ export default function CreateQuotationPage() {
         return res.data || [];
       }
     },
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   const queryClient = useQueryClient();
@@ -85,7 +89,7 @@ export default function CreateQuotationPage() {
         region: values.region,
         user_id: user.id,
         clinic_id,
-        images: form.getValues("images").files,
+        images: form.getValues("images")?.files,
         setUploadingImageIdx,
       });
     },
@@ -122,7 +126,7 @@ export default function CreateQuotationPage() {
           placeholder="시술을 선택해주세요" /* Please select a treatment */
         >
           {treatmentsData &&
-            treatmentsData.map((t) => (
+            treatmentsData?.map((t) => (
               <SelectItem key={t.id} value={t.id}>
                 {t.treatment_name || "시술" /* Treatment */}
               </SelectItem>

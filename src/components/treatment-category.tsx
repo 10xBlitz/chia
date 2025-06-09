@@ -10,6 +10,8 @@ export default function TreatmentCategoryScroll() {
   const treatmentQuery = useQuery({
     queryKey: ["treatments"],
     queryFn: async () => await getPaginatedTreatments(1, 100),
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    retry: 1,
   });
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -79,7 +81,7 @@ export default function TreatmentCategoryScroll() {
         <p>Error loading treatments: {treatmentQuery.error.message}</p>
       )}
       {treatmentQuery.data &&
-        treatmentQuery.data?.data.map((treatment) => (
+        treatmentQuery.data?.data?.map((treatment) => (
           <Link
             href={`/clinics/${treatment.id}`}
             key={treatment.id}

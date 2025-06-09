@@ -84,7 +84,7 @@ export async function getSingleBid(bidId: string) {
   return data;
 }
 
-export async function checkIfClinicHasBidOnQuotation(
+export async function getClinicBidOnQuotation(
   quotationId: string,
   clinicId: string
 ) {

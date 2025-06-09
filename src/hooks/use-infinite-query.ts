@@ -1,11 +1,11 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from "@/lib/supabase/client";
+import { supabaseClient } from "@/lib/supabase/client";
 import { PostgrestQueryBuilder } from "@supabase/postgrest-js";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 
-const supabase = createClient();
+const supabase = supabaseClient;
 
 // The following types are used to make the hook type-safe. It extracts the database type from the supabase client.
 type SupabaseClientType = typeof supabase;

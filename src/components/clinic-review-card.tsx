@@ -13,7 +13,7 @@ interface ClinicReviewCardProps {
 
 function ClinicReviewCard(props: ClinicReviewCardProps) {
   return (
-    <div key={props.id} className="bg-[#F6FAFF] rounded-xl px-4 py-6">
+    <div key={props.id} className="bg-[#F6FAFF] rounded-xl px-4 py-6 mt-3">
       <div className="flex items-center gap-4 mb-3">
         <div className="w-12 h-12 rounded-full bg-[#E9EEF3] flex items-center justify-center">
           <span className="text-2xl text-gray-400">

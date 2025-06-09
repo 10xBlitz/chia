@@ -93,6 +93,15 @@ export async function updateUserProfile(
   if (profileError) throw profileError;
 }
 
+export async function updateUserPassword(newPassword: string) {
+  // Update user password using Supabase auth
+  const { error } = await supabaseClient.auth.updateUser({
+    password: newPassword,
+  });
+  console.log("---->updateUserPassword error: ", error);
+  if (error) throw error;
+}
+
 // Get a single user by id
 export async function getUserById(userId: string) {
   const { data, error } = await supabaseClient

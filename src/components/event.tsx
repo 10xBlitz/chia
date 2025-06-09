@@ -23,6 +23,8 @@ export default function EventCarousel() {
       if (error) throw error;
       return data;
     },
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    retry: 1,
   });
 
   // Add touch and mouse event listeners for scrolling

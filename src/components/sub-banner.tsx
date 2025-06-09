@@ -16,6 +16,8 @@ export default function SubBannerCarousel() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["banners", "sub"],
     queryFn: async () => await getPaginatedBanners(1, 10, { type: "sub" }),
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    retry: 1,
   });
 
   const banners = data?.data || [];

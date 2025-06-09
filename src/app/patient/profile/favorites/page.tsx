@@ -9,7 +9,7 @@ import { getPaginatedFavoriteClinics } from "@/lib/supabase/services/favorite-cl
 import ClinicCard from "@/components/clinic-card";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { ConfirmDeleteModal } from "@/components/confirm-modal";
+import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 
 export default function FavoriteClinicsPage() {

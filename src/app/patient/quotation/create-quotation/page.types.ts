@@ -20,10 +20,12 @@ export const quotationSchema = z.object({
       `최대 ${QUOTATION_MAX_TEXT}자까지 입력할 수 있습니다.`
     )
     .optional(),
-  images: z.object({
-    files: z.array(z.any()), // or z.instanceof(File)
-    previews: z.array(z.string()),
-  }),
+  images: z
+    .object({
+      files: z.array(z.any()), // or z.instanceof(File)
+      previews: z.array(z.string()),
+    })
+    .optional(),
 });
 
 export type QuotationFormValues = z.infer<typeof quotationSchema>;

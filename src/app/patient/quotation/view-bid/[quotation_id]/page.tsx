@@ -4,7 +4,6 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { getSingleBid } from "@/lib/supabase/services/bids.services";
 import { getSingleQuotation } from "@/lib/supabase/services/quotation.services";
@@ -16,23 +15,26 @@ export default function ViewBidPage() {
   const params = useParams();
   const bidId = searchParams.get("bid_id") as string;
   const quotationId = params?.quotation_id as string;
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    if (bidId && quotationId) setEnabled(true);
-  }, [bidId, quotationId]);
 
   const { data: bid, isLoading } = useQuery({
     queryKey: ["bid", bidId],
     queryFn: () => getSingleBid(bidId),
-    enabled: enabled,
+    enabled: !!bidId && !!quotationId,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   // Fetch quotation details
   const { data: quotation } = useQuery({
     queryKey: ["quotation", quotationId],
     queryFn: () => getSingleQuotation(quotationId),
-    enabled: enabled && !!quotationId,
+    enabled: !!bidId && !!quotationId,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   return (

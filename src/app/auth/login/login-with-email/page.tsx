@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +29,7 @@ import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import FormInput from "@/components/form-ui/form-input";
+import { supabaseClient } from "@/lib/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }),
@@ -57,16 +57,24 @@ export default function LoginForm() {
   });
 
   const handleLogin = async (data: LoginFormValues) => {
-    const supabase = createClient();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabaseClient.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
       if (error) throw error;
     } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        error.message === "Invalid login credentials"
+      ) {
+        toast.error(
+          "이메일 또는 비밀번호가 잘못되었습니다. 다시 시도해주세요."
+        );
+        return;
+      }
       toast.error(
         error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다"
       );
