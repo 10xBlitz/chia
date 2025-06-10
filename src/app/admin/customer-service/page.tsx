@@ -256,7 +256,7 @@ export default function CustomerServiceChatListener() {
   // --- Render ---
 
   return (
-    <div className="flex h-screen gap-2 bg-gray-100">
+    <div className="flex gap-2 bg-gray-100 min-h-[calc(100dvh-44px)]">
       <ChatRoomSidebar
         openRooms={openRooms}
         isLoadingRoomsWithDetails={isLoadingRoomsWithDetails}
@@ -271,7 +271,7 @@ export default function CustomerServiceChatListener() {
         onLoadMore={() => setRoomLimit((prev) => prev + 20)}
         hasMore={!!initialRoomsData && initialRoomsData.length >= roomLimit}
       />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col max-h-[calc(100dvh-44px)]">
         {selectedRoom ? (
           isLoadingMessages ? (
             <div className="flex-1 flex items-center justify-center">
@@ -333,7 +333,7 @@ function ChatRoomSidebar({
   hasMore: boolean;
 }) {
   return (
-    <aside className="w-64 bg-whiteborder-r bg-sidebar rounded-md p-4 flex flex-col h-full">
+    <aside className="w-64 bg-whiteborder-r bg-sidebar rounded-md p-4 flex flex-col min-h-[calc(100dvh-44px)] max-h-[calc(100dvh-44px)]">
       <h2 className="font-bold mb-4">Open Chat Rooms</h2>
       <form
         onSubmit={(e) => e.preventDefault()}

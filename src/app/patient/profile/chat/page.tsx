@@ -6,14 +6,52 @@ import { useUserStore } from "@/providers/user-store-provider";
 import { useState, useMemo, useEffect } from "react";
 
 export default function ChatPage() {
-  // Track unread message count by category for all rooms for the current user
-  const [unreadByCategory, setUnreadByCategory] = useState<
-    Record<string, number>
-  >({});
-  const user = useUserStore((state) => state.user);
   const [roomCategory, setRoomCategory] = useState<string>();
+  const user = useUserStore((state) => state.user);
 
-  // 1. Query for chat room
+  // Query for all chat rooms for the user (for realtime check and unread counts)
+  const {
+    data: userRooms = [],
+    refetch: refetchUserRooms,
+    isLoading: isLoadingUserRooms,
+  } = useQuery({
+    queryKey: ["patient-chat-rooms", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabaseClient
+        .from("chat_room")
+        .select("id, last_user_read_at, category, patient_id")
+        .eq("patient_id", user.id);
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 0,
+  });
+
+  // Query for unread message count for all rooms for the logged-in user, grouped by category
+  const { data: unreadByCategory = {}, refetch: refetchUnreadByCategory } =
+    useQuery({
+      queryKey: ["patient-chat-unread-by-category", user?.id, userRooms],
+      queryFn: async () => {
+        if (!user?.id || !userRooms.length) return {};
+        const categoryCounts: Record<string, number> = {};
+        for (const room of userRooms) {
+          const count = await getUnreadMessageCount(
+            user.id,
+            room.id,
+            room.last_user_read_at || "1970-01-01T00:00:00Z"
+          );
+          const cat = room.category || "기타";
+          categoryCounts[cat] = (categoryCounts[cat] || 0) + count;
+        }
+        return categoryCounts;
+      },
+      enabled: !!user?.id && !!userRooms.length,
+      staleTime: 0,
+    });
+
+  // Query for chat room
   const { data: chatRoom, isLoading: chatRoomLoading } = useQuery({
     queryKey: ["chatRoom", user?.id, roomCategory],
     queryFn: async () =>
@@ -22,41 +60,7 @@ export default function ChatPage() {
     retry: 1,
   });
 
-  // Fetch unread message count for all rooms for the logged-in user, grouped by category
-  useEffect(() => {
-    async function fetchUnreadCountForAllRooms() {
-      if (!user?.id) {
-        setUnreadByCategory({});
-        return;
-      }
-      // Fetch all chat rooms for the user
-      const { data: rooms, error } = await supabaseClient
-        .from("chat_room")
-        .select("id, last_user_read_at, category")
-        .eq("patient_id", user.id);
-
-      if (error || !rooms) {
-        setUnreadByCategory({});
-        return;
-      }
-
-      // For each room, get unread count and group by category
-      const categoryCounts: Record<string, number> = {};
-      for (const room of rooms) {
-        const count = await getUnreadMessageCount(
-          user.id,
-          room.id,
-          room.last_user_read_at || "1970-01-01T00:00:00Z"
-        );
-        const cat = room.category || "기타";
-        categoryCounts[cat] = (categoryCounts[cat] || 0) + count;
-      }
-      setUnreadByCategory(categoryCounts);
-    }
-    fetchUnreadCountForAllRooms();
-  }, [user?.id, chatRoom?.id, chatRoom?.last_user_read_at]);
-
-  // 2. Infinite query for messages
+  // Infinite query for messages
   const {
     data: infiniteMessagesData,
     fetchNextPage,
@@ -72,7 +76,7 @@ export default function ChatPage() {
       return lastPage[lastPage.length - 1].createdAt;
     },
     refetchOnWindowFocus: false,
-    initialPageParam: "", // Use an empty string as the initialPageParam
+    initialPageParam: "",
   });
 
   // Combine all pages (reverse to chronological order)
@@ -81,7 +85,7 @@ export default function ChatPage() {
     return [...infiniteMessagesData.pages.flat()].reverse();
   }, [infiniteMessagesData]);
 
-  // 4. Mutation to send message
+  // Mutation to send message
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
       if (!user || !chatRoom?.id) return;
@@ -91,78 +95,61 @@ export default function ChatPage() {
         userId: user.id,
       });
     },
+    onSuccess: () => {
+      refetchUserRooms();
+      refetchUnreadByCategory();
+    },
   });
 
-  // Mark all messages as read when the chat is opened or new messages arrive
-  useEffect(() => {
-    async function markAsRead() {
-      if (!chatRoom?.id) return;
-      // Find the latest message timestamp
-      const latestMsg =
-        infiniteMessages.length > 0
-          ? infiniteMessages[infiniteMessages.length - 1]
-          : null;
-      const latestTimestamp = latestMsg?.createdAt || new Date().toISOString();
-      await updateLastPatientReadAt(chatRoom.id, latestTimestamp);
-      // After marking as read, refetch unread counts for all rooms
-      if (user?.id) {
-        const { data: rooms } = await supabaseClient
-          .from("chat_room")
-          .select("id, last_user_read_at, category")
-          .eq("patient_id", user.id);
-        const categoryCounts: Record<string, number> = {};
-        if (rooms) {
-          for (const room of rooms) {
-            const count = await getUnreadMessageCount(
-              user.id,
-              room.id,
-              room.last_user_read_at || "1970-01-01T00:00:00Z"
-            );
-            const cat = room.category || "기타";
-            categoryCounts[cat] = (categoryCounts[cat] || 0) + count;
-          }
-        }
-        setUnreadByCategory(categoryCounts);
-      }
+  // Update last read time when user selects a category (room)
+  const handleSelectRoomCategory = async (rCategory: string | undefined) => {
+    setRoomCategory(rCategory);
+    // Find the chat room for this category
+    const selectedRoom = userRooms.find((room) => room.category === rCategory);
+    if (selectedRoom) {
+      // Fetch the latest message for this room
+      const { data: latestMsg } = await supabaseClient
+        .from("message")
+        .select("created_at")
+        .eq("chat_room_id", selectedRoom.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const latestTimestamp = latestMsg?.created_at || new Date().toISOString();
+      await updateLastPatientReadAt(selectedRoom.id, latestTimestamp);
+      refetchUserRooms();
+      refetchUnreadByCategory();
     }
-    if (chatRoom?.id && infiniteMessages.length > 0) {
-      markAsRead();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatRoom?.id, infiniteMessages.length]);
+  };
 
-  // --- Realtime subscription for admin messages ---
+  // --- Realtime subscription for admin messages and mark as read ---
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || isLoadingUserRooms) return;
 
-    // Subscribe to new messages inserted by admin (assuming admin messages have a specific sender_id or role)
     const channel = supabaseClient
       .channel(`patient-chat-admin-messages-${user.id}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "message" },
         async (payload) => {
-          // Only count if the sender is not the current user (i.e., admin message)
+          if (
+            payload.new &&
+            payload.new.chat_room_id &&
+            payload.new.sender_id !== user.id
+          ) {
+            console.log("----> checking if room belongs to user");
+            if (
+              userRooms.some((room) => room.id === payload.new.chat_room_id)
+            ) {
+              console.log("----> room belongs to user, updating last read at");
+              // await updateLastPatientReadAt(
+              //   payload.new.chat_room_id,
+              //   payload.new.created_at
+              // );
 
-          if (payload.new.sender_id !== user.id) {
-            // Refetch unread counts for all rooms
-            const { data: rooms } = await supabaseClient
-              .from("chat_room")
-              .select("id, last_user_read_at, category")
-              .eq("patient_id", user.id);
-            const categoryCounts: Record<string, number> = {};
-            if (rooms) {
-              for (const room of rooms) {
-                const count = await getUnreadMessageCount(
-                  user.id,
-                  room.id,
-                  room.last_user_read_at || "1970-01-01T00:00:00Z"
-                );
-                const cat = room.category || "기타";
-                categoryCounts[cat] = (categoryCounts[cat] || 0) + count;
-              }
+              refetchUserRooms();
+              refetchUnreadByCategory();
             }
-            setUnreadByCategory(categoryCounts);
           }
         }
       )
@@ -171,7 +158,13 @@ export default function ChatPage() {
     return () => {
       channel.unsubscribe?.();
     };
-  }, [user?.id]);
+  }, [
+    user?.id,
+    userRooms,
+    refetchUserRooms,
+    refetchUnreadByCategory,
+    isLoadingUserRooms,
+  ]);
 
   if (chatRoomLoading) {
     return <div>Loading chat...</div>;
@@ -185,7 +178,7 @@ export default function ChatPage() {
         username={user?.full_name || "no name"}
         messages={roomCategory ? infiniteMessages : []}
         onMessage={(msg) => sendMessageMutation.mutate(msg)}
-        onSelectRoomCategory={(rCategory) => setRoomCategory(rCategory)}
+        onSelectRoomCategory={handleSelectRoomCategory}
         fetchPrevMessages={fetchNextPage}
         hasMorePrev={!!hasNextPage}
         isFetchingPrev={isFetchingNextPage}

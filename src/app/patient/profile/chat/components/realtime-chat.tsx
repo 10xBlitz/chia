@@ -16,7 +16,7 @@ interface RealtimeChatProps {
   username: string;
   onMessage?: (message: string) => void;
   messages?: ChatMessage[];
-  onSelectRoomCategory: (roomCategory: string | undefined) => void;
+  onSelectRoomCategory: (roomCategory: string | undefined) => Promise<void>;
   fetchPrevMessages?: () => void;
   hasMorePrev?: boolean;
   isFetchingPrev?: boolean;

@@ -117,7 +117,7 @@ export const RealtimeChat = ({
   }, [fetchPrevMessages, hasMorePrev, isFetchingPrev, containerRef]);
 
   return (
-    <div className="flex flex-col h-dvh pb-5 w-full text-foreground antialiased bg-sidebar rounded-md">
+    <div className="flex flex-col max-h-full min-h-full w-full text-foreground antialiased bg-sidebar rounded-md">
       {/* Header */}
       <div className="flex items-center px-4 py-4 rounded-t-3xl border-b">
         <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ export const RealtimeChat = ({
       {/* Chat area */}
       <div
         ref={containerRef}
-        className="flex-1  overflow-y-auto flex flex-col items-center px-4 pt-6 pb-2"
+        className="flex-1 overflow-y-auto flex flex-col items-center px-4 pt-6 pb-2"
       >
         {/* Avatar */}
         <div className="flex flex-col items-center mb-2">
@@ -186,13 +186,14 @@ export const RealtimeChat = ({
           })}
         </div>
       </div>
-
-      <ChatForm
-        handleSendMessage={handleSendMessage}
-        isConnected={isConnected}
-        newMessage={newMessage}
-        setNewMessage={setNewMessage}
-      />
+      <div className="p-5">
+        <ChatForm
+          handleSendMessage={handleSendMessage}
+          isConnected={isConnected}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+        />
+      </div>
     </div>
   );
 };
