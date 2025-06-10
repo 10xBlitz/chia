@@ -83,18 +83,21 @@ export type Database = {
           category: string
           created_at: string
           id: string
+          last_admin_read_at: string | null
           patient_id: string
         }
         Insert: {
           category: string
           created_at?: string
           id?: string
+          last_admin_read_at?: string | null
           patient_id: string
         }
         Update: {
           category?: string
           created_at?: string
           id?: string
+          last_admin_read_at?: string | null
           patient_id?: string
         }
         Relationships: [

@@ -66,12 +66,16 @@ const PatientHomePage = () => {
           fontWeight: 500,
         }}
       >
-        <Link href="/auth/login/login-with-email?title=이메일로 로그인(환자)">
+        <Link href="/auth/login/login-with-email?title=이메일로 로그인하기">
           이메일로 로그인하기 {/** Log in with email */}
         </Link>
 
-        <Link href="/auth/login/login-with-email?title=이메일로 로그인(치과)">
+        <Link href="/auth/login/login-with-email?title=치과 의사로 로그인">
           치과 의사로 로그인 {/** Log in as dentist */}
+        </Link>
+
+        <Link href="/auth/login/login-with-email?title=관리자로 로그인">
+          관리자로 로그인 {/** Log in as admin */}
         </Link>
       </div>
     </div>
