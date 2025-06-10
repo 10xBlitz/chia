@@ -22,6 +22,7 @@ import {
   BookMarked,
   ChevronUp,
   HospitalIcon,
+  MessageSquareMoreIcon,
   SettingsIcon,
   SyringeIcon,
   User2,
@@ -64,7 +65,7 @@ const items = [
   {
     title: "Customer Service",
     url: "/admin/customer-service",
-    icon: BookMarked,
+    icon: MessageSquareMoreIcon,
   },
   {
     title: "Settings",

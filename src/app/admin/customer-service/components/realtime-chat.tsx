@@ -8,19 +8,15 @@ import { Send } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useChatScroll } from "../hooks/use-chat-scroll";
 import { ChatMessageItem } from "./chat-message";
-import BackButton from "@/components/back-button";
-import Image from "next/image";
 
 interface RealtimeChatProps {
   roomName: string;
   username: string;
   onMessage?: (message: string) => void;
   messages?: ChatMessage[];
-  onSelectRoomCategory: (roomCategory: string | undefined) => void;
   fetchPrevMessages?: () => void;
   hasMorePrev?: boolean;
   isFetchingPrev?: boolean;
-  unreadByCategory?: Record<string, number>; // <-- add prop
 }
 
 /**
@@ -36,11 +32,9 @@ export const RealtimeChat = ({
   username,
   onMessage,
   messages: initialMessages = [],
-  onSelectRoomCategory,
   fetchPrevMessages,
   hasMorePrev,
   isFetchingPrev,
-  unreadByCategory = {}, // <-- default to empty object
 }: RealtimeChatProps) => {
   const { containerRef } = useChatScroll();
 
@@ -122,36 +116,10 @@ export const RealtimeChat = ({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [fetchPrevMessages, hasMorePrev, isFetchingPrev, containerRef]);
 
-  const categories = [
-    "회원/계정",
-    "후기 관리",
-    "상담 신청",
-    "앱결제",
-    "오류",
-    "기타",
-  ];
-
   return (
-    <div className="flex flex-col h-dvh pb-5 w-full text-foreground antialiased">
+    <div className="flex flex-col h-dvh pb-5 w-full text-foreground antialiased bg-sidebar rounded-md">
       {/* Header */}
-      <div className="flex items-center px-4 py-4 bg-white rounded-t-3xl">
-        {roomName === "no room" ? (
-          <BackButton />
-        ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            type="button"
-            onClick={() => onSelectRoomCategory(undefined)}
-          >
-            <Image
-              src="/icons/chevron-left.svg"
-              alt="back"
-              height={20}
-              width={12}
-            />
-          </Button>
-        )}
+      <div className="flex items-center px-4 py-4 rounded-t-3xl border-b">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-white border border-[#E6F0FF] flex items-center justify-center">
             <span className="text-blue-600 font-bold text-sm">Chia!</span>
@@ -171,8 +139,6 @@ export const RealtimeChat = ({
           <div className="w-16 h-16 rounded-full p-10 flex items-center justify-center text-2xl font-bold mb-2 border border-[#D6E6FF]">
             Chia!
           </div>
-          <div className="font-semibold text-base mb-1">Contact 치아</div>
-          <div className="text-xs text-muted-foreground mb-4">1:18 PM</div>
         </div>
 
         {/**System message if there is no room yet */}
@@ -221,33 +187,12 @@ export const RealtimeChat = ({
         </div>
       </div>
 
-      {/* Input only, no options */}
-      {roomName === "no room" ? (
-        <div className="flex gap-3 flex-wrap justify-end">
-          {categories.map((item) => (
-            <Button
-              variant="outline"
-              key={item}
-              onClick={() => onSelectRoomCategory(item)}
-              className="relative"
-            >
-              {item}
-              {unreadByCategory[item] > 0 && (
-                <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-semibold text-white bg-red-500 rounded-full">
-                  {unreadByCategory[item]}
-                </span>
-              )}
-            </Button>
-          ))}
-        </div>
-      ) : (
-        <ChatForm
-          handleSendMessage={handleSendMessage}
-          isConnected={isConnected}
-          newMessage={newMessage}
-          setNewMessage={setNewMessage}
-        />
-      )}
+      <ChatForm
+        handleSendMessage={handleSendMessage}
+        isConnected={isConnected}
+        newMessage={newMessage}
+        setNewMessage={setNewMessage}
+      />
     </div>
   );
 };

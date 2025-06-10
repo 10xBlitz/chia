@@ -84,6 +84,7 @@ export type Database = {
           created_at: string
           id: string
           last_admin_read_at: string | null
+          last_user_read_at: string | null
           patient_id: string
         }
         Insert: {
@@ -91,6 +92,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_admin_read_at?: string | null
+          last_user_read_at?: string | null
           patient_id: string
         }
         Update: {
@@ -98,6 +100,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_admin_read_at?: string | null
+          last_user_read_at?: string | null
           patient_id?: string
         }
         Relationships: [
@@ -704,7 +707,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fetch_rooms_by_latest_message: {
+        Args:
+          | { p_search?: string; p_limit?: number; p_offset?: number }
+          | {
+              p_user_id: string
+              p_search?: string
+              p_limit?: number
+              p_offset?: number
+            }
+        Returns: {
+          id: string
+          category: string
+          patient_full_name: string
+          last_admin_read_at: string
+          latest_message_created_at: string
+        }[]
+      }
     }
     Enums: {
       banner_type: "main" | "sub"
