@@ -226,8 +226,8 @@ export default function ClinicDetailPage() {
     );
 
   return (
-    <MobileLayout className="!px-0">
-      <div className="flex flex-col !px-0">
+    <MobileLayout className="!px-0 relative">
+      <div className="flex flex-col !px-0 relative">
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2 bg-white z-20">
           <BackButton />
@@ -525,7 +525,7 @@ export default function ClinicDetailPage() {
         </div>
 
         {/* Bottom actions */}
-        <div className="max-w-[460px] w-full mx-auto bg-white  flex gap-2 px-4 py-3 mb-20">
+        <div className="max-w-[460px] w-full mx-auto bg-white flex gap-2 px-4 py-3 mb-20">
           <Button
             variant="outline"
             className="flex-1"
@@ -548,16 +548,43 @@ export default function ClinicDetailPage() {
         </div>
 
         {/* Floating review button */}
-        <Button
-          className="fixed bottom-24 right-6 z-30 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 py-3 shadow-lg flex items-center gap-2 transition-all"
-          style={{ fontWeight: 500, fontSize: 16 }}
-          onClick={() => {
-            router.push(`/patient/review/create-review?clinic_id=${clinic_id}`);
-          }}
+        <div
+          className="
+            fixed z-30
+            bottom-24
+            left-1/2
+            -translate-x-1/2
+            md:left-auto md:translate-x-0
+            max-w-[450px] w-full
+            pointer-events-none
+            flex justify-end
+            px-4
+          "
+          style={{ maxWidth: 450, width: "100%" }}
         >
-          <EditIcon />
-          리뷰 쓰기 {/* Write a Review */}
-        </Button>
+          <div className="pointer-events-auto">
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center transition-all
+                w-12 h-12 justify-center
+                md:w-12 md:h-12 md:justify-center
+                md:overflow-hidden
+                group
+                md:hover:w-44"
+              style={{ fontWeight: 500, fontSize: 16, minWidth: 48 }}
+              onClick={() => {
+                router.push(
+                  `/patient/review/create-review?clinic_id=${clinic_id}`
+                );
+              }}
+            >
+              <EditIcon className="w-6 h-6" />
+              {/* Only show text on desktop and only on hover */}
+              <span className="hidden md:whitespace-nowrap md:ml-2 md:group-hover:inline-block transition-opacity duration-200">
+                리뷰 쓰기 {/* Write a Review */}
+              </span>
+            </Button>
+          </div>
+        </div>
         {user?.id && <BottomNavigation />}
       </div>
     </MobileLayout>
