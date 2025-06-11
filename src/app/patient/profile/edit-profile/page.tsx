@@ -85,6 +85,13 @@ export default function EditProfilePage() {
             emptyText="거주지 주소 등록" // Register Residence Address
           />
 
+          <InfoRow
+            label="근무지 주소" // Work Address
+            value={user?.work_place}
+            highlightWhenEmpty
+            emptyText="근무지 주소 등록" // Register Work Address
+          />
+
           {/* Edit Basic Info Button */}
           <div className="flex justify-end mb-2 gap-4 flex-col mt-10">
             <Button

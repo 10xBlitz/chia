@@ -5,12 +5,16 @@ interface ChatMessageItemProps {
   message: ChatMessage;
   isOwnMessage: boolean;
   showHeader: boolean;
+  sendingStatus?: "idle" | "sending" | "delivered";
+  sendError?: string | null;
 }
 
 export const ChatMessageItem = ({
   message,
   isOwnMessage,
   showHeader,
+  sendingStatus,
+  sendError,
 }: ChatMessageItemProps) => {
   return (
     <div
@@ -47,6 +51,18 @@ export const ChatMessageItem = ({
         >
           {message.content}
         </div>
+        {/* Status UI for last own message */}
+        {isOwnMessage && sendingStatus === "sending" && (
+          <span className="text-xs text-gray-400 mt-0.5">Sending...</span>
+        )}
+        {isOwnMessage && sendingStatus === "delivered" && (
+          <span className="text-xs text-green-500 mt-0.5">Delivered</span>
+        )}
+        {isOwnMessage && sendError && (
+          <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded mt-0.5">
+            {sendError}
+          </span>
+        )}
       </div>
     </div>
   );

@@ -9,12 +9,13 @@ export default function ChatPage() {
   const [roomCategory, setRoomCategory] = useState<string>();
   const user = useUserStore((state) => state.user);
 
+  // ---  Local state for unreadByCategory ---
+  const [unreadByCategory, setUnreadByCategory] = useState<
+    Record<string, number>
+  >({});
+
   // Query for all chat rooms for the user (for realtime check and unread counts)
-  const {
-    data: userRooms = [],
-    refetch: refetchUserRooms,
-    isLoading: isLoadingUserRooms,
-  } = useQuery({
+  const { data: userRooms = [], isLoading: isLoadingUserRooms } = useQuery({
     queryKey: ["patient-chat-rooms", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -29,33 +30,39 @@ export default function ChatPage() {
     staleTime: 0,
   });
 
-  // Query for unread message count for all rooms for the logged-in user, grouped by category
-  const { data: unreadByCategory = {}, refetch: refetchUnreadByCategory } =
-    useQuery({
-      queryKey: ["patient-chat-unread-by-category", user?.id, userRooms],
-      queryFn: async () => {
-        if (!user?.id || !userRooms.length) return {};
-        const categoryCounts: Record<string, number> = {};
-        for (const room of userRooms) {
-          const count = await getUnreadMessageCount(
+  // Fetch unread counts initially and when userRooms changes
+  useEffect(() => {
+    async function fetchUnread() {
+      if (!user?.id || !userRooms.length) {
+        return;
+      }
+      // --- Use Promise.all to fetch unread counts in parallel ---
+      const counts = await Promise.all(
+        userRooms.map((room) =>
+          getUnreadMessageCount(
             user.id,
             room.id,
             room.last_user_read_at || "1970-01-01T00:00:00Z"
-          );
-          const cat = room.category || "기타";
-          categoryCounts[cat] = (categoryCounts[cat] || 0) + count;
-        }
-        return categoryCounts;
-      },
-      enabled: !!user?.id && !!userRooms.length,
-      staleTime: 0,
-    });
+          ).then((count) => ({
+            cat: room.category || "기타",
+            count,
+          }))
+        )
+      );
+      const categoryCounts: Record<string, number> = {};
+      for (const { cat, count } of counts) {
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + count;
+      }
+      setUnreadByCategory(categoryCounts);
+    }
+    fetchUnread();
+  }, [user?.id, userRooms]);
 
   // Query for chat room
   const { data: chatRoom, isLoading: chatRoomLoading } = useQuery({
     queryKey: ["chatRoom", user?.id, roomCategory],
     queryFn: async () =>
-      await fetchChatRoom(user?.id as string, roomCategory as string),
+      await fetchOrCreateChatRoom(user?.id as string, roomCategory as string),
     enabled: !!user?.id && !!roomCategory,
     retry: 1,
   });
@@ -86,18 +93,24 @@ export default function ChatPage() {
   }, [infiniteMessagesData]);
 
   // Mutation to send message
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [lastSentMessage, setLastSentMessage] = useState<string>("");
+
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
       if (!user || !chatRoom?.id) return;
+      setLastSentMessage(message);
       await sendMessageToRoom({
         message,
         chatRoomId: chatRoom.id,
         userId: user.id,
       });
     },
-    onSuccess: () => {
-      refetchUserRooms();
-      refetchUnreadByCategory();
+    onError: () => {
+      setSendError("메시지 전송에 실패했습니다. 다시 시도해 주세요.");
+    },
+    onMutate: () => {
+      setSendError(null);
     },
   });
 
@@ -116,9 +129,27 @@ export default function ChatPage() {
         .limit(1)
         .maybeSingle();
       const latestTimestamp = latestMsg?.created_at || new Date().toISOString();
-      await updateLastPatientReadAt(selectedRoom.id, latestTimestamp);
-      refetchUserRooms();
-      refetchUnreadByCategory();
+
+      // Store the previous unread count for fallback
+      const prevUnreadCount =
+        unreadByCategory[selectedRoom.category || "기타"] || 0;
+
+      try {
+        await updateLastPatientReadAt(selectedRoom.id, latestTimestamp);
+        // Reset unread count for this category in state
+        setUnreadByCategory((prev) => ({
+          ...prev,
+          [selectedRoom.category || "기타"]: 0,
+        }));
+      } catch (err) {
+        // If update fails, restore the previous unread count from variable
+        setUnreadByCategory((prev) => ({
+          ...prev,
+          [selectedRoom.category || "기타"]: prevUnreadCount,
+        }));
+        // Optionally, show an error message or log
+        console.error("Failed to update last read at:", err);
+      }
     }
   };
 
@@ -130,26 +161,30 @@ export default function ChatPage() {
       .channel(`patient-chat-admin-messages-${user.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "message" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "message",
+          filter: `chat_room_id=in.(${userRooms
+            .map((item) => item.id)
+            .join(",")})`,
+        },
         async (payload) => {
           if (
             payload.new &&
             payload.new.chat_room_id &&
             payload.new.sender_id !== user.id
           ) {
-            console.log("----> checking if room belongs to user");
-            if (
-              userRooms.some((room) => room.id === payload.new.chat_room_id)
-            ) {
-              console.log("----> room belongs to user, updating last read at");
-              // await updateLastPatientReadAt(
-              //   payload.new.chat_room_id,
-              //   payload.new.created_at
-              // );
-
-              refetchUserRooms();
-              refetchUnreadByCategory();
-            }
+            // If the message is from admin and not sent by the user
+            // --- NEW: Find the room and increment unread count in state ---
+            const room = userRooms.find(
+              (r) => r.id === payload.new.chat_room_id
+            );
+            const cat = room?.category || "기타";
+            setUnreadByCategory((prev) => ({
+              ...prev,
+              [cat]: (prev[cat] || 0) + 1,
+            }));
           }
         }
       )
@@ -158,16 +193,10 @@ export default function ChatPage() {
     return () => {
       channel.unsubscribe?.();
     };
-  }, [
-    user?.id,
-    userRooms,
-    refetchUserRooms,
-    refetchUnreadByCategory,
-    isLoadingUserRooms,
-  ]);
+  }, [user?.id, userRooms, isLoadingUserRooms]);
 
   if (chatRoomLoading) {
-    return <div>Loading chat...</div>;
+    return <div>채팅방을 로딩 중입니다...{/**Loading chat rooms... */}</div>;
   }
 
   return (
@@ -183,12 +212,21 @@ export default function ChatPage() {
         hasMorePrev={!!hasNextPage}
         isFetchingPrev={isFetchingNextPage}
         unreadByCategory={unreadByCategory}
+        sendError={sendError}
+        sendingStatus={
+          sendMessageMutation.status === "pending"
+            ? "sending"
+            : sendMessageMutation.isSuccess
+            ? "delivered"
+            : "idle"
+        }
+        lastSentMessage={lastSentMessage}
       />
     </>
   );
 }
 
-async function fetchChatRoom(userId: string, roomCategory: string) {
+async function fetchOrCreateChatRoom(userId: string, roomCategory: string) {
   const { data: chatRoom, error } = await supabaseClient
     .from("chat_room")
     .select("*")
@@ -276,10 +314,14 @@ async function sendMessageToRoom({
 // Helper to update last_patient_read_at for the chat room
 async function updateLastPatientReadAt(roomId: string, timestamp: string) {
   if (!roomId || !timestamp) return;
-  await supabaseClient
+  const { error } = await supabaseClient
     .from("chat_room")
     .update({ last_user_read_at: timestamp })
     .eq("id", roomId);
+
+  if (error) {
+    throw new Error(`Error updating last read at: ${error.message}`);
+  }
 }
 
 // Helper to get unread message count for the patient

@@ -21,6 +21,9 @@ interface RealtimeChatProps {
   hasMorePrev?: boolean;
   isFetchingPrev?: boolean;
   unreadByCategory?: Record<string, number>; // <-- add prop
+  sendError?: string | null;
+  sendingStatus?: "idle" | "sending" | "delivered";
+  lastSentMessage?: string;
 }
 
 /**
@@ -41,6 +44,9 @@ export const RealtimeChat = ({
   hasMorePrev,
   isFetchingPrev,
   unreadByCategory = {}, // <-- default to empty object
+  sendError,
+  sendingStatus,
+  lastSentMessage,
 }: RealtimeChatProps) => {
   const { containerRef } = useChatScroll();
 
@@ -205,6 +211,13 @@ export const RealtimeChat = ({
             const showHeader =
               !prevMessage || prevMessage.user.name !== message.user.name;
 
+            // Determine if this is the last own message and matches the last sent message
+            const isLastOwnMessage =
+              message.user.name === username &&
+              index === allMessages.length - 1 &&
+              lastSentMessage &&
+              message.content === lastSentMessage;
+
             return (
               <div
                 key={message.id}
@@ -214,7 +227,10 @@ export const RealtimeChat = ({
                   message={message}
                   isOwnMessage={message.user.name === username}
                   showHeader={showHeader}
+                  sendingStatus={isLastOwnMessage ? sendingStatus : undefined}
+                  sendError={isLastOwnMessage ? sendError : undefined}
                 />
+                {/* Remove error UI here, now handled in ChatMessageItem */}
               </div>
             );
           })}
