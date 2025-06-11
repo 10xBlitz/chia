@@ -238,11 +238,22 @@ export default function ClinicDetailPage() {
         </div>
         <div className="w-full h-[180px] relative">
           <Image
-            src={clinic.pictures?.[0] || "/images/clinic-default.jpg"}
+            src={clinic.pictures?.[0] || "/images/fallback-image.png"}
             alt={clinic.clinic_name}
-            fill
-            className="object-cover"
             priority
+            {...(clinic.pictures?.[0]
+              ? { fill: true }
+              : { width: 200, height: 200 })}
+            className={
+              !clinic.pictures?.[0]
+                ? "object-contain mx-auto my-auto flex items-center justify-center bg-white"
+                : "object-cover"
+            }
+            style={
+              !clinic.pictures?.[0]
+                ? { display: "block", margin: "0 auto", background: "#fff" }
+                : undefined
+            }
           />
         </div>
 
