@@ -58,6 +58,7 @@ export default function CreateBidPage() {
 
   // Mutation for inserting a bid
   const insertBidMutation = useMutation({
+    mutationKey: ["insert_bid", quotationId],
     mutationFn: (values: FormValues) =>
       insertBid({
         quotation_id: quotationId,
@@ -97,8 +98,8 @@ export default function CreateBidPage() {
             placeholder="시술을 선택하세요" // Please select a treatment
           >
             {availableTreatments &&
-              availableTreatments?.data.length > 0 &&
-              availableTreatments.data.map((t) => (
+              availableTreatments?.data?.length > 0 &&
+              availableTreatments?.data?.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
                   {t.treatment.treatment_name} {/* Treatment Name */}
                 </SelectItem>

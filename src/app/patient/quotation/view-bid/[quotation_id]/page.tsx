@@ -19,22 +19,14 @@ export default function ViewBidPage() {
   const { data: bid, isLoading } = useQuery({
     queryKey: ["bid", bidId],
     queryFn: () => getSingleBid(bidId),
-    enabled: !!bidId && !!quotationId,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    enabled: !!bidId && bidId !== "null" && !!quotationId,
   });
 
   // Fetch quotation details
   const { data: quotation } = useQuery({
     queryKey: ["quotation", quotationId],
     queryFn: () => getSingleQuotation(quotationId),
-    enabled: !!bidId && !!quotationId,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    enabled: !!quotationId,
   });
 
   return (

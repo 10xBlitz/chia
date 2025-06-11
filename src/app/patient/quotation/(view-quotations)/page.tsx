@@ -89,7 +89,7 @@ export interface Quotation {
   region: string;
   treatment: {
     treatment_name: string;
-  };
+  } | null;
   clinic_id: string | null;
   bid: { id: string }[];
 }
@@ -106,7 +106,7 @@ interface QuotationListItemProps {
 
 function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
   const detail = `${q.region?.split(",")[1]?.trim() || q.region} · ${
-    q.treatment.treatment_name
+    q.treatment?.treatment_name || "선택된 치료 없음"
   } 공개견적`;
 
   return (
@@ -125,7 +125,8 @@ function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
       </span>
       <span className="text-gray-600 truncate flex-1 mr-4 whitespace-nowrap">
         {q.region?.split(",")[1]?.trim() || q.region} ·{" "}
-        {q.treatment.treatment_name} {q.clinic_id ? "치과" : "공개견적"}
+        {q.treatment?.treatment_name || "선택된 치료 없음"}{" "}
+        {q.clinic_id ? "치과" : "공개견적"}
       </span>
       <Button
         className={`rounded-md px-4 h-9 font-medium ${

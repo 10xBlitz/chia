@@ -5,7 +5,7 @@ export const QUOTATION_MAX_TEXT = 500;
 
 // --- Form Schema ---
 export const quotationSchema = z.object({
-  treatment_id: z.string().min(1, "시술을 선택해주세요."),
+  treatment_id: z.string().optional(),
   region: z.string().min(1, "지역을 선택해주세요."),
   name: z.string().min(1, "이름을 입력해주세요."),
   gender: z.string({

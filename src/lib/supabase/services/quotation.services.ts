@@ -7,7 +7,7 @@ const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_MB = 10;
 const BUCKET_NAME = "quotation-images";
 interface CreateQuotationParams {
-  treatment_id: string;
+  treatment_id?: string;
   region: string;
   name: string;
   gender: string;

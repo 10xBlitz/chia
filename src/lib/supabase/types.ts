@@ -439,7 +439,7 @@ export type Database = {
           patient_id: string
           region: string
           residence: string
-          treatment_id: string
+          treatment_id: string | null
         }
         Insert: {
           birthdate: string
@@ -453,7 +453,7 @@ export type Database = {
           patient_id: string
           region: string
           residence: string
-          treatment_id: string
+          treatment_id?: string | null
         }
         Update: {
           birthdate?: string
@@ -467,7 +467,7 @@ export type Database = {
           patient_id?: string
           region?: string
           residence?: string
-          treatment_id?: string
+          treatment_id?: string | null
         }
         Relationships: [
           {

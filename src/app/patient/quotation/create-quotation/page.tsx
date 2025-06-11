@@ -71,7 +71,6 @@ export default function CreateQuotationPage() {
   const form = useForm<QuotationFormValues>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
-      treatment_id: "",
       region: "",
       name: "",
       gender: "",

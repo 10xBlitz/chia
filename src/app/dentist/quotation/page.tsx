@@ -64,7 +64,7 @@ export default function ViewQuotationPage() {
               </span>
               <span className="text-gray-600 truncate flex-1 mr-4 whitespace-nowrap">
                 {q.region?.split(",")[1]?.trim() || q.region} ·{" "}
-                {q.treatment.treatment_name}{" "}
+                {q.treatment?.treatment_name || "선택된 치료 없음"}{" "}
                 {
                   q.clinic_id
                     ? "치과" /* Dental Clinic */
@@ -110,15 +110,18 @@ async function fetchQuotations(
     .order("created_at", { ascending: false })
     .limit(100);
 
-  // Logic:
-  // 1. If clinic_id is present in quotation, get if clinic_id matches.
-  // 2. If clinic_id is null, get if region matches and treatment_id is provided by clinic.
-  // Supabase .or() uses | for OR and .and for AND.
+  // Properly quote region if it contains a comma
+  const quotedRegion =
+    region.includes(",") ? `"${region}"` : region;
 
-  // Compose the filter string for .or()
-  const filter = `clinic_id.eq.${clinic_id},and(clinic_id.is.null,region.eq.${region},treatment_id.in.(${treatments
-    .map((id) => `"${id}"`)
-    .join(",")}))`;
+  // treatment_id.in.(...) should not have quotes around each id
+  const treatmentsList = treatments.join(",");
+
+  const filter = [
+    `clinic_id.eq.${clinic_id}`,
+    `and(clinic_id.is.null,treatment_id.is.null,region.eq.${quotedRegion})`,
+    `and(clinic_id.is.null,region.eq.${quotedRegion},treatment_id.in.(${treatmentsList}))`,
+  ].join(",");
 
   console.log("---->filter: ", filter);
   query = query.or(filter);
