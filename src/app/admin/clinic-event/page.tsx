@@ -28,9 +28,14 @@ export default function ClinicEventPage() {
       filters.clinic_name,
       filters.date_range,
     ],
-    queryFn: async () => await getPaginatedClinicEvents(page, limit, filters),
+    queryFn: async () => {
+      const x = await getPaginatedClinicEvents(page, limit, filters);
+      console.log("----->xxxx: ", x);
+      return x;
+    },
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 1, // 1 minute1
+    refetchOnMount: true,
   });
 
   return (

@@ -84,7 +84,6 @@ export const ClinicModal = ({
   onClose: () => void;
   onSuccess: () => void;
 }) => {
-  const [confirmModal, setConfirmModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const [clinicImagePreviews, setClinicImagePreviews] = useState<string[]>(
@@ -158,6 +157,7 @@ export const ClinicModal = ({
   };
 
   const mutation = useMutation({
+    mutationKey: ["save_clinic_and_treatments", data?.id],
     mutationFn: async (values: z.infer<typeof formSchema>) => {
       // Attach pictures to values
       values.pictures =
@@ -183,9 +183,12 @@ export const ClinicModal = ({
     mutation.mutate(values);
   };
 
+  // Track which treatment index is being confirmed for deletion
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
   const confirmRemoveTreatment = (index: number) => {
     const treatment = form.getValues(`treatments.${index}`);
-    if (treatment.treatment_id) {
+    if (treatment.action === "old") {
       // Existing treatment: mark as deleted
       update(index, { ...treatment, action: "deleted" });
     } else {
@@ -201,7 +204,10 @@ export const ClinicModal = ({
         description={""}
         isOpen={open}
         isLong={true}
-        onClose={onClose}
+        onClose={() => {
+          form.reset();
+          onClose();
+        }}
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="py-2">
@@ -295,7 +301,7 @@ export const ClinicModal = ({
                       <Button
                         className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
                         type="button"
-                        onClick={() => setConfirmModal(true)}
+                        onClick={() => setDeleteIndex(index)}
                       >
                         <Trash2Icon className="h-4 w-4" />
                       </Button>
@@ -328,9 +334,43 @@ export const ClinicModal = ({
                                         selected.image_url || ""
                                       );
                                     }
+                                    // Remove this treatment from other selects (including newly added)
+                                    const currentTreatments =
+                                      form.getValues("treatments");
+                                    currentTreatments.forEach((t, idx) => {
+                                      if (
+                                        idx !== index &&
+                                        t.treatment_id === e &&
+                                        t.action !== "deleted"
+                                      ) {
+                                        form.setValue(
+                                          `treatments.${idx}.treatment_id`,
+                                          ""
+                                        );
+                                        form.setValue(
+                                          `treatments.${idx}.treatment_name`,
+                                          ""
+                                        );
+                                        form.setValue(
+                                          `treatments.${idx}.image_url`,
+                                          ""
+                                        );
+                                      }
+                                    });
                                   }}
                                   filterItems={(inputValue, items) =>
                                     items.filter(({ value }) => {
+                                      // Exclude treatments already selected in other fields (including new ones)
+                                      const selectedIds = form
+                                        .getValues("treatments")
+                                        .filter(
+                                          (t, idx) =>
+                                            idx !== index &&
+                                            t.action !== "deleted"
+                                        )
+                                        .map((t) => t.treatment_id);
+                                      if (selectedIds.includes(value))
+                                        return false;
                                       const treatment =
                                         allTreatments?.data.find(
                                           (t) => t.id === value
@@ -478,10 +518,10 @@ export const ClinicModal = ({
                       <ConfirmDeleteModal
                         title="Confirm Remove Treatment"
                         description={`Are you sure you want to remove ${item.treatment_name}?`}
-                        open={confirmModal}
-                        onCancel={() => setConfirmModal(false)}
+                        open={deleteIndex === index}
+                        onCancel={() => setDeleteIndex(null)}
                         onConfirm={() => {
-                          setConfirmModal(false);
+                          setDeleteIndex(null);
                           confirmRemoveTreatment(index);
                         }}
                       />

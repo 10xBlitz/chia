@@ -4,9 +4,18 @@ import HeaderWithBackButton from "@/components/header-with-back-button";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useUserStore } from "@/providers/user-store-provider";
+import { Button } from "@/components/ui/button";
+import { EditIcon, LockIcon } from "lucide-react";
+import { useState } from "react";
+import { EditProfileModal } from "@/app/patient/profile/edit-profile/edit-profile-modal";
+import { EditPasswordModal } from "@/components/modals/edit-password-modal";
+
+type ModalState = "profile" | "password" | "none";
 
 export default function ProfilePage() {
   const user = useUserStore((state) => state.user);
+  const [modal, setModal] = useState<ModalState>("none");
+
   // Dentist-specific fields
   const dentistName = user?.clinic?.clinic_name || "일신치과의원";
   const establishedAt = user?.clinic?.created_at
@@ -60,6 +69,27 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Edit Buttons */}
+        <div className="flex justify-end mb-2 gap-4 flex-col mt-10">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-md px-4 py-1 text-sm font-medium flex items-center gap-1"
+            onClick={() => setModal("profile")}
+          >
+            <EditIcon className="w-4 h-4" /> 정보 수정 {/* Edit Info */}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-md px-4 py-1 text-sm font-medium flex items-center gap-1"
+            onClick={() => setModal("password")}
+          >
+            <LockIcon className="w-4 h-4" /> 비밀번호 변경{" "}
+            {/* Change Password */}
+          </Button>
+        </div>
+
         {/* Divider */}
         <div className="border-t my-4" />
 
@@ -102,6 +132,17 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
+      {/* Modals */}
+      <EditProfileModal
+        open={modal === "profile"}
+        onClose={() => setModal("none")}
+        userData={user}
+      />
+      <EditPasswordModal
+        open={modal === "password"}
+        onClose={() => setModal("none")}
+        userData={user}
+      />
     </div>
   );
 }

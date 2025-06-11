@@ -118,34 +118,37 @@ export function DataTable<TData, TValue>({
   });
 
   //debounced the fullName so that it doesn't trigger the search params update on every keystroke
+  const updateParam = React.useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParam.toString());
+
+      //update or delete the param
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+
+      //reset pagination when filter or limit changes
+      if (key !== "page") {
+        params.set("page", "1");
+        setPage(1);
+        setLimit(10);
+      }
+
+      //update local state
+      if (key === "page") setPage(Number(value));
+
+      if (key === "limit") setLimit(Number(value));
+
+      router.push(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParam]
+  );
+
   React.useEffect(() => {
     updateParam("full_name", debouncedFullName);
-  }, [debouncedFullName]);
-
-  const updateParam = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParam.toString());
-
-    //update or delete the param
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-
-    //reset pagination when filter or limit changes
-    if (key !== "page") {
-      params.set("page", "1");
-      setPage(1);
-      setLimit(10);
-    }
-
-    //update local state
-    if (key === "page") setPage(Number(value));
-
-    if (key === "limit") setLimit(Number(value));
-
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
+  }, [debouncedFullName, updateParam]);
   return (
     <div>
       <div className="flex items-center gap-3 py-4">

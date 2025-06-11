@@ -213,22 +213,29 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
 
     // Subscribe to auth state changes
     const { data: authListener } = supabaseClient.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!storeRef.current) {
-          // This case should be rare if initializeStore completes first
-          console.warn("onAuthStateChange: storeRef not initialized yet.");
-          return;
-        }
+      (event, session) => {
+        setTimeout(async () => {
+          if (!storeRef.current) {
+            // This case should be rare if initializeStore completes first
+            console.warn("onAuthStateChange: storeRef not initialized yet.");
+            return;
+          }
 
-        if (event === "SIGNED_IN" && session?.user) {
-          await fetchProfileAndUpdateStore(session.user.id, session.user.email);
-        } else if (event === "SIGNED_OUT") {
-          storeRef.current.getState().updateUser(defaultUserState);
-        } else if (event === "USER_UPDATED" && session?.user) {
-          // If user's auth details change (e.g. email verified), re-fetch profile
-          await fetchProfileAndUpdateStore(session.user.id, session.user.email);
-        }
-        // You might also handle TOKEN_REFRESHED if it implies user data changes in your app
+          if (event === "SIGNED_IN" && session?.user) {
+            await fetchProfileAndUpdateStore(
+              session.user.id,
+              session.user.email
+            );
+          } else if (event === "SIGNED_OUT") {
+            storeRef.current.getState().updateUser(defaultUserState);
+          } else if (event === "USER_UPDATED" && session?.user) {
+            // If user's auth details change (e.g. email verified), re-fetch profile
+            await fetchProfileAndUpdateStore(
+              session.user.id,
+              session.user.email
+            );
+          }
+        }, 0);
       }
     );
 

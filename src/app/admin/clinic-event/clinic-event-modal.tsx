@@ -169,8 +169,6 @@ export const ClinicEventModal = ({
     enabled: !!selectedClinicId || !!form.getValues("clinic_id"),
   });
 
-  console.log("---->treatments: ", treatments);
-
   return (
     <Modal
       title={data ? "클리닉 이벤트 편집" : "클리닉 이벤트 추가"} // "Edit Clinic Event" or "Add Clinic Event"

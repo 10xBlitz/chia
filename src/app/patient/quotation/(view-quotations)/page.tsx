@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { EditIcon } from "lucide-react";
@@ -11,14 +11,27 @@ import { QuotationListItemSkeleton } from "@/components/loading-skeletons/quotat
 
 export default function ViewQuotationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const userId = useUserStore((selector) => selector.user?.id);
 
+  // Read pagination from searchParams
+  const page = Number(searchParams.get("page") || 1);
+  const pageSize = Number(searchParams.get("pageSize") || 10);
+
   const { data: quotations, isLoading } = useQuery({
-    queryKey: ["quotations", userId],
-    queryFn: () => getPaginatedQuotations(1, 1000, { patient_id: userId }),
+    queryKey: ["quotations", userId, page, pageSize],
+    queryFn: () =>
+      getPaginatedQuotations(page, pageSize, { patient_id: userId }),
     enabled: !!userId,
-    retry: 1,
   });
+
+  // Helper to update searchParams for pagination
+  const setPagination = (newPage: number, newPageSize: number = pageSize) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(newPage));
+    params.set("pageSize", String(newPageSize));
+    router.push(`?${params.toString()}`);
+  };
 
   const handleQuotationClick = (
     quotation_id: string,
@@ -50,7 +63,7 @@ export default function ViewQuotationPage() {
           <QuotationListItemSkeleton key={i} />
         ))}
 
-      {quotations?.data.length === 0 && (
+      {(quotations?.data?.length ?? 0) === 0 && (
         <div className="mt-10 text-center">
           견적이 없습니다. {/* No quotations. */}
         </div>
@@ -67,6 +80,28 @@ export default function ViewQuotationPage() {
           ))}
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center gap-4 mt-6">
+        <Button
+          variant="outline"
+          disabled={page === 1}
+          onClick={() => setPagination(Math.max(1, page - 1))}
+        >
+          이전 {/* Previous */}
+        </Button>
+        <span className="self-center font-medium">
+          {page} 페이지 {/** page*/}
+        </span>
+        <Button
+          variant="outline"
+          disabled={(quotations?.data?.length ?? 0) < pageSize}
+          onClick={() => setPagination(page + 1)}
+        >
+          다음 {/* Next */}
+        </Button>
+      </div>
+
       {/* Floating Button */}
       <Button
         className="fixed bottom-24 right-6 z-30 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 py-2 shadow-lg flex items-center gap-2 transition-all"

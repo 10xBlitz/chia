@@ -16,18 +16,30 @@ export default function ReservationListPage() {
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
 
+  // Pagination state from searchParams
+  const page = Number(searchParams.get("page") || 1);
+  const pageSize = Number(searchParams.get("pageSize") || 10);
+
   const {
     data: reservations,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["reservations", userId],
+    queryKey: ["reservations", userId, page, pageSize],
     queryFn: async () =>
-      await getPaginatedReservations(1, 1000, { patient_id: userId }),
+      await getPaginatedReservations(page, pageSize, { patient_id: userId }),
     enabled: !!userId,
     refetchInterval: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });
+
+  // Helper to update searchParams for pagination
+  const setPagination = (newPage: number, newPageSize: number = pageSize) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(newPage));
+    params.set("pageSize", String(newPageSize));
+    router.push(`?${params.toString()}`);
+  };
 
   console.log("---> error: ", error);
 
@@ -42,7 +54,7 @@ export default function ReservationListPage() {
       )}
       {isLoading && <ReservationListSkeleton />}
 
-      {reservations?.data.length === 0 && (
+      {(reservations?.data?.length ?? 0) === 0 && (
         <div className="text-center ">
           예약이 없습니다. {/* No reservations. */}
         </div>
@@ -87,6 +99,26 @@ export default function ReservationListPage() {
           ))}
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center gap-4 mt-6">
+        <Button
+          variant="outline"
+          disabled={page === 1}
+          onClick={() => setPagination(Math.max(1, page - 1))}
+        >
+          이전
+        </Button>
+        <span className="self-center font-medium">{page} 페이지</span>
+        <Button
+          variant="outline"
+          disabled={(reservations?.data?.length ?? 0) < pageSize}
+          onClick={() => setPagination(page + 1)}
+        >
+          다음
+        </Button>
+      </div>
+
       {!accessedFromProfile && <BottomNavigation />}
     </>
   );

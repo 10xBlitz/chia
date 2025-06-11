@@ -111,26 +111,29 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const updateParam = React.useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParam.toString());
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      if (key !== "page") {
+        params.set("page", "1");
+        setPage(1);
+        setLimit(10);
+      }
+      if (key === "page") setPage(Number(value));
+      if (key === "limit") setLimit(Number(value));
+      router.push(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParam]
+  );
+
   React.useEffect(() => {
     updateParam("treatment_name", debouncedTreatmentName);
-  }, [debouncedTreatmentName]);
-
-  const updateParam = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParam.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    if (key !== "page") {
-      params.set("page", "1");
-      setPage(1);
-      setLimit(10);
-    }
-    if (key === "page") setPage(Number(value));
-    if (key === "limit") setLimit(Number(value));
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
+  }, [debouncedTreatmentName, updateParam]);
 
   return (
     <div className="w-full flex-1 ">

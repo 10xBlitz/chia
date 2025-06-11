@@ -25,44 +25,69 @@ export async function getPaginatedClinicEvents(
     discount?: number;
   }
 ) {
-  if (limit > 1000) {
-    throw Error("Limit exceeds 100");
+  try {
+    if (limit > 1000) {
+      throw Error("Limit exceeds 100");
+    }
+    if (limit < 1) {
+      throw Error("Limit must be a positive number");
+    }
+
+    const offset = (page - 1) * limit;
+
+    console.log("----> Getting clinic events with filters:", {
+      page,
+      limit,
+      offset,
+      filters,
+    });
+
+    let query = supabaseClient
+      .from("event")
+      .select("*, clinic_treatment(clinic(*)) ", { count: "exact" })
+      .order("created_at", { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    console.log("----> Initial query:", query.toString());
+
+    // Filters
+    if (filters.clinic_name) {
+      query = query.ilike(
+        "clinic_treatment.clinic.clinic_name",
+        `%${filters.clinic_name}%`
+      );
+      query = query.filter("clinic_treatment", "not.is", null);
+      query = query.filter("clinic_treatment.clinic", "not.is", null);
+    }
+
+    console.log("----> After clinic_name filter:");
+
+    console.log("Supabase client:", supabaseClient);
+    const session = await supabaseClient.auth.getSession();
+    console.log("Supabase session:", session);
+
+    const { data, error, count } = await query;
+
+    console.log("----> Query result:", { data, error, count });
+
+    if (error) throw error;
+
+    const totalPages = count ? Math.ceil(count / limit) : 1;
+
+    console.log("----> Total items:", count);
+    console.log("----> Total pages:", totalPages);
+
+    return {
+      data,
+      totalItems: count,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    };
+  } catch (error) {
+    console.log("---->error: ", error);
+    throw error;
   }
-  if (limit < 1) {
-    throw Error("Limit must be a positive number");
-  }
-
-  const offset = (page - 1) * limit;
-
-  let query = supabaseClient
-    .from("event")
-    .select("*, clinic_treatment(clinic(*)) ", { count: "exact" })
-    .order("created_at", { ascending: true })
-    .range(offset, offset + limit - 1);
-
-  // Filters
-  if (filters.clinic_name) {
-    query = query.ilike(
-      "clinic_treatment.clinic.clinic_name",
-      `%${filters.clinic_name}%`
-    );
-    query = query.filter("clinic_treatment", "not.is", null);
-    query = query.filter("clinic_treatment.clinic", "not.is", null);
-  }
-
-  const { data, error, count } = await query;
-
-  if (error) throw error;
-
-  const totalPages = count ? Math.ceil(count / limit) : 1;
-
-  return {
-    data,
-    totalItems: count,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1,
-  };
 }
 
 type InsertEventInput = Omit<

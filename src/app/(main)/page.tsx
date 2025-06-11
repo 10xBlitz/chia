@@ -14,7 +14,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 import { UserIcon } from "lucide-react";
 import EventCarousel from "@/components/event";
 import MainBannerCarousel from "@/components/main-banner";
@@ -25,6 +24,7 @@ import MobileLayout from "@/components/layout/mobile-layout";
 import BottomNavigation from "@/components/bottom-navigation";
 import { Button } from "@/components/ui/button";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
+import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 
 export default function MainPage() {
   const searchParams = useSearchParams();
@@ -58,6 +58,8 @@ export default function MainPage() {
       const res = await getPaginatedClinicsWthReviews(1, 3, {
         region: regionFilter,
       });
+
+      console.info("res.data", res.data);
       return res.data || [];
     },
     enabled:
@@ -68,7 +70,7 @@ export default function MainPage() {
         : filterOption === "거주"
         ? !!user?.residence
         : false,
-    structuralSharing: false,
+    refetchOnWindowFocus: true,
   });
 
   // useEffect(() => {

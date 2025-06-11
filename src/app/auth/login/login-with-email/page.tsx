@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import FormInput from "@/components/form-ui/form-input";
-import { supabaseClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }),
@@ -45,8 +45,10 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "이메일로 로그인"; // Default to 'Login With Email' if not specified
   let signUpLink = "";
-  if (title === "이메일로 로그인(환자)") signUpLink = "/auth/sign-up/patient"; // Sign up link for patients
-  if (title === "이메일로 로그인(치과)") signUpLink = "/auth/sign-up/dentist"; // Sign up link for dentists
+  if (title === "이메일로 로그인하기") signUpLink = "/auth/sign-up/patient"; // Sign up link for patients
+  if (title === "치과 의사로 로그인") signUpLink = "/auth/sign-up/dentist"; // Sign up link for dentists
+
+  const client = createClient();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -60,7 +62,7 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabaseClient.auth.signInWithPassword({
+      const { error } = await client.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
