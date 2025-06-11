@@ -41,9 +41,12 @@ export default function MainPage() {
     data: clinicsData,
     isLoading: clinicsLoading,
     error: clinicsError,
+    // refetch: refetchInitialClinics,
+    // fetchStatus: clinicsFetchStatus,
   } = useQuery({
     queryKey: ["clinics-initial", filterOption],
     queryFn: async () => {
+      console.log("---->Fetching clinics with filter:", filterOption);
       let regionFilter = "";
       if (filterOption === "근무지") {
         //workplace
@@ -57,9 +60,17 @@ export default function MainPage() {
       });
       return res.data || [];
     },
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-    retry: 1,
+    enabled: !!user?.work_place && !!user.residence,
+    structuralSharing: false,
   });
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (clinicsFetchStatus === "fetching") {
+  //       refetchInitialClinics();
+  //     }
+  //   }, 3000);
+  // }, [filterOption]);
 
   return (
     <MobileLayout className="!px-0">
@@ -104,9 +115,18 @@ export default function MainPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="근무지">근무지</SelectItem>{" "}
+                  <SelectItem className="cursor-pointer" value="모두">
+                    모두
+                  </SelectItem>{" "}
+                  {/** All */}
+                  <SelectItem className="cursor-pointer" value="근무지">
+                    근무지
+                  </SelectItem>
                   {/** Workplace */}
-                  <SelectItem value="거주">거주</SelectItem> {/** Residence */}
+                  <SelectItem className="cursor-pointer" value="거주">
+                    거주
+                  </SelectItem>{" "}
+                  {/** Residence */}
                 </SelectContent>
               </Select>
             )}
@@ -129,19 +149,23 @@ export default function MainPage() {
               clinicsData
                 .slice(0, 2)
                 .map((item) => <ClinicCard {...item} key={item.id} />)}
-
+            {/** No clinics found message when user filters */}
+            {clinicsData && clinicsData.length === 0 && filterOption && (
+              <p className="text-center text-gray-500 px-4 py-15">
+                해당 지역에는 조건에 맞는 병원이 없습니다. 다른 지역을
+                선택하거나 필터를 조정해보세요.
+                {/** There are no hospitals in your area that match your criteria. Please select a different area or adjust your filters. */}
+              </p>
+            )}{" "}
             {/* 2. SubBanner */}
             <SubBannerCarousel />
-
             {/* 3. Next 1 clinic */}
             {clinicsData &&
               clinicsData
                 .slice(2, 3)
                 .map((item) => <ClinicCard {...item} key={item.id} />)}
-
             {/* 4. Event Carousel */}
             <EventCarousel />
-
             {/* 5. Rest of clinics with infinite scroll */}
             {clinicsData && clinicsData?.length >= 3 && (
               <InfiniteList
