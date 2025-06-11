@@ -49,7 +49,10 @@ async function fetchClinicDetail(clinic_id: string) {
     )
     .eq("id", clinic_id)
     .single();
+  console.log("---->error", error);
   if (error) throw error;
+
+  console.log("---->error", error);
   return data;
 }
 
@@ -109,7 +112,7 @@ export default function ClinicDetailPage() {
     isLoading: clinicLoading,
   } = useQuery({
     queryKey: ["clinic-detail", clinic_id],
-    queryFn: () => fetchClinicDetail(clinic_id),
+    queryFn: async () => await fetchClinicDetail(clinic_id),
     enabled: !!clinic_id,
   });
 
@@ -420,8 +423,11 @@ export default function ClinicDetailPage() {
                 </div>
               </div>
             </div>
-            {/* 시설 (Facilities) */}
-            <div className="mt-6">
+            <div
+              className="mt-6"
+              id={tabAnchors.treatments}
+              ref={treatmentsRef}
+            >
               <div className="font-semibold mb-2 text-xl">
                 시설 {/**Treatments */}
               </div>

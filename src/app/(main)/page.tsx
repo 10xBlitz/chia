@@ -60,7 +60,14 @@ export default function MainPage() {
       });
       return res.data || [];
     },
-    enabled: !!user?.work_place && !!user.residence,
+    enabled:
+      filterOption === "모두" || filterOption === ""
+        ? true
+        : filterOption === "근무지"
+        ? !!user?.work_place
+        : filterOption === "거주"
+        ? !!user?.residence
+        : false,
     structuralSharing: false,
   });
 
