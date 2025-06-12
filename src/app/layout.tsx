@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg", // Remove double slash
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg",
         width: 1200,
         height: 630,
         alt: "My Website Preview",
@@ -45,19 +45,9 @@ export const metadata: Metadata = {
       "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg",
     ],
   },
-  // Add legacy meta tags for social preview compatibility
-  metadataBase: new URL("https://chia-azure.vercel.app/"),
-  other: {
-    "og:image":
-      "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg",
-    "og:image:width": "1200",
-    "og:image:height": "630",
-    "og:image:type": "image/jpeg",
-    "twitter:image":
-      "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg",
-  },
+  // Remove the 'other' block completely. It's causing incorrect duplicate tags.
+  // metadataBase: new URL("https://chia-azure.vercel.app/"), // Keep this if you want to resolve relative URLs elsewhere
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
