@@ -1,6 +1,6 @@
 import MainPage from "./main-content";
 
-function Page() {
+async function Page() {
   return <MainPage />;
 }
 
