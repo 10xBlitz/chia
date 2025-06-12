@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -11,15 +10,41 @@ import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import toast from "react-hot-toast";
 import { registerDentist } from "@/lib/supabase/services/users.services";
-import { DentistSignupFormSchema } from "./schema";
+import {
+  DentistSignupFormSchema,
+  dentistStep1Schema,
+  dentistStep2Schema,
+  dentistStep3Schema,
+  DentistSignupFormType,
+} from "./schema";
 import { getClinicDepartments } from "@/lib/supabase/services/clinic-departments.services";
 import FormInput from "@/components/form-ui/form-input";
 import FormSelect from "@/components/form-ui/form-select";
 import FormMultiSelect from "@/components/form-ui/form-select-multi";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
+import FormGender from "@/components/form-ui/form-gender";
+import FormContactNumber from "@/components/form-ui/form-contact-number";
+import FormDatePicker from "@/components/form-ui/form-date-picker-single";
+import FormAddress from "@/components/form-ui/form-address";
+import { Stepper } from "@/components/stepper";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import MobileLayout from "@/components/layout/mobile-layout";
+
+const steps = [
+  { label: "계정" }, // Account
+  { label: "개인 정보" }, // Personal Info
+  { label: "병원 정보" }, // Clinic Info
+];
 
 export default function DentistSignupPage() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isStepValid, setIsStepValid] = useState(false);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
+  const [confirmPasswordError, setConfirmPasswordError] = useState<
+    string | null
+  >(null);
 
   // Fetch hospitals
   const { data: hospitals } = useQuery({
@@ -51,141 +76,297 @@ export default function DentistSignupPage() {
     },
   });
 
-  const form = useForm<z.infer<typeof DentistSignupFormSchema>>({
+  const form = useForm<DentistSignupFormType>({
     resolver: zodResolver(DentistSignupFormSchema),
+    mode: "onChange",
     defaultValues: {
       full_name: "",
       email: "",
       password: "",
       confirmPassword: "",
+      gender: "",
+      contact_number: "",
+      birthdate: new Date(),
+      residence: "",
+      work_place: "",
       clinic_id: "",
       treatments: [],
       departments: [],
     },
   });
 
+  const watchedValues = form.watch();
+
+  // Step schema for validation
+  const currentSchema =
+    currentStep === 1
+      ? dentistStep1Schema
+      : currentStep === 2
+      ? dentistStep2Schema
+      : dentistStep3Schema;
+
+  useEffect(() => {
+    const validate = async () => {
+      const result = currentSchema.safeParse(watchedValues);
+      setIsStepValid(result.success);
+    };
+
+    if (currentStep === 1) {
+      if (watchedValues.password !== watchedValues.confirmPassword) {
+        setConfirmPasswordError("비밀번호가 일치하지 않습니다."); // Passwords do not match
+      } else {
+        setConfirmPasswordError(null);
+      }
+    }
+
+    validate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedValues, currentStep]);
+
   const { mutate, status } = useMutation({
-    mutationFn: async (data: z.infer<typeof DentistSignupFormSchema>) => {
-      await registerDentist(data);
+    mutationFn: async (data: DentistSignupFormType) => {
+      await registerDentist({
+        ...data,
+        birthdate: data.birthdate.toISOString(),
+      });
     },
     onSuccess: () => {
       toast.success("회원가입이 완료되었습니다!"); // Sign up completed successfully
       router.push("/dentist");
     },
     onError: (error) => {
-      console.log("---->error: ", error);
       toast.error(error?.message || "회원가입에 실패했습니다."); //Failed to register.
     },
   });
 
-  const onSubmit = (data: z.infer<typeof DentistSignupFormSchema>) => {
+  const onSubmit = (data: DentistSignupFormType) => {
     mutate(data);
-    // console.log("---->data: ", data);
+  };
+
+  const nextStep = () => {
+    setDirection("next");
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length));
+  };
+
+  const prevStep = () => {
+    setDirection("prev");
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  // Variants for swipe animation with directional support
+  const variants = {
+    enter: (dir: "next" | "prev") => ({
+      x: dir === "next" ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: "next" | "prev") => ({
+      x: dir === "next" ? -300 : 300,
+      opacity: 0,
+    }),
   };
 
   return (
-    <div className="flex flex-col min-h-dvh px-4 pt-6 pb-2 bg-white max-w-lg mx-auto">
-      {/* 아래 정보를 입력해주세요. (Please enter the information below.) */}
+    <MobileLayout className="flex flex-col min-h-dvh">
       <HeaderWithBackButton title="아래 정보를 입력해주세요." />
+      <div className="flex items-center mt-3 justify-center w-full">
+        <Stepper steps={steps} currentStep={currentStep} />
+      </div>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-7 flex-1"
+          className="flex flex-col gap-10 flex-1 pb-10"
         >
-          <FormInput
-            control={form.control}
-            name="full_name"
-            label="이름" //Name
-            placeholder="이름을 입력해주세요." //Please enter your name
-          />
+          <AnimatePresence initial={false} mode="wait" custom={direction}>
+            {currentStep === 1 && (
+              <motion.div
+                key="step1"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-7 flex-1"
+              >
+                <FormInput
+                  control={form.control}
+                  name="full_name"
+                  label="이름" //Name
+                  placeholder="이름을 입력해주세요." //Please enter your name
+                />
+                <FormInput
+                  control={form.control}
+                  name="email"
+                  type="email"
+                  label="이메일 주소" //Email address
+                  placeholder="이메일을 입력해주세요." //Please enter your email address.
+                />
+                <FormInput
+                  control={form.control}
+                  name="password"
+                  label="비밀번호" //Password
+                  type="password"
+                  placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
+                />
+                <FormInput
+                  control={form.control}
+                  name="confirmPassword"
+                  label="비밀번호 확인" //Verify password
+                  type="password"
+                  placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
+                />
+                {confirmPasswordError && (
+                  <span className="text-red-500 -mt-6 ml-1">
+                    {confirmPasswordError}
+                  </span>
+                )}
+              </motion.div>
+            )}
 
-          <FormInput
-            control={form.control}
-            name="email"
-            type="email"
-            label="이메일 주소" //Email address
-            placeholder="이름을 입력해주세요." //Please enter your email address.
-          />
+            {currentStep === 2 && (
+              <motion.div
+                key="step2"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-7 flex-1"
+              >
+                <FormGender
+                  control={form.control}
+                  name="gender"
+                  label="성별" //Gender
+                />
+                <FormContactNumber
+                  control={form.control}
+                  name="contact_number"
+                  label="연락처" //Contact Number
+                  defaultCountry="KR"
+                />
+                <FormDatePicker
+                  control={form.control}
+                  name="birthdate"
+                  label="생년월일" //Birthdate
+                />
+                <FormAddress
+                  control={form.control}
+                  name="residence"
+                  label="거주지" // Residence
+                />
+                <FormAddress
+                  control={form.control}
+                  name="work_place"
+                  label="근무지" // Workplace
+                />
+              </motion.div>
+            )}
 
-          <FormInput
-            control={form.control}
-            name="password"
-            label="비밀번호" //Password
-            type="password"
-            placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
-          />
+            {currentStep === 3 && (
+              <motion.div
+                key="step3"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-7 flex-1"
+              >
+                <FormSelect
+                  control={form.control}
+                  name="clinic_id"
+                  label="병원명" // Hospital Name
+                  placeholder="병원명을 입력해주세요." // Please select hospital
+                >
+                  {hospitals?.map((h) => (
+                    <SelectItem key={h.id} value={h.id}>
+                      {h.clinic_name}
+                    </SelectItem>
+                  ))}
+                </FormSelect>
+                {treatments && Array.isArray(treatments) && (
+                  <FormMultiSelect
+                    control={form.control}
+                    name="treatments"
+                    label="치료" // Treatment
+                    placeholder="여기에서 치료를 선택하세요" // Select treatments here
+                    options={treatments?.map((item) => ({
+                      label: item.treatment_name,
+                      value: item.id,
+                    }))}
+                    loading={!treatments}
+                    onChange={(selected) => {
+                      form.setValue(
+                        "treatments",
+                        selected.map((item) => item.value),
+                        { shouldValidate: true }
+                      );
+                    }}
+                  />
+                )}
+                <FormMultiSelect
+                  control={form.control}
+                  name="departments"
+                  label="진료과목" // Departments
+                  placeholder="여기에서 부서를 선택하세요" // Select departments here
+                  options={departments?.map((item) => ({
+                    label: item.department_name,
+                    value: item.id,
+                  }))}
+                  loading={!departments}
+                  onChange={(e) =>
+                    form.setValue(
+                      "departments",
+                      e.map((item) => item.value),
+                      { shouldValidate: true }
+                    )
+                  }
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <FormInput
-            control={form.control}
-            name="confirmPassword"
-            label="비밀번호" //Verify password
-            type="password"
-            placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
-          />
+          {/* Navigation buttons */}
+          <div className="flex items-end flex-1 gap-2">
+            <Button
+              disabled={currentStep <= 1}
+              type="button"
+              className="w-[49%] btn-primary"
+              onClick={prevStep}
+            >
+              이전 {/* Previous */}
+            </Button>
 
-          <FormSelect
-            control={form.control}
-            name="clinic_id"
-            label="병원명" // Hospital Name
-            placeholder="병원명을 입력해주세요." // Please select hospital
-          >
-            {hospitals?.map((h) => (
-              <SelectItem key={h.id} value={h.id}>
-                {h.clinic_name}
-              </SelectItem>
-            ))}
-          </FormSelect>
+            {currentStep < steps.length && (
+              <Button
+                type="button"
+                className="w-[49%] btn-primary"
+                onClick={nextStep}
+                disabled={!isStepValid}
+              >
+                다음 {/* Next */}
+              </Button>
+            )}
 
-          {treatments && Array.isArray(treatments) && (
-            <FormMultiSelect
-              control={form.control}
-              name="treatments"
-              label="치료" // Treatment
-              placeholder="여기에서 치료를 선택하세요" // Select treatments here
-              options={treatments?.map((item) => ({
-                label: item.treatment_name,
-                value: item.id,
-              }))}
-              loading={!treatments}
-              onChange={(selected) => {
-                form.setValue(
-                  "treatments",
-                  selected.map((item) => item.value),
-                  { shouldValidate: true }
-                );
-              }}
-            />
-          )}
-
-          <FormMultiSelect
-            control={form.control}
-            name="departments"
-            label="진료과목" // Departments
-            placeholder="여기에서 부서를 선택하세요" // Select departments here
-            options={departments?.map((item) => ({
-              label: item.department_name,
-              value: item.id,
-            }))}
-            loading={!departments}
-            onChange={(e) =>
-              form.setValue(
-                "departments",
-                e.map((item) => item.value),
-                { shouldValidate: true }
-              )
-            }
-          />
-
-          <Button
-            type="submit"
-            className="h-[45px] rounded-md btn-primary"
-            disabled={status === "pending"}
-          >
-            {/*Submit */}
-            {status === "pending" ? "회원가입 중..." : "회원가입"}
-          </Button>
+            {currentStep === steps.length && (
+              <Button
+                type="submit"
+                disabled={status === "pending"}
+                className="w-[49%] btn-primary"
+              >
+                {status === "pending" ? "회원가입 중..." : "회원가입"}{" "}
+                {/* Sign Up */}
+              </Button>
+            )}
+          </div>
         </form>
       </Form>
-    </div>
+    </MobileLayout>
   );
 }

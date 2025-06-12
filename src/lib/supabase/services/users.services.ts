@@ -160,24 +160,35 @@ export async function registerDentist({
   treatments,
   departments,
   clinic_id,
+  gender,
+  contact_number,
+  birthdate,
+  residence,
+  work_place,
 }: {
   full_name: string;
   email: string;
   password: string;
-  clinic_id: string; // Assuming clinicId is passed as a parameter
-  treatments: string[]; // Array of treatment IDs
-  departments: string[]; // Array of department IDs
+  clinic_id: string;
+  treatments: string[];
+  departments: string[];
+  gender: string;
+  contact_number: string;
+  birthdate: string | Date;
+  residence: string;
+  work_place: string;
 }) {
   const result = await registerUser({
-    birthdate: new Date().toISOString(), // Assuming current date for simplicity
+    birthdate:
+      typeof birthdate === "string" ? birthdate : birthdate.toISOString(),
     clinic_id,
-    contact_number: "", // Assuming no contact number for simplicity
-    full_name: full_name,
-    gender: "male",
-    residence: "", // Assuming no residence for simplicity
-    work_place: "", // Assuming no work place for simplicity
-    email: email,
-    password: password,
+    contact_number,
+    full_name,
+    gender,
+    residence,
+    work_place,
+    email,
+    password,
     role: "dentist",
   });
   console.log("---->registerDentist result: ", result);
