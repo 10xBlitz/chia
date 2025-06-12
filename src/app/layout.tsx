@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "치과 시술 플랫폼",
     images: [
       {
-        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png", // Must be an absolute URL
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png", // removed double slash
         width: 800,
         height: 600,
         alt: "My custom alt",
