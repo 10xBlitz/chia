@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "Learn more about our dental platform.",
     images: [
       {
-        url: "https://chia-azure.vercel.app/images/fallback-image.png",
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png",
         width: 800,
         height: 600,
         alt: "About OG Image",
