@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // This page should always be revalidated on each request
+
 import { Metadata } from "next";
 import MainPage from "./(main)/main-content";
 
