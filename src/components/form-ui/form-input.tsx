@@ -8,7 +8,8 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
-import { HTMLInputTypeAttribute } from "react";
+import { HTMLInputTypeAttribute, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
@@ -33,6 +34,10 @@ export default function FormInput<T extends FieldValues>({
   formLabelClassName,
   inputClassName,
 }: FormInputProps<T>) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isPasswordType = type === "password";
+
   return (
     <FormField
       control={control}
@@ -48,13 +53,28 @@ export default function FormInput<T extends FieldValues>({
             {label}
           </FormLabel>
           <FormControl>
-            <Input
-              type={type}
-              className={cn("h-[45px]", inputClassName)}
-              placeholder={placeholder}
-              disabled={disabled}
-              {...field}
-            />
+            <div className="relative">
+              <Input
+                type={
+                  isPasswordType ? (showPassword ? "text" : "password") : type
+                }
+                className={cn("h-[45px] pr-10", inputClassName)}
+                placeholder={placeholder}
+                disabled={disabled}
+                {...field}
+              />
+              {isPasswordType && (
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                </button>
+              )}
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>

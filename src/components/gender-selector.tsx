@@ -25,11 +25,11 @@ export default function GenderSelector({
         className="flex gap-3 w-full "
       >
         <ToggleGroupItem
-          value="male"
+          value="남성"
           aria-label="Toggle male"
           className={cn(
             "rounded-lg border-1 h-[45px] !text-[16px] !font-pretendard-500", // Base styles for both states
-            value === "male"
+            value === "남성"
               ? "border-[#287DFA] !text-[#287DFA]" // Selected state for Male
               : "hover:border-gray-300 opacity-50" // Unselected state for Male
           )}
@@ -37,11 +37,11 @@ export default function GenderSelector({
           남성 {/* male*/}
         </ToggleGroupItem>
         <ToggleGroupItem
-          value="female"
+          value="여성"
           aria-label="Toggle female"
           className={cn(
             "rounded-lg border-1 h-[45px] !text-[16px] !font-pretendard-500", // Base styles for both states
-            value === "female"
+            value === "여성"
               ? "border-[#287DFA] !text-[#287DFA]" // Selected state for Female
               : "hover:border-gray-300 opacity-50" // Unselected state for Female
           )}

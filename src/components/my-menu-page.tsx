@@ -92,7 +92,7 @@ export default function MyMenuPage({
               className="flex items-center w-full justify-between "
             >
               <span className="ml-2">회원탈퇴 {/* Withdraw Membership */}</span>
-              <ChevronRightIcon className="min-h-5 min-w-5 mr-2 " />
+              <ChevronRightIcon className="min-h-5 min-w-5 mr-2 text-red-400 " />
             </Button>
           </div>
         </section>

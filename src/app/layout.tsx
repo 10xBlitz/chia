@@ -22,6 +22,21 @@ export const metadata: Metadata = {
   icons: {
     icon: "/images/chia-logo.svg",
   },
+  openGraph: {
+    title: "치과 시술 플랫폼",
+    description: "치과 시술 견적 및 예약 플랫폼",
+    url: "https://chia-azure.vercel.app/", // Replace with your website's base URL
+    type: "website",
+    images: [
+      {
+        url: "/images/chia-logo.svg", // Path to your preview image
+        width: 1200,
+        height: 630,
+        alt: "My Website Preview",
+      },
+      // You can add more images if needed
+    ],
+  },
 };
 
 export default function RootLayout({

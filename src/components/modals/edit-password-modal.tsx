@@ -16,9 +16,7 @@ import FormInput from "@/components/form-ui/form-input";
 const formSchema = z
   .object({
     password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다."), // Password must be at least 6 characters long.
-    confirmPassword: z
-      .string()
-      .min(6, "비밀번호 확인은 최소 6자 이상이어야 합니다."), // Confirm password must be at least 6 characters long.
+    confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "비밀번호가 일치하지 않습니다.", // Passwords do not match.
@@ -38,6 +36,7 @@ export function EditPasswordModal({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       password: "",
       confirmPassword: "",
@@ -87,12 +86,14 @@ export function EditPasswordModal({
           <FormInput
             control={form.control}
             name="password"
+            type="password"
             label="새 비밀번호" // New Password
             placeholder="새 비밀번호를 입력해주세요." // Please enter your new password.
           />
           <FormInput
             control={form.control}
             name="confirmPassword"
+            type="password"
             label="비밀번호 확인" // Confirm Password
             placeholder="비밀번호를 다시 입력해주세요." // Please re-enter your password.
           />

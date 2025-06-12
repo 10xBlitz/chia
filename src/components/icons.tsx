@@ -106,7 +106,7 @@ export const ChevronRightIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <path d="M20 20H0V0H20V20Z" fill="white" />
+    <path d="M20 20H0V0H20V20Z" fill="" />
     <path
       d="M6.66699 3.33325L13.3337 9.99992L6.66699 15.8333"
       stroke="#505050"

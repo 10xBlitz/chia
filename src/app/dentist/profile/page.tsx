@@ -67,13 +67,11 @@ export default function ProfilePage() {
             기본 정보 {/* Basic Info */}
           </div>
           <InfoRow label="이름" value={user?.full_name} emptyText="이름 등록" />{" "}
-          {/* Name / Register Name */}
           <InfoRow
-            label="이메일"
+            label="이메일" // Email
             value={user?.email}
-            emptyText="이메일 등록"
-          />{" "}
-          {/* Email / Register Email */}
+            emptyText="이메일 등록" // Register Email
+          />
           <InfoRow
             label="생년월일" // Birthdate
             value={
@@ -81,6 +79,10 @@ export default function ProfilePage() {
                 ? format(user.birthdate, "yyyy.MM.dd")
                 : "0000.00.00"
             }
+          />
+          <InfoRow
+            label="성별" //  Gender
+            value={user?.gender}
           />
           <InfoRow
             label="연락처" // Contact
