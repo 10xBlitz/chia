@@ -3,10 +3,13 @@
 import { useUserStore } from "@/providers/user-store-provider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
+import { useState } from "react";
 import { UserIcon, ChevronRightIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase/client";
+import { updateLoginStatus } from "@/lib/supabase/services/users.services";
+import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
+import toast from "react-hot-toast";
 
 interface ProfilePageProps {
   actions: {
@@ -23,6 +26,17 @@ export default function MyMenuPage({
 }: ProfilePageProps) {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
+  const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
+
+  // Separate function for withdraw membership logic
+  const handleWithdrawMembership = async () => {
+    if (!user?.id) return;
+    await updateLoginStatus(user.id, "inactive");
+    await supabaseClient.auth.signOut();
+    setWithdrawModalOpen(false);
+    toast.success("회원탈퇴가 완료되었습니다."); // Membership withdrawal completed successfully
+    router.push("/");
+  };
 
   return (
     <div className="flex flex-col">
@@ -86,9 +100,7 @@ export default function MyMenuPage({
 
             <Button
               variant={"ghost"}
-              onClick={async () => {
-                router.push("/auth/withdraw");
-              }}
+              onClick={() => setWithdrawModalOpen(true)}
               className="flex items-center w-full justify-between "
             >
               <span className="ml-2">회원탈퇴 {/* Withdraw Membership */}</span>
@@ -96,6 +108,15 @@ export default function MyMenuPage({
             </Button>
           </div>
         </section>
+
+        {/* Withdraw Confirm Modal */}
+        <ConfirmDeleteModal
+          open={withdrawModalOpen}
+          onCancel={() => setWithdrawModalOpen(false)}
+          onConfirm={handleWithdrawMembership}
+          title="회원탈퇴 확인" // Confirm Membership Withdrawal
+          description="정말로 회원탈퇴 하시겠습니까? 탈퇴 시 계정이 비활성화됩니다." // Are you sure you want to withdraw your membership? Your account will be deactivated.
+        />
 
         {/* Customer center */}
         <section className="mt-8">

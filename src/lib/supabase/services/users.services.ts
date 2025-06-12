@@ -102,6 +102,18 @@ export async function updateUserPassword(newPassword: string) {
   if (error) throw error;
 }
 
+export async function updateLoginStatus(
+  userId: string,
+  status: Tables<"user">["login_status"]
+) {
+  // Update login status in the user table
+  const { error } = await supabaseClient
+    .from("user")
+    .update({ login_status: status })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
 // Get a single user by id
 export async function getUserById(userId: string) {
   const { data, error } = await supabaseClient
@@ -114,7 +126,7 @@ export async function getUserById(userId: string) {
 }
 
 export async function registerUser(
-  data: Omit<Tables<"user">, "id" | "created_at"> & {
+  data: Omit<Tables<"user">, "id" | "created_at" | "login_status"> & {
     email: string;
     password: string;
   }

@@ -17,6 +17,7 @@ import {
   type UserState,
 } from "@/stores/user-store"; // Ensure UserState is exported
 import { supabaseClient } from "@/lib/supabase/client";
+import { Tables } from "@/lib/supabase/types";
 
 export type UserStoreApi = ReturnType<typeof createUserStore>;
 
@@ -38,6 +39,7 @@ const defaultUserState = {
   role: null, // Or a 'guest' role
   created_at: "",
   clinic_id: null, // Assuming clinic_id can be null
+  login_status: "inactive" as Tables<"user">["login_status"], // Default to inactive
 };
 
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
@@ -91,6 +93,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           created_at: userProfileData.created_at,
           clinic_id: userProfileData.clinic_id,
           clinic: userProfileData.clinic || null, // Attach clinic info if available
+          login_status: userProfileData.login_status, // Default to inactive if not set
         });
       } else {
         // User is authenticated, but no profile found (e.g., new user before profile creation)
@@ -102,6 +105,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           id: userId,
           email: userEmail || "",
           role: "", // Or a 'guest' role
+          login_status: "inactive", // Default to inactive
         });
       }
     } catch (e) {
@@ -176,6 +180,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
                 created_at: userProfileData.created_at,
                 clinic_id: userProfileData.clinic_id,
                 clinic: userProfileData.clinic,
+                login_status: userProfileData.login_status,
               },
             };
           } else {

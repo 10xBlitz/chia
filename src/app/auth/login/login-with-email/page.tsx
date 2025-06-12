@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import FormInput from "@/components/form-ui/form-input";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, supabaseClient } from "@/lib/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }),
@@ -41,7 +41,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const userRole = useUserStore((select) => select.user?.role);
+  const userRole = useUserStore((state) => state.user?.role);
+  const loginStatus = useUserStore((state) => state.user?.login_status);
+
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "이메일로 로그인"; // Default to 'Login With Email' if not specified
   let signUpLink = "";
@@ -96,7 +98,8 @@ export default function LoginForm() {
 
   useEffect(() => {
     console.log("----> user role: ", userRole);
-    if (userRole) {
+    console.log("----> login status: ", loginStatus);
+    if (userRole && loginStatus === "active") {
       if (userRole === "admin") {
         router.push("/admin");
       } else if (userRole === "patient") {
@@ -105,8 +108,14 @@ export default function LoginForm() {
         router.push("/dentist");
       }
     }
+
+    if (userRole && loginStatus === "inactive") {
+      toast.error("계정이 비활성화되었습니다. 관리자에게 문의해주세요."); // "Your account has been deactivated. Please contact the administrator."
+      (async () => await supabaseClient.auth.signOut())();
+    }
+
     // README: unsure about the router in deps, if there re-render issues, remove it
-  }, [userRole, router]);
+  }, [userRole, router, loginStatus]);
 
   return (
     <MobileLayout className="min-h-dvh">

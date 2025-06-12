@@ -629,6 +629,7 @@ export type Database = {
           full_name: string
           gender: string
           id: string
+          login_status: Database["public"]["Enums"]["login_status"]
           residence: string
           role: Database["public"]["Enums"]["user_role"]
           work_place: string
@@ -641,6 +642,7 @@ export type Database = {
           full_name: string
           gender: string
           id: string
+          login_status?: Database["public"]["Enums"]["login_status"]
           residence: string
           role: Database["public"]["Enums"]["user_role"]
           work_place: string
@@ -653,6 +655,7 @@ export type Database = {
           full_name?: string
           gender?: string
           id?: string
+          login_status?: Database["public"]["Enums"]["login_status"]
           residence?: string
           role?: Database["public"]["Enums"]["user_role"]
           work_place?: string
@@ -727,6 +730,7 @@ export type Database = {
     }
     Enums: {
       banner_type: "main" | "sub"
+      login_status: "active" | "inactive"
       record_status: "deleted" | "active"
       user_role: "patient" | "dentist" | "admin" | "dentist employee"
     }
@@ -845,6 +849,7 @@ export const Constants = {
   public: {
     Enums: {
       banner_type: ["main", "sub"],
+      login_status: ["active", "inactive"],
       record_status: ["deleted", "active"],
       user_role: ["patient", "dentist", "admin", "dentist employee"],
     },

@@ -56,30 +56,30 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // const role = user?.user_metadata?.role;
+  const role = user?.user_metadata?.role;
 
-  // if (user) {
-  //   if (request.nextUrl.pathname.startsWith("/patient") && role !== "patient") {
-  //     // User is not a patient, redirect to forbidden page
-  //     const url = request.nextUrl.clone();
-  //     url.pathname = "/forbidden";
-  //     return NextResponse.redirect(url);
-  //   }
+  if (user) {
+    if (request.nextUrl.pathname.startsWith("/patient") && role !== "patient") {
+      // User is not a patient, redirect to forbidden page
+      const url = request.nextUrl.clone();
+      url.pathname = "/forbidden";
+      return NextResponse.redirect(url);
+    }
 
-  //   if (request.nextUrl.pathname.startsWith("/dentist") && role !== "dentist") {
-  //     // User is not a dentist, redirect to forbidden page
-  //     const url = request.nextUrl.clone();
-  //     url.pathname = "/forbidden";
-  //     return NextResponse.redirect(url);
-  //   }
+    if (request.nextUrl.pathname.startsWith("/dentist") && role !== "dentist") {
+      // User is not a dentist, redirect to forbidden page
+      const url = request.nextUrl.clone();
+      url.pathname = "/forbidden";
+      return NextResponse.redirect(url);
+    }
 
-  //   if (request.nextUrl.pathname.startsWith("/admin") && role !== "admin") {
-  //     // User is not an admin, redirect to forbidden page
-  //     const url = request.nextUrl.clone();
-  //     url.pathname = "/forbidden";
-  //     return NextResponse.redirect(url);
-  //   }
-  // }
+    if (request.nextUrl.pathname.startsWith("/admin") && role !== "admin") {
+      // User is not an admin, redirect to forbidden page
+      const url = request.nextUrl.clone();
+      url.pathname = "/forbidden";
+      return NextResponse.redirect(url);
+    }
+  }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
