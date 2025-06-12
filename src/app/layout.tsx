@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     images: [
       // Keep the images array for width, height, alt
       {
-        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png",
+        url: "https://picsum.photos/200/300",
         width: 1200,
         height: 630,
         alt: "My Website Preview",
@@ -44,9 +44,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "치과 시술 플랫폼",
     description: "치과 시술 견적 및 예약 플랫폼",
-    images: [
-      "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png",
-    ],
+    images: ["https://picsum.photos/200/300"],
   },
   metadataBase: new URL("https://chia-azure.vercel.app/"),
 };
