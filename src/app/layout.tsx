@@ -42,7 +42,6 @@ export const metadata: Metadata = {
     : new URL(`http://localhost:${process.env.PORT || 3000}`),
 };
 
-// ... rest of your layout.tsx remains the same
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,12 +52,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CustomQueryClientProvider>
-          <UserStoreProvider>
-            <main className="bg-[#F1F1F5]">{children}</main>
-          </UserStoreProvider>
-          <ToasterProvider />
-        </CustomQueryClientProvider>
+        <main className="bg-[#F1F1F5]">
+          <CustomQueryClientProvider>
+            <UserStoreProvider>{children}</UserStoreProvider>
+            <ToasterProvider />
+          </CustomQueryClientProvider>
+        </main>
       </body>
     </html>
   );
