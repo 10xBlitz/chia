@@ -125,7 +125,13 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <div className="fixed max-w-[450px] z-[999] mx-auto bottom-0 left-0 right-0 bg-white flex justify-around items-center p-3">
+    <div
+      className="fixed max-w-[450px] z-[999] mx-auto bottom-0 left-0 right-0 bg-white flex justify-around items-center p-3"
+      style={{
+        pointerEvents: "auto",
+        paddingBottom: "env(safe-area-inset-bottom, 0)",
+      }}
+    >
       {navItems.map((item) => {
         const isActive = pathname === item.path;
         return (

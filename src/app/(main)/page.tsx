@@ -25,6 +25,7 @@ import BottomNavigation from "@/components/bottom-navigation";
 import { Button } from "@/components/ui/button";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
+import Footer from "@/components/footer";
 
 export default function MainPage() {
   const searchParams = useSearchParams();
@@ -223,6 +224,10 @@ export default function MainPage() {
           </div>
         </main>
         {user?.id && <BottomNavigation />}
+
+        <Footer />
+        {/* Spacer to prevent footer overlap on mobile */}
+        {user?.id && <div className="h-14"></div>}
       </div>
     </MobileLayout>
   );

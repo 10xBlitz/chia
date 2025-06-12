@@ -11,7 +11,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children, className }) => {
     <div
       className={cn(
         className,
-        "px-5 pt-4 max-w-[450px] min-h-dvh mx-auto bg-white"
+        "px-5 pt-4 max-w-[450px] min-h-dvh mx-auto bg-white shadow-lg"
       )}
     >
       {children}
