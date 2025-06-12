@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/chia-logo.svg", // Path to your preview image
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//e619047c-457f-4be8-a1a1-6641792c2ec9.jpg", // Path to your preview image
         width: 1200,
         height: 630,
         alt: "My Website Preview",
