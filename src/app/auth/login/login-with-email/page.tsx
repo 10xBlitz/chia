@@ -45,8 +45,17 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "이메일로 로그인"; // Default to 'Login With Email' if not specified
   let signUpLink = "";
-  if (title === "이메일로 로그인하기") signUpLink = "/auth/sign-up/patient"; // Sign up link for patients
-  if (title === "치과 의사로 로그인") signUpLink = "/auth/sign-up/dentist"; // Sign up link for dentists
+  let forgotPasswordRedirect = "";
+  const isDentistLogin = title === "치과 의사로 로그인"; //title for dentist login
+  const isPatientLogin = title === "이메일로 로그인하기"; //title for patient login
+  if (isPatientLogin) {
+    signUpLink = "/auth/sign-up/patient";
+    forgotPasswordRedirect = "/";
+  }
+  if (isDentistLogin) {
+    signUpLink = "/auth/sign-up/dentist";
+    forgotPasswordRedirect = "/dentist";
+  }
 
   const client = createClient();
 
@@ -135,7 +144,10 @@ export default function LoginForm() {
                               비밀번호
                             </FormLabel>
                             <Link
-                              href="/auth/forgot-password"
+                              href={
+                                "/auth/forgot-password?redirect=" +
+                                forgotPasswordRedirect
+                              }
                               className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                             >
                               {/* Forgot your password? */}
