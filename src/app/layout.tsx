@@ -19,6 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+//dynamic (SSR)
 // export const metadata: Metadata = {
 //   title: "치과 시술 플랫폼", // "Dental Procedure Platform"
 //   description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
@@ -42,6 +43,7 @@ const geistMono = Geist_Mono({
 //   },
 // };
 
+//static metadata for the root layout
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
