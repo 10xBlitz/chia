@@ -77,7 +77,7 @@ function Footer() {
       </div>
       {/* Copyright */}
       <div className="text-[12px] text-gray-400 mt-2">
-        ©BCD Co.,Ltd. all rights reserved.
+        ©BCD 주식회사. 모든 권리 보유.
         {/* ©BCD Co.,Ltd. all rights reserved. */}
       </div>
     </footer>
