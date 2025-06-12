@@ -1,9 +1,25 @@
-export const dynamic = "force-dynamic";
-
+import { Metadata } from "next";
 import MainPage from "./(main)/main-content";
 
-async function Page() {
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn more about our dental platform.",
+  openGraph: {
+    title: "About Us",
+    description: "Learn more about our dental platform.",
+    images: [
+      {
+        url: "https://chia-azure.vercel.app/images/fallback-image.png",
+        width: 800,
+        height: 600,
+        alt: "About OG Image",
+      },
+    ],
+    type: "website",
+  },
+};
+
+function Page() {
   return <MainPage />;
 }
 
