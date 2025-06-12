@@ -30,12 +30,107 @@ import { Stepper } from "@/components/stepper";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import MobileLayout from "@/components/layout/mobile-layout";
+import { format } from "date-fns";
+import { Tables } from "@/lib/supabase/types";
 
 const steps = [
   { label: "계정" }, // Account
-  { label: "개인 정보" }, // Personal Info
-  { label: "병원 정보" }, // Clinic Info
+  { label: "정보" }, // Info
+  { label: "병원" }, // Clinic
+  { label: "검토" }, // Review
 ];
+
+// Review Step Component
+function ReviewStep({
+  form,
+  treatments,
+  departments,
+  hospitals,
+}: {
+  form: ReturnType<typeof useForm<DentistSignupFormType>>;
+  treatments: Tables<"treatment">[];
+  departments: Tables<"clinic_department">[];
+  hospitals: { id: string; clinic_name: string }[];
+}) {
+  const values = form.getValues();
+
+  // Map treatment IDs to names
+  const treatmentNames =
+    Array.isArray(values.treatments) && treatments
+      ? values.treatments
+          .map((id) => {
+            const t = treatments.find((item) => item.id === id);
+            return t ? t.treatment_name : id;
+          })
+          .join(", ")
+      : "";
+
+  // Map department IDs to names
+  const departmentNames =
+    Array.isArray(values.departments) && departments
+      ? values.departments
+          .map((id) => {
+            const d = departments.find((item) => item.id === id);
+            return d ? d.department_name : id;
+          })
+          .join(", ")
+      : "";
+
+  // Map clinic_id to clinic_name
+  const clinicName =
+    hospitals?.find((h) => h.id === values.clinic_id)?.clinic_name ||
+    values.clinic_id ||
+    "";
+
+  return (
+    <div className="p-6 bg-white rounded-lg">
+      <div className="mb-4">
+        <strong className="block">이름: {/* Name */}</strong>
+        <div>{values.full_name}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">이메일: {/* Email */}</strong>
+        <div>{values.email}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">성별: {/* Gender */}</strong>
+        <div>{values.gender}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">연락처: {/* Contact Number */}</strong>
+        <div>{values.contact_number}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">생년월일: {/* Birthdate */}</strong>
+        <div>
+          {values.birthdate
+            ? format(new Date(values.birthdate), "yyyy.MM.dd")
+            : ""}
+        </div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">거주지: {/* Residence */}</strong>
+        <div>{values.residence}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">근무지: {/* Workplace */}</strong>
+        <div>{values.work_place}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">병원명: {/* Clinic Name */}</strong>
+        <div>{clinicName}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">치료: {/* Treatments */}</strong>
+        <div>{treatmentNames}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">진료과목: {/* Departments */}</strong>
+        <div>{departmentNames}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function DentistSignupPage() {
   const router = useRouter();
@@ -170,9 +265,9 @@ export default function DentistSignupPage() {
   };
 
   return (
-    <MobileLayout className="flex flex-col min-h-dvh">
+    <MobileLayout className="flex flex-col min-h-dvh overflow-x-hidden">
       <HeaderWithBackButton title="아래 정보를 입력해주세요." />
-      <div className="flex items-center mt-3 justify-center w-full">
+      <div className="flex items-center mt-3 mb-5 justify-center w-full">
         <Stepper steps={steps} currentStep={currentStep} />
       </div>
       <Form {...form}>
@@ -327,6 +422,26 @@ export default function DentistSignupPage() {
                       { shouldValidate: true }
                     )
                   }
+                />
+              </motion.div>
+            )}
+
+            {currentStep === 4 && (
+              <motion.div
+                key="step4"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ type: "tween", duration: 0.2 }}
+                className="flex flex-col gap-7 flex-1"
+              >
+                <ReviewStep
+                  form={form}
+                  treatments={treatments || []}
+                  departments={departments || []}
+                  hospitals={hospitals || []}
                 />
               </motion.div>
             )}

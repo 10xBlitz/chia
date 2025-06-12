@@ -1,10 +1,11 @@
+import MobileLayout from "@/components/layout/mobile-layout";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 
 const PatientHomePage = () => {
   return (
-    <div className="max-w-[460px] bg-white min-h-screen flex flex-col  px-[20px] py-[16px] mx-auto">
+    <MobileLayout className="min-h-dvh flex flex-col  ">
       <div className="flex flex-col gap-10">
         <div className="flex items-center">
           <Image
@@ -78,7 +79,7 @@ const PatientHomePage = () => {
           관리자로 로그인 {/** Log in as admin */}
         </Link>
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 

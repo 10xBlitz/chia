@@ -10,8 +10,17 @@ export const Stepper = ({
   steps: { label: string; sub?: string }[];
   currentStep: number;
 }) => {
+  // If there are 4 steps, use smaller text
+  const stepperTextClass =
+    steps.length === 4 ? "text-sm" : "text-md sm:text-base";
+
   return (
-    <ol className="flex font-retendard-600 items-center justify-between w-full p-3 space-x-2 text-md font-medium text-center text-gray-500 rounded-lg dark:text-gray-400 sm:text-base dark:bg-gray-800 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
+    <ol
+      className={cn(
+        "flex font-retendard-600 items-center justify-between w-full p-3 space-x-2 font-medium text-center text-gray-500 rounded-lg dark:text-gray-400 dark:bg-gray-800 sm:p-4  rtl:space-x-reverse",
+        stepperTextClass
+      )}
+    >
       {steps.map((step, index) => {
         const isActive = index + 1 === currentStep;
         return (
