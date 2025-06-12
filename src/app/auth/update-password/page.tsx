@@ -61,10 +61,18 @@ export default function UpdatePassword() {
     });
 
     if (error) {
-      // Show error message "Failed to update password. Please try again."
-      toast.error("비밀번호 업데이트에 실패했습니다. 다시 시도해주세요.");
-      toast.error(error.message);
-      console.error("Error updating password:", error);
+      if (
+        error.message.includes(
+          "New password should be different from the old password."
+        )
+      ) {
+        toast.error("새 비밀번호는 이전 비밀번호와 달라야 합니다."); // "New password should be different from the old password."
+      } else {
+        // Show error message "Failed to update password. Please try again."
+        toast.error("비밀번호 업데이트에 실패했습니다. 다시 시도해주세요.");
+        toast.error(error.message);
+        console.error("Error updating password:", error);
+      }
     } else {
       // Show success message "Password updated successfully."
       toast.success("비밀번호가 성공적으로 업데이트되었습니다.");
