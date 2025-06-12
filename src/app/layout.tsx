@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "치과 시술 플랫폼",
     images: [
       {
-        url: "https://chia-azure.vercel.app/images/fallback-image.png", // Absolute URL for OG image
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png", // Absolute URL for OG image
         width: 800,
         height: 600,
         alt: "My custom alt",
