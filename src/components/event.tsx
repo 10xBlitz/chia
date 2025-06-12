@@ -135,11 +135,11 @@ export default function EventCarousel() {
                     <span className="text-gray-500">No Image</span>
                   </div>
                 )}
-                <div className="absolute bottom-2 left-0 w-full  bg-opacity-50 py-2 px-2">
+                {/* <div className="absolute bottom-2 left-0 w-full  bg-opacity-50 py-2 px-2">
                   <h3 className="text-white ml-5 text-xl font-semibold truncate">
                     {event.title || "치아미백"}
                   </h3>
-                </div>
+                </div> */}
               </div>
             </div>
           ))}
