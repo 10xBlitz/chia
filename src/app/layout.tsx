@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     type: "website",
   },
+  metadataBase: process.env.VERCEL_URL
+    ? new URL(`https://${process.env.VERCEL_URL}`)
+    : new URL(`http://localhost:${process.env.PORT || 3000}`),
 };
 
 // ... rest of your layout.tsx remains the same
