@@ -23,22 +23,20 @@ export const metadata: Metadata = {
     icon: "/images/chia-logo.svg",
   },
   openGraph: {
-    title: "치과 시술 플랫폼",
-    description: "치과 시술 견적 및 예약 플랫폼",
+    title: "치과 시술 플랫폼", // "Dental Procedure Platform"
+    description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
     url: "https://chia-azure.vercel.app/",
+    siteName: "치과 시술 플랫폼",
+    images: [
+      {
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png", // Must be an absolute URL
+        width: 800,
+        height: 600,
+        alt: "My custom alt",
+      },
+    ],
+    locale: "ko_KR",
     type: "website",
-    // Add this explicit 'image' property
-
-    // images: [
-    //   // Keep the images array for width, height, alt
-    //   {
-    //     url: "https://picsum.photos/200/300",
-    //     width: 1200,
-    //     height: 630,
-    //     alt: "My Website Preview",
-    //     type: "image/png",
-    //   },
-    // ],
   },
 };
 
