@@ -25,29 +25,32 @@ export const metadata: Metadata = {
   openGraph: {
     title: "치과 시술 플랫폼",
     description: "치과 시술 견적 및 예약 플랫폼",
-    url: "https://chia-azure.vercel.app/", // Replace with your website's base URL
+    url: "https://chia-azure.vercel.app/",
     type: "website",
+    // Add this explicit 'image' property
+
     images: [
+      // Keep the images array for width, height, alt
       {
-        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg",
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png",
         width: 1200,
         height: 630,
         alt: "My Website Preview",
       },
     ],
   },
-  // Add twitter card for better preview on Discord, Messenger, etc.
   twitter: {
     card: "summary_large_image",
     title: "치과 시술 플랫폼",
     description: "치과 시술 견적 및 예약 플랫폼",
     images: [
-      "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images/e619047c-457f-4be8-a1a1-6641792c2ec9.jpg",
+      "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png",
     ],
   },
-  // Remove the 'other' block completely. It's causing incorrect duplicate tags.
-  // metadataBase: new URL("https://chia-azure.vercel.app/"), // Keep this if you want to resolve relative URLs elsewhere
+  metadataBase: new URL("https://chia-azure.vercel.app/"),
 };
+
+// ... rest of your layout.tsx remains the same
 export default function RootLayout({
   children,
 }: Readonly<{
