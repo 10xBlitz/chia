@@ -7,18 +7,17 @@ import { cn } from "@/lib/utils";
 
 const BackButton = ({
   className,
-  fallback = "/",
+  link = "/",
 }: {
   className?: string;
-  fallback?: string;
+  link?: string;
 }) => {
   const router = useRouter();
   const handleBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 2) {
-      router.back();
-    } else {
-      router.push(fallback);
+    if (link) {
+      router.push(link);
     }
+    router.back();
   };
   return (
     <Button

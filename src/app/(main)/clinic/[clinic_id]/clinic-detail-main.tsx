@@ -172,7 +172,7 @@ export default function ClinicSingleViewMainComponent() {
       <div className="flex flex-col !px-0 relative">
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2 bg-white z-20">
-          <BackButton />
+          <BackButton link="/" />
           <BookmarkButton
             isActive={isFavorite}
             handleBookmarkClick={handleBookmarkClick}

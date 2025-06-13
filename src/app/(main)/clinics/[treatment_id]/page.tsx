@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -36,13 +35,7 @@ export default function ClinicsPage() {
     <MobileLayout className="!px-0">
       <div className="flex flex-col">
         <header className="pb-3 flex justify-between items-center px-4">
-          <BackButton fallback="/" />
-          <Image
-            src={"/images/chia-logo.svg"}
-            height={54}
-            width={76}
-            alt="logo"
-          />
+          <BackButton link="/" />
           {user?.id ? (
             <Link href="/patient/profile">
               <UserIcon className="min-w-7 min-h-7" />
