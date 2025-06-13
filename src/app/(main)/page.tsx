@@ -7,30 +7,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-  description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-  icons: {
-    icon: "https://chia-azure.vercel.app/images/chia-logo.png",
-  },
-  openGraph: {
-    title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-    description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-    siteName: "치과 시술 플랫폼",
-    images: [
-      {
-        url: "https://chia-azure.vercel.app/images/chia-logo.png", // Use local SVG image
-        width: 54,
-        height: 24,
-        alt: "Chia Logo",
-      },
-    ],
-    locale: "ko_KR",
-    type: "website",
-  },
-};
 
 export default async function Page() {
   const userData = await supabaseClient.auth.getUser();
