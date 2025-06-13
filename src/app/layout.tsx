@@ -27,10 +27,10 @@ const geistMono = Geist_Mono({
 //     siteName: "치과 시술 플랫폼",
 //     images: [
 //       {
-//         url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png", // Absolute URL for OG image
-//         width: 800,
-//         height: 600,
-//         alt: "My custom alt",
+//         url: "/images/chia-logo.svg", // Use local SVG image
+//         width: 54,
+//         height: 24,
+//         alt: "Chia Logo",
 //       },
 //     ],
 //     locale: "ko_KR",
@@ -52,12 +52,9 @@ export default function RootLayout({
           content="치과 시술 견적 및 예약 플랫폼"
         />
         <meta property="og:siteName" content="치과 시술 플랫폼" />
-        <meta
-          property="og:image"
-          content="https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png"
-        />
-        <meta property="og:image:width" content="800px" />
-        <meta property="og:image:height" content="600px" />
+        <meta property="og:image" content="https://chia-azure.vercel.app/images/chia-logo.svg" />
+        <meta property="og:image:width" content="54" />
+        <meta property="og:image:height" content="24" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

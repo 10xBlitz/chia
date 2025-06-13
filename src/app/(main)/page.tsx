@@ -27,7 +27,7 @@ import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skele
 import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 import Footer from "@/components/footer";
 
-export default function MainPage() {
+export default function MainContent() {
   const searchParams = useSearchParams();
   const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
   const user = useUserStore((state) => state.user);
@@ -73,14 +73,6 @@ export default function MainPage() {
         : false,
     refetchOnWindowFocus: true,
   });
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     if (clinicsFetchStatus === "fetching") {
-  //       refetchInitialClinics();
-  //     }
-  //   }, 3000);
-  // }, [filterOption]);
 
   return (
     <MobileLayout className="!px-0">
