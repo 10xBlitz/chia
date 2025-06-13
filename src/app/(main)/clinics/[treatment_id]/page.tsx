@@ -23,7 +23,7 @@ import BackButton from "@/components/back-button";
 export default function ClinicsPage() {
   const searchParams = useSearchParams();
   const params = useParams<{ treatment_id: string }>();
-  const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
+  const filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "모두" "All"
   const user = useUserStore((state) => state.user);
   const router = useRouter();
 
@@ -64,9 +64,18 @@ export default function ClinicsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="근무지">근무지</SelectItem>{" "}
+                  <SelectItem className="cursor-pointer" value="모두">
+                    모두
+                  </SelectItem>{" "}
+                  {/** All */}
+                  <SelectItem className="cursor-pointer" value="근무지">
+                    근무지
+                  </SelectItem>
                   {/** Workplace */}
-                  <SelectItem value="거주">거주</SelectItem> {/** Residence */}
+                  <SelectItem className="cursor-pointer" value="거주">
+                    거주
+                  </SelectItem>{" "}
+                  {/** Residence */}
                 </SelectContent>
               </Select>
             )}

@@ -16,8 +16,9 @@ const BackButton = ({
   const handleBack = () => {
     if (link) {
       router.push(link);
+    } else {
+      router.back();
     }
-    router.back();
   };
   return (
     <Button
