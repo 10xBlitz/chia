@@ -12,13 +12,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { clinic_id } = await params;
 
   // fetch data
-  const product = await fetchClinicDetail(clinic_id);
+  const clinic = await fetchClinicDetail(clinic_id);
 
   return {
     openGraph: {
       //korean description
-      title: product.clinic_name || "Clinic Name",
-      description: product.clinic_name,
+      title: clinic.clinic_name,
       locale: "ko_KR",
       type: "website",
       url: `https://chia-azure.vercel.app/clinic/${clinic_id}`,
@@ -26,9 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [
         {
           url:
-            product.pictures?.[0] ||
+            clinic.pictures?.[0] ||
             "https://chia-azure.vercel.app/images/chia-logo.png",
-          alt: product.clinic_name || "Clinic Image",
+          alt: clinic.clinic_name || "Clinic Image",
+          width: 100,
+          height: 100,
         },
       ],
     },
