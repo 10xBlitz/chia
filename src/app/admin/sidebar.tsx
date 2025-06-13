@@ -12,7 +12,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -33,42 +32,42 @@ import { usePathname } from "next/navigation";
 
 const items = [
   {
-    title: "User Management",
+    title: "유저 관리", // User Management
     url: "/admin/user",
     icon: Users,
   },
   {
-    title: "Clinic Management",
+    title: "병원 관리", // Clinic Management
     url: "/admin/clinic",
     icon: HospitalIcon,
   },
   {
-    title: "Clinic Event ",
+    title: "병원 이벤트", // Clinic Event
     url: "/admin/clinic-event",
     icon: HospitalIcon,
   },
   {
-    title: "Treatments",
+    title: "진료 항목", // Treatments
     url: "/admin/treatment",
     icon: SyringeIcon,
   },
   {
-    title: "Reservation Management",
+    title: "예약 관리", // Reservation Management
     url: "/admin/reservation",
     icon: BookMarked,
   },
   {
-    title: "Review Management",
+    title: "리뷰 관리", // Review Management
     url: "/admin/review",
     icon: BookMarked,
   },
   {
-    title: "Customer Service",
+    title: "고객센터", // Customer Service
     url: "/admin/customer-service",
     icon: MessageSquareMoreIcon,
   },
   {
-    title: "Settings",
+    title: "설정", // Settings
     url: "/admin/settings",
     icon: SettingsIcon,
   },
@@ -79,9 +78,23 @@ export function AppSidebar() {
   console.log("-=--->pathname:", pathname);
   return (
     <Sidebar>
+      {/* Sidebar Header */}
+      <div className="flex items-center gap-4 px-6 py-6 border-b border-gray-100 bg-gray-50">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100">
+          {/* User avatar icon */}
+          <User2 className="w-8 h-8 text-gray-400" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-lg text-gray-900">관리자</span>{" "}
+          {/* Example name, replace with dynamic if needed */}
+          <span className="text-sm text-gray-500 mt-0.5">관리자</span>{" "}
+          {/* Admin */}
+        </div>
+      </div>
+      {/* End Sidebar Header */}
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          {/* <SidebarGroupLabel>Application</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -115,7 +128,7 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <User2 /> Username
+                  <User2 /> 행동
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>

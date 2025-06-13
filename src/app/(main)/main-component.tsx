@@ -16,9 +16,6 @@ import TreatmentCategoryScroll from "@/components/treatment-category";
 import ClinicCard, { ClinicCardProps } from "@/components/clinic-card";
 import SubBannerCarousel from "@/components/sub-banner";
 
-// import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
-// import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
-
 interface MainPageProps {
   clinicsData: ClinicCardProps[];
 }

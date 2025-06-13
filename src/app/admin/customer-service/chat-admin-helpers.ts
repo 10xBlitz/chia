@@ -129,12 +129,16 @@ export async function getUnreadMessageCount(
 
 // --- Update Functions ---
 
+/**
+ * Get the latest message timestamp for a room, or the current time if not found.
+ * @param roomId - The ID of the room to check.
+ * @param openRooms - The list of open rooms to search in.
+ * @returns The latest message timestamp or current time if not found.
+ */
 export function getRoomLatestTimestamp(
   roomId: string,
-  openRooms: DisplayRoomInfo[],
-  referenceTimestamp?: string
+  openRooms: DisplayRoomInfo[]
 ): string {
-  if (referenceTimestamp) return referenceTimestamp;
   const roomInfo = openRooms.find((room) => room.room_id === roomId);
   return roomInfo?.latest_message_timestamp || new Date().toISOString();
 }

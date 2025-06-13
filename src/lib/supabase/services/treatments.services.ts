@@ -27,6 +27,7 @@ export async function getPaginatedTreatments(
   let query = supabaseClient
     .from("treatment")
     .select("*", { count: "exact" })
+    .not("status", "eq", "deleted") // Assuming you want to exclude deleted treatments
     .order("treatment_name", { ascending: true })
     .range(offset, offset + limit - 1);
 

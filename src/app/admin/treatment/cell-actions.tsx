@@ -91,8 +91,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
       <ConfirmDeleteModal
         open={showDeleteModal}
-        title="Delete Treatment"
-        description={`Are you sure you want to delete treatment "${data.treatment_name}"?`}
+        // 시술 삭제 (Delete Treatment)
+        title="시술 삭제"
+        // 시술 \"{data.treatment_name}\"을(를) 삭제하시겠습니까? (Are you sure you want to delete treatment ...)
+        description={`시술 \"${data.treatment_name}\"을(를) 삭제하시겠습니까?`}
         onCancel={() => {
           setTimeout(() => {
             const body = document.querySelector("body");
@@ -116,7 +118,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            {/* 메뉴 열기 (Open menu) */}
+            <span className="sr-only">메뉴 열기</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -127,7 +130,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
               setSelected(data);
             }}
           >
-            <EditIcon className="h-4 w-4" /> Update
+            <EditIcon className="h-4 w-4" /> {/* 수정 (Update) */} 수정
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
@@ -135,7 +138,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             disabled={deleteMutation.status === "pending"}
           >
             <Trash2Icon className="w-4 h-4" />{" "}
-            {deleteMutation.status === "pending" ? "Deleting..." : "Delete"}
+            {/* 삭제 중... (Deleting...) / 삭제 (Delete) */}
+            {deleteMutation.status === "pending" ? "삭제 중..." : "삭제"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

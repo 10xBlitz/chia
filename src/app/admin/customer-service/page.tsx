@@ -37,19 +37,6 @@ export default function CustomerServiceChatListener() {
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
 
-  // Update searchParams in URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (search) {
-      params.set("search", search);
-    } else {
-      params.delete("search");
-    }
-
-    router.replace(`?${params.toString()}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
-
   // 1. Fetch all chat rooms, filtered by search and category (from DB), with pagination
   const {
     data: initialRoomsData,
@@ -62,7 +49,6 @@ export default function CustomerServiceChatListener() {
       roomLimit,
     ],
     queryFn: () => fetchChatRooms(debouncedSearch, roomLimit),
-    enabled: true,
     staleTime: 1000 * 60, // cache for 1 minute to avoid unnecessary refetches
     refetchOnWindowFocus: false, // don't refetch on window focus
   });
@@ -85,9 +71,9 @@ export default function CustomerServiceChatListener() {
     [roomsWithDetailsData]
   );
 
-  // Mark all messages as read in a room
-  const updateRoomLastReadDate = useCallback(
-    async (roomId: string, referenceTimestamp?: string) => {
+  //Updates the last read date for a room to latest message when a room is selected
+  const setLastReadDateToLatestMessage = useCallback(
+    async (roomId: string, latestMessageTimeStampParam?: string) => {
       if (!user?.id || !roomId) return;
 
       const optimisticUpdateQueryKey = [
@@ -110,16 +96,15 @@ export default function CustomerServiceChatListener() {
           ) || []
       );
 
-      const latestMessageTimestamp = getRoomLatestTimestamp(
-        roomId,
-        openRooms,
-        referenceTimestamp
-      );
+      const latestMessageTimestamp =
+        latestMessageTimeStampParam ??
+        getRoomLatestTimestamp(roomId, openRooms);
 
-      console.log("----->referenceTimestamp:", latestMessageTimestamp);
+      console.log("----->latestMessageTimeStamp:", latestMessageTimestamp);
 
       try {
         await updateLastAdminReadAt(roomId, latestMessageTimestamp);
+        //Promise to wait for the update to complete in supabase
         await new Promise((resolve) => setTimeout(resolve, 200));
         console.log("----> refething queries after updating last read date");
         queryClient.refetchQueries({
@@ -222,12 +207,24 @@ export default function CustomerServiceChatListener() {
   };
 
   // --- Effects ---
+  useEffect(() => {
+    // Update searchParams in URL when filters change
+    const params = new URLSearchParams(searchParams.toString());
+    if (search) {
+      params.set("search", search);
+    } else {
+      params.delete("search");
+    }
+
+    router.replace(`?${params.toString()}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   useEffect(() => {
     if (selectedRoom && user?.id) {
-      updateRoomLastReadDate(selectedRoom);
+      setLastReadDateToLatestMessage(selectedRoom);
     }
-  }, [selectedRoom, user?.id, updateRoomLastReadDate]);
+  }, [selectedRoom, user?.id, setLastReadDateToLatestMessage]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -235,7 +232,7 @@ export default function CustomerServiceChatListener() {
     const messageSubscription = handleRealtimeMessage(
       channelName,
       selectedRoom,
-      updateRoomLastReadDate,
+      setLastReadDateToLatestMessage,
       queryClient,
       user?.id,
       debouncedSearch,
@@ -248,7 +245,7 @@ export default function CustomerServiceChatListener() {
     user?.id,
     queryClient,
     selectedRoom,
-    updateRoomLastReadDate,
+    setLastReadDateToLatestMessage,
     debouncedSearch,
     roomLimit,
   ]);
@@ -275,11 +272,13 @@ export default function CustomerServiceChatListener() {
         {selectedRoom ? (
           isLoadingMessages ? (
             <div className="flex-1 flex items-center justify-center">
-              <p>Loading messages...</p>
+              {/* 메시지 불러오는 중... (Loading messages...) */}
+              <p>메시지 불러오는 중...</p>
             </div>
           ) : messagesError ? (
             <div className="flex-1 flex items-center justify-center text-red-500">
-              <p>Error loading messages: {messagesError.message}</p>
+              {/* 메시지 불러오기 오류: (Error loading messages:) */}
+              <p>메시지 불러오기 오류: {messagesError.message}</p>
             </div>
           ) : (
             <RealtimeChat
@@ -295,7 +294,8 @@ export default function CustomerServiceChatListener() {
           )
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            Select a room to start chatting.
+            {/* 채팅을 시작할 방을 선택하세요. (Select a room to start chatting.) */}
+            채팅을 시작할 방을 선택하세요.
           </div>
         )}
       </div>
@@ -334,14 +334,17 @@ function ChatRoomSidebar({
 }) {
   return (
     <aside className="w-64 bg-whiteborder-r bg-sidebar rounded-md p-4 flex flex-col min-h-[calc(100dvh-44px)] max-h-[calc(100dvh-44px)]">
-      <h2 className="font-bold mb-4">Open Chat Rooms</h2>
+      <h2 className="font-bold mb-4">
+        {/* 오픈 채팅방 (Open Chat Rooms) */}오픈 채팅방
+      </h2>
       <form
         onSubmit={(e) => e.preventDefault()}
         className="mb-3 flex flex-col gap-2"
       >
         <Input
           type="text"
-          placeholder="Search by user name"
+          // 사용자 이름으로 검색 (Search by user name)
+          placeholder="사용자 이름으로 검색"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full px-2 py-1 border rounded"
@@ -352,8 +355,10 @@ function ChatRoomSidebar({
       !roomsWithDetailsData &&
       initialRoomsData &&
       initialRoomsData.length > 0 ? (
-        <p>Loading room details...</p>
+        // 채팅방 정보 불러오는 중... (Loading room details...)
+        <p>채팅방 정보 불러오는 중...</p>
       ) : openRooms.length === 0 && !isLoadingInitialRooms ? (
+        // 활성화된 채팅방이 없습니다. (No active chat rooms)
         <p className="text-gray-500">활성화된 채팅방이 없습니다.</p>
       ) : (
         <>
@@ -374,6 +379,7 @@ function ChatRoomSidebar({
                     {room.person_name}
                   </span>
                   <span className="text-xs text-gray-500">
+                    {/* {room.category || "일반 문의"} (General Inquiry) */}
                     {room.category || "일반 문의"}
                   </span>
                 </div>
@@ -391,7 +397,8 @@ function ChatRoomSidebar({
                 disabled={isFetchingRooms}
                 className="mt-3 w-full"
               >
-                {isFetchingRooms ? "Loading..." : "Load More"}
+                {/* {isFetchingRooms ? "Loading..." : "Load More"} */}
+                {isFetchingRooms ? "불러오는 중..." : "더 보기"}
               </Button>
             )}
           </ul>

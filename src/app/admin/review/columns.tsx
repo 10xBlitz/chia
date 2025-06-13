@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { CellAction } from "./cell-actions";
+// import { CellAction } from "./cell-actions";
 
 export type ReviewTable = {
   id: string;
@@ -57,8 +57,8 @@ export const columns: ColumnDef<ReviewTable>[] = [
     accessorKey: "review",
     header: "Review",
   },
-  {
-    id: "actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
-  },
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => <CellAction data={row.original} />,
+  // },
 ];

@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { addDays, format } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -153,7 +154,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center gap-3 py-4">
         <Input
-          placeholder="Search by full name..."
+          placeholder="이름으로 검색..." // Search by full name...
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
           className="w-[300px] bg-white h-[45px]"
@@ -167,15 +168,15 @@ export function DataTable<TData, TValue>({
           }}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select a category" />
+            <SelectValue placeholder="카테고리 선택" /> // Select a category
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="patient">Patient</SelectItem>
-              <SelectItem value="dentist">Dentist</SelectItem>
-              <SelectItem value="dentist_employee">Dentist Employee</SelectItem>
+              <SelectItem value="all">전체</SelectItem> // All
+              <SelectItem value="admin">관리자</SelectItem> // Admin
+              <SelectItem value="patient">환자</SelectItem> // Patient
+              <SelectItem value="dentist">치과의사</SelectItem> // Dentist
+              <SelectItem value="dentist_employee">치과 직원</SelectItem> // Dentist Employee
             </SelectGroup>
           </SelectContent>
         </Select> */}
@@ -200,7 +201,7 @@ export function DataTable<TData, TValue>({
                   format(dates.from, "LLL dd, y")
                 )
               ) : (
-                <span>Pick a date</span>
+                <span>날짜 선택</span> // Pick a date
               )}
             </Button>
           </PopoverTrigger>
@@ -210,6 +211,7 @@ export function DataTable<TData, TValue>({
               mode="range"
               defaultMonth={dates?.from}
               selected={dates}
+              locale={ko}
               onSelect={(dates) => {
                 setDates(dates);
                 updateParam("dates", JSON.stringify(dates));
@@ -262,7 +264,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  결과 없음
+                  결과 없음 {/* No results */}
                 </TableCell>
               </TableRow>
             )}
@@ -272,7 +274,8 @@ export function DataTable<TData, TValue>({
 
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium">페이지당 행 수</p>{" "}
+          {/* Rows per page */}
           <Select
             value={`${limit}`}
             onValueChange={(value) => updateParam("limit", value)}
@@ -291,9 +294,8 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
-            {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
-            {/* {table.getPageCount()} */}
-            Page {page} of {paginatedData.totalPages}
+            페이지 {page} / {paginatedData.totalPages}{" "}
+            {/* Page {page} of {paginatedData.totalPages} */}
           </div>
           <Button
             variant="outline"
@@ -301,7 +303,8 @@ export function DataTable<TData, TValue>({
             onClick={() => updateParam("page", "1")}
             disabled={!paginatedData.hasPrevPage}
           >
-            <span className="sr-only">Go to first page</span>
+            <span className="sr-only">첫 페이지로 이동</span>{" "}
+            {/* Go to first page */}
             <ChevronsLeft />
           </Button>
 
@@ -311,7 +314,8 @@ export function DataTable<TData, TValue>({
             onClick={() => updateParam("page", (page - 1).toString())}
             disabled={!paginatedData.hasPrevPage}
           >
-            <span className="sr-only">Go to previous page</span>
+            <span className="sr-only">이전 페이지로 이동</span>{" "}
+            {/* Go to previous page */}
             <ChevronLeft />
           </Button>
 
@@ -321,7 +325,8 @@ export function DataTable<TData, TValue>({
             onClick={() => updateParam("page", (page + 1).toString())}
             disabled={!paginatedData.hasNextPage}
           >
-            <span className="sr-only">Go to next page</span>
+            <span className="sr-only">다음 페이지로 이동</span>{" "}
+            {/* Go to next page */}
             <ChevronRight />
           </Button>
           <Button
@@ -332,7 +337,8 @@ export function DataTable<TData, TValue>({
             }
             disabled={!paginatedData.hasNextPage}
           >
-            <span className="sr-only">Go to last page</span>
+            <span className="sr-only">마지막 페이지로 이동</span>{" "}
+            {/* Go to last page */}
             <ChevronsRight />
           </Button>
         </div>

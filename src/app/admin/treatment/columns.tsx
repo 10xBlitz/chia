@@ -2,7 +2,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import { CellAction } from "./cell-actions";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
-import { Badge } from "@/components/ui/badge";
 
 export type TreatmentTable = Awaited<
   ReturnType<typeof getPaginatedTreatments>
@@ -11,11 +10,11 @@ export type TreatmentTable = Awaited<
 export const columns: ColumnDef<TreatmentTable>[] = [
   {
     accessorKey: "treatment_name",
-    header: "Treatment Name",
+    header: "진료명", // Treatment Name
   },
   {
     accessorKey: "image_url",
-    header: "Image",
+    header: "이미지", // Image
     cell: ({ row }) => {
       const imageUrl = row.original.image_url;
 
@@ -28,34 +27,20 @@ export const columns: ColumnDef<TreatmentTable>[] = [
           className="object-cover rounded"
         />
       ) : (
-        <span className="text-gray-500">No Image</span>
+        <span className="text-gray-500">이미지 없음</span> // No Image
       );
     },
   },
 
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <>
-        <Badge
-          variant={row.original.status === "active" ? "default" : "destructive"}
-        >
-          {row.original.status}
-        </Badge>
-      </>
-    ),
-  },
-
-  {
     accessorKey: "created_at",
-    header: "Created At",
+    header: "생성일", // Created At
     cell: ({ getValue }) =>
       getValue() ? new Date(getValue() as string).toLocaleDateString() : "-",
   },
 
   {
     id: "actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
+    cell: ({ row }) => <CellAction data={row.original} />, // Actions
   },
 ];

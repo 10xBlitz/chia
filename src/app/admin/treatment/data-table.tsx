@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { addDays, format } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -140,7 +141,7 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-between gap-3 py-4 ">
         <div className="flex items-center gap-3">
           <Input
-            placeholder="Search by treatment name..."
+            placeholder="치료명 검색" // Search by treatment name
             value={treatmentName}
             onChange={(event) => setTreatmentName(event.target.value)}
             className="w-[300px] bg-white h-[45px]"
@@ -176,6 +177,7 @@ export function DataTable<TData, TValue>({
                 mode="range"
                 defaultMonth={dates?.from}
                 selected={dates}
+                locale={ko}
                 onSelect={(dates) => {
                   setDates(dates);
                   updateParam("dates", JSON.stringify(dates));
@@ -189,7 +191,7 @@ export function DataTable<TData, TValue>({
           onClick={onClickAdd}
           className="bg-white text-black border-1 hover:bg-black/20"
         >
-          <PlusSquareIcon className="h-4 w-4" /> Add Treatment
+          <PlusSquareIcon className="h-4 w-4" /> 치료 추가{/* Add Treatment */}
         </Button>
       </div>
       <div className="rounded-md border bg-white">
@@ -244,7 +246,9 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium">
+            페이지당 행 수 {/**Rows per page */}
+          </p>
           <Select
             value={`${limit}`}
             onValueChange={(value) => updateParam("limit", value)}
@@ -263,7 +267,7 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
-            Page {page} of {paginatedData.totalPages}
+            {page} / {paginatedData.totalPages} 페이지
           </div>
           <Button
             variant="outline"

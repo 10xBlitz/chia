@@ -14,5 +14,5 @@ export function LogoutButton() {
     console.log("---->User logged out and redirected to home page");
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return <Button onClick={logout}>로그아웃</Button>;
 }

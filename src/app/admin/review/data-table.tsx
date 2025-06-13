@@ -153,7 +153,8 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center gap-3 py-4">
         <Input
-          placeholder="Search by full name..."
+          // 이름으로 검색 (Search by full name)
+          placeholder="이름으로 검색"
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
           className="w-[300px] bg-white h-[45px]"
@@ -200,7 +201,8 @@ export function DataTable<TData, TValue>({
                   format(dates.from, "LLL dd, y")
                 )
               ) : (
-                <span>Pick a date</span>
+                // 날짜 선택 (Pick a date)
+                <span>날짜 선택</span>
               )}
             </Button>
           </PopoverTrigger>
@@ -262,6 +264,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
+                  {/* 결과 없음 (No results) */}
                   결과 없음
                 </TableCell>
               </TableRow>
@@ -272,7 +275,8 @@ export function DataTable<TData, TValue>({
 
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          {/* 페이지당 행 수 (Rows per page) */}
+          <p className="text-sm font-medium">페이지당 행 수</p>
           <Select
             value={`${limit}`}
             onValueChange={(value) => updateParam("limit", value)}
@@ -291,9 +295,8 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
-            {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
-            {/* {table.getPageCount()} */}
-            Page {page} of {paginatedData.totalPages}
+            {/* 페이지 {page} / {paginatedData.totalPages} (Page {page} of {paginatedData.totalPages}) */}
+            페이지 {page} / {paginatedData.totalPages}
           </div>
           <Button
             variant="outline"
@@ -301,7 +304,8 @@ export function DataTable<TData, TValue>({
             onClick={() => updateParam("page", "1")}
             disabled={!paginatedData.hasPrevPage}
           >
-            <span className="sr-only">Go to first page</span>
+            {/* 첫 페이지로 이동 (Go to first page) */}
+            <span className="sr-only">첫 페이지로 이동</span>
             <ChevronsLeft />
           </Button>
 
@@ -311,7 +315,8 @@ export function DataTable<TData, TValue>({
             onClick={() => updateParam("page", (page - 1).toString())}
             disabled={!paginatedData.hasPrevPage}
           >
-            <span className="sr-only">Go to previous page</span>
+            {/* 이전 페이지로 이동 (Go to previous page) */}
+            <span className="sr-only">이전 페이지로 이동</span>
             <ChevronLeft />
           </Button>
 
@@ -321,7 +326,8 @@ export function DataTable<TData, TValue>({
             onClick={() => updateParam("page", (page + 1).toString())}
             disabled={!paginatedData.hasNextPage}
           >
-            <span className="sr-only">Go to next page</span>
+            {/* 다음 페이지로 이동 (Go to next page) */}
+            <span className="sr-only">다음 페이지로 이동</span>
             <ChevronRight />
           </Button>
           <Button
@@ -332,7 +338,8 @@ export function DataTable<TData, TValue>({
             }
             disabled={!paginatedData.hasNextPage}
           >
-            <span className="sr-only">Go to last page</span>
+            {/* 마지막 페이지로 이동 (Go to last page) */}
+            <span className="sr-only">마지막 페이지로 이동</span>
             <ChevronsRight />
           </Button>
         </div>

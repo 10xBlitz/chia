@@ -21,16 +21,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            {/* 메뉴 열기 (Open menu) */}
+            <span className="sr-only">메뉴 열기</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem>
-            <EditIcon className="h-4 w-4" /> Update
+            <EditIcon className="h-4 w-4" /> {/* 수정 (Update) */} 수정
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Trash2Icon className="h-4 w-4" /> Delete
+            <Trash2Icon className="h-4 w-4" /> {/* 삭제 (Delete) */} 삭제
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
