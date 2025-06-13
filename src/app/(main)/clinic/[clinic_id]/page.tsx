@@ -21,6 +21,7 @@ import BottomNavigation from "@/components/bottom-navigation";
 import MobileLayout from "@/components/layout/mobile-layout";
 import ClinicReviewCard from "@/components/clinic-review-card";
 import ClinicDetailSkeleton from "./page-skeleton";
+import type { Metadata } from "next";
 
 const TABS = [
   { key: "info", label: "병원정보" },
@@ -87,6 +88,37 @@ async function fetchClinicReviews({
   return {
     reviews: reviews || [],
     hasMore: (reviews?.length || 0) === PAGE_SIZE,
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ clinic_id: string }>;
+}): Promise<Metadata> {
+  const slug = (await params).clinic_id;
+
+  // fetch post information
+  const clinic = await fetchClinicDetail(slug);
+
+  return {
+    title: "치과 시술 플랫폼",
+    description: clinic.clinic_name,
+    openGraph: {
+      title: clinic.clinic_name,
+      description: clinic.clinic_name,
+      siteName: "치과 시술 플랫폼",
+      images: [
+        {
+          url: clinic.pictures?.[0] || "/images/fallback-image.png",
+          width: 800,
+          height: 600,
+          alt: clinic.clinic_name || "Clinic Image",
+        },
+      ],
+      locale: "ko_KR",
+      type: "website",
+    },
   };
 }
 
