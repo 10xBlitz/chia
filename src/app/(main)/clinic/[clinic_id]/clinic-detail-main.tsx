@@ -173,10 +173,12 @@ export default function ClinicSingleViewMainComponent() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2 bg-white z-20">
           <BackButton link="/" />
-          <BookmarkButton
-            isActive={isFavorite}
-            handleBookmarkClick={handleBookmarkClick}
-          />
+          {user?.id && (
+            <BookmarkButton
+              isActive={isFavorite}
+              handleBookmarkClick={handleBookmarkClick}
+            />
+          )}
         </div>
         <div className="w-full h-[180px] relative">
           <Image
