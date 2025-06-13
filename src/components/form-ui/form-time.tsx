@@ -7,33 +7,27 @@ import {
   FormMessage,
 } from "../ui/form";
 import { cn } from "@/lib/utils";
-import { Textarea } from "../ui/textarea";
+import { KoreanTimePicker } from "../time-picker";
 
-type FormTextareaProps<T extends FieldValues> = {
+type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
   disabled?: boolean;
-  maxLength?: number;
-  placeholder?: string;
   formItemClassName?: string;
   formLabelClassName?: string;
-  formControlClassName?: string;
   inputClassName?: string;
 };
 
-export default function FormTextarea<T extends FieldValues>({
+export default function FormTimePicker<T extends FieldValues>({
   control,
   name,
   label,
-  maxLength = 1000, // Default max length
   disabled = false,
-  placeholder,
   formItemClassName,
   formLabelClassName,
-  formControlClassName,
   inputClassName,
-}: FormTextareaProps<T>) {
+}: FormInputProps<T>) {
   return (
     <FormField
       control={control}
@@ -48,18 +42,16 @@ export default function FormTextarea<T extends FieldValues>({
           >
             {label}
           </FormLabel>
-          <FormControl className={formControlClassName}>
-            <Textarea
-              className={cn("h-[45px]", inputClassName)}
-              placeholder={placeholder}
-              maxLength={maxLength}
-              disabled={disabled}
-              {...field}
-            />
+          <FormControl>
+            <div className="relative">
+              <KoreanTimePicker
+                disabled={disabled}
+                className={inputClassName}
+                time={field.value}
+                setSelected={field.onChange}
+              />
+            </div>
           </FormControl>
-          <div className="text-right text-xs text-gray-400 mt-1">
-            {field.value?.length || 0}/{maxLength}
-          </div>
           <FormMessage />
         </FormItem>
       )}

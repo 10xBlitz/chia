@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +54,36 @@ import FormInput from "@/components/form-ui/form-input";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
 import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  insertClinicWorkingHours,
+  deleteClinicWorkingHours,
+} from "@/lib/supabase/services/clinics.services";
+import FormTextarea from "@/components/form-ui/form-textarea";
+
+// 요일을 한글로, 영어 주석 추가 (Days of week in Korean, with English comments)
+const DAYS_OF_WEEK = [
+  "월요일", // Monday
+  "화요일", // Tuesday
+  "수요일", // Wednesday
+  "목요일", // Thursday
+  "금요일", // Friday
+  "토요일", // Saturday
+  "일요일", // Sunday
+];
+
+// Add ClinicHour type for typing
+export type ClinicHour = {
+  day_of_week: string;
+  time_open: string;
+  note?: string;
+};
 
 const formSchema = z.object({
   clinic_name: z.string().min(1, "Clinic name is required"),
@@ -71,6 +102,15 @@ const formSchema = z.object({
       action: z.enum(["new", "updated", "deleted", "old"]),
     })
   ),
+  clinic_hours: z
+    .array(
+      z.object({
+        day_of_week: z.string().min(1, "Day is required"),
+        time_open: z.string().min(1, "Time is required"),
+        note: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export const ClinicModal = ({
@@ -118,6 +158,23 @@ export const ClinicModal = ({
               price: item.price,
               action: "old",
             })) || [],
+          clinic_hours:
+            typeof data === "object" &&
+            data !== null &&
+            "working_hour" in data &&
+            Array.isArray((data as Record<string, unknown>)["working_hour"])
+              ? (
+                  (data as Record<string, unknown>)["working_hour"] as Array<{
+                    day_of_week: string;
+                    time_open: string;
+                    note?: string;
+                  }>
+                ).map((h) => ({
+                  day_of_week: h.day_of_week,
+                  time_open: h.time_open,
+                  note: h.note || "",
+                }))
+              : [],
         }
       : {
           clinic_name: "",
@@ -127,12 +184,22 @@ export const ClinicModal = ({
           region: "",
           opening_date: new Date(),
           treatments: [],
+          clinic_hours: [],
         },
   });
 
   const { fields, append, remove, update } = useFieldArray({
     control: form.control,
     name: "treatments",
+  });
+
+  const {
+    fields: clinicHourFields,
+    append: appendClinicHour,
+    remove: removeClinicHour,
+  } = useFieldArray({
+    control: form.control,
+    name: "clinic_hours",
   });
 
   // For image preview per treatment
@@ -157,13 +224,15 @@ export const ClinicModal = ({
   };
 
   const mutation = useMutation({
-    mutationKey: ["save_clinic_and_treatments", data?.id],
+    mutationKey: [data ? "update_clinic" : "add_clinic", data?.id],
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      // Attach pictures to values
       values.pictures =
         clinicImageFiles.length > 0 ? clinicImageFiles : data?.pictures || [];
-
-      return saveClinicAndTreatments(values, data?.id, setProgress);
+      if (data) {
+        return updateClinicWithImages(values, data!.id, setProgress);
+      } else {
+        return addClinicWithImages(values, setProgress);
+      }
     },
     onSuccess: () => {
       form.reset();
@@ -197,10 +266,13 @@ export const ClinicModal = ({
     }
   };
 
+  // For custom day_of_week input
+  const [customDayIdx, setCustomDayIdx] = React.useState<number | null>(null);
+
   return (
     <>
       <Modal
-        title={data ? "병원 편집" : "병원 추가"} // "Edit Clinic" or "Add Clinic"
+        title={data ? "병원 편집" : "병원 추가"} // Edit Clinic / Add Clinic
         description={""}
         isOpen={open}
         isLong={true}
@@ -212,60 +284,51 @@ export const ClinicModal = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="py-2">
             <div className="flex flex-col gap-8 w-full items-start justify-center">
-              {/* Left: Clinic Info */}
+              {/* 왼쪽: 병원 정보 (Left: Clinic Info) */}
               <div className="flex flex-col gap-5 w-full">
                 <FormInput
                   control={form.control}
                   name="clinic_name"
-                  label="병원 이름" //Clinic Name
-                  placeholder="여기에 병원 이름을 입력하세요." //Enter clinic name here
+                  label="병원 이름" // Clinic Name
+                  placeholder="여기에 병원 이름을 입력하세요." // Enter clinic name here
                 />
                 <FormInput
                   control={form.control}
                   name="link"
-                  label="클리닉 링크" //Clinic Link
-                  placeholder="여기에 클리닉 링크를 입력하세요." //Enter clinic link here
+                  label="클리닉 링크" // Clinic Link
+                  placeholder="여기에 클리닉 링크를 입력하세요." // Enter clinic link here
                   type="url"
                 />
-
                 <FormContactNumber
                   control={form.control}
                   name="contact_number"
-                  label="연락처" //Contact Number
-                  placeholder="연락처를 입력하세요." //Enter contact number here
+                  label="연락처" // Contact Number
+                  placeholder="연락처를 입력하세요." // Enter contact number here
                 />
-
                 <FormAddress
                   control={form.control}
                   name="location"
-                  label="위치" //Location
+                  label="위치" // Location
                 />
-
                 <FormAddress
                   control={form.control}
                   name="region"
-                  label="지역" //Region
+                  label="지역" // Region
                 />
-
                 <FormDatePicker
                   control={form.control}
                   name="opening_date"
-                  label="개원일" //Opening Date
+                  label="개원일" // Opening Date
                 />
-
+                {/* 병원 이미지 (Clinic Images) */}
                 <div>
-                  <FormLabel>Clinic Images</FormLabel>
+                  <FormLabel>병원 이미지</FormLabel> {/* Clinic Images */}
                   <input
                     type="file"
                     accept="image/*"
                     multiple
                     onChange={handleClinicImagesChange}
-                    className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
                   <div className="flex flex-wrap gap-2 mt-2">
                     {clinicImagePreviews.map((src, idx) => (
@@ -281,13 +344,15 @@ export const ClinicModal = ({
                   </div>
                 </div>
               </div>
-              {/* Right: Treatments */}
+              {/* 진료 항목 (Treatments Section) */}
               <div className="flex flex-col w-full max-w-xl">
-                <div className="font-semibold mb-2">Treatments</div>
+                <div className="font-semibold mb-2">진료 항목</div>{" "}
+                {/* Treatments */}
                 {fields.length === 0 && (
-                  <p className="text-sm  text-muted-foreground">
-                    No treatments added yet. Click the plus icon to add a
-                    treatment.
+                  <p className="text-sm text-muted-foreground">
+                    아직 추가된 진료 항목이 없습니다. 플러스 아이콘을 클릭하여
+                    진료 항목을 추가하세요.
+                    {/* No treatments added yet. Click the plus icon to add a treatment. */}
                   </p>
                 )}
                 {fields
@@ -297,7 +362,7 @@ export const ClinicModal = ({
                       key={item.id + index}
                       className="relative grid grid-cols-2 gap-3 items-stretch w-full border rounded-md p-4 mb-2"
                     >
-                      {/* Delete button at top right */}
+                      {/* 오른쪽 상단 삭제 버튼 (Delete button at top right) */}
                       <Button
                         className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
                         type="button"
@@ -305,22 +370,21 @@ export const ClinicModal = ({
                       >
                         <Trash2Icon className="h-4 w-4" />
                       </Button>
-                      {/* Left: Treatment Name (select) and Price (stacked) */}
+                      {/* 진료명 및 가격 (Treatment Name and Price) */}
                       <div className="flex flex-col gap-2 justify-between h-full">
                         {treatmentsLoading ? (
-                          <div>Loading...</div>
+                          <div>로딩 중... {/* Loading... */}</div>
                         ) : (
                           <FormField
                             control={form.control}
                             name={`treatments.${index}.treatment_id`}
                             render={({ field }) => (
                               <FormItem className="flex flex-col">
-                                <FormLabel>Treatment</FormLabel>
+                                <FormLabel>진료명</FormLabel> {/* Treatment */}
                                 <Combobox
                                   value={field.value}
                                   onValueChange={(e) => {
                                     field.onChange(e);
-                                    // Set image_url and treatment_name when treatment is selected
                                     const selected = allTreatments?.data.find(
                                       (t) => t.id === e
                                     );
@@ -334,7 +398,6 @@ export const ClinicModal = ({
                                         selected.image_url || ""
                                       );
                                     }
-                                    // Remove this treatment from other selects (including newly added)
                                     const currentTreatments =
                                       form.getValues("treatments");
                                     currentTreatments.forEach((t, idx) => {
@@ -360,7 +423,6 @@ export const ClinicModal = ({
                                   }}
                                   filterItems={(inputValue, items) =>
                                     items.filter(({ value }) => {
-                                      // Exclude treatments already selected in other fields (including new ones)
                                       const selectedIds = form
                                         .getValues("treatments")
                                         .filter(
@@ -386,14 +448,15 @@ export const ClinicModal = ({
                                   }
                                 >
                                   <ComboboxInput
-                                    placeholder="Pick a treatment..."
+                                    placeholder="진료 항목을 선택하세요..."
                                     className="cursor-pointer"
                                     disabled={
                                       form.getValues(
                                         `treatments.${index}.action`
                                       ) === "old"
                                     }
-                                  />
+                                  />{" "}
+                                  {/* Pick a treatment... */}
                                   <ComboboxContent>
                                     {allTreatments?.data.map(
                                       ({ id, treatment_name, image_url }) => (
@@ -404,7 +467,6 @@ export const ClinicModal = ({
                                           className="ps-8"
                                         >
                                           <span className="text-sm text-foreground flex items-center gap-2">
-                                            {/* Show treatment image in dropdown */}
                                             {image_url && (
                                               <Image
                                                 src={image_url}
@@ -424,10 +486,12 @@ export const ClinicModal = ({
                                         </ComboboxItem>
                                       )
                                     )}
-                                    <ComboboxEmpty>No results.</ComboboxEmpty>
+                                    <ComboboxEmpty>
+                                      검색 결과가 없습니다.
+                                    </ComboboxEmpty>{" "}
+                                    {/* No results. */}
                                   </ComboboxContent>
                                 </Combobox>
-
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -438,7 +502,7 @@ export const ClinicModal = ({
                           name={`treatments.${index}.price`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Price</FormLabel>
+                              <FormLabel>가격</FormLabel> {/* Price */}
                               <FormControl>
                                 <Input
                                   {...field}
@@ -456,7 +520,7 @@ export const ClinicModal = ({
                                   }}
                                   type="number"
                                   className="w-full h-[45px]"
-                                  placeholder="Enter price"
+                                  placeholder="가격을 입력하세요."
                                 />
                               </FormControl>
                               <FormMessage />
@@ -464,17 +528,16 @@ export const ClinicModal = ({
                           )}
                         />
                       </div>
-                      {/* Right: Image */}
+                      {/* 오른쪽: 이미지 (Right: Image) */}
                       <div className="flex flex-col gap-2 items-center h-full justify-between">
                         <FormField
                           control={form.control}
                           name={`treatments.${index}.image_url`}
                           render={() => (
                             <FormItem className="h-full flex flex-col justify-between">
-                              <FormLabel>Image</FormLabel>
+                              <FormLabel>이미지</FormLabel> {/* Image */}
                               <FormControl>
                                 <div className="flex flex-col h-full justify-between">
-                                  {/* Only show preview, no input */}
                                   {(form.getValues(
                                     `treatments.${index}.image_url`
                                   ) &&
@@ -484,7 +547,7 @@ export const ClinicModal = ({
                                     imagePreviews.current[index] && (
                                       <Image
                                         src={imagePreviews.current[index]}
-                                        alt="Preview"
+                                        alt="미리보기"
                                         width={140}
                                         height={140}
                                         className="mt-2 w-full h-[92px] object-cover rounded"
@@ -504,7 +567,7 @@ export const ClinicModal = ({
                                           }
                                           width={140}
                                           height={140}
-                                          alt="Preview"
+                                          alt="미리보기"
                                           className="mt-2 w-full h-[92px] object-cover rounded"
                                         />
                                       ))}
@@ -516,8 +579,8 @@ export const ClinicModal = ({
                         />
                       </div>
                       <ConfirmDeleteModal
-                        title="Confirm Remove Treatment"
-                        description={`Are you sure you want to remove ${item.treatment_name}?`}
+                        title="진료 항목 삭제 확인" // Confirm Remove Treatment
+                        description={`정말로 ${item.treatment_name} 항목을 삭제하시겠습니까?`} // Are you sure you want to remove ...
                         open={deleteIndex === index}
                         onCancel={() => setDeleteIndex(null)}
                         onConfirm={() => {
@@ -541,15 +604,148 @@ export const ClinicModal = ({
                     })
                   }
                 >
-                  치료 추가 {/* Add Treatment */}
+                  진료 항목 추가 {/* Add Treatment */}
                 </Button>
               </div>
-            </div>
-            <div className="pt-4 space-x-2 flex items-center justify-end">
+              {/* 진료시간 섹션 (Clinic Hours Section) */}
+              <div className="pt-8 w-full">
+                <div className="border-t border-t-muted py-4">
+                  <div className="font-semibold mb-2">진료시간</div>{" "}
+                  {/* Clinic Hours */}
+                  {clinicHourFields.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      아직 추가된 진료시간이 없습니다. 플러스 아이콘을 클릭하여
+                      진료시간을 추가하세요.
+                      {/* No clinic hours added yet. Click the plus icon to add a clinic hour. */}
+                    </p>
+                  )}
+                  {clinicHourFields.map((item, index) => {
+                    const dayValue = form.watch(
+                      `clinic_hours.${index}.day_of_week`
+                    );
+                    const isCustom =
+                      dayValue &&
+                      !DAYS_OF_WEEK.includes(dayValue) &&
+                      dayValue !== "";
+                    return (
+                      <section
+                        key={item.id + index}
+                        className="relative grid grid-cols-2 gap-3 items-stretch w-full border rounded-md p-4 mb-2"
+                      >
+                        {/* 오른쪽 상단 삭제 버튼 (Delete button at top right) */}
+                        <Button
+                          className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
+                          type="button"
+                          onClick={() => removeClinicHour(index)}
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                        </Button>
+                        {/* 요일 선택 (Day of Week Select with custom option) */}
+                        <section className=" w-full flex flex-col gap-2">
+                          <FormField
+                            control={form.control}
+                            name={`clinic_hours.${index}.day_of_week`}
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col">
+                                <FormLabel className="text-[16px] font-pretendard-600">
+                                  요일
+                                </FormLabel>{" "}
+                                {/* Day */}
+                                <Select
+                                  value={
+                                    DAYS_OF_WEEK.includes(field.value)
+                                      ? field.value
+                                      : "other"
+                                  }
+                                  onValueChange={(val) => {
+                                    if (val === "other") {
+                                      setCustomDayIdx(index);
+                                      field.onChange("");
+                                    } else {
+                                      setCustomDayIdx(null);
+                                      field.onChange(val);
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className="w-full min-h-[45px]">
+                                    <SelectValue placeholder="요일을 선택하거나 직접 입력하세요" />{" "}
+                                    {/* Select day or custom */}
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DAYS_OF_WEEK.map((d) => (
+                                      <SelectItem
+                                        key={d}
+                                        value={d}
+                                        className="cursor-pointer"
+                                      >
+                                        {d}
+                                      </SelectItem>
+                                    ))}
+                                    <SelectItem
+                                      value="other"
+                                      className="cursor-pointer"
+                                    >
+                                      기타 (직접 입력)
+                                    </SelectItem>{" "}
+                                    {/* Other (custom) */}
+                                  </SelectContent>
+                                </Select>
+                                {/* '기타' 선택 시 직접 입력 (Show custom input if 'Other' is selected) */}
+                                {(customDayIdx === index || isCustom) && (
+                                  <Input
+                                    className="mt-2"
+                                    placeholder="직접 입력 (예: 점심시간)" // Enter custom day (e.g. Lunch Break)
+                                    value={field.value}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.value)
+                                    }
+                                  />
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* 시간 (Time) */}
+                          <FormInput
+                            control={form.control}
+                            name={`clinic_hours.${index}.time_open`}
+                            label="진료 시간" // Clinic Hours
+                            placeholder="예: 09:00 - 18:00" // e.g. 09:00 - 18:00
+                            type="text"
+                          />
+                        </section>
+
+                        {/* 비고 (Note) */}
+                        <FormTextarea
+                          formItemClassName="row-span-2 flex flex-col"
+                          inputClassName="flex-1"
+                          control={form.control}
+                          name={`clinic_hours.${index}.note`}
+                          label="비고" // Note
+                          placeholder="예: 점심시간 없음" // e.g. No lunch break
+                        />
+                      </section>
+                    );
+                  })}
+                  <Button
+                    type="button"
+                    className="w-full mt-4"
+                    onClick={() =>
+                      appendClinicHour({
+                        day_of_week: "",
+                        time_open: "",
+                        note: "",
+                      })
+                    }
+                  >
+                    진료시간 추가 {/* Add Clinic Hour */}
+                  </Button>
+                </div>
+              </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {data ? "변경 사항 저장" : "병원 추가"}{" "}
-                {/* "Save Changes" or "Add Clinic" */}
-                {progress}
+                {data ? "변경 사항 저장" : "병원 추가"} {progress}
+                {/* Save Changes / Add Clinic */}
               </Button>
             </div>
           </form>
@@ -560,72 +756,65 @@ export const ClinicModal = ({
 };
 
 /**
- * Saves a clinic and its treatments.
- * If clinicId is provided, updates the clinic and its images.
- * If clinicId is not provided, creates a new clinic and uploads images.
- *
- * @param values - Clinic form values including treatments and pictures (always File[])
- * @param clinicId - Optional clinic ID for update (if not provided, creates new)
- * @param setUploadingFileIndex - Optional callback for UI feedback during image upload
- * @returns Promise resolving to { success: true }
- */
-async function saveClinicAndTreatments(
-  values: z.infer<typeof formSchema>,
-  clinicId?: string,
-  setProgress?: (prog: string | null) => void
-) {
-  if (clinicId) {
-    console.log("--->updating clinic with id: ", clinicId);
-    await updateClinicWithImages(values, clinicId, setProgress);
-  } else {
-    console.log("--->adding new clinic");
-    await addClinicWithImages(values, setProgress);
-  }
-  return { success: true };
-}
-
-/**
- * Handles updating a clinic, including deleting old images, uploading new ones, and updating treatments.
+ * Handles updating a clinic, including deleting old images, uploading new ones, and updating treatments and working hours.
  */
 async function updateClinicWithImages(
   values: z.infer<typeof formSchema>,
   clinicId: string,
   setProgress?: (prog: string | null) => void
 ) {
-  // Remove old images
-  const { data: clinic } = await supabaseClient
-    .from("clinic")
-    .select("pictures")
-    .eq("id", clinicId)
-    .single();
+  // Check if there are any new images to upload (at least one File in the array)
+  const hasNewImages =
+    Array.isArray(values.pictures) &&
+    values.pictures.some((img) => img instanceof File);
 
-  if (clinic?.pictures && clinic.pictures.length > 0) {
-    console.log("----->deleting old clinic images: ", clinic.pictures);
-    for (let idx = 0; idx < clinic.pictures.length; idx++) {
-      const pic = clinic.pictures[idx];
-      await deleteFileFromSupabase(pic, {
-        bucket: CLINIC_IMAGE_BUCKET,
-      });
+  let clinicPictures: string[] = [];
+
+  if (hasNewImages) {
+    // Remove old images
+    const { data: clinic } = await supabaseClient
+      .from("clinic")
+      .select("pictures")
+      .eq("id", clinicId)
+      .single();
+
+    if (clinic?.pictures && clinic.pictures.length > 0) {
+      for (let idx = 0; idx < clinic.pictures.length; idx++) {
+        const pic = clinic.pictures[idx];
+        await deleteFileFromSupabase(pic, {
+          bucket: CLINIC_IMAGE_BUCKET,
+        });
+      }
     }
+
+    // Upload new images (replace all)
+    for (let i = 0; i < values.pictures.length; i++) {
+      const file = values.pictures[i];
+      if (file instanceof File) {
+        setProgress?.("클리닉 이미지 업로드 중: " + (i + 1));
+        const publicUrl = await uploadFileToSupabase(file, {
+          bucket: CLINIC_IMAGE_BUCKET,
+          allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+          maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+        });
+        clinicPictures.push(publicUrl);
+      } else if (typeof file === "string") {
+        // If the image is already a URL, keep it
+        clinicPictures.push(file);
+      }
+    }
+    setProgress?.(null);
+  } else {
+    // No new images, keep the existing ones
+    const { data: clinic } = await supabaseClient
+      .from("clinic")
+      .select("pictures")
+      .eq("id", clinicId)
+      .single();
+    clinicPictures = clinic?.pictures || [];
   }
 
-  // Upload new images
-  const clinicPictures: string[] = [];
-  console.log("------->uploading new clinic images: ", values.pictures);
-  for (let i = 0; i < values.pictures.length; i++) {
-    const file = values.pictures[i] as File;
-    setProgress?.("클리닉 이미지 업로드 중: " + (i + 1)); //Uploading Clinic Image
-    console.log("------->uploading clinic image: ", i);
-    const publicUrl = await uploadFileToSupabase(file, {
-      bucket: CLINIC_IMAGE_BUCKET,
-      allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
-      maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
-    });
-    clinicPictures.push(publicUrl);
-  }
-  setProgress?.(null);
-
-  // Update clinic
+  // Update clinic (with new or existing images)
   const clinicPayload = {
     ...values,
     link: values.link || "",
@@ -633,18 +822,25 @@ async function updateClinicWithImages(
     opening_date: values.opening_date.toDateString(),
   };
 
-  console.log("----->updating clinic: ", clinicPayload);
-  setProgress?.("병원 업데이트 중..."); // "Updating clinic..."
+  setProgress?.("병원 업데이트 중...");
   await updateClinic(clinicId, clinicPayload, clinicPictures);
-  console.log("-----> saving treatments for clinic");
+
+  // Save working hours
+  setProgress?.("진료시간 저장 중...");
+  if (values.clinic_hours && values.clinic_hours.length > 0) {
+    await deleteClinicWorkingHours(clinicId);
+    await insertClinicWorkingHours(clinicId, values.clinic_hours);
+  } else {
+    await deleteClinicWorkingHours(clinicId);
+  }
+
   // Save treatments
-  setProgress?.("트리트먼트 저장 중..."); // "Saving treatments..."
-  console.log("----->saving treatments: ", clinicId);
+  setProgress?.("트리트먼트 저장 중...");
   await saveTreatmentsForClinic(values.treatments, clinicId);
 }
 
 /**
- * Handles adding a new clinic, uploading images, and saving treatments.
+ * Handles adding a new clinic, uploading images, and saving treatments and working hours.
  */
 async function addClinicWithImages(
   values: z.infer<typeof formSchema>,
@@ -654,8 +850,7 @@ async function addClinicWithImages(
   const clinicPictures: string[] = [];
   for (let i = 0; i < values.pictures.length; i++) {
     const file = values.pictures[i] as File;
-    if (setProgress) setProgress("클리닉 이미지 업로드 중: " + (i + 1)); //Uploading Clinic Image
-    console.log("------->uploading clinic image: ", i);
+    if (setProgress) setProgress("클리닉 이미지 업로드 중: " + (i + 1));
     const publicUrl = await uploadFileToSupabase(file, {
       bucket: CLINIC_IMAGE_BUCKET,
       allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
@@ -673,6 +868,11 @@ async function addClinicWithImages(
     opening_date: values.opening_date.toDateString(),
   };
   const newClinicId = await insertClinic(clinicPayload, clinicPictures);
+
+  // Save working hours
+  if (values.clinic_hours && values.clinic_hours.length > 0) {
+    await insertClinicWorkingHours(newClinicId, values.clinic_hours);
+  }
 
   // Save treatments
   await saveTreatmentsForClinic(values.treatments, newClinicId);

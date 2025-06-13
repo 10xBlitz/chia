@@ -14,13 +14,21 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 type KoreanTimePickerProps = {
   time: string | null; // e.g., "14:30"
   setSelected: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
 };
 
-export function KoreanTimePicker({ time, setSelected }: KoreanTimePickerProps) {
+export function KoreanTimePicker({
+  time,
+  setSelected,
+  disabled,
+  className,
+}: KoreanTimePickerProps) {
   const [hour, setHour] = useState<number | null>(null);
   const [minute, setMinute] = useState<number | null>(null);
 
@@ -52,7 +60,11 @@ export function KoreanTimePicker({ time, setSelected }: KoreanTimePickerProps) {
       {/* Hour Picker */}
       <Popover open={openHour} onOpenChange={setOpenHour}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="flex-1 justify-start">
+          <Button
+            variant="outline"
+            className={cn("flex-1 justify-start", className)}
+            disabled={disabled}
+          >
             {hour !== null ? `${hour}` : "시"}
           </Button>
         </PopoverTrigger>
