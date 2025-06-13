@@ -178,42 +178,37 @@ export async function createReview({
   return { success: true };
 }
 
-/**
- * Fetch all reviews for a clinic, including review images and patient info.
- * @param clinicId The clinic id
- */
-// export async function getClinicReviews(clinicId: string) {
-//   // Fetch all reviews where the related clinic_treatment.clinic_id matches
-//   const { data: reviews, error: reviewsError } = await supabaseClient
-//     .from("review")
-//     .select(
-//       `
-//         *,
-//         user:patient_id (
-//           id,
-//           full_name
-//         ),
-//         clinic_treatment (
-//           id,
-//           clinic_id
-//         )
-//       `
-//     )
-//     .eq("clinic_treatment.clinic_id", clinicId)
-//     .order("created_at", { ascending: false });
+// Infinite fetch reviews for this clinic
+export async function fetchClinicReviews({
+  pageParam = 0,
+  clinic_id,
+  pageSize = 10,
+}: {
+  pageParam?: number;
+  pageSize: number;
+  clinic_id: string;
+}) {
+  // Get all clinic_treatment ids for this clinic
+  const { data: treatments, error: treatmentError } = await supabaseClient
+    .from("clinic_treatment")
+    .select("id")
+    .eq("clinic_id", clinic_id);
 
-//   if (reviewsError) throw reviewsError;
+  if (treatmentError) throw treatmentError;
+  const treatmentIds = treatments?.map((t) => t.id) || [];
+  if (treatmentIds.length === 0) return { reviews: [], hasMore: false };
 
-//   // Fetch clinic views count only
-//   const { count: viewsCount, error: clinicError } = await supabaseClient
-//     .from("clinic_view")
-//     .select("*", { count: "exact", head: true })
-//     .eq("clinic_id", clinicId);
+  // Fetch reviews for these treatments, paginated
+  const { data: reviews, error: reviewError } = await supabaseClient
+    .from("review")
+    .select("*, user:patient_id(*)")
+    .in("clinic_treatment_id", treatmentIds)
+    .order("created_at", { ascending: false })
+    .range(pageParam * pageSize, pageParam * pageSize + pageSize - 1);
 
-//   if (clinicError) throw clinicError;
-
-//   return {
-//     reviews: reviews || [],
-//     views: viewsCount ?? 0,
-//   };
-// }
+  if (reviewError) throw reviewError;
+  return {
+    reviews: reviews || [],
+    hasMore: (reviews?.length || 0) === pageSize,
+  };
+}

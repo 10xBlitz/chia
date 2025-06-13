@@ -214,31 +214,30 @@ export async function insertClinic(
   return insertedClinic.id;
 }
 
+// Fetch clinic detail (no reviews, no views)
 export async function fetchClinicDetail(clinic_id: string) {
   const { data, error } = await supabaseClient
     .from("clinic")
     .select(
       `
         *,
-        clinic_view(*),
         working_hour(*),
         clinic_treatment (
+          id,
+          treatment (
             id,
-            treatment (
-                id,
-                treatment_name,
-                image_url
-            ),
-            review (
-              *,
-              user:patient_id(*)
-            )
+            treatment_name,
+            image_url
+          )
         )
       `
     )
     .eq("id", clinic_id)
     .single();
+  console.log("---->error", error);
   if (error) throw error;
+
+  console.log("---->error", error);
   return data;
 }
 
