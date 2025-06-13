@@ -7,7 +7,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Page({
@@ -23,13 +22,6 @@ export default async function Page({
   // Determine filter option from search params
   const region = (await searchParams)?.region;
 
-  // If "모두" or no filter, regionFilter remains ""
-
-  const clinicsRes = await getPaginatedClinicsWthReviews(1, 3, {
-    region,
-  });
-
-  // console.log("---->clinicsres", clinicsRes.data);
   return (
     <MobileLayout className="!px-0 flex flex-col">
       <header className="pb-3 flex justify-between items-center px-4">
@@ -53,7 +45,7 @@ export default async function Page({
           </Link>
         )}
       </header>
-      <MainPage clinicsData={clinicsRes.data} />
+      <MainPage region={region} />
       {userId && <BottomNavigation />}
       <Footer />
       {/* Spacer to prevent footer overlap on mobile */}

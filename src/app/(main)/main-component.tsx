@@ -15,16 +15,27 @@ import MainBannerCarousel from "@/components/main-banner";
 import TreatmentCategoryScroll from "@/components/treatment-category";
 import ClinicCard, { ClinicCardProps } from "@/components/clinic-card";
 import SubBannerCarousel from "@/components/sub-banner";
+import { useQuery } from "@tanstack/react-query";
+import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
+import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 
 interface MainPageProps {
-  clinicsData: ClinicCardProps[];
+  region?: string;
 }
 
-export default function MainPage({ clinicsData }: MainPageProps) {
+export default function MainPage({ region }: MainPageProps) {
   const searchParams = useSearchParams();
   const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
   const user = useUserStore((state) => state.user);
   const router = useRouter();
+
+  // Fetch clinics data with React Query
+  const { data: clinicsData = [], isLoading } = useQuery({
+    queryKey: ["clinics", region],
+    queryFn: () =>
+      getPaginatedClinicsWthReviews(1, 3, { region }).then((res) => res.data),
+    staleTime: 1000 * 60, // 1 minute cache
+  });
 
   const handleSortOptionChange = (option: string) => {
     let regionFilter = "";
@@ -73,6 +84,11 @@ export default function MainPage({ clinicsData }: MainPageProps) {
         {/* Custom clinic/event/sub-banner order */}
         <div className="flex flex-col gap-4 flex-1 px-2">
           {/* 1. First 2 clinics */}
+
+          {isLoading &&
+            Array.from({ length: 2 }).map((_, index) => (
+              <ClinicCardSkeleton key={index} />
+            ))}
           {clinicsData &&
             clinicsData
               .slice(0, 2)
