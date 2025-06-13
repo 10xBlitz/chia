@@ -46,12 +46,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta property="og:title" content="치과 시술 플랫폼" />
+        <meta
+          property="og:description"
+          content="치과 시술 견적 및 예약 플랫폼"
+        />
+        <meta property="og:siteName" content="치과 시술 플랫폼" />
         <meta
           property="og:image"
           content="https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/clinic-images//2471d7e1-f871-4bdd-ba84-9755cf7f38f3.png"
         />
-        <meta property="og:image:width" content="800" />
-        <meta property="og:image:height" content="600" />
+        <meta property="og:image:width" content="800px" />
+        <meta property="og:image:height" content="600px" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
