@@ -10,16 +10,20 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
 import EventCarousel from "@/components/event";
 import MainBannerCarousel from "@/components/main-banner";
 import TreatmentCategoryScroll from "@/components/treatment-category";
-import ClinicCard from "@/components/clinic-card";
+import ClinicCard, { ClinicCardProps } from "@/components/clinic-card";
 import SubBannerCarousel from "@/components/sub-banner";
-import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
-import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 
-export default function MainPage() {
+// import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
+// import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
+
+interface MainPageProps {
+  clinicsData: ClinicCardProps[];
+}
+
+export default function MainPage({ clinicsData }: MainPageProps) {
   const searchParams = useSearchParams();
   const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
   const user = useUserStore((state) => state.user);
@@ -29,50 +33,11 @@ export default function MainPage() {
     router.push(`?searchByAddress=${option}`, { scroll: false });
   };
 
-  // Fetch first 3 clinics for custom placement
-  const {
-    data: clinicsData,
-    isLoading: clinicsLoading,
-    error: clinicsError,
-    // refetch: refetchInitialClinics,
-    // fetchStatus: clinicsFetchStatus,
-  } = useQuery({
-    queryKey: ["clinics-initial", filterOption],
-    queryFn: async () => {
-      console.log("---->Fetching clinics with filter:", filterOption);
-      let regionFilter = "";
-      if (filterOption === "근무지") {
-        //workplace
-        regionFilter = user?.work_place || "";
-      } else if (filterOption === "거주") {
-        //residence
-        regionFilter = user?.residence || "";
-      }
-      const res = await getPaginatedClinicsWthReviews(1, 3, {
-        region: regionFilter,
-      });
-
-      console.info("res.data", res.data);
-      return res.data || [];
-    },
-    enabled:
-      filterOption === "모두" || filterOption === ""
-        ? true
-        : filterOption === "근무지"
-        ? !!user?.work_place
-        : filterOption === "거주"
-        ? !!user?.residence
-        : false,
-    refetchOnWindowFocus: true,
-  });
-
   return (
     <>
       <main className="flex-1 overflow-hidden flex flex-col h-full pb-16">
         <MainBannerCarousel />
-
         <TreatmentCategoryScroll />
-
         {/* Sorting options */}
         <div className="flex justify-between items-center p-4">
           <div className="text-sm">
@@ -100,32 +65,21 @@ export default function MainPage() {
             </Select>
           )}
         </div>
-
         {/* Custom clinic/event/sub-banner order */}
         <div className="flex flex-col gap-4 flex-1 px-2">
           {/* 1. First 2 clinics */}
-          {clinicsLoading &&
-            Array.from({ length: 2 }).map((_, i) => (
-              <ClinicCardSkeleton key={i} />
-            ))}
-          {clinicsError && (
-            <p>
-              클리닉을 로딩하는 중 오류가 발생했습니다: {clinicsError.message}
-            </p>
-            //Error loading clinics
-          )}
           {clinicsData &&
             clinicsData
               .slice(0, 2)
               .map((item) => <ClinicCard {...item} key={item.id} />)}
-          {/** No clinics found message when user filters */}
+          {/* No clinics found message when user filters */}
           {clinicsData && clinicsData.length === 0 && filterOption && (
             <p className="text-center text-gray-500 px-4 py-15">
               해당 지역에는 조건에 맞는 병원이 없습니다. 다른 지역을 선택하거나
               필터를 조정해보세요.
               {/** There are no hospitals in your area that match your criteria. Please select a different area or adjust your filters. */}
             </p>
-          )}{" "}
+          )}
           {/* 2. SubBanner */}
           <SubBannerCarousel />
           {/* 3. Next 1 clinic */}
@@ -136,7 +90,7 @@ export default function MainPage() {
           {/* 4. Event Carousel */}
           <EventCarousel />
           {/* 5. Rest of clinics with infinite scroll */}
-          {clinicsData && clinicsData?.length >= 3 && (
+          {clinicsData && clinicsData.length >= 3 && (
             <InfiniteList
               key={filterOption} // Reset list when sort changes
               tableName="clinic"
@@ -155,26 +109,23 @@ export default function MainPage() {
                 let addressFilter = "";
                 if (filterOption === "근무지") {
                   //workplace
-                  addressFilter = user?.work_place.split(",")[1] || "";
+                  addressFilter = user?.work_place?.split(",")[1] || "";
                 } else if (filterOption === "거주") {
                   //residence
-                  addressFilter = user?.residence.split(",")[1] || "";
+                  addressFilter = user?.residence?.split(",")[1] || "";
                 }
                 let q = query;
                 if (addressFilter) {
                   q = q.eq("region", addressFilter);
                 }
-
                 q = q.range(3, 1000);
                 q.order("id", { ascending: true });
-
                 return q;
               }}
               renderItem={(item, index) => {
-                /* eslint-disable @typescript-eslint/no-explicit-any */
                 return (
                   index > 3 && (
-                    <ClinicCard {...(item as unknown as any)} key={item.id} />
+                    <ClinicCard {...(item as ClinicCardProps)} key={item.id} />
                   )
                 );
               }}

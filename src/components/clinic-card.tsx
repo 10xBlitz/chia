@@ -10,7 +10,7 @@ import Link from "next/link";
 import BookmarkButton from "@/components/bookmark";
 import { cn } from "@/lib/utils";
 
-interface ClinicCardProps {
+export interface ClinicCardProps {
   total_reviews: number;
   avg_reviews_per_treatment: number;
   clinic_name: string;
