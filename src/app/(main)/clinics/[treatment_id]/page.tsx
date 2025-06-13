@@ -19,6 +19,7 @@ import ClinicCard from "@/components/clinic-card";
 import MobileLayout from "@/components/layout/mobile-layout";
 import BottomNavigation from "@/components/bottom-navigation";
 import { Button } from "@/components/ui/button";
+import BackButton from "@/components/back-button";
 
 export default function ClinicsPage() {
   const searchParams = useSearchParams();
@@ -35,6 +36,7 @@ export default function ClinicsPage() {
     <MobileLayout className="!px-0">
       <div className="flex flex-col">
         <header className="pb-3 flex justify-between items-center px-4">
+          <BackButton fallback="/" />
           <Image
             src={"/images/chia-logo.svg"}
             height={54}

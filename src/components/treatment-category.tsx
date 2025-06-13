@@ -76,9 +76,14 @@ export default function TreatmentCategoryScroll() {
       }}
       className="flex space-x-4 px-4 py-4 overflow-x-scroll"
     >
-      {treatmentQuery.isLoading && <p>Loading treatments...</p>}
+      {treatmentQuery.isLoading && <p>치료 항목을 불러오는 중...</p>}{" "}
+      {/* Loading treatments... */}
       {treatmentQuery.error && (
-        <p>Error loading treatments: {treatmentQuery.error.message}</p>
+        // Error loading treatments: ...
+        <p>
+          치료 항목을 불러오는 중 오류가 발생했습니다:{" "}
+          {treatmentQuery.error.message}
+        </p>
       )}
       {treatmentQuery.data &&
         treatmentQuery.data?.data?.map((treatment) => (
@@ -92,12 +97,12 @@ export default function TreatmentCategoryScroll() {
                 <Image
                   draggable={false}
                   src={treatment.image_url}
-                  alt={treatment.treatment_name || "treatment"}
+                  alt={treatment.treatment_name || "치료 항목"} // treatment
                   fill
                   className="object-cover"
                 />
               ) : (
-                <span className="text-xs text-gray-500">Icon</span>
+                <span className="text-xs text-gray-500">아이콘</span> /* Icon */
               )}
             </div>
             <span className="text-xs mt-1 w-16 text-center ">

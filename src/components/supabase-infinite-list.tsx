@@ -25,7 +25,9 @@ interface InfiniteListProps<TableName extends SupabaseTableName> {
 }
 
 const DefaultNoResults = () => (
-  <div className="text-center text-muted-foreground py-10">No results.</div>
+  <div className="text-center text-muted-foreground py-10">
+    결과가 없습니다. {/**No results. */}
+  </div>
 );
 
 const DefaultEndMessage = () => (
