@@ -93,10 +93,10 @@ export default function ClinicsPage() {
                 let addressFilter = "";
                 if (filterOption === "근무지") {
                   //workplace
-                  addressFilter = user?.work_place.split(",")[1] || "";
+                  addressFilter = user?.work_place || "";
                 } else if (filterOption === "거주") {
                   //residence
-                  addressFilter = user?.residence.split(",")[1] || "";
+                  addressFilter = user?.residence || "";
                 }
                 let q = query;
                 if (addressFilter) {
