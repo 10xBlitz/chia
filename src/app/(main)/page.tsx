@@ -14,9 +14,9 @@ export default async function Page({
 }: {
   searchParams?: Promise<Record<string, string>>;
 }) {
-  const userData = await supabaseClient.auth.getUser();
-  const userId = userData?.data.user?.id;
-  const userMeta = userData?.data.user?.user_metadata || {};
+  const userData = await supabaseClient.auth.getSession();
+  const userId = userData?.data?.session?.user?.id;
+  const userMeta = userData?.data.session?.user?.user_metadata || {};
 
   // Determine filter option from search params
   const region = (await searchParams)?.region;
@@ -28,7 +28,9 @@ export default async function Page({
   });
 
   console.log("----->searchParams", await searchParams);
-  console.log("---->clinicsres", clinicsRes.data);
+  console.log("----->userData", userData);
+  console.log("----->userId", userId);
+  // console.log("---->clinicsres", clinicsRes.data);
   return (
     <MobileLayout className="!px-0 flex flex-col">
       <header className="pb-3 flex justify-between items-center px-4">

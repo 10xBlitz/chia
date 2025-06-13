@@ -44,13 +44,14 @@ type Props = {
 };
 
 export async function generateMetadata(
-  { params }: Props,
+  { params, searchParams }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   // read route params
   const { id } = await params;
 
   console.log(id);
+  console.log(searchParams);
   console.log(parent);
   // optionally access and extend (rather than replace) parent metadata
 
