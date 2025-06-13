@@ -4,7 +4,7 @@ import "./fonts.css";
 import { UserStoreProvider } from "@/providers/user-store-provider";
 import CustomQueryClientProvider from "@/providers/query-client-provider";
 import { ToasterProvider } from "@/providers/toast-provider";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,56 +16,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// export const metadata: Metadata = {
-//   title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-//   description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-//   icons: {
-//     icon: "https://chia-azure.vercel.app/images/chia-logo.png",
-//   },
-//   openGraph: {
-//     title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-//     description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-//     siteName: "치과 시술 플랫폼",
-//     images: [
-//       {
-//         url: "https://chia-azure.vercel.app/images/chia-logo.png", // Use local SVG image
-//         width: 54,
-//         height: 24,
-//         alt: "Chia Logo",
-//       },
-//     ],
-//     locale: "ko_KR",
-//     type: "website",
-//   },
-// };
-
-export async function generateMetadata(
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  // read route params
-
-  console.log(parent);
-  // optionally access and extend (rather than replace) parent metadata
-
-  return {
-    title: "custom",
-    openGraph: {
-      title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-      description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-      siteName: "치과 시술 플랫폼", // "Dental Procedure Platform"
-      locale: "ko_KR",
-      type: "website",
-      images: [
-        {
-          url: "https://chia-azure.vercel.app/images/chia-logo.png", // Use local SVG image
-          width: 54,
-          height: 24,
-          alt: "Chia Logo",
-        },
-      ],
-    },
-  };
-}
+export const metadata: Metadata = {
+  title: "치과 시술 플랫폼", // "Dental Procedure Platform"
+  description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
+  icons: {
+    icon: "https://chia-azure.vercel.app/images/chia-logo.png",
+  },
+  openGraph: {
+    title: "치과 시술 플랫폼", // "Dental Procedure Platform"
+    description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
+    siteName: "치과 시술 플랫폼",
+    images: [
+      {
+        url: "https://chia-azure.vercel.app/images/chia-logo.png", // Use local SVG image
+        width: 54,
+        height: 24,
+        alt: "Chia Logo",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -73,9 +45,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        {/* <meta property="og:title" content="치과 시술 플랫폼" />
+    <CustomQueryClientProvider>
+      <html lang="en">
+        <head>
+          {/* <meta property="og:title" content="치과 시술 플랫폼" />
         <meta
           property="og:description"
           content="치과 시술 견적 및 예약 플랫폼"
@@ -87,17 +60,14 @@ export default function RootLayout({
         />
         <meta property="og:image:width" content="74" />
         <meta property="og:image:height" content="44" /> */}
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <main className="bg-[#F1F1F5]">
-          <CustomQueryClientProvider>
-            <UserStoreProvider>{children}</UserStoreProvider>
-            <ToasterProvider />
-          </CustomQueryClientProvider>
-        </main>
-      </body>
-    </html>
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <UserStoreProvider>{children}</UserStoreProvider>
+          <ToasterProvider />
+        </body>
+      </html>
+    </CustomQueryClientProvider>
   );
 }

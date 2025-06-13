@@ -1,6 +1,6 @@
+"use server";
 import MobileLayout from "@/components/layout/mobile-layout";
 import MainPage from "./main-component";
-import { supabaseClient } from "@/lib/supabase/client";
 import BottomNavigation from "@/components/bottom-navigation";
 import Footer from "@/components/footer";
 import Image from "next/image";
@@ -8,15 +8,17 @@ import Link from "next/link";
 import { UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string>>;
 }) {
-  const userData = await supabaseClient.auth.getSession();
-  const userId = userData?.data?.session?.user?.id;
-  const userMeta = userData?.data.session?.user?.user_metadata || {};
+  const supabase = await createClient();
+  const user = (await supabase.auth.getUser()).data.user;
+  const userId = user?.id;
+  const userMeta = user?.user_metadata || {};
 
   // Determine filter option from search params
   const region = (await searchParams)?.region;
@@ -27,9 +29,6 @@ export default async function Page({
     region,
   });
 
-  console.log("----->searchParams", await searchParams);
-  console.log("----->userData", userData);
-  console.log("----->userId", userId);
   // console.log("---->clinicsres", clinicsRes.data);
   return (
     <MobileLayout className="!px-0 flex flex-col">
