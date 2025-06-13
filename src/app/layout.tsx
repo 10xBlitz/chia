@@ -38,20 +38,12 @@ const geistMono = Geist_Mono({
 //     type: "website",
 //   },
 // };
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
 
 export async function generateMetadata(
-  { params, searchParams }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   // read route params
-  const { id } = await params;
 
-  console.log(id);
-  console.log(searchParams);
   console.log(parent);
   // optionally access and extend (rather than replace) parent metadata
 
