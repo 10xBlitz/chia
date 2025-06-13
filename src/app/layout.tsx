@@ -56,8 +56,8 @@ export default function RootLayout({
           property="og:image"
           content="https://chia-azure.vercel.app/images/chia-logo.png"
         />
-        <meta property="og:image:width" content="54" />
-        <meta property="og:image:height" content="24" />
+        <meta property="og:image:width" content="154" />
+        <meta property="og:image:height" content="124" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
