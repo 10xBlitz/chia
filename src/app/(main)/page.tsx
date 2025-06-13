@@ -19,20 +19,16 @@ export default async function Page({
   const userMeta = userData?.data.user?.user_metadata || {};
 
   // Determine filter option from search params
-  const filterOption = (await searchParams)?.searchByAddress || "모두";
-  let regionFilter = "";
-  if (filterOption === "근무지") {
-    regionFilter = userMeta.work_place || "";
-  } else if (filterOption === "거주") {
-    regionFilter = userMeta.residence || "";
-  }
+  const region = (await searchParams)?.region;
+
   // If "모두" or no filter, regionFilter remains ""
 
   const clinicsRes = await getPaginatedClinicsWthReviews(1, 3, {
-    region: regionFilter,
+    region,
   });
-  const clinicsData = clinicsRes.data || [];
 
+  console.log("----->searchParams", await searchParams);
+  console.log("---->clinicsres", clinicsRes.data);
   return (
     <MobileLayout className="!px-0 flex flex-col">
       <header className="pb-3 flex justify-between items-center px-4">
@@ -56,7 +52,7 @@ export default async function Page({
           </Link>
         )}
       </header>
-      <MainPage clinicsData={clinicsData} />
+      <MainPage clinicsData={clinicsRes.data} />
       {userId && <BottomNavigation />}
       <Footer />
       {/* Spacer to prevent footer overlap on mobile */}

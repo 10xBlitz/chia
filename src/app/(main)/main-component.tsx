@@ -30,7 +30,15 @@ export default function MainPage({ clinicsData }: MainPageProps) {
   const router = useRouter();
 
   const handleSortOptionChange = (option: string) => {
-    router.push(`?searchByAddress=${option}`, { scroll: false });
+    let regionFilter = "";
+    if (option === "근무지") {
+      regionFilter = user?.work_place || "";
+    } else if (option === "거주") {
+      regionFilter = user?.residence || "";
+    }
+    router.push(`?region=${regionFilter}&searchByAddress=${option}`, {
+      scroll: false,
+    });
   };
 
   return (
