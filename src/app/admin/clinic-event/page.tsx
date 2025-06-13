@@ -36,6 +36,7 @@ export default function ClinicEventPage() {
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 1, // 1 minute1
     refetchOnMount: true,
+    retry: 3,
   });
 
   return (
