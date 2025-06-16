@@ -22,21 +22,6 @@ export const metadata: Metadata = {
   icons: {
     icon: "https://chia-azure.vercel.app/images/chia-logo.svg",
   },
-  openGraph: {
-    title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-    description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-    siteName: "치과 시술 플랫폼",
-    images: [
-      {
-        url: "https://chia-azure.vercel.app/images/chia-logo.png", // Use local SVG image
-        width: 54,
-        height: 24,
-        alt: "Chia Logo",
-      },
-    ],
-    locale: "ko_KR",
-    type: "website",
-  },
 };
 
 export default function RootLayout({
@@ -47,20 +32,6 @@ export default function RootLayout({
   return (
     <CustomQueryClientProvider>
       <html lang="en">
-        <head>
-          {/* <meta property="og:title" content="치과 시술 플랫폼" />
-        <meta
-          property="og:description"
-          content="치과 시술 견적 및 예약 플랫폼"
-        />
-        <meta property="og:siteName" content="치과 시술 플랫폼" />
-        <meta
-          property="og:image"
-          content="https://chia-azure.vercel.app/images/chia-logo.png"
-        />
-        <meta property="og:image:width" content="74" />
-        <meta property="og:image:height" content="44" /> */}
-        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
