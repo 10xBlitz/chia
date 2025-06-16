@@ -30,15 +30,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <CustomQueryClientProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <CustomQueryClientProvider>
           <UserStoreProvider>{children}</UserStoreProvider>
           <ToasterProvider />
-        </body>
-      </html>
-    </CustomQueryClientProvider>
+        </CustomQueryClientProvider>
+      </body>
+    </html>
   );
 }
