@@ -5,7 +5,7 @@ import { type ChatMessage, useRealtimeChat } from "../hooks/use-realtime-chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChatScroll } from "../hooks/use-chat-scroll";
 import { ChatMessageItem } from "./chat-message";
 import BackButton from "@/components/back-button";
@@ -20,10 +20,11 @@ interface RealtimeChatProps {
   fetchPrevMessages?: () => void;
   hasMorePrev?: boolean;
   isFetchingPrev?: boolean;
-  unreadByCategory?: Record<string, number>; // <-- add prop
+  unreadByCategory?: Record<string, number>;
   sendError?: string | null;
   sendingStatus?: "idle" | "sending" | "delivered";
   lastSentMessage?: string;
+  adminLastReadAt?: string | null;
 }
 
 /**
@@ -43,12 +44,12 @@ export const RealtimeChat = ({
   fetchPrevMessages,
   hasMorePrev,
   isFetchingPrev,
-  unreadByCategory = {}, // <-- default to empty object
+  unreadByCategory = {},
   sendError,
   sendingStatus,
-  lastSentMessage,
+  adminLastReadAt,
 }: RealtimeChatProps) => {
-  const { containerRef } = useChatScroll();
+  const { containerRef, scrollToBottom } = useChatScroll();
 
   const {
     messages: realtimeMessages,
@@ -77,10 +78,25 @@ export const RealtimeChat = ({
     return sortedMessages;
   }, [initialMessages, realtimeMessages]);
 
-  // useEffect(() => {
-  //   // Scroll to bottom whenever messages change
-  //   scrollToBottom();
-  // }, [allMessages, scrollToBottom]);
+  const prevLastMessageIdRef = useRef<string | undefined>(undefined);
+  const prevMessagesLengthRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (allMessages.length === 0) return;
+    const lastMessage = allMessages[allMessages.length - 1];
+    const prevLastId = prevLastMessageIdRef.current;
+    const prevLen = prevMessagesLengthRef.current;
+    // Only scroll if a new message is appended (not when fetching old messages)
+    if (
+      prevLen > 0 &&
+      allMessages.length > prevLen &&
+      lastMessage.id !== prevLastId
+    ) {
+      requestAnimationFrame(() => scrollToBottom());
+    }
+    prevLastMessageIdRef.current = lastMessage.id;
+    prevMessagesLengthRef.current = allMessages.length;
+  }, [allMessages, scrollToBottom]);
 
   const handleSendMessage = useCallback(
     (e: React.FormEvent) => {
@@ -211,12 +227,20 @@ export const RealtimeChat = ({
             const showHeader =
               !prevMessage || prevMessage.user.name !== message.user.name;
 
-            // Determine if this is the last own message and matches the last sent message
+            // Only show status on the last own message
             const isLastOwnMessage =
               message.user.name === username &&
-              index === allMessages.length - 1 &&
-              lastSentMessage &&
-              message.content === lastSentMessage;
+              index === allMessages.length - 1;
+
+            let forceStatus: "seen" | undefined = undefined;
+            // Only set status if this is the last own message
+            if (
+              isLastOwnMessage &&
+              adminLastReadAt &&
+              new Date(message.createdAt) <= new Date(adminLastReadAt)
+            ) {
+              forceStatus = "seen";
+            }
 
             return (
               <div
@@ -229,8 +253,8 @@ export const RealtimeChat = ({
                   showHeader={showHeader}
                   sendingStatus={isLastOwnMessage ? sendingStatus : undefined}
                   sendError={isLastOwnMessage ? sendError : undefined}
+                  forceStatus={isLastOwnMessage ? forceStatus : undefined}
                 />
-                {/* Remove error UI here, now handled in ChatMessageItem */}
               </div>
             );
           })}

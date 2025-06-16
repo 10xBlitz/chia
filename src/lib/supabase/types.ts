@@ -724,6 +724,7 @@ export type Database = {
           category: string
           patient_full_name: string
           last_admin_read_at: string
+          last_patient_read_at: string
           latest_message_created_at: string
         }[]
       }

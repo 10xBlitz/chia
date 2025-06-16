@@ -5,8 +5,9 @@ interface ChatMessageItemProps {
   message: ChatMessage;
   isOwnMessage: boolean;
   showHeader: boolean;
-  sendingStatus?: "idle" | "sending" | "delivered";
+  sendingStatus?: "idle" | "sending" | "delivered" | "seen";
   sendError?: string | null;
+  forceStatus?: "idle" | "sending" | "delivered" | "seen";
 }
 
 export const ChatMessageItem = ({
@@ -15,7 +16,18 @@ export const ChatMessageItem = ({
   showHeader,
   sendingStatus,
   sendError,
+  forceStatus,
 }: ChatMessageItemProps) => {
+  // Use forceStatus if provided, otherwise use sendingStatus
+  // If forceStatus is set to 'seen', always show 'seen' and never fallback to delivered
+  let status: "idle" | "sending" | "delivered" | "seen" | undefined =
+    sendingStatus;
+  if (forceStatus === "seen") {
+    status = "seen";
+  } else if (forceStatus) {
+    status = forceStatus;
+  }
+
   return (
     <div
       className={`flex mt-2 ${isOwnMessage ? "justify-end" : "justify-start"}`}
@@ -52,11 +64,14 @@ export const ChatMessageItem = ({
           {message.content}
         </div>
         {/* Status UI for last own message */}
-        {isOwnMessage && sendingStatus === "sending" && (
+        {isOwnMessage && status === "sending" && (
           <span className="text-xs text-gray-400 mt-0.5">Sending...</span>
         )}
-        {isOwnMessage && sendingStatus === "delivered" && (
+        {isOwnMessage && status === "delivered" && (
           <span className="text-xs text-green-500 mt-0.5">Delivered</span>
+        )}
+        {isOwnMessage && status === "seen" && (
+          <span className="text-xs text-blue-500 mt-0.5">Seen</span>
         )}
         {isOwnMessage && sendError && (
           <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded mt-0.5">

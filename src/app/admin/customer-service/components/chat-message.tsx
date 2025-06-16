@@ -5,12 +5,18 @@ interface ChatMessageItemProps {
   message: ChatMessage;
   isOwnMessage: boolean;
   showHeader: boolean;
+  forceStatus?: "seen";
+  sendingStatus?: "idle" | "sending" | "delivered";
+  sendError?: string | null;
 }
 
 export const ChatMessageItem = ({
   message,
   isOwnMessage,
   showHeader,
+  forceStatus,
+  sendingStatus,
+  sendError,
 }: ChatMessageItemProps) => {
   return (
     <div
@@ -47,6 +53,23 @@ export const ChatMessageItem = ({
         >
           {message.content}
         </div>
+        {/* Message status for last own message */}
+        {isOwnMessage && (
+          <span className="text-xs mt-0.5 ml-2">
+            {sendError && (
+              <span className="text-red-500">전송 실패{/* Send failed */}</span>
+            )}
+            {!sendError && forceStatus === "seen" && (
+              <span className="text-blue-500">읽음{/* Seen */}</span>
+            )}
+            {!sendError && !forceStatus && sendingStatus === "sending" && (
+              <span className="text-gray-400">전송 중{/* Sending */}</span>
+            )}
+            {!sendError && !forceStatus && sendingStatus === "delivered" && (
+              <span className="text-gray-400">전달됨{/* Delivered */}</span>
+            )}
+          </span>
+        )}
       </div>
     </div>
   );

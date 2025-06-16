@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { EditIcon } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
@@ -13,25 +13,22 @@ export default function ViewQuotationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = useUserStore((selector) => selector.user?.id);
-
-  // Read pagination from searchParams
-  const page = Number(searchParams.get("page") || 1);
   const pageSize = Number(searchParams.get("pageSize") || 10);
 
-  const { data: quotations, isLoading } = useQuery({
-    queryKey: ["quotations", userId, page, pageSize],
-    queryFn: () =>
-      getPaginatedQuotations(page, pageSize, { patient_id: userId }),
-    enabled: !!userId,
-  });
+  // Infinite Query for quotations
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["quotations", userId, pageSize],
+      queryFn: async ({ pageParam = 1 }) =>
+        getPaginatedQuotations(pageParam, pageSize, { patient_id: userId }),
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage?.data?.length === pageSize ? allPages.length + 1 : undefined,
+      enabled: !!userId,
+      initialPageParam: 1,
+    });
 
-  // Helper to update searchParams for pagination
-  const setPagination = (newPage: number, newPageSize: number = pageSize) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(newPage));
-    params.set("pageSize", String(newPageSize));
-    router.push(`?${params.toString()}`);
-  };
+  // Flatten all loaded quotations
+  const allQuotations = data?.pages.flatMap((page) => page.data) || [];
 
   const handleQuotationClick = (
     quotation_id: string,
@@ -63,15 +60,15 @@ export default function ViewQuotationPage() {
           <QuotationListItemSkeleton key={i} />
         ))}
 
-      {(quotations?.data?.length ?? 0) === 0 && (
+      {allQuotations.length === 0 && !isLoading && (
         <div className="mt-10 text-center">
           견적이 없습니다. {/* No quotations. */}
         </div>
       )}
 
-      {quotations?.data && (
+      {allQuotations.length > 0 && (
         <div className="flex flex-col gap-3">
-          {quotations.data.map((q: Quotation) => (
+          {allQuotations.map((q: Quotation) => (
             <QuotationListItem
               key={q.id}
               quotation={q}
@@ -81,26 +78,18 @@ export default function ViewQuotationPage() {
         </div>
       )}
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center gap-4 mt-6">
-        <Button
-          variant="outline"
-          disabled={page === 1}
-          onClick={() => setPagination(Math.max(1, page - 1))}
-        >
-          이전 {/* Previous */}
-        </Button>
-        <span className="self-center font-medium">
-          {page} 페이지 {/** page*/}
-        </span>
-        <Button
-          variant="outline"
-          disabled={(quotations?.data?.length ?? 0) < pageSize}
-          onClick={() => setPagination(page + 1)}
-        >
-          다음 {/* Next */}
-        </Button>
-      </div>
+      {/* Infinite Pagination Controls */}
+      {hasNextPage && (
+        <div className="flex justify-center mt-6">
+          <Button
+            variant="outline"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "로딩 중..." : "더 보기"} {/* Load more */}
+          </Button>
+        </div>
+      )}
 
       {/* Floating Button */}
       <Button

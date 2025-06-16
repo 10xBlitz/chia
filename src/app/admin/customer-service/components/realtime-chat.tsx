@@ -5,7 +5,7 @@ import { type ChatMessage, useRealtimeChat } from "../hooks/use-realtime-chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useChatScroll } from "../hooks/use-chat-scroll";
 import { ChatMessageItem } from "./chat-message";
 
@@ -17,6 +17,7 @@ interface RealtimeChatProps {
   fetchPrevMessages?: () => void;
   hasMorePrev?: boolean;
   isFetchingPrev?: boolean;
+  lastPatientReadAt?: string | null; // For message status
 }
 
 /**
@@ -35,8 +36,9 @@ export const RealtimeChat = ({
   fetchPrevMessages,
   hasMorePrev,
   isFetchingPrev,
+  lastPatientReadAt,
 }: RealtimeChatProps) => {
-  const { containerRef } = useChatScroll();
+  const { containerRef, scrollToBottom } = useChatScroll();
 
   const {
     messages: realtimeMessages,
@@ -47,6 +49,9 @@ export const RealtimeChat = ({
     username,
   });
   const [newMessage, setNewMessage] = useState("");
+  const [sendingStatus, setSendingStatus] = useState<
+    "idle" | "sending" | "delivered"
+  >("idle");
 
   // Merge realtime messages with initial messages
   const allMessages = useMemo(() => {
@@ -65,10 +70,38 @@ export const RealtimeChat = ({
     return sortedMessages;
   }, [initialMessages, realtimeMessages]);
 
-  // useEffect(() => {
-  //   // Scroll to bottom whenever messages change
-  //   scrollToBottom();
-  // }, [allMessages, scrollToBottom]);
+  // Track sending/delivered status for last own message
+  useEffect(() => {
+    if (!allMessages.length) return;
+    const lastMsg = allMessages[allMessages.length - 1];
+    if (lastMsg.user.name === username) {
+      // If the last message is in realtimeMessages, it's delivered
+      const isDelivered = realtimeMessages.some((m) => m.id === lastMsg.id);
+      setSendingStatus(isDelivered ? "delivered" : "sending");
+    } else {
+      setSendingStatus("idle");
+    }
+  }, [allMessages, realtimeMessages, username]);
+
+  // Scroll to bottom when a new message is appended (not when loading old messages)
+  const prevLastMessageIdRef = useRef<string | undefined>(undefined);
+  const prevMessagesLengthRef = useRef<number>(0);
+  useEffect(() => {
+    if (allMessages.length === 0) return;
+    const lastMessage = allMessages[allMessages.length - 1];
+    const prevLastId = prevLastMessageIdRef.current;
+    const prevLen = prevMessagesLengthRef.current;
+    // Only scroll if a new message is appended (not when fetching old messages)
+    if (
+      prevLen > 0 &&
+      allMessages.length > prevLen &&
+      lastMessage.id !== prevLastId
+    ) {
+      scrollToBottom();
+    }
+    prevLastMessageIdRef.current = lastMessage.id;
+    prevMessagesLengthRef.current = allMessages.length;
+  }, [allMessages, scrollToBottom]);
 
   const handleSendMessage = useCallback(
     (e: React.FormEvent) => {
@@ -171,6 +204,20 @@ export const RealtimeChat = ({
             const showHeader =
               !prevMessage || prevMessage.user.name !== message.user.name;
 
+            // Only show status on the last own message
+            const isLastOwnMessage =
+              message.user.name === username &&
+              index === allMessages.length - 1;
+
+            let forceStatus: "seen" | undefined = undefined;
+            if (
+              isLastOwnMessage &&
+              lastPatientReadAt &&
+              new Date(message.createdAt) <= new Date(lastPatientReadAt)
+            ) {
+              forceStatus = "seen";
+            }
+
             return (
               <div
                 key={message.id}
@@ -180,6 +227,8 @@ export const RealtimeChat = ({
                   message={message}
                   isOwnMessage={message.user.name === username}
                   showHeader={showHeader}
+                  forceStatus={isLastOwnMessage ? forceStatus : undefined}
+                  sendingStatus={isLastOwnMessage ? sendingStatus : undefined}
                 />
               </div>
             );

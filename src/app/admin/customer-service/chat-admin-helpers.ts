@@ -1,5 +1,5 @@
 import { supabaseClient } from "@/lib/supabase/client";
-import { ChatMessage } from "../../patient/profile/chat/hooks/use-realtime-chat";
+import { fetchUnreadMessageCountOfRoom } from "@/lib/supabase/services/messages.services";
 
 // --- Types ---
 export interface ChatRoomFromDB {
@@ -7,7 +7,8 @@ export interface ChatRoomFromDB {
   category: string | null;
   user: { full_name: string | null } | null;
   last_admin_read_at: string | null;
-  latest_message_created_at: string | null; // <-- add this
+  last_patient_read_at: string | null;
+  latest_message_created_at: string | null;
 }
 
 export interface DisplayRoomInfo {
@@ -16,6 +17,8 @@ export interface DisplayRoomInfo {
   category: string | null;
   latest_message_timestamp: string | null;
   unread_message_count: number;
+  last_admin_read_at?: string | null;
+  last_patient_read_at?: string | null;
 }
 
 // --- Data Fetching Functions ---
@@ -46,21 +49,29 @@ export async function fetchChatRooms(
       category: row.category,
       user: { full_name: row.patient_full_name },
       last_admin_read_at: row.last_admin_read_at,
+      last_patient_read_at: row.last_patient_read_at,
       latest_message_created_at: row.latest_message_created_at, // <-- add this
     })) ?? []
   );
 }
 
+/**
+ *
+ * This function fetches room details for a given user and processes the initial rooms data.
+ * It calculates the unread message count for each room based on the user's last read timestamp.
+ *
+ * @param userId - The ID of the user to fetch room details for.
+ * @param initialRoomsData - The initial list of chat rooms to process.
+ * @returns
+ */
 export async function fetchRoomDetails(
   userId: string | undefined,
   initialRoomsData: ChatRoomFromDB[] | undefined
 ): Promise<DisplayRoomInfo[]> {
   if (!userId || !initialRoomsData || initialRoomsData.length === 0) return [];
-
-  // Fetch unread count for all rooms in parallel (no need to fetch latest message timestamp)
   const processedRooms: DisplayRoomInfo[] = await Promise.all(
     initialRoomsData.map(async (room) => {
-      const unreadCount = await getUnreadMessageCount(
+      const unreadCount = await fetchUnreadMessageCountOfRoom(
         userId,
         room.id,
         room.last_admin_read_at || "1970-01-01T00:00:00Z"
@@ -71,63 +82,13 @@ export async function fetchRoomDetails(
         category: room.category,
         latest_message_timestamp: room.latest_message_created_at,
         unread_message_count: unreadCount,
+        last_admin_read_at: room.last_admin_read_at || null,
+        last_patient_read_at: room.last_patient_read_at || null,
       };
     })
   );
   return processedRooms;
 }
-
-export async function getLatestMessageTimestamp(
-  roomId: string
-): Promise<string | null> {
-  const { data, error } = await supabaseClient
-    .from("message")
-    .select("created_at")
-    .eq("chat_room_id", roomId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) {
-    console.error(
-      `Error fetching latest message for room ${roomId}:`,
-      error.message
-    );
-    return null;
-  }
-  return data?.created_at || null;
-}
-
-export async function getUnreadMessageCount(
-  userId: string,
-  roomId: string,
-  lastAdminReadTimestamp: string
-): Promise<number> {
-  try {
-    const { count, error } = await supabaseClient
-      .from("message")
-      .select("*", { count: "exact", head: true })
-      .eq("chat_room_id", roomId)
-      .not("sender_id", "eq", userId) // <-- fix here: use not("sender_id", "eq", userId)
-      .gt("created_at", lastAdminReadTimestamp);
-
-    if (error) {
-      console.log("---->error fetching unread count: ", {
-        userId,
-        roomId,
-        lastAdminReadTimestamp,
-        error,
-      });
-      return 0;
-    }
-
-    return count || 0;
-  } catch (err) {
-    console.error("Exception in getUnreadMessageCount:", err);
-    return 0;
-  }
-}
-
-// --- Update Functions ---
 
 /**
  * Get the latest message timestamp for a room, or the current time if not found.
@@ -143,42 +104,32 @@ export function getRoomLatestTimestamp(
   return roomInfo?.latest_message_timestamp || new Date().toISOString();
 }
 
-export async function updateLastAdminReadAt(
+/**
+ * Subscribe to last_patient_read_at (last_user_read_at) changes for a room
+ * Calls onUpdate with the new timestamp when it changes
+ */
+export function subscribeToLastPatientReadAt(
   roomId: string,
-  timestamp: string
-): Promise<void> {
-  // Ensure timestamp is a valid ISO string, not "null"
-  if (!timestamp || timestamp === "null") {
-    timestamp = new Date().toISOString();
-  }
-  console.log("----> updateLastAdminReadAt: ", { roomId, timestamp });
-  const { error } = await supabaseClient
-    .from("chat_room")
-    .update({ last_admin_read_at: timestamp })
-    .eq("id", roomId);
-  if (error) throw error;
-}
-
-export async function fetchMessagesForRoom(
-  selectedRoom: string | null
-): Promise<ChatMessage[]> {
-  if (!selectedRoom) return [];
-  const { data, error } = await supabaseClient
-    .from("message")
-    .select("*, sender:sender_id(full_name)")
-    .eq("chat_room_id", selectedRoom)
-    .order("created_at", { ascending: true });
-
-  console.log("---->fetchMessagesForRoom: ", error);
-  if (error) throw new Error(error.message);
-  return (
-    data?.map((msg) => ({
-      id: msg.id,
-      content: msg.content,
-      user: { name: msg.sender?.full_name || "Unknown Sender" },
-      createdAt: msg.created_at,
-    })) || []
-  );
+  onUpdate: (lastPatientReadAt: string | null) => void
+) {
+  if (!roomId) return null;
+  const channel = supabaseClient
+    .channel(`room-last-admin-read-at-${roomId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "chat_room",
+        filter: `id=eq.${roomId}`,
+      },
+      (payload) => {
+        const newReadAt = payload.new?.last_user_read_at;
+        onUpdate(newReadAt || null);
+      }
+    )
+    .subscribe();
+  return channel;
 }
 
 // --- Realtime Handler ---
@@ -223,7 +174,7 @@ export function handleRealtimeMessage(
           const newMsgRoomId = payload.new.chat_room_id;
           if (newMsgRoomId && selectedRoom && newMsgRoomId === selectedRoom) {
             console.log(
-              `Realtime: New message in selected room ${selectedRoom}, marking as read.`
+              `----> Realtime: New message in selected room ${selectedRoom}, marking as read.`
             );
             updateRoomLastReadDate(selectedRoom, payload.new.created_at);
           }

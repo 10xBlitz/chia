@@ -10,6 +10,7 @@ returns table (
   category text,
   patient_full_name text,
   last_admin_read_at timestamptz,
+  last_patient_read_at timestamptz, -- added
   latest_message_created_at timestamptz
 )
 language sql
@@ -19,6 +20,7 @@ as $$
     cr.category,
     u.full_name as patient_full_name,
     cr.last_admin_read_at,
+    cr.last_user_read_at as last_patient_read_at, -- added
     lm.created_at as latest_message_created_at
   from chat_room cr
   left join (

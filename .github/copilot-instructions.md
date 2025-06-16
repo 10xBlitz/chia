@@ -1,5 +1,11 @@
 # Copilot Custom Instructions
 
+---
+
+> **File location:** `.github/copilot-instructions.md` > **Supabase service/helper files location:** `src/lib/supabase/services/`
+
+---
+
 ## What is this project?
 
 This is a Next.js 15+ App Router project for a dental clinic platform. It uses Supabase for backend data (auth, clinics, reviews, etc.), supports static and dynamic rendering, and includes social/OG meta tags for sharing. The codebase is TypeScript, and the UI is modern and mobile-friendly.
@@ -18,6 +24,15 @@ This is a Next.js 15+ App Router project for a dental clinic platform. It uses S
 - Use concise, readable code and modern React patterns.
 - **If there are Korean words in the UI, always add English translations as comments for developers.**
 - **If there is Supabase data fetching, put the logic in the lib/supabase/services folder and attach it to the existing services there. Services are categorized by table; each table should have its own service file.**
+
+---
+
+**Supabase Query Placement:**
+
+- All Supabase queries must be placed in the appropriate service/helper file under `src/lib/supabase/services/`.
+- If a function for the query already exists, reuse it.
+- If no function exists, create a new one in the correct service file (by table/domain).
+- When creating new functions, make them reusable (accept parameters, avoid hardcoding, etc.) whenever possible.
 
 ## Coding style
 

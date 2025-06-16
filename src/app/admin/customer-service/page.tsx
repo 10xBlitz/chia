@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,17 +11,21 @@ import {
   fetchChatRooms,
   fetchRoomDetails,
   getRoomLatestTimestamp,
-  updateLastAdminReadAt,
   handleRealtimeMessage,
   ChatRoomFromDB,
   DisplayRoomInfo,
+  subscribeToLastPatientReadAt,
 } from "./chat-admin-helpers";
-import { supabaseClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChatMessage } from "./hooks/use-realtime-chat";
 import { RealtimeChat } from "./components/realtime-chat";
+import {
+  fetchMessagesOfRoom,
+  insertMessage,
+} from "@/lib/supabase/services/messages.services";
+import { updateRoom } from "@/lib/supabase/services/room.services";
 
 export default function CustomerServiceChatListener() {
   const router = useRouter();
@@ -34,8 +38,15 @@ export default function CustomerServiceChatListener() {
   const [search, setSearch] = useState(searchParam);
   const debouncedSearch = useDebounce(search, 300);
   const [roomLimit, setRoomLimit] = useState(20);
+  const [lastPatientReadAt, setLastPatientReadAt] = useState<string | null>(
+    null
+  );
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
+  // Use a specific type for the subscription ref
+  const lastAdminReadAtSubscriptionRef = useRef<{
+    unsubscribe: () => void;
+  } | null>(null);
 
   // 1. Fetch all chat rooms, filtered by search and category (from DB), with pagination
   const {
@@ -70,7 +81,15 @@ export default function CustomerServiceChatListener() {
     () => roomsWithDetailsData || [],
     [roomsWithDetailsData]
   );
-
+  // Helper to select a room and set lastAdminReadAt from openRooms
+  const handleSelectRoom = useCallback(
+    (roomId: string) => {
+      setSelectedRoom(roomId);
+      const found = openRooms.find((r) => r.room_id === roomId);
+      setLastPatientReadAt(found?.last_patient_read_at || null);
+    },
+    [openRooms]
+  );
   //Updates the last read date for a room to latest message when a room is selected
   const setLastReadDateToLatestMessage = useCallback(
     async (roomId: string, latestMessageTimeStampParam?: string) => {
@@ -100,10 +119,9 @@ export default function CustomerServiceChatListener() {
         latestMessageTimeStampParam ??
         getRoomLatestTimestamp(roomId, openRooms);
 
-      console.log("----->latestMessageTimeStamp:", latestMessageTimestamp);
-
       try {
-        await updateLastAdminReadAt(roomId, latestMessageTimestamp);
+        // await updateRoom(roomId, latestMessageTimestamp);
+        updateRoom(roomId, { last_admin_read_at: latestMessageTimestamp });
         //Promise to wait for the update to complete in supabase
         await new Promise((resolve) => setTimeout(resolve, 200));
         console.log("----> refething queries after updating last read date");
@@ -137,7 +155,7 @@ export default function CustomerServiceChatListener() {
     [queryClient, user?.id, openRooms, debouncedSearch, roomLimit]
   );
 
-  // Infinite query for messages
+  // Infinite query for messages (all Supabase logic is in fetchMessagesInfinite helper)
   const {
     data: infiniteMessagesData,
     fetchNextPage,
@@ -148,32 +166,11 @@ export default function CustomerServiceChatListener() {
   } = useInfiniteQuery<ChatMessage[], Error>({
     queryKey: ["messages-infinite", selectedRoom],
     queryFn: async ({ pageParam }) => {
-      // pageParam is the cursor (oldest message's createdAt)
       if (!selectedRoom) return [];
-      const PAGE_SIZE = 20;
-      let query = supabaseClient
-        .from("message")
-        .select("*, sender:sender_id(full_name)")
-        .eq("chat_room_id", selectedRoom)
-        .order("created_at", { ascending: false })
-        .limit(PAGE_SIZE);
 
-      // Only add .lt if pageParam is a valid string
-      if (typeof pageParam === "string" && pageParam) {
-        query = query.lt("created_at", pageParam);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw new Error(error.message);
-
-      return (
-        data?.map((msg) => ({
-          id: msg.id,
-          content: msg.content,
-          user: { name: msg.sender?.full_name || "Unknown Sender" },
-          createdAt: msg.created_at,
-        })) || []
+      return await fetchMessagesOfRoom(
+        selectedRoom,
+        typeof pageParam === "string" ? pageParam : undefined
       );
     },
     enabled: !!selectedRoom,
@@ -193,17 +190,14 @@ export default function CustomerServiceChatListener() {
     return [...infiniteMessagesData.pages.flat()].reverse();
   }, [infiniteMessagesData]);
 
-  // Send a message in the selected room
+  // Send a message in the selected room (delegates to reusable helper)
   const sendMessage = async (message: string) => {
     if (!user || !message.trim() || !selectedRoom) return;
-    await supabaseClient.from("message").insert([
-      {
-        content: message.trim(),
-        chat_room_id: selectedRoom,
-        sender_id: user.id,
-      },
-    ]);
-    // await updateLastAdminReadAt(selectedRoom, new Date().toISOString());
+    await insertMessage({
+      chat_room_id: selectedRoom,
+      sender_id: user.id,
+      content: message,
+    });
   };
 
   // --- Effects ---
@@ -250,6 +244,23 @@ export default function CustomerServiceChatListener() {
     roomLimit,
   ]);
 
+  // Subscribe to last_patient_read_at changes in real time ("seen" status)
+  useEffect(() => {
+    if (!selectedRoom) return;
+    // Unsubscribe previous
+    if (lastAdminReadAtSubscriptionRef.current) {
+      lastAdminReadAtSubscriptionRef.current.unsubscribe();
+    }
+    // Subscribe using helper
+    const channel = subscribeToLastPatientReadAt(selectedRoom, (newReadAt) => {
+      setLastPatientReadAt(newReadAt);
+    });
+    lastAdminReadAtSubscriptionRef.current = channel;
+    return () => {
+      channel?.unsubscribe?.();
+    };
+  }, [selectedRoom]);
+
   // --- Render ---
 
   return (
@@ -262,7 +273,7 @@ export default function CustomerServiceChatListener() {
         initialRoomsData={initialRoomsData}
         isLoadingInitialRooms={isLoadingInitialRooms}
         selectedRoom={selectedRoom}
-        setSelectedRoom={setSelectedRoom}
+        setSelectedRoom={handleSelectRoom}
         search={search}
         setSearch={setSearch}
         onLoadMore={() => setRoomLimit((prev) => prev + 20)}
@@ -281,16 +292,19 @@ export default function CustomerServiceChatListener() {
               <p>메시지 불러오기 오류: {messagesError.message}</p>
             </div>
           ) : (
-            <RealtimeChat
-              key={selectedRoom}
-              roomName={selectedRoom}
-              username={user?.full_name || "Admin"}
-              messages={infiniteMessages}
-              onMessage={sendMessage}
-              fetchPrevMessages={fetchNextPage}
-              hasMorePrev={!!hasNextPage}
-              isFetchingPrev={isFetchingNextPage}
-            />
+            <div className="flex-1 flex flex-col overflow-y-auto">
+              <RealtimeChat
+                key={selectedRoom}
+                roomName={selectedRoom}
+                username={user?.full_name || "Admin"}
+                messages={infiniteMessages}
+                onMessage={sendMessage}
+                fetchPrevMessages={fetchNextPage}
+                hasMorePrev={!!hasNextPage}
+                isFetchingPrev={isFetchingNextPage}
+                lastPatientReadAt={lastPatientReadAt}
+              />
+            </div>
           )
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">

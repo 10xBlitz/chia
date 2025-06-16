@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cache } from "react";
 import ClinicSingleViewMainComponent from "./clinic-detail-main";
 import { Metadata } from "next";
 import { fetchClinicDetail } from "@/lib/supabase/services/clinics.services";
@@ -8,14 +8,15 @@ type Props = {
   params: Promise<{ clinic_id: string }>;
 };
 
-export const dynamic = "force-static"; // Ensure static generation
+const cachedFetchClinicDetail = cache(fetchClinicDetail);
+export const revalidate = 3600; // Revalidate this page every hour (3600 seconds)
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // read route params
   const { clinic_id } = await params;
 
   // fetch data
-  const clinic = await fetchClinicDetail(clinic_id);
+  const clinic = await cachedFetchClinicDetail(clinic_id);
 
   return {
     openGraph: {
@@ -53,7 +54,7 @@ export async function generateStaticParams() {
 
 export default async function ClinicSingleViewPage({ params }: Props) {
   const { clinic_id } = await params;
-  const clinic = await fetchClinicDetail(clinic_id);
+  const clinic = await cachedFetchClinicDetail(clinic_id);
 
   return (
     <>
