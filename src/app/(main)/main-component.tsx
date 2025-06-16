@@ -22,22 +22,31 @@ import BottomNavigation from "@/components/bottom-navigation";
 import Footer from "@/components/footer";
 import Image from "next/image";
 import Link from "next/link";
-import { UserIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { UserIcon } from "lucide-react";
 
 export default function MainPage() {
   const searchParams = useSearchParams();
-  const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
+  let filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "근무지"
   const user = useUserStore((state) => state.user);
   const router = useRouter();
 
   // Fetch clinics data with React Query
   const { data: clinicsData = [], isLoading } = useQuery({
     queryKey: ["clinics", filterOption],
-    queryFn: () =>
-      getPaginatedClinicsWthReviews(1, 3, { region: filterOption }).then(
-        (res) => res.data
-      ),
+    queryFn: async () => {
+      if (filterOption === "근무지") {
+        filterOption = user?.work_place || "";
+      } else if (filterOption === "거주") {
+        filterOption = user?.residence || "";
+      } else {
+        filterOption = ""; // Reset to empty for "모두" or other cases
+      }
+      const result = await getPaginatedClinicsWthReviews(1, 3, {
+        region: filterOption,
+      });
+      return result.data;
+    },
     staleTime: 1000 * 60, // 1 minute cache
   });
 
