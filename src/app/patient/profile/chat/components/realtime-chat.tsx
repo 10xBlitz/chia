@@ -86,13 +86,13 @@ export const RealtimeChat = ({
     const lastMessage = allMessages[allMessages.length - 1];
     const prevLastId = prevLastMessageIdRef.current;
     const prevLen = prevMessagesLengthRef.current;
-    // Only scroll if a new message is appended (not when fetching old messages)
+    // Only scroll if a new message is appended (not prepended)
     if (
       prevLen > 0 &&
       allMessages.length > prevLen &&
       lastMessage.id !== prevLastId
     ) {
-      requestAnimationFrame(() => scrollToBottom());
+      scrollToBottom();
     }
     prevLastMessageIdRef.current = lastMessage.id;
     prevMessagesLengthRef.current = allMessages.length;
