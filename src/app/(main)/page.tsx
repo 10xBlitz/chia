@@ -14,7 +14,7 @@ export const metadata = {
     siteName: "치과 시술 플랫폼",
     images: [
       {
-        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/banner-images//banner-1.png",
+        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/banner-images/banner-1.png", // fixed double slash
         alt: "치과 시술 플랫폼 로고",
       },
     ],
