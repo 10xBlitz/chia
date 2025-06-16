@@ -194,7 +194,7 @@ export default function ChatPage() {
             const cat = room?.category || "기타"; // 기타 = etc
 
             // Only update unread count if the category is different from the current roomCategory
-            if (cat && cat !== roomCategory) {
+            if (roomCategory && cat && cat !== roomCategory) {
               queryClient.setQueryData(
                 ["unread-counts", user?.id, userRooms],
                 (old: Record<string, number> | undefined) => {
