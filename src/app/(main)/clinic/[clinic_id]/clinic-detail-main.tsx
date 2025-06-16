@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,6 @@ import BookmarkButton from "@/components/bookmark";
 import BottomNavigation from "@/components/bottom-navigation";
 import MobileLayout from "@/components/layout/mobile-layout";
 import ClinicReviewCard from "@/components/clinic-review-card";
-import ClinicDetailSkeleton from "./page-skeleton";
-import { fetchClinicDetail } from "@/lib/supabase/services/clinics.services";
 import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
 
 const TABS = [
@@ -32,7 +30,47 @@ const TABS = [
 ];
 
 const PAGE_SIZE = 10;
-export default function ClinicSingleViewMainComponent() {
+
+// Change prop signature to accept all clinic fields as top-level props
+interface ClinicSingleViewMainComponentProps {
+  clinic_name: string;
+  contact_number: string;
+  id: string;
+  link: string | null;
+  location: string;
+  pictures: string[] | null;
+  region: string;
+  working_hour?: Array<{
+    day_of_week: string;
+    time_open: string;
+    note?: string | null;
+    [key: string]: unknown;
+  }>;
+  clinic_treatment?: Array<{
+    id: string;
+    treatment?: { id: string; treatment_name: string; image_url?: string | null };
+    price?: number;
+    [key: string]: unknown;
+  }>;
+  [key: string]: unknown;
+}
+
+export default function ClinicSingleViewMainComponent(
+  props: ClinicSingleViewMainComponentProps
+) {
+  // Destructure all props for easier usage
+  const {
+    clinic_name,
+    contact_number,
+    id,
+    link,
+    location,
+    pictures,
+    region,
+    working_hour,
+    clinic_treatment,
+  } = props;
+
   const { clinic_id } = useParams<{ clinic_id: string }>();
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
@@ -46,17 +84,6 @@ export default function ClinicSingleViewMainComponent() {
     treatments: "clinic-treatments",
     reviews: "clinic-reviews",
   };
-
-  // Fetch clinic detail
-  const {
-    data: clinic,
-    error: clinicError,
-    isLoading: clinicLoading,
-  } = useQuery({
-    queryKey: ["clinic-detail", clinic_id],
-    queryFn: async () => await fetchClinicDetail(clinic_id),
-    enabled: !!clinic_id,
-  });
 
   // Infinite query for reviews
   const {
@@ -126,16 +153,16 @@ export default function ClinicSingleViewMainComponent() {
 
   useEffect(() => {
     const checkFavorite = async () => {
-      if (!user?.id || !clinic?.id) return;
+      if (!user?.id || !id) return;
       const { isFavorite, favoriteId } = await checkIfClinicIsFavorite(
         user.id,
-        clinic.id
+        id
       );
       setIsFavorite(isFavorite);
       setFavoriteId(favoriteId);
     };
     checkFavorite();
-  }, [user?.id, clinic?.id]);
+  }, [user?.id, id]);
 
   useEffect(() => {
     const addViewCount = async () => {
@@ -153,19 +180,11 @@ export default function ClinicSingleViewMainComponent() {
 
   // Copy address to clipboard
   const handleCopyAddress = () => {
-    if (clinic?.location) {
-      navigator.clipboard.writeText(clinic.location);
+    if (location) {
+      navigator.clipboard.writeText(location);
       toast.success("주소가 클립보드에 복사되었습니다.");
     }
   };
-
-  if (clinicLoading) return <ClinicDetailSkeleton />;
-
-  if (clinicError || !clinic)
-    return (
-      <div className="p-8 text-center">병원 정보를 불러올 수 없습니다.</div>
-      //Unable to retrieve hospital information.
-    );
 
   return (
     <MobileLayout className="!px-0 relative">
@@ -182,19 +201,17 @@ export default function ClinicSingleViewMainComponent() {
         </div>
         <div className="w-full h-[180px] relative">
           <Image
-            src={clinic.pictures?.[0] || "/images/fallback-image.png"}
-            alt={clinic.clinic_name}
+            src={pictures?.[0] || "/images/fallback-image.png"}
+            alt={clinic_name}
             priority
-            {...(clinic.pictures?.[0]
-              ? { fill: true }
-              : { width: 200, height: 200 })}
+            {...(pictures?.[0] ? { fill: true } : { width: 200, height: 200 })}
             className={
-              !clinic.pictures?.[0]
+              !pictures?.[0]
                 ? "object-contain mx-auto my-auto flex items-center justify-center bg-white"
                 : "object-cover"
             }
             style={
-              !clinic.pictures?.[0]
+              !pictures?.[0]
                 ? { display: "block", margin: "0 auto", background: "#fff" }
                 : undefined
             }
@@ -207,7 +224,7 @@ export default function ClinicSingleViewMainComponent() {
           style={{ zIndex: 1, position: "relative" }}
         >
           <div className="pt-8 pb-2">
-            <h1 className="text-2xl font-bold">{clinic.clinic_name}</h1>
+            <h1 className="text-2xl font-bold">{clinic_name}</h1>
             <div className="flex items-center gap-1 text-yellow-500 mt-1">
               <Star size={20} fill="currentColor" />
               <span className="font-semibold text-lg">
@@ -231,14 +248,14 @@ export default function ClinicSingleViewMainComponent() {
           <div className="flex flex-col gap-2 text-gray-700 text-[15px]">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-black" />
-              <span>{clinic.location || "no location"}</span>
+              <span>{location || "no location"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
               <span>
                 진료종료 오늘{" "}
-                {clinic.working_hour && clinic.working_hour.length > 0
-                  ? clinic.working_hour[0].time_open
+                {working_hour && working_hour.length > 0
+                  ? working_hour[0].time_open
                   : "9:30 ~ 14:00"}
               </span>
             </div>
@@ -246,16 +263,15 @@ export default function ClinicSingleViewMainComponent() {
               <Phone className="h-4 w-4" />
               <span>
                 전화번호
-                <a href={`tel:${clinic.contact_number}`} className=" underline">
-                  {clinic.contact_number}
+                <a href={`tel:${contact_number}`} className=" underline">
+                  {contact_number}
                 </a>
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Youtube className="h-4 w-4" />
               <span>
-                유튜브{" "}
-                <span className="underline cursor-pointer">{clinic.link}</span>
+                유튜브 <span className="underline cursor-pointer">{link}</span>
               </span>
             </div>
           </div>
@@ -303,10 +319,8 @@ export default function ClinicSingleViewMainComponent() {
                       const todayIdx = new Date().getDay();
                       const todayKor = days[todayIdx === 0 ? 0 : todayIdx]; // 0 is Sunday
                       const wh =
-                        clinic.working_hour &&
-                        clinic.working_hour.find(
-                          (w) => w.day_of_week === todayKor
-                        );
+                        working_hour &&
+                        working_hour.find((w) => w.day_of_week === todayKor);
                       return wh ? wh.time_open : "-";
                     })()}
                   </div>
@@ -323,8 +337,8 @@ export default function ClinicSingleViewMainComponent() {
               </div>
               {/* All days section */}
               <div className="bg-gray-100 rounded-xl p-4">
-                {(clinic.working_hour && clinic.working_hour.length > 0
-                  ? clinic.working_hour
+                {(working_hour && working_hour.length > 0
+                  ? working_hour
                   : [
                       { day_of_week: "월요일", time_open: "00:00 ~ 00:00" }, // Monday
                       { day_of_week: "화요일", time_open: "00:00 ~ 00:00" }, // Tuesday
@@ -355,7 +369,7 @@ export default function ClinicSingleViewMainComponent() {
                     height="100%"
                     style={{ border: 0, minHeight: 160 }}
                     src={`https://www.google.com/maps?q=${encodeURIComponent(
-                      clinic.location || clinic.region || ""
+                      location || region || ""
                     )}&output=embed`}
                     allowFullScreen
                     loading="lazy"
@@ -363,9 +377,7 @@ export default function ClinicSingleViewMainComponent() {
                   />
                 </div>
                 <div className="flex justify-between items-center">
-                  <div className="text-sm">
-                    {clinic.location || "no location"}
-                  </div>
+                  <div className="text-sm">{location || "no location"}</div>
                   <Button
                     size="sm"
                     variant="outline"
@@ -387,11 +399,11 @@ export default function ClinicSingleViewMainComponent() {
                 시설 {/**Treatments */}
               </div>
               <div className=" mb-2">
-                총 {clinic.clinic_treatment.length}개{" "}
+                총 {clinic_treatment ? clinic_treatment.length : 0}개{" "}
                 {/**A total of {number} */}
               </div>
               <div className="flex flex-wrap gap-2">
-                {clinic.clinic_treatment?.map((ct) => (
+                {clinic_treatment?.map((ct) => (
                   <span
                     key={ct.id}
                     className="bg-gray-100 rounded-md px-3 py-1 text-xs"
@@ -412,7 +424,7 @@ export default function ClinicSingleViewMainComponent() {
             <div className="font-semibold text-xl mb-2">사진</div>{" "}
             {/* Photos */}
             <div className="grid grid-cols-3 gap-2">
-              {clinic.pictures?.map((pic: string, idx: number) => (
+              {pictures?.map((pic: string, idx: number) => (
                 <div
                   key={idx}
                   className="aspect-square relative rounded-lg overflow-hidden"

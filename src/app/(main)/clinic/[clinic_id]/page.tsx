@@ -2,10 +2,13 @@ import React from "react";
 import ClinicSingleViewMainComponent from "./clinic-detail-main";
 import { Metadata } from "next";
 import { fetchClinicDetail } from "@/lib/supabase/services/clinics.services";
+import { supabaseClient } from "@/lib/supabase/client";
 
 type Props = {
   params: Promise<{ clinic_id: string }>;
 };
+
+export const dynamic = "force-static"; // Ensure static generation
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // read route params
@@ -36,8 +39,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function ClinicSingleViewPage() {
-  return <ClinicSingleViewMainComponent />;
+// Add generateStaticParams for static generation of clinic detail pages
+export async function generateStaticParams() {
+  // Fetch all clinic IDs for static generation using Supabase client
+  const { data: clinics, error } = await supabaseClient
+    .from("clinic")
+    .select("id");
+  if (error) throw error;
+  return (clinics || []).map((clinic: { id: string }) => ({
+    clinic_id: clinic.id,
+  }));
 }
 
-export default ClinicSingleViewPage;
+export default async function ClinicSingleViewPage({ params }: Props) {
+  const { clinic_id } = await params;
+  const clinic = await fetchClinicDetail(clinic_id);
+
+  return (
+    <>
+      {/* Pass clinic as a flat prop, not as an object with a 'clinic' key */}
+      <ClinicSingleViewMainComponent {...clinic} />
+    </>
+  );
+}
