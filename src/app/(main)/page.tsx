@@ -10,7 +10,7 @@ export const metadata = {
   openGraph: {
     images: [
       {
-        url: "https://hmhtqgzcqoxssuhtmscp.supabase.co/storage/v1/object/public/banner-images/banner-1.png", // fixed double slash
+        url: "https://chia-azure.vercel.app/opengraph-image.png",
         alt: "치과 시술 플랫폼 로고",
       },
     ],
