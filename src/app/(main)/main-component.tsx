@@ -18,12 +18,14 @@ import SubBannerCarousel from "@/components/sub-banner";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedClinicsWthReviews } from "@/lib/supabase/services/clinics.services";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
+import BottomNavigation from "@/components/bottom-navigation";
+import Footer from "@/components/footer";
+import Image from "next/image";
+import Link from "next/link";
+import { UserIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 
-interface MainPageProps {
-  region?: string;
-}
-
-export default function MainPage({ region }: MainPageProps) {
+export default function MainPage() {
   const searchParams = useSearchParams();
   const filterOption = searchParams.get("searchByAddress") || ""; // Default to "근무지"
   const user = useUserStore((state) => state.user);
@@ -31,9 +33,11 @@ export default function MainPage({ region }: MainPageProps) {
 
   // Fetch clinics data with React Query
   const { data: clinicsData = [], isLoading } = useQuery({
-    queryKey: ["clinics", region],
+    queryKey: ["clinics", filterOption],
     queryFn: () =>
-      getPaginatedClinicsWthReviews(1, 3, { region }).then((res) => res.data),
+      getPaginatedClinicsWthReviews(1, 3, { region: filterOption }).then(
+        (res) => res.data
+      ),
     staleTime: 1000 * 60, // 1 minute cache
   });
 
@@ -51,6 +55,25 @@ export default function MainPage({ region }: MainPageProps) {
 
   return (
     <>
+      <header className="pb-3 flex justify-between items-center px-4">
+        <Image
+          src={"/images/chia-logo.svg"}
+          height={54}
+          width={76}
+          alt="logo"
+        />
+        {user?.id ? (
+          <Link href={user?.role === "admin" ? "/admin" : "/patient/profile"}>
+            <UserIcon className="min-w-7 min-h-7" />
+          </Link>
+        ) : (
+          <Link href="/auth/login">
+            <Button className="bg-white text-black border-1 hover:bg-black/20">
+              로그인 {/**Login */}
+            </Button>
+          </Link>
+        )}
+      </header>
       <main className="flex-1 overflow-hidden flex flex-col h-full pb-16">
         <MainBannerCarousel />
         <TreatmentCategoryScroll />
@@ -154,6 +177,10 @@ export default function MainPage({ region }: MainPageProps) {
           )}
         </div>
       </main>
+      {user?.id && <BottomNavigation />}
+      <Footer />
+      {/* Spacer to prevent footer overlap on mobile */}
+      {user?.id && <div className="h-14"></div>}
     </>
   );
 }
