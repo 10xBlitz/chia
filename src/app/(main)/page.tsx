@@ -8,8 +8,8 @@ export const metadata = {
     icon: "https://chia-azure.vercel.app/images/chia-logo.svg",
   },
   openGraph: {
-    title: "치과 시술 플랫폼",
-    description: "치과 시술 견적 및 예약 플랫폼",
+    title: "aaa",
+    description: "bbb",
     url: "https://chia-azure.vercel.app",
     siteName: "치과 시술 플랫폼",
     images: [
