@@ -48,82 +48,82 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const [isStoreInitialized, setIsStoreInitialized] = useState(false);
 
   // Helper function to fetch user profile and update the store
-  // const fetchProfileAndUpdateStore = async (
-  //   userId: string,
-  //   userEmail?: string
-  // ) => {
-  //   if (!storeRef.current) {
-  //     console.warn(
-  //       "fetchProfileAndUpdateStore called before storeRef is initialized."
-  //     );
-  //     return;
-  //   }
-  //   try {
-  //     const { data: userProfileData, error: profileError } =
-  //       await supabaseClient
-  //         .from("user")
-  //         .select("*, clinic(*)") // Fetch user and related clinic in one query
-  //         .eq("id", userId)
-  //         .single();
+  const fetchProfileAndUpdateStore = async (
+    userId: string,
+    userEmail?: string
+  ) => {
+    if (!storeRef.current) {
+      console.warn(
+        "fetchProfileAndUpdateStore called before storeRef is initialized."
+      );
+      return;
+    }
+    try {
+      const { data: userProfileData, error: profileError } =
+        await supabaseClient
+          .from("user")
+          .select("*, clinic(*)") // Fetch user and related clinic in one query
+          .eq("id", userId)
+          .single();
 
-  //     // PGRST116: "Searched item was not found"
-  //     if (profileError && profileError.code !== "PGRST116") {
-  //       console.error("Error fetching user profile:", profileError.message);
-  //       // Fallback to updating with auth data if profile fetch fails
-  //       storeRef.current.getState().updateUser({
-  //         ...defaultUserState,
-  //         id: userId,
-  //         role: "",
-  //         email: userEmail || "", // Prefer auth email, fallback to profile email
-  //       });
-  //       return;
-  //     }
+      // PGRST116: "Searched item was not found"
+      if (profileError && profileError.code !== "PGRST116") {
+        console.error("Error fetching user profile:", profileError.message);
+        // Fallback to updating with auth data if profile fetch fails
+        storeRef.current.getState().updateUser({
+          ...defaultUserState,
+          id: userId,
+          role: "",
+          email: userEmail || "", // Prefer auth email, fallback to profile email
+        });
+        return;
+      }
 
-  //     if (userProfileData) {
-  //       storeRef.current.getState().updateUser({
-  //         id: userProfileData.id,
-  //         email: userEmail || "",
-  //         full_name: userProfileData.full_name,
-  //         gender: userProfileData.gender,
-  //         birthdate: userProfileData.birthdate,
-  //         contact_number: userProfileData.contact_number,
-  //         residence: userProfileData.residence,
-  //         work_place: userProfileData.work_place,
-  //         role: userProfileData.role,
-  //         created_at: userProfileData.created_at,
-  //         clinic_id: userProfileData.clinic_id,
-  //         clinic: userProfileData.clinic || null, // Attach clinic info if available
-  //         login_status: userProfileData.login_status, // Default to inactive if not set
-  //       });
-  //     } else {
-  //       // User is authenticated, but no profile found (e.g., new user before profile creation)
-  //       console.warn(
-  //         `User profile not found for ID: ${userId}. Updating store with auth details only.`
-  //       );
-  //       storeRef.current.getState().updateUser({
-  //         ...defaultUserState,
-  //         id: userId,
-  //         email: userEmail || "",
-  //         role: "", // Or a 'guest' role
-  //         login_status: "inactive", // Default to inactive
-  //       });
-  //     }
-  //   } catch (e) {
-  //     console.error("Unexpected error in fetchProfileAndUpdateStore:", e);
-  //     // Fallback to minimal update
-  //     if (storeRef.current) {
-  //       storeRef.current.getState().updateUser({
-  //         ...defaultUserState,
-  //         id: userId,
-  //         email: userEmail || "",
-  //         role: "", // Or a 'guest' role
-  //       });
-  //     }
-  //   }
-  // };
+      if (userProfileData) {
+        storeRef.current.getState().updateUser({
+          id: userProfileData.id,
+          email: userEmail || "",
+          full_name: userProfileData.full_name,
+          gender: userProfileData.gender,
+          birthdate: userProfileData.birthdate,
+          contact_number: userProfileData.contact_number,
+          residence: userProfileData.residence,
+          work_place: userProfileData.work_place,
+          role: userProfileData.role,
+          created_at: userProfileData.created_at,
+          clinic_id: userProfileData.clinic_id,
+          clinic: userProfileData.clinic || null, // Attach clinic info if available
+          login_status: userProfileData.login_status, // Default to inactive if not set
+        });
+      } else {
+        // User is authenticated, but no profile found (e.g., new user before profile creation)
+        console.warn(
+          `User profile not found for ID: ${userId}. Updating store with auth details only.`
+        );
+        storeRef.current.getState().updateUser({
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+          role: "", // Or a 'guest' role
+          login_status: "inactive", // Default to inactive
+        });
+      }
+    } catch (e) {
+      console.error("Unexpected error in fetchProfileAndUpdateStore:", e);
+      // Fallback to minimal update
+      if (storeRef.current) {
+        storeRef.current.getState().updateUser({
+          ...defaultUserState,
+          id: userId,
+          email: userEmail || "",
+          role: "", // Or a 'guest' role
+        });
+      }
+    }
+  };
 
   useEffect(() => {
-    const mounted = true;
+    let mounted = true;
 
     const initializeStore = async () => {
       let initialDataForStore: UserState = { user: defaultUserState };
@@ -217,37 +217,37 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     initializeStore();
 
     // Subscribe to auth state changes
-    // const { data: authListener } = supabaseClient.auth.onAuthStateChange(
-    //   (event, session) => {
-    //     setTimeout(async () => {
-    //       if (!storeRef.current) {
-    //         // This case should be rare if initializeStore completes first
-    //         console.warn("onAuthStateChange: storeRef not initialized yet.");
-    //         return;
-    //       }
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      (event, session) => {
+        setTimeout(async () => {
+          if (!storeRef.current) {
+            // This case should be rare if initializeStore completes first
+            console.warn("onAuthStateChange: storeRef not initialized yet.");
+            return;
+          }
 
-    //       if (event === "SIGNED_IN" && session?.user) {
-    //         await fetchProfileAndUpdateStore(
-    //           session.user.id,
-    //           session.user.email
-    //         );
-    //       } else if (event === "SIGNED_OUT") {
-    //         storeRef.current.getState().updateUser(defaultUserState);
-    //       } else if (event === "USER_UPDATED" && session?.user) {
-    //         // If user's auth details change (e.g. email verified), re-fetch profile
-    //         await fetchProfileAndUpdateStore(
-    //           session.user.id,
-    //           session.user.email
-    //         );
-    //       }
-    //     }, 0);
-    //   }
-    // );
+          if (event === "SIGNED_IN" && session?.user) {
+            await fetchProfileAndUpdateStore(
+              session.user.id,
+              session.user.email
+            );
+          } else if (event === "SIGNED_OUT") {
+            storeRef.current.getState().updateUser(defaultUserState);
+          } else if (event === "USER_UPDATED" && session?.user) {
+            // If user's auth details change (e.g. email verified), re-fetch profile
+            await fetchProfileAndUpdateStore(
+              session.user.id,
+              session.user.email
+            );
+          }
+        }, 0);
+      }
+    );
 
-    // return () => {
-    //   authListener.subscription.unsubscribe();
-    //   mounted = false;
-    // };
+    return () => {
+      authListener.subscription.unsubscribe();
+      mounted = false;
+    };
   }, []); // Empty dependency array ensures this runs once on mount
 
   // Render children only after the store is initialized
