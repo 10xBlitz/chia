@@ -27,8 +27,8 @@ interface KoreanDatePickerProps {
 }
 
 const YEARS = Array.from(
-  { length: 100 },
-  (_, i) => new Date().getFullYear() - 50 + i
+  { length: 300 },
+  (_, i) => new Date().getFullYear() - 100 + i
 );
 const MONTHS = [
   "1월",
@@ -92,15 +92,15 @@ export function KoreanDatePicker({
           disabled={disabled}
           type="button"
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "w-full text-left flex justify-between font-normal",
             !value && !disabled && "text-muted-foreground",
             disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
           {value
             ? format(value, "yyyy년 M월 d일", { locale: ko })
             : "날짜 선택"}
+          <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
 
@@ -117,7 +117,11 @@ export function KoreanDatePicker({
             </SelectTrigger>
             <SelectContent className="max-h-48 overflow-auto">
               {YEARS.map((year) => (
-                <SelectItem key={year} value={String(year)}>
+                <SelectItem
+                  className="cursor-pointer"
+                  key={year}
+                  value={String(year)}
+                >
                   {year}년
                 </SelectItem>
               ))}
@@ -134,7 +138,11 @@ export function KoreanDatePicker({
             </SelectTrigger>
             <SelectContent>
               {MONTHS.map((monthName, idx) => (
-                <SelectItem key={monthName} value={String(idx)}>
+                <SelectItem
+                  className="cursor-pointer"
+                  key={monthName}
+                  value={String(idx)}
+                >
                   {monthName}
                 </SelectItem>
               ))}

@@ -2,11 +2,14 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import BackButton from "@/components/back-button";
 import { getPaginatedBids } from "@/lib/supabase/services/bids.services";
+
+// Constants
+const PAGE_SIZE = 10; // Number of bids per page
 
 export default function BidsPage() {
   const router = useRouter();
@@ -20,15 +23,18 @@ export default function BidsPage() {
     if (quotationId) setEnabled(true);
   }, [quotationId]);
 
-  const { data: bids, isLoading } = useQuery({
-    queryKey: ["bids", quotationId],
-    queryFn: () => getPaginatedBids(1, 100, { quotation_id: quotationId }),
-    enabled: enabled && !!quotationId,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-  });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["bids", quotationId],
+      queryFn: async ({ pageParam = 1 }) =>
+        getPaginatedBids(pageParam, PAGE_SIZE, { quotation_id: quotationId }),
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage?.data?.length === PAGE_SIZE ? allPages.length + 1 : undefined,
+      enabled: enabled && !!quotationId,
+      initialPageParam: 1,
+    });
+
+  const allBids = data?.pages.flatMap((page) => page.data) || [];
 
   return (
     <div className="flex flex-col">
@@ -45,12 +51,12 @@ export default function BidsPage() {
       </header>
       {/* Public Quotation Biddings */}
       {isLoading && <div>로딩 중... {/* Loading... */}</div>}
-      {bids?.data.length === 0 && (
+      {allBids.length === 0 && (
         <div>입찰이 없습니다. {/* There is no bids. */}</div>
       )}
-      {bids && (
+      {allBids && (
         <div className="flex flex-col gap-3">
-          {bids.data.map((b) => (
+          {allBids.map((b) => (
             <div
               key={b.id}
               className="flex text-sm items-center w-full py-1 cursor-pointer"
@@ -86,6 +92,18 @@ export default function BidsPage() {
               </Button>
             </div>
           ))}
+        </div>
+      )}
+      {/* Infinite Pagination Controls */}
+      {hasNextPage && (
+        <div className="flex justify-center mt-6">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "로딩 중..." : "더 보기"} {/* Load more */}
+          </button>
         </div>
       )}
     </div>

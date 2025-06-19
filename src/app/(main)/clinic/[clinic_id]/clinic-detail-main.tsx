@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,7 @@ export default function ClinicSingleViewMainComponent(
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const router = useRouter();
   const user = useUserStore((state) => state.user);
+  const queryclient = useQueryClient();
 
   // Use anchor IDs for scroll-to-section
   const tabAnchors = {
@@ -110,6 +111,7 @@ export default function ClinicSingleViewMainComponent(
   const reviews =
     reviewsPages?.pages.flatMap((page) =>
       page.reviews.map((review) => ({
+        userId: review.user.id,
         id: review.id,
         full_name: review.user?.full_name || "익명", // Anonymous if no user
         images: review.images || [],
@@ -267,17 +269,24 @@ export default function ClinicSingleViewMainComponent(
               <Phone className="h-4 w-4" />
               <span>
                 전화번호
-                <a href={`tel:${contact_number}`} className=" underline">
+                <Link href={`tel:${contact_number}`} className=" underline">
                   {contact_number}
-                </a>
+                </Link>
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <Link
+              href={link || "#"}
+              target="_blank"
+              className="flex items-center gap-2 text-ellipsis"
+            >
               <Youtube className="h-4 w-4" />
               <span>
-                유튜브 <span className="underline cursor-pointer">{link}</span>
+                유튜브{" "}
+                <span className="underline cursor-pointer text-ellipsis ">
+                  {link?.split("/watch")[0]}
+                </span>
               </span>
-            </div>
+            </Link>
           </div>
         </div>
 
@@ -482,7 +491,13 @@ export default function ClinicSingleViewMainComponent(
                 <ClinicReviewCard
                   {...review}
                   key={review.id}
+                  hasEditDeleteButtons={user?.id === review.userId}
                   onclick={() => router.push(`/patient/review`)}
+                  deleteSuccessCallback={() =>
+                    queryclient.invalidateQueries({
+                      queryKey: ["clinic-reviews", clinic_id],
+                    })
+                  }
                 />
               ))}
               {hasNextPage && (
@@ -560,7 +575,7 @@ export default function ClinicSingleViewMainComponent(
             </Button>
           </div>
         </div>
-        {user?.id && <BottomNavigation />}
+        {user?.id && <BottomNavigation forceActiveIndex={0} />}
       </div>
     </MobileLayout>
   );

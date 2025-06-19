@@ -24,7 +24,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserStore } from "@/providers/user-store-provider";
 import HeaderWithBackButton from "@/components/header-with-back-button";
-import MobileLayout from "@/components/layout/mobile-layout";
 
 const MAX_IMAGES = 10;
 const MAX_TEXT = 500;
@@ -111,7 +110,7 @@ export default function CreateReviewPage() {
   };
 
   return (
-    <MobileLayout>
+    <>
       <HeaderWithBackButton title="" />
       <Form {...form}>
         <form className="flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
@@ -301,6 +300,6 @@ export default function CreateReviewPage() {
           </div>
         </form>
       </Form>
-    </MobileLayout>
+    </>
   );
 }

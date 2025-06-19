@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
+import BottomNavigation from "@/components/bottom-navigation";
 
 export default function FavoriteClinicsPage() {
   const user = useUserStore((state) => state.user);
@@ -111,6 +112,7 @@ export default function FavoriteClinicsPage() {
           </div>
         )}
       </main>
+      <BottomNavigation forceActiveIndex={3} />
     </div>
   );
 }

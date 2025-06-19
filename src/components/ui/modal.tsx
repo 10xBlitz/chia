@@ -31,7 +31,12 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onChange}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(e) => {
+        onChange(e);
+      }}
+    >
       <DialogContent
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         className={cn(

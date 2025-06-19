@@ -51,6 +51,12 @@ This is a Next.js 15+ App Router project for a dental clinic platform. It uses S
 - No inline styles unless necessary
 - No magic numbers or strings—use constants or enums
 
+## Form UI Components
+
+- When building forms, always use the form components from `src/components/ui/` (e.g., `Form`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`, `Input`, `Textarea`, `Button`, etc.).
+- If a required form UI component does not exist in `src/components/ui/`, create it in that folder and use it in your implementation.
+- All new form UI components should follow the project's coding style and accessibility best practices.
+
 ## Example prompt
 
 "Add a new static page for clinic details, using Supabase for data and Next.js metadata for OG tags. Reviews should be loaded dynamically in a client component. All client components must use TanStack Query for fetching. If you add Korean text, include English comments. Any new Supabase fetch logic should go in the appropriate service file in lib/supabase/services."

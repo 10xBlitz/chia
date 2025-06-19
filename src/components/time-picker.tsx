@@ -21,6 +21,7 @@ type KoreanTimePickerProps = {
   setSelected: (value: string) => void;
   disabled?: boolean;
   className?: string;
+  allowedHours?: number[]; // Only show these hours if provided
 };
 
 export function KoreanTimePicker({
@@ -28,6 +29,7 @@ export function KoreanTimePicker({
   setSelected,
   disabled,
   className,
+  allowedHours,
 }: KoreanTimePickerProps) {
   const [hour, setHour] = useState<number | null>(null);
   const [minute, setMinute] = useState<number | null>(null);
@@ -52,7 +54,7 @@ export function KoreanTimePicker({
     }
   }, [hour, minute, setSelected]);
 
-  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const hours = allowedHours ?? Array.from({ length: 24 }, (_, i) => i);
   const minutes = Array.from({ length: 60 }, (_, i) => i);
 
   return (
@@ -65,10 +67,10 @@ export function KoreanTimePicker({
             className={cn("flex-1 justify-start", className)}
             disabled={disabled}
           >
-            {hour !== null ? `${hour}` : "시"}
+            {hour !== null ? `${hour}` : "시간"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 w-28 max-h-60 overflow-auto">
+        <PopoverContent className="p-0 w-28 max-h-60 ">
           <Command>
             <CommandInput placeholder="시 검색..." />
             <CommandList>
@@ -91,11 +93,15 @@ export function KoreanTimePicker({
       {/* Minute Picker */}
       <Popover open={openMinute} onOpenChange={setOpenMinute}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="flex-1 justify-start">
+          <Button
+            variant="outline"
+            className="flex-1 justify-start"
+            disabled={disabled}
+          >
             {minute !== null ? minute.toString().padStart(2, "0") : "분"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 w-28 max-h-60 overflow-auto">
+        <PopoverContent className="p-0 w-28 max-h-60">
           <Command>
             <CommandInput placeholder="분 검색..." />
             <CommandList>

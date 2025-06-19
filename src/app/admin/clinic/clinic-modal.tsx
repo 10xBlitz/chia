@@ -731,6 +731,7 @@ export const ClinicModal = ({
                   <Button
                     type="button"
                     className="w-full mt-4"
+                    disabled={mutation.status === "pending"}
                     onClick={() =>
                       appendClinicHour({
                         day_of_week: "",

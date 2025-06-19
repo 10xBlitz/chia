@@ -49,6 +49,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { KoreanDatePicker } from "@/components/korean-date-picker-single";
 import { KoreanTimePicker } from "@/components/time-picker";
 import HeaderWithBackButton from "@/components/header-with-back-button";
+import BottomNavigation from "@/components/bottom-navigation";
+import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
 
 // Zod schema for validation
 const reservationSchema = z.object({
@@ -60,6 +62,16 @@ const reservationSchema = z.object({
 });
 
 type ReservationFormValues = z.infer<typeof reservationSchema>;
+
+// Add WorkingHour type for type safety
+interface WorkingHour {
+  clinic_id: string;
+  created_at: string;
+  day_of_week: string;
+  id: string;
+  note: string | null;
+  time_open: string; // e.g., "09:00AM - 06:00PM "
+}
 
 export default function CreateReservation() {
   const searchParams = useSearchParams();
@@ -119,6 +131,36 @@ export default function CreateReservation() {
     }
   }
 
+  const reservationDate = form.watch("date");
+
+  const { data: workingHours } = useQuery({
+    queryKey: ["working-hours", clinic_id],
+    queryFn: () => fetchClinicWorkingHours(clinic_id as string),
+    enabled: !!clinic_id,
+  });
+
+  // Determine the day of week for the selected reservation date
+  const dayOfWeek = reservationDate
+    ? getKoreanDayOfWeek(reservationDate)
+    : undefined;
+  const todayHours = (workingHours as WorkingHour[] | undefined)?.find(
+    (w) => w.day_of_week === dayOfWeek
+  );
+  const { openHour, closeHour } =
+    todayHours && todayHours.time_open
+      ? parseOpenClose(todayHours.time_open)
+      : { openHour: 0, closeHour: 23 };
+  const allowedHours = Array.from(
+    { length: closeHour - openHour + 1 },
+    (_, i) => i + openHour
+  );
+
+  console.log(dayOfWeek);
+  console.log("---->workinghours:", workingHours);
+  console.log("====> today hours:", todayHours);
+  console.log("---->close hours:", closeHour);
+  console.log("---->open hours:", openHour);
+
   return (
     <div className="flex flex-col min-h-dvh">
       <HeaderWithBackButton title="예약하기" />
@@ -156,8 +198,10 @@ export default function CreateReservation() {
                     <FormItem>
                       <FormControl>
                         <KoreanTimePicker
+                          disabled={!!form.getValues("date")}
                           time={field.value}
                           setSelected={(e) => field.onChange(e)}
+                          allowedHours={allowedHours}
                         />
                       </FormControl>
                       <FormMessage />
@@ -211,7 +255,7 @@ export default function CreateReservation() {
                                   treatments.data.map((treatment) => (
                                     <CommandItem
                                       value={
-                                        treatment?.treatment.treatment_name
+                                        treatment?.treatment?.treatment_name
                                       }
                                       key={treatment.id}
                                       onSelect={() => {
@@ -221,7 +265,7 @@ export default function CreateReservation() {
                                         );
                                       }}
                                     >
-                                      {treatment.treatment.treatment_name}
+                                      {treatment?.treatment?.treatment_name}
                                       <Check
                                         className={cn(
                                           "ml-auto",
@@ -312,7 +356,7 @@ export default function CreateReservation() {
           </div>
           <Button
             type="submit"
-            className="h-[45px] btn-primary"
+            className="h-[45px] mb-20 btn-primary"
             disabled={loading}
           >
             {loading ? "요청 중..." : "작성하기"}
@@ -320,6 +364,39 @@ export default function CreateReservation() {
           </Button>
         </form>
       </Form>
+      <BottomNavigation forceActiveIndex={2} />
     </div>
   );
+}
+
+// Helper: Map Korean day to DB value (assuming DB uses Korean day names)
+const getKoreanDayOfWeek = (date: string | Date) => {
+  const days = [
+    "일요일",
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+  ];
+  const d = typeof date === "string" ? new Date(date) : date;
+  return days[d.getDay()];
+};
+
+// Parse open/close from time_open string (e.g., "09:00AM - 06:00PM ")
+function parseOpenClose(timeOpen: string) {
+  // Expects format: "09:00AM - 06:00PM "
+  const [open, close] = timeOpen.split("-").map((s) => s.trim());
+  // Convert to 24-hour
+  const parse = (t: string) => {
+    const match = t.match(/(\d{2}):(\d{2})(AM|PM)/i) || [];
+    const hour = match[1];
+    const ampm = match[3];
+    let h = parseInt(hour, 10);
+    if (ampm?.toUpperCase() === "PM" && h !== 12) h += 12;
+    if (ampm?.toUpperCase() === "AM" && h === 12) h = 0;
+    return h;
+  };
+  return { openHour: parse(open), closeHour: parse(close) };
 }

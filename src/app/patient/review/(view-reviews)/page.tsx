@@ -2,7 +2,6 @@
 
 import ClinicReviewCard from "@/components/clinic-review-card";
 import HeaderWithBackButton from "@/components/header-with-back-button";
-import MobileLayout from "@/components/layout/mobile-layout";
 import ClinicReviewCardSkeleton from "@/components/loading-skeletons/clinic-review-skeleton";
 import { getPaginatedReviews } from "@/lib/supabase/services/reviews.services";
 import { useUserStore } from "@/providers/user-store-provider";
@@ -43,7 +42,7 @@ function ViewReviewsPage() {
     infiniteReviewsData?.pages.flatMap((page) => page.data) || [];
 
   return (
-    <MobileLayout>
+    <>
       <HeaderWithBackButton title="리뷰 보기" />
 
       {error && (
@@ -80,7 +79,7 @@ function ViewReviewsPage() {
           </button>
         </div>
       )}
-    </MobileLayout>
+    </>
   );
 }
 

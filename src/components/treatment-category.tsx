@@ -5,8 +5,13 @@ import Image from "next/image";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-export default function TreatmentCategoryScroll() {
+export default function TreatmentCategoryScroll({
+  activeId,
+}: {
+  activeId?: string;
+}) {
   const treatmentQuery = useQuery({
     queryKey: ["treatments"],
     queryFn: async () => await getPaginatedTreatments(1, 100),
@@ -67,6 +72,11 @@ export default function TreatmentCategoryScroll() {
     };
   }, [isDragging, startX, scrollLeft]);
 
+  //sort here treatments by the activeId if there is an activeId
+  const sortedTreatments = treatmentQuery.data?.data?.sort((a, b) =>
+    a.id === activeId ? -1 : b.id === activeId ? 1 : 0
+  );
+
   return (
     <div
       ref={scrollContainerRef}
@@ -86,11 +96,14 @@ export default function TreatmentCategoryScroll() {
         </p>
       )}
       {treatmentQuery.data &&
-        treatmentQuery.data?.data?.map((treatment) => (
+        sortedTreatments?.map((treatment) => (
           <Link
             href={`/clinics/${treatment.id}`}
             key={treatment.id}
-            className="flex flex-col items-center flex-shrink-0"
+            className={cn(
+              "flex flex-col items-center flex-shrink-0",
+              activeId === treatment.id && "text-blue-500 font-bold"
+            )} // Active treatment color
           >
             <div className="relative w-13 h-13 rounded-full overflow-hidden">
               {treatment.image_url ? (

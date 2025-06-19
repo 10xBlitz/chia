@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { EditIcon } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
-import BottomNavigation from "../../../../components/bottom-navigation";
 import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
 import { QuotationListItemSkeleton } from "@/components/loading-skeletons/quotation-skeleton";
+
+// Constants
+const PAGE_SIZE = 10; // Number of quotations per page
 
 export default function ViewQuotationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = useUserStore((selector) => selector.user?.id);
-  const pageSize = Number(searchParams.get("pageSize") || 10);
+  const pageSize = Number(searchParams.get("pageSize") || PAGE_SIZE);
 
   // Infinite Query for quotations
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -102,7 +104,6 @@ export default function ViewQuotationPage() {
         <EditIcon />
         견적서 작성 {/* Create a Quote */}
       </Button>
-      <BottomNavigation />
     </>
   );
 }

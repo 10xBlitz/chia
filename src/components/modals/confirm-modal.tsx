@@ -8,12 +8,16 @@ export function ConfirmDeleteModal({
   onCancel,
   title,
   description,
+  confirmLabel = "삭제", // Delete
+  cancelLabel = "취소", // Cancel
 }: {
   open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   title: string;
   description: string;
+  confirmLabel?: string; // Button label for confirm (default: 삭제)
+  cancelLabel?: string; // Button label for cancel (default: 취소)
 }) {
   return (
     <Modal
@@ -29,14 +33,17 @@ export function ConfirmDeleteModal({
             className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
             onClick={onConfirm}
           >
-            삭제 {/**Delete */}
+            {confirmLabel} {/**Delete */}
           </Button>
           <Button
             type="button"
             className="px-4 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300"
-            onClick={onCancel}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCancel();
+            }}
           >
-            취소 {/**Cancel */}
+            {cancelLabel} {/**Cancel */}
           </Button>
         </div>
       </div>

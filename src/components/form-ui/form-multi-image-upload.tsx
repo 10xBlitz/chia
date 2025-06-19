@@ -1,3 +1,47 @@
+/**
+ * FormMultiImageUpload - A reusable multi-image upload form field component for React Hook Form.
+ *
+ * @example
+ * // In your form component:
+ * import { useForm } from "react-hook-form";
+ * import { Form } from "../ui/form";
+ * import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
+ *
+ * // --- Zod Schema Example ---
+ * import { z } from "zod";
+ * export const formSchema = z.object({
+ *   // ...other fields...
+ *   images: z.object({
+ *     files: z.array(z.any()), // or z.instanceof(File)
+ *     previews: z.array(z.string()),
+ *   }),
+ * });
+ * export type FormValues = z.infer<typeof formSchema>;
+ *
+ * // --- Usage Example ---
+ * const form = useForm<FormValues>({ ... });
+ * return (
+ *   <Form {...form}>
+ *     <form onSubmit={form.handleSubmit(onSubmit)}>
+ *       <FormMultiImageUpload
+ *         control={form.control}
+ *         name="images"
+ *         maxImages={5}
+ *       />
+ *       // ...other fields and submit button...
+ *     </form>
+ *   </Form>
+ * );
+ *
+ * @see {@link src/app/patient/quotation/create-quotation/page.tsx} for a full usage example
+ *
+ * @param control - The react-hook-form control object
+ * @param name - The field name (string)
+ * @param maxImages - Maximum number of images allowed
+ * @param formItemClassName - Custom class for the FormItem
+ * @param formLabelClassName - Custom class for the FormLabel
+ */
+
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 import {
   FormField,

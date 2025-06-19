@@ -1,68 +1,63 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
 import { ReservationListSkeleton } from "@/components/loading-skeletons/reservation-skeleton";
 import HeaderWithBackButton from "@/components/header-with-back-button";
+import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
+
+// Constants
+const PAGE_SIZE = 10; // Number of reservations per page
 
 export default function ReservationListPage() {
-  const userId = useUserStore((selector) => selector.user?.id as string);
-  const searchParams = useSearchParams();
+  const userId = useUserStore((selector) => selector.user?.id);
+
+  // Infinite Query for reservations
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["reservations", userId, PAGE_SIZE],
+      queryFn: async ({ pageParam = 1 }) =>
+        getPaginatedReservations(pageParam, PAGE_SIZE, { patient_id: userId }),
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage?.data?.length === PAGE_SIZE ? allPages.length + 1 : undefined,
+      enabled: !!userId,
+      initialPageParam: 1,
+    });
+
+  // Flatten all loaded reservations
+  const allReservations = data?.pages.flatMap((page) => page.data) || [];
+
   const router = useRouter();
+  const searchParams = useSearchParams();
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
-
-  // Pagination state from searchParams
-  const page = Number(searchParams.get("page") || 1);
-  const pageSize = Number(searchParams.get("pageSize") || 10);
-
-  const {
-    data: reservations,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["reservations", userId, page, pageSize],
-    queryFn: async () =>
-      await getPaginatedReservations(page, pageSize, { patient_id: userId }),
-    enabled: !!userId,
-    refetchInterval: 5 * 60 * 1000, // 5 minutes
-    retry: 1,
-  });
-
-  // Helper to update searchParams for pagination
-  const setPagination = (newPage: number, newPageSize: number = pageSize) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", String(newPage));
-    params.set("pageSize", String(newPageSize));
-    router.push(`?${params.toString()}`);
-  };
-
-  console.log("---> error: ", error);
 
   return (
     <>
       {accessedFromProfile ? (
         <HeaderWithBackButton title="예약 목록" />
       ) : (
-        <header className="flex flex-col gap-4 mb-5 font-bold font-pretendard-600 text-lg">
-          예약 목록
-        </header>
+        <>
+          <h2 className="font-bold text-xl mb-6">전세 {/* Reservations */}</h2>
+          <h2 className="font-bold text-xl mb-4">
+            예약 목록 {/* List of Reservations */}
+          </h2>
+        </>
       )}
       {isLoading && <ReservationListSkeleton />}
 
-      {(reservations?.data?.length ?? 0) === 0 && (
+      {allReservations.length === 0 && (
         <div className="text-center ">
           예약이 없습니다. {/* No reservations. */}
         </div>
       )}
 
-      {reservations && (
+      {allReservations.length > 0 && (
         <div className="flex flex-col gap-4">
-          {reservations.data.map((r) => (
+          {allReservations.map((r) => (
             <div
               key={r.id}
               className="flex items-center w-full py-1 text-base cursor-pointer"
@@ -100,24 +95,18 @@ export default function ReservationListPage() {
         </div>
       )}
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center gap-4 mt-6">
-        <Button
-          variant="outline"
-          disabled={page === 1}
-          onClick={() => setPagination(Math.max(1, page - 1))}
-        >
-          이전
-        </Button>
-        <span className="self-center font-medium">{page} 페이지</span>
-        <Button
-          variant="outline"
-          disabled={(reservations?.data?.length ?? 0) < pageSize}
-          onClick={() => setPagination(page + 1)}
-        >
-          다음
-        </Button>
-      </div>
+      {/* Infinite Pagination Controls */}
+      {hasNextPage && (
+        <div className="flex justify-center mt-6">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "로딩 중..." : "더 보기"} {/* Load more */}
+          </button>
+        </div>
+      )}
 
       {!accessedFromProfile && <BottomNavigation />}
     </>

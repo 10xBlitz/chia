@@ -71,6 +71,7 @@ export async function getPaginatedClinicTreatments(
     .from("clinic_treatment")
     .select("*, treatment(*)", { count: "exact" })
     .eq("clinic_id", clinic_id)
+    .eq("status", "active") // Assuming you want to include only active treatments
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -94,41 +95,6 @@ export async function getPaginatedClinicTreatments(
     hasPrevPage: page > 1,
   };
 }
-
-/**
- * Uploads a treatment image to Supabase Storage and returns the public URL.
- * Validates file type and size.
- * @param file - The image file to upload.
- * @returns The public URL of the uploaded image.
- */
-// export async function uploadTreatmentImage(file: File) {
-//   // Validate file type
-//   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-//     throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`); //  "Unsupported image format: " + file.type);
-//   }
-//   // Validate file size
-//   if (file.size > MAX_FILE_SIZE_MB) {
-//     throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`); // "Image size must be less than " + MAX_FILE_SIZE_MB + "MB");
-//   }
-//   const fileExt = file.name.split(".").pop();
-//   const fileName = `${uuidv4()}.${fileExt}`;
-//   const filePath = `${fileName}`;
-//   const { error: uploadError } = await supabaseClient.storage
-//     .from(IMAGE_BUCKET)
-//     .upload(filePath, file, {
-//       contentType: file.type,
-//       upsert: true,
-//     });
-//   if (uploadError)
-//     throw new Error(`이미지 업로드 실패: ${uploadError.message}`); // "Image upload failed: " + uploadError.message);
-//   const { data: publicUrlData } = supabaseClient.storage
-//     .from(IMAGE_BUCKET)
-//     .getPublicUrl(filePath);
-//   if (!publicUrlData.publicUrl) {
-//     throw new Error("이미지 URL 생성 실패"); // "Failed to generate image URL");
-//   }
-//   return publicUrlData.publicUrl;
-// }
 
 export async function removeTreatmentImage(imageUrl: string) {
   const path = imageUrl.split("treatment-images/")[1];

@@ -48,7 +48,7 @@ export default function ClinicsPage() {
         </header>
 
         <main className="flex-1 overflow-hidden flex flex-col h-full pb-16">
-          <TreatmentCategoryScroll />
+          <TreatmentCategoryScroll activeId={params.treatment_id} />
 
           {/* Sorting options */}
           <div className="flex justify-between items-center p-4">

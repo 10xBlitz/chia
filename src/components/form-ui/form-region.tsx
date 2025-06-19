@@ -1,3 +1,36 @@
+/**
+ * FormAddress - A reusable address selector form field component for React Hook Form.
+ *
+ * @example
+ * // In your form component:
+ * import { useForm } from "react-hook-form";
+ * import { Form } from "../ui/form";
+ * import FormAddress from "@/components/form-ui/form-address";
+ *
+ * const form = useForm();
+ *
+ * return (
+ *   <Form {...form}>
+ *     <form onSubmit={form.handleSubmit(onSubmit)}>
+ *       <FormAddress
+ *         control={form.control}
+ *         name="address"
+ *         label="주소" // Address
+ *       />
+ *       // ...other fields and submit button...
+ *     </form>
+ *   </Form>
+ * );
+ *
+ * @see {@link src/app/patient/quotation/create-quotation/page.tsx} for a full usage example
+ *
+ * @param control - The react-hook-form control object
+ * @param name - The field name (string)
+ * @param label - The label for the address selector (string)
+ * @param formItemClassName - Custom class for the FormItem
+ * @param formLabelClassName - Custom class for the FormLabel
+ */
+
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 import {
   FormControl,

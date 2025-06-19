@@ -188,27 +188,80 @@ export async function fetchClinicReviews({
   pageSize: number;
   clinic_id: string;
 }) {
-  // Get all clinic_treatment ids for this clinic
-  const { data: treatments, error: treatmentError } = await supabaseClient
-    .from("clinic_treatment")
-    .select("id")
-    .eq("clinic_id", clinic_id);
-
-  if (treatmentError) throw treatmentError;
-  const treatmentIds = treatments?.map((t) => t.id) || [];
-  if (treatmentIds.length === 0) return { reviews: [], hasMore: false };
-
-  // Fetch reviews for these treatments, paginated
-  const { data: reviews, error: reviewError } = await supabaseClient
+  // Single query: join review -> clinic_treatment, filter by clinic_id
+  const { data: reviews, error } = await supabaseClient
     .from("review")
-    .select("*, user:patient_id(*)")
-    .in("clinic_treatment_id", treatmentIds)
+    .select("*, user:patient_id(*), clinic_treatment!inner(id, clinic_id)")
+    .eq("clinic_treatment.clinic_id", clinic_id)
     .order("created_at", { ascending: false })
     .range(pageParam * pageSize, pageParam * pageSize + pageSize - 1);
 
-  if (reviewError) throw reviewError;
+  if (error) throw error;
   return {
     reviews: reviews || [],
     hasMore: (reviews?.length || 0) === pageSize,
   };
+}
+
+// Fetch a single review by ID (with treatment info)
+export async function fetchReviewById(review_id: string) {
+  const { data, error } = await supabaseClient
+    .from("review")
+    .select(
+      `*, clinic_treatment:clinic_treatment_id(id, clinic_id, treatment:treatment_id(*))`
+    )
+    .eq("id", review_id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Update a review
+export async function updateReview({
+  review_id,
+  rating,
+  review,
+  clinic_treatment_id,
+  images = [],
+}: {
+  review_id: string;
+  rating: number;
+  review?: string;
+  clinic_treatment_id?: string;
+  images?: string[];
+}) {
+  // No upload logic needed, just update the images array in the DB
+  const { error: updateError } = await supabaseClient
+    .from("review")
+    .update({
+      rating,
+      review,
+      clinic_treatment_id,
+      images,
+    })
+    .eq("id", review_id);
+  if (updateError) {
+    throw new Error(`리뷰 수정 실패: ${updateError.message}`);
+  }
+  return { success: true };
+}
+
+/**
+ * Delete a review by ID
+ * @param review_id - The review's id (string)
+ * @returns {Promise<{ success: boolean }>} Success object
+ * @throws Error if deletion fails
+ *
+ * @example
+ * await deleteReview("123");
+ */
+export async function deleteReview(
+  review_id: string
+): Promise<{ success: boolean }> {
+  const { error } = await supabaseClient
+    .from("review")
+    .delete()
+    .eq("id", review_id);
+  if (error) throw new Error(error.message || "리뷰 삭제에 실패했습니다."); // Failed to delete review
+  return { success: true };
 }
