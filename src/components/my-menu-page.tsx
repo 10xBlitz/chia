@@ -137,6 +137,14 @@ export default function MyMenuPage({
               </span>
               <ChevronRightIcon className="min-h-5 min-w-5 mr-2" />
             </Button>
+            <Button
+              variant={"ghost"}
+              onClick={() => router.push("/patient/profile/terms-of-service")}
+              className="flex items-center w-full justify-between "
+            >
+              <span className="ml-2">이용약관 {/* Terms of Service */}</span>
+              <ChevronRightIcon className="min-h-5 min-w-5 mr-2" />
+            </Button>
           </div>
         </section>
       </main>

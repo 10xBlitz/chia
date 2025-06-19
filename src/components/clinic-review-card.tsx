@@ -1,4 +1,5 @@
-import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Star, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -9,11 +10,36 @@ interface ClinicReviewCardProps {
   rating?: number | string;
   created_at?: string | Date;
   review?: string;
+  onclick?: () => void;
 }
 
 function ClinicReviewCard(props: ClinicReviewCardProps) {
   return (
-    <div key={props.id} className="bg-[#F6FAFF] rounded-xl px-4 py-6 mt-3">
+    <div
+      key={props.id}
+      className={cn(
+        "bg-[#F6FAFF] rounded-xl px-4 py-6 mt-3 relative",
+        props.onclick && "cursor-pointer hover:bg-[#F0F5FF]"
+      )}
+      onClick={props.onclick}
+    >
+      {/* Edit/Delete buttons (top right) */}
+      <div className="absolute top-3 right-4 flex gap-2 z-10">
+        <button
+          type="button"
+          aria-label="Edit review"
+          className="p-1 rounded hover:bg-blue-100 transition"
+        >
+          <Pencil size={18} className="text-blue-500" />
+        </button>
+        <button
+          type="button"
+          aria-label="Delete review"
+          className="p-1 rounded hover:bg-red-100 transition"
+        >
+          <Trash2 size={18} className="text-red-500" />
+        </button>
+      </div>
       <div className="flex items-center gap-4 mb-3">
         <div className="w-12 h-12 rounded-full bg-[#E9EEF3] flex items-center justify-center">
           <span className="text-2xl text-gray-400">

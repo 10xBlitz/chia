@@ -24,6 +24,7 @@ export default function SuccessPage() {
       const json = await response.json();
 
       if (!response.ok) {
+        console.log("----> error:", response);
         router.push(
           `/patient/reservation/payment/fail?message=${json.message}&code=${json.code}`
         );

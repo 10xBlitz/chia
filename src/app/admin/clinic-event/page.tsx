@@ -34,7 +34,7 @@ export default function ClinicEventPage() {
       return x;
     },
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 1, // 1 minute1
+    staleTime: 1000 * 60 * 1, // 1 minute
     refetchOnMount: true,
     retry: 3,
   });

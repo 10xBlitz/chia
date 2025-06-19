@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -81,6 +81,15 @@ export const ClinicEventModal = ({
           },
         },
   });
+
+  // Reset form and image state when modal closes
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+      setImageFile(null);
+      setImagePreview("");
+    }
+  }, [open, form]);
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof clinicEventFormSchema>) => {
@@ -171,16 +180,11 @@ export const ClinicEventModal = ({
 
   return (
     <Modal
-      title={data ? "클리닉 이벤트 편집" : "클리닉 이벤트 추가"} // "Edit Clinic Event" or "Add Clinic Event"
+      title={data ? "클리닉 이벤트 편집" : "클리닉 이벤트 추가"}
       description={""}
       isOpen={open}
       isLong={false}
-      onClose={() => {
-        onClose();
-        form.reset();
-        setImageFile(null);
-        setImagePreview("");
-      }}
+      onClose={onClose}
     >
       <Form {...form}>
         <form

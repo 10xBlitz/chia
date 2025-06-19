@@ -48,7 +48,11 @@ interface ClinicSingleViewMainComponentProps {
   }>;
   clinic_treatment?: Array<{
     id: string;
-    treatment?: { id: string; treatment_name: string; image_url?: string | null };
+    treatment?: {
+      id: string;
+      treatment_name: string;
+      image_url?: string | null;
+    };
     price?: number;
     [key: string]: unknown;
   }>;
@@ -475,7 +479,11 @@ export default function ClinicSingleViewMainComponent(
                 </div>
               )}
               {reviews.map((review) => (
-                <ClinicReviewCard {...review} key={review.id} />
+                <ClinicReviewCard
+                  {...review}
+                  key={review.id}
+                  onclick={() => router.push(`/patient/review`)}
+                />
               ))}
               {hasNextPage && (
                 <Button

@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { supabaseClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { calculateDiscountedPrice } from "@/lib/utils";
 
 export default function EventCarousel() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -19,7 +20,9 @@ export default function EventCarousel() {
   } = useQuery({
     queryKey: ["events"],
     queryFn: async () => {
-      const { data, error } = await supabaseClient.from("event").select("*");
+      const { data, error } = await supabaseClient
+        .from("event")
+        .select("*, clinic_treatment(*)");
       if (error) throw error;
       return data;
     },
@@ -119,7 +122,12 @@ export default function EventCarousel() {
               <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
                 {event.image_url ? (
                   <Link
-                    href={`/patient/reservation/payment?orderId${event.id}`}
+                    href={`/patient/reservation/payment?orderId=${
+                      event.id
+                    }&amount=${calculateDiscountedPrice(
+                      event.clinic_treatment.price,
+                      event.discount
+                    )}`}
                     className="block h-full"
                   >
                     <Image
