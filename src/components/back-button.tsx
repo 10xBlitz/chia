@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const BackButton = ({
   className,
-  link = "/",
+  link,
 }: {
   className?: string;
   link?: string;
