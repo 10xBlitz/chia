@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Enums } from "./supabase/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -83,3 +84,26 @@ export function calculateDiscountedPrice(
   // which is common for currency. Convert it back to a number using parseFloat.
   return parseFloat(finalPrice.toFixed(2));
 }
+
+/** * Returns the day of the week in Korean for a given date.
+ * @param date - A string or Date object representing the date.
+ * @returns The day of the week in Korean (e.g., "월요일" for Monday).
+ * @example
+ * getKoreanDayOfWeek("2023-10-01"); // Returns "일요일"
+ * getKoreanDayOfWeek(new Date("2023-10-02")); // Returns "월요일"
+ */
+export const getKoreanDayOfWeek = (
+  date: string | Date
+): Enums<"day_of_week"> => {
+  const days = [
+    "일요일",
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+  ] as const;
+  const d = typeof date === "string" ? new Date(date) : date;
+  return days[d.getDay()];
+};

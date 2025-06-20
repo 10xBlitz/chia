@@ -19,7 +19,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/popover";
 
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, getKoreanDayOfWeek } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
 import { useUserStore } from "@/providers/user-store-provider";
@@ -64,14 +64,6 @@ const reservationSchema = z.object({
 type ReservationFormValues = z.infer<typeof reservationSchema>;
 
 // Add WorkingHour type for type safety
-interface WorkingHour {
-  clinic_id: string;
-  created_at: string;
-  day_of_week: string;
-  id: string;
-  note: string | null;
-  time_open: string; // e.g., "09:00AM - 06:00PM "
-}
 
 export default function CreateReservation() {
   const searchParams = useSearchParams();
@@ -133,19 +125,23 @@ export default function CreateReservation() {
 
   const reservationDate = form.watch("date");
 
+  // When the user selects a reservation date:
+  const selectedDate = reservationDate; // e.g., from form state
+  const selectedDayOfWeek = selectedDate
+    ? getKoreanDayOfWeek(selectedDate)
+    : undefined;
+
   const { data: workingHours } = useQuery({
-    queryKey: ["working-hours", clinic_id],
-    queryFn: () => fetchClinicWorkingHours(clinic_id as string),
-    enabled: !!clinic_id,
+    queryKey: ["working-hours", clinic_id, selectedDayOfWeek],
+    queryFn: () =>
+      fetchClinicWorkingHours(clinic_id as string, {
+        dayOfWeek: selectedDayOfWeek,
+      }),
+    enabled: !!clinic_id && !!selectedDayOfWeek,
   });
 
-  // Determine the day of week for the selected reservation date
-  const dayOfWeek = reservationDate
-    ? getKoreanDayOfWeek(reservationDate)
-    : undefined;
-  const todayHours = (workingHours as WorkingHour[] | undefined)?.find(
-    (w) => w.day_of_week === dayOfWeek
-  );
+  // workingHours will be an array with 0 or 1 item for the selected day
+  const todayHours = workingHours?.[0];
   const { openHour, closeHour } =
     todayHours && todayHours.time_open
       ? parseOpenClose(todayHours.time_open)
@@ -155,11 +151,19 @@ export default function CreateReservation() {
     (_, i) => i + openHour
   );
 
-  console.log(dayOfWeek);
-  console.log("---->workinghours:", workingHours);
-  console.log("====> today hours:", todayHours);
-  console.log("---->close hours:", closeHour);
-  console.log("---->open hours:", openHour);
+  useEffect(() => {
+    if (workingHours?.length === 0) {
+      form.setError("time", {
+        type: "manual",
+        message: "해당 날짜에 진료 시간이 없습니다. 다른 날짜를 선택해주세요.", // No working hours for this date. Please select another date.
+      });
+    } else {
+      // If there are working hours, clear any previous error
+      form.clearErrors("time");
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workingHours]);
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -198,7 +202,7 @@ export default function CreateReservation() {
                     <FormItem>
                       <FormControl>
                         <KoreanTimePicker
-                          disabled={!!form.getValues("date")}
+                          disabled={workingHours?.length === 0}
                           time={field.value}
                           setSelected={(e) => field.onChange(e)}
                           allowedHours={allowedHours}
@@ -368,21 +372,6 @@ export default function CreateReservation() {
     </div>
   );
 }
-
-// Helper: Map Korean day to DB value (assuming DB uses Korean day names)
-const getKoreanDayOfWeek = (date: string | Date) => {
-  const days = [
-    "일요일",
-    "월요일",
-    "화요일",
-    "수요일",
-    "목요일",
-    "금요일",
-    "토요일",
-  ];
-  const d = typeof date === "string" ? new Date(date) : date;
-  return days[d.getDay()];
-};
 
 // Parse open/close from time_open string (e.g., "09:00AM - 06:00PM ")
 function parseOpenClose(timeOpen: string) {

@@ -66,9 +66,10 @@ import {
   deleteClinicWorkingHours,
 } from "@/lib/supabase/services/clinics.services";
 import FormTextarea from "@/components/form-ui/form-textarea";
+import { Enums } from "@/lib/supabase/types";
 
 // 요일을 한글로, 영어 주석 추가 (Days of week in Korean, with English comments)
-const DAYS_OF_WEEK = [
+const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
   "월요일", // Monday
   "화요일", // Tuesday
   "수요일", // Wednesday
@@ -76,6 +77,7 @@ const DAYS_OF_WEEK = [
   "금요일", // Friday
   "토요일", // Saturday
   "일요일", // Sunday
+  "점심시간", // Lunch Break
 ];
 
 // Add ClinicHour type for typing
@@ -267,7 +269,6 @@ export const ClinicModal = ({
   };
 
   // For custom day_of_week input
-  const [customDayIdx, setCustomDayIdx] = React.useState<number | null>(null);
 
   return (
     <>
@@ -620,13 +621,6 @@ export const ClinicModal = ({
                     </p>
                   )}
                   {clinicHourFields.map((item, index) => {
-                    const dayValue = form.watch(
-                      `clinic_hours.${index}.day_of_week`
-                    );
-                    const isCustom =
-                      dayValue &&
-                      !DAYS_OF_WEEK.includes(dayValue) &&
-                      dayValue !== "";
                     return (
                       <section
                         key={item.id + index}
@@ -652,20 +646,8 @@ export const ClinicModal = ({
                                 </FormLabel>{" "}
                                 {/* Day */}
                                 <Select
-                                  value={
-                                    DAYS_OF_WEEK.includes(field.value)
-                                      ? field.value
-                                      : "other"
-                                  }
-                                  onValueChange={(val) => {
-                                    if (val === "other") {
-                                      setCustomDayIdx(index);
-                                      field.onChange("");
-                                    } else {
-                                      setCustomDayIdx(null);
-                                      field.onChange(val);
-                                    }
-                                  }}
+                                  value={field.value}
+                                  onValueChange={field.onChange}
                                 >
                                   <SelectTrigger className="w-full min-h-[45px]">
                                     <SelectValue placeholder="요일을 선택하거나 직접 입력하세요" />{" "}
@@ -681,26 +663,8 @@ export const ClinicModal = ({
                                         {d}
                                       </SelectItem>
                                     ))}
-                                    <SelectItem
-                                      value="other"
-                                      className="cursor-pointer"
-                                    >
-                                      기타 (직접 입력)
-                                    </SelectItem>{" "}
-                                    {/* Other (custom) */}
                                   </SelectContent>
                                 </Select>
-                                {/* '기타' 선택 시 직접 입력 (Show custom input if 'Other' is selected) */}
-                                {(customDayIdx === index || isCustom) && (
-                                  <Input
-                                    className="mt-2"
-                                    placeholder="직접 입력 (예: 점심시간)" // Enter custom day (e.g. Lunch Break)
-                                    value={field.value}
-                                    onChange={(e) =>
-                                      field.onChange(e.target.value)
-                                    }
-                                  />
-                                )}
                                 <FormMessage />
                               </FormItem>
                             )}
