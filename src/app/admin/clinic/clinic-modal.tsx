@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/combobox";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
-import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import {
   CLINIC_IMAGE_ALLOWED_MIME_TYPES,
   CLINIC_IMAGE_BUCKET,
@@ -67,6 +66,7 @@ import {
 } from "@/lib/supabase/services/clinics.services";
 import FormTextarea from "@/components/form-ui/form-textarea";
 import { Enums } from "@/lib/supabase/types";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 // 요일을 한글로, 영어 주석 추가 (Days of week in Korean, with English comments)
 const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
@@ -579,7 +579,7 @@ export const ClinicModal = ({
                           )}
                         />
                       </div>
-                      <ConfirmDeleteModal
+                      <ConfirmModal
                         title="진료 항목 삭제 확인" // Confirm Remove Treatment
                         description={`정말로 ${item.treatment_name} 항목을 삭제하시겠습니까?`} // Are you sure you want to remove ...
                         open={deleteIndex === index}
@@ -793,8 +793,14 @@ async function updateClinicWithImages(
   // Save working hours
   setProgress?.("진료시간 저장 중...");
   if (values.clinic_hours && values.clinic_hours.length > 0) {
+    const workingHours = values.clinic_hours.map((h) => ({
+      day_of_week: h.day_of_week as Enums<"day_of_week">, // Cast to the correct type
+      time_open: h.time_open,
+      note: h.note,
+    }));
+
     await deleteClinicWorkingHours(clinicId);
-    await insertClinicWorkingHours(clinicId, values.clinic_hours);
+    await insertClinicWorkingHours(clinicId, workingHours);
   } else {
     await deleteClinicWorkingHours(clinicId);
   }
@@ -836,7 +842,12 @@ async function addClinicWithImages(
 
   // Save working hours
   if (values.clinic_hours && values.clinic_hours.length > 0) {
-    await insertClinicWorkingHours(newClinicId, values.clinic_hours);
+    const workingHours = values.clinic_hours.map((h) => ({
+      day_of_week: h.day_of_week as Enums<"day_of_week">, // Cast to the correct type
+      time_open: h.time_open,
+      note: h.note,
+    }));
+    await insertClinicWorkingHours(newClinicId, workingHours);
   }
 
   // Save treatments

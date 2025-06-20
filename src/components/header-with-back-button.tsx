@@ -5,11 +5,13 @@ import { cn } from "@/lib/utils";
 interface HeaderWithBackButtonProps {
   className?: string;
   title: string;
+  rightAction?: React.ReactNode; // Optional right-aligned action (e.g., kebab menu)
 }
 
 const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
   className,
   title,
+  rightAction,
 }) => {
   return (
     <header
@@ -19,7 +21,10 @@ const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
       )}
     >
       <BackButton className="-ml-2" />
-      {title}
+      <div className="flex flex-row items-center justify-between w-full">
+        <span>{title}</span>
+        {rightAction && <div className="flex items-center">{rightAction}</div>}
+      </div>
     </header>
   );
 };

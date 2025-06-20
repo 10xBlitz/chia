@@ -9,9 +9,9 @@ import { getPaginatedFavoriteClinics } from "@/lib/supabase/services/favorite-cl
 import ClinicCard from "@/components/clinic-card";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
-import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 import BottomNavigation from "@/components/bottom-navigation";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 export default function FavoriteClinicsPage() {
   const user = useUserStore((state) => state.user);
@@ -56,7 +56,7 @@ export default function FavoriteClinicsPage() {
   return (
     <div className="flex flex-col">
       {selectedFavorite && (
-        <ConfirmDeleteModal
+        <ConfirmModal
           open={modalOpen}
           title={`${selectedFavorite.clinic_name} 병원을 즐겨찾기에서 삭제하시겠습니까?`} // Are you sure you want to remove {clinic_name} from favorites?
           description="즐겨찾기에서 삭제하면 다시 추가해야 합니다." // Removing from favorites will require re-adding.

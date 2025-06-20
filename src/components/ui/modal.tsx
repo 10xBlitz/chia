@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
 
@@ -24,7 +24,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
 }) => {
   const onChange = (open: boolean) => {
-    setTimeout(() => (document.body.style.pointerEvents = ""), 100);
+    setTimeout(() => (document.body.style.pointerEvents = "auto"), 100);
     if (!open) {
       onClose();
     }
@@ -45,12 +45,14 @@ export const Modal: React.FC<ModalProps> = ({
           isWide && "min-w-[80dvw]"
         )}
       >
-        <DialogTitle>
-          <div className="flex items-center justify-center flex-col">
-            <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-            <p className="text-sm text-muted-foreground">{description}</p>
-          </div>
-        </DialogTitle>
+        <DialogHeader>
+          <DialogTitle>
+            <div className="flex items-center justify-center flex-col">
+              <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
+              <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
 
         <div>{children}</div>
       </DialogContent>

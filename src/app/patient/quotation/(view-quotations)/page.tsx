@@ -153,18 +153,17 @@ function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
         {q.treatment?.treatment_name || "선택된 치료 없음"}{" "}
         {q.clinic_id ? "치과" : "공개견적"}
       </span>
-      <Button
-        className={`rounded-md px-4 h-9 font-medium ${
+      <div
+        className={`rounded-md flex justify-center items-center px-4 h-9 font-medium  ${
           q.bid.length > 0
             ? "bg-blue-600 text-white"
             : "border border-gray-200 bg-white text-gray-500"
         }`}
-        variant={q.bid.length > 0 ? "outline" : "default"}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         {q.bid.length > 0 ? "답변완료" : "답변 없음"}
-      </Button>
+      </div>
     </div>
   );
 }

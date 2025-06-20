@@ -39,6 +39,9 @@ export default function CreateQuotationPage() {
   const [uploadingImageIdx, setUploadingImageIdx] = useState<number | null>(
     null
   );
+  const title = searchParams.get("clinic_name")
+    ? `견적 요청 - ${searchParams.get("clinic_name")}`
+    : "견적 요청"; // Quotation Request
 
   // Treatments fetch
   const { data: treatmentsData } = useQuery({
@@ -119,7 +122,7 @@ export default function CreateQuotationPage() {
           className="flex flex-col gap-4"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <HeaderWithBackButton title="견적 요청" /> {/**Request for Quote */}
+          <HeaderWithBackButton title={title} /> {/**Request for Quote */}
           <FormSelect
             control={form.control}
             name="treatment_id"

@@ -42,6 +42,7 @@ export type Database = {
           id: string
           quotation_id: string
           recommend_quick_visit: boolean
+          status: Database["public"]["Enums"]["record_status"]
         }
         Insert: {
           additional_explanation?: string | null
@@ -51,6 +52,7 @@ export type Database = {
           id?: string
           quotation_id: string
           recommend_quick_visit: boolean
+          status?: Database["public"]["Enums"]["record_status"]
         }
         Update: {
           additional_explanation?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           id?: string
           quotation_id?: string
           recommend_quick_visit?: boolean
+          status?: Database["public"]["Enums"]["record_status"]
         }
         Relationships: [
           {
@@ -439,6 +442,7 @@ export type Database = {
           patient_id: string
           region: string
           residence: string
+          status: Database["public"]["Enums"]["record_status"]
           treatment_id: string | null
         }
         Insert: {
@@ -453,6 +457,7 @@ export type Database = {
           patient_id: string
           region: string
           residence: string
+          status?: Database["public"]["Enums"]["record_status"]
           treatment_id?: string | null
         }
         Update: {
@@ -467,6 +472,7 @@ export type Database = {
           patient_id?: string
           region?: string
           residence?: string
+          status?: Database["public"]["Enums"]["record_status"]
           treatment_id?: string | null
         }
         Relationships: [

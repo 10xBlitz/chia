@@ -8,8 +8,8 @@ import { UserIcon, ChevronRightIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase/client";
 import { updateLoginStatus } from "@/lib/supabase/services/users.services";
-import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import toast from "react-hot-toast";
+import { ConfirmModal } from "./modals/confirm-modal";
 
 interface ProfilePageProps {
   actions: {
@@ -110,7 +110,7 @@ export default function MyMenuPage({
         </section>
 
         {/* Withdraw Confirm Modal */}
-        <ConfirmDeleteModal
+        <ConfirmModal
           open={withdrawModalOpen}
           onCancel={() => setWithdrawModalOpen(false)}
           onConfirm={handleWithdrawMembership}

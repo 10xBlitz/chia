@@ -1,6 +1,6 @@
 import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
-import { Tables } from "../types";
+import { Enums, Tables } from "../types";
 
 interface Filters {
   clinic_name?: string | null;
@@ -250,7 +250,11 @@ export async function fetchClinicDetail(clinic_id: string) {
  */
 export async function insertClinicWorkingHours(
   clinicId: string,
-  hours: Array<{ day_of_week: string; time_open: string; note?: string }>
+  hours: Array<{
+    day_of_week: Enums<"day_of_week">;
+    time_open: string;
+    note?: string;
+  }>
 ) {
   if (!clinicId || !Array.isArray(hours)) return;
   if (hours.length === 0) return;

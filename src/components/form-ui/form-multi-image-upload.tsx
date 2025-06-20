@@ -58,6 +58,12 @@ import { cn } from "@/lib/utils";
 import { useRef } from "react";
 import { toast } from "react-hot-toast";
 
+type ImageFieldItem = {
+  url: string; // data URL or Supabase URL
+  file?: File; // Only for new images
+  status: "old" | "new" | "deleted";
+};
+
 type FormImageUploadProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>; // e.g. "images"
@@ -82,17 +88,26 @@ export default function FormMultiImageUpload<T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => {
-        const files: File[] = field.value?.files || [];
-        const previews: string[] = field.value?.previews || [];
-        const setValue = (newFiles: File[], newPreviews: string[]) => {
-          field.onChange({ files: newFiles, previews: newPreviews });
+        const images: ImageFieldItem[] = field.value || [];
+        const setValue = (newImages: ImageFieldItem[]) => {
+          field.onChange(newImages);
         };
         const handleRemoveImage = (idx: number) => {
-          setValue(
-            files.filter((_, i) => i !== idx),
-            previews.filter((_, i) => i !== idx)
-          );
+          const img = images[idx];
+          if (img.status === "old") {
+            // Mark as deleted
+            setValue(
+              images.map((item, i) =>
+                i === idx ? { ...item, status: "deleted" } : item
+              )
+            );
+          } else if (img.status === "new") {
+            // Remove from array
+            setValue(images.filter((_, i) => i !== idx));
+          }
         };
+        // Only show images not deleted
+        const visibleImages = images.filter((img) => img.status !== "deleted");
         return (
           <FormItem className={formItemClassName}>
             <FormLabel
@@ -105,24 +120,26 @@ export default function FormMultiImageUpload<T extends FieldValues>({
             </FormLabel>
             <FormControl>
               <div className="flex gap-2 flex-wrap mt-2">
-                {previews.map((src, idx) => (
+                {visibleImages.map((img, idx) => (
                   <div
                     key={idx}
                     className="relative w-20 h-20 rounded-lg overflow-hidden"
                   >
-                    <Image src={src} alt={`quotation-img-${idx}`} fill />
+                    <Image src={img.url} alt={`quotation-img-${idx}`} fill />
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
                       className="absolute top-1 right-1 bg-white/80 rounded-full"
-                      onClick={() => handleRemoveImage(idx)}
+                      onClick={() =>
+                        handleRemoveImage(images.findIndex((i) => i === img))
+                      }
                     >
                       <X size={16} />
                     </Button>
                   </div>
                 ))}
-                {files.length < maxImages && (
+                {visibleImages.length < maxImages && (
                   <div className="w-20 h-20 flex items-center justify-center border rounded-lg bg-gray-100 relative">
                     <Button
                       type="button"
@@ -143,7 +160,7 @@ export default function FormMultiImageUpload<T extends FieldValues>({
                       onChange={(e) => {
                         const inputFiles = e.target.files;
                         if (!inputFiles) return;
-                        const allowed = maxImages - files.length;
+                        const allowed = maxImages - visibleImages.length;
                         if (inputFiles.length > allowed) {
                           toast.error(
                             `최대 ${maxImages}장까지 업로드할 수 있습니다.`
@@ -153,22 +170,25 @@ export default function FormMultiImageUpload<T extends FieldValues>({
                           0,
                           allowed
                         );
-                        const newFiles = [...files, ...fileArr];
-                        const newPreviews = [...previews];
                         let loaded = 0;
+                        const newImages: ImageFieldItem[] = [];
                         fileArr.forEach((file) => {
                           const reader = new FileReader();
                           reader.onload = (ev) => {
-                            newPreviews.push(ev.target?.result as string);
+                            newImages.push({
+                              url: ev.target?.result as string,
+                              file,
+                              status: "new",
+                            });
                             loaded++;
                             if (loaded === fileArr.length) {
-                              setValue(newFiles, newPreviews);
+                              setValue([...images, ...newImages]);
                             }
                           };
                           reader.readAsDataURL(file);
                         });
                         if (fileArr.length === 0) {
-                          setValue(newFiles, newPreviews);
+                          setValue([...images]);
                         }
                         e.target.value = "";
                       }}

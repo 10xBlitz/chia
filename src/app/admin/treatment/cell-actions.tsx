@@ -13,8 +13,8 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
 import { TreatmentModal } from "./treatment-modal";
 import { TreatmentTable } from "./columns";
-import { ConfirmDeleteModal } from "@/components/modals/confirm-modal";
 import { supabaseClient } from "@/lib/supabase/client";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 interface CellActionProps {
   data: TreatmentTable;
 }
@@ -89,7 +89,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         />
       )}
 
-      <ConfirmDeleteModal
+      <ConfirmModal
         open={showDeleteModal}
         // 시술 삭제 (Delete Treatment)
         title="시술 삭제"

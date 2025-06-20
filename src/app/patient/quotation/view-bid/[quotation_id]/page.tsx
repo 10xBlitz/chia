@@ -1,12 +1,27 @@
 "use client";
 
 import { useParams, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { getSingleBid } from "@/lib/supabase/services/bids.services";
-import { getSingleQuotation } from "@/lib/supabase/services/quotation.services";
+import {
+  deleteQuotation,
+  getSingleQuotation,
+} from "@/lib/supabase/services/quotation.services";
+import { BidSkeleton, QuotationSkeleton } from "./skeleton";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { useState } from "react";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 // Fetch quotation details
 
@@ -16,23 +31,116 @@ export default function ViewBidPage() {
   const bidId = searchParams.get("bid_id") as string;
   const quotationId = params?.quotation_id as string;
 
-  const { data: bid, isLoading } = useQuery({
-    queryKey: ["bid", bidId],
-    queryFn: () => getSingleBid(bidId),
-    enabled: !!bidId && bidId !== "null" && !!quotationId,
-  });
-
   // Fetch quotation details
-  const { data: quotation } = useQuery({
+  const { data: quotation, isLoading: isQuotationLoading } = useQuery({
     queryKey: ["quotation", quotationId],
     queryFn: () => getSingleQuotation(quotationId),
     enabled: !!quotationId,
   });
 
+  const { data: bid, isLoading: isBidsLoading } = useQuery({
+    queryKey: ["bid", bidId],
+    queryFn: () => getSingleBid(bidId),
+    enabled: !!bidId && bidId !== "null" && !!quotationId,
+  });
+
+  const clinicName = quotation?.clinic
+    ? quotation.clinic.clinic_name
+    : bid?.clinic_treatment.clinic.clinic_name;
+
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!bidId) throw new Error("잘못된 요청입니다."); // Invalid request
+      return deleteQuotation(quotationId);
+    },
+    onSuccess: () => {
+      toast.success("입찰이 삭제되었습니다."); // Bid deleted
+      setShowDeleteModal(false);
+      queryClient.invalidateQueries();
+      router.back();
+    },
+    onError: (err: unknown) => {
+      const message =
+        err instanceof Error ? err.message : "삭제에 실패했습니다."; // Delete failed
+      toast.error(message);
+      setShowDeleteModal(false);
+    },
+  });
+
+  function handleEdit() {
+    if (!bidId) return;
+    router.push(`/patient/quotation/edit-quotation/${quotationId}`);
+  }
+  function handleDelete() {
+    setShowDeleteModal(true);
+  }
+
+  // Disable edit/delete if a bid is already associated with the quotation
+  const isBidAssociated = !!bid;
+
   return (
     <div className="flex flex-col">
-      <HeaderWithBackButton title="공개 견적서" /> {/* Public Quotation */}
-      {isLoading && <div>로딩 중... {/* Loading... */}</div>}
+      <HeaderWithBackButton
+        title={"견적서" + " > " + clinicName}
+        rightAction={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="More actions"
+                className="p-2 rounded hover:bg-gray-100 transition"
+                disabled={isBidAssociated}
+                aria-disabled={isBidAssociated}
+              >
+                <MoreVertical size={22} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={isBidAssociated ? undefined : handleEdit}
+                className="flex items-center gap-2 cursor-pointer"
+                disabled={isBidAssociated}
+                aria-disabled={isBidAssociated}
+              >
+                <Pencil size={16} className="text-blue-500" />
+                수정 {/* Edit */}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={isBidAssociated ? undefined : handleDelete}
+                className="flex items-center gap-2 cursor-pointer"
+                disabled={isBidAssociated}
+                aria-disabled={isBidAssociated}
+              >
+                <Trash2 size={16} className="text-red-500" />
+                삭제 {/* Delete */}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+      <ConfirmModal
+        open={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="입찰 삭제 확인" // Confirm Bid Delete
+        description="정말로 이 입찰을 삭제하시겠습니까?" // Are you sure you want to delete this bid?
+        confirmLabel="삭제" // Delete
+        cancelLabel="취소" // Cancel
+        loading={deleteMutation.isPending}
+      />
+      {/* Quotation */}
+      {isQuotationLoading && <QuotationSkeleton />}
+      {isBidsLoading && (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <BidSkeleton key={i} />
+          ))}
+        </div>
+      )}
       <div className="mb-6">
         <div className="mb-3">
           <label className="block text-xs text-gray-500 mb-1">
@@ -90,12 +198,15 @@ export default function ViewBidPage() {
       </div>
       {/* Bid Info (bottom part) */}
       <div className="border-t pt-6 mt-2">
-        <div className="font-semibold mb-3">답변 {/* Answer */}</div>
+        <div className="font-semibold mb-3">
+          답변
+          {/* Answer */}
+        </div>
         <div className="mb-2">
           <span className="block text-xs text-gray-500 mb-1">
             병원명 {/* Clinic Name */}
           </span>
-          <div>{bid?.clinic_treatment?.clinic?.clinic_name || "-"}</div>
+          <div>{clinicName}</div>
         </div>
         <div className="mb-2">
           <span className="block text-xs text-gray-500 mb-1">

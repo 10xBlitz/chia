@@ -34,6 +34,10 @@ export async function getPaginatedBids(
     query = query.lte("created_at", endOfDay(filters.date_range.to));
   }
 
+  if (filters.quotation_id) {
+    query = query.eq("quotation_id", filters.quotation_id);
+  }
+
   // Add more filters here as needed
 
   const { data, error, count } = await query;

@@ -14,13 +14,19 @@ import {
   fetchReviewById,
   updateReview,
 } from "@/lib/supabase/services/reviews.services";
-import { deleteFileFromSupabase } from "@/lib/supabase/services/upload-file.services";
+import {
+  deleteFileFromSupabase,
+  uploadFileToSupabase,
+} from "@/lib/supabase/services/upload-file.services";
 import FormTextarea from "@/components/form-ui/form-textarea";
 import { SelectItem } from "@/components/ui/select";
 import { Form } from "@/components/ui/form";
 import FormSelect from "@/components/form-ui/form-select";
 import FormStarRating from "@/components/form-ui/form-star-rating";
 import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
+import { useEffect } from "react";
+
+// New type for image field
 
 const MAX_IMAGES = 10;
 const MAX_TEXT = 500;
@@ -31,10 +37,13 @@ const reviewSchema = z.object({
   review: z
     .string()
     .max(MAX_TEXT, `최대 ${MAX_TEXT}자까지 입력할 수 있습니다.`),
-  images: z.object({
-    files: z.array(z.any()),
-    previews: z.array(z.string()),
-  }),
+  images: z.array(
+    z.object({
+      url: z.string(),
+      file: z.any().optional(),
+      status: z.enum(["old", "new", "deleted"]),
+    })
+  ),
 });
 
 /**
@@ -70,14 +79,14 @@ export default function EditReviewPage() {
 
   // Fetch clinic treatments
   const clinic_id = reviewData?.clinic_treatment?.clinic_id || "";
-  const { data: treatmentsData, isLoading: treatmentsLoading } = useQuery({
+  const { data: treatmentsData } = useQuery({
     queryKey: ["clinic-treatments", clinic_id],
     queryFn: async () => {
       if (!clinic_id) return [];
       const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
       return res.data || [];
     },
-    enabled: !!clinic_id,
+    enabled: !!clinic_id && !!reviewData,
   });
 
   // Initialize form with fetched review data
@@ -87,36 +96,45 @@ export default function EditReviewPage() {
       clinic_treatment_id: undefined,
       rating: 4,
       review: "",
-      images: { files: [], previews: [] },
+      images: [],
     },
     values: reviewData
       ? {
           clinic_treatment_id: reviewData.clinic_treatment_id,
           rating: reviewData.rating || 4,
           review: reviewData.review || "",
-          images: { files: [], previews: reviewData.images || [] },
+          images: Array.isArray(reviewData.images)
+            ? reviewData.images.map((url: string) => ({ url, status: "old" }))
+            : [],
         }
       : undefined,
   });
 
-  // Helper: Get removed image URLs (existing images that were removed from preview)
-  function getRemovedImageUrls() {
-    if (!reviewData || !Array.isArray(reviewData.images)) return [];
-    const currentPreviews = form.getValues("images").previews || [];
-    return reviewData.images.filter(
-      (url: string) =>
-        !currentPreviews.includes(url) &&
-        typeof url === "string" &&
-        !url.startsWith("data:") &&
-        !url.startsWith("blob:")
-    );
-  }
+  useEffect(() => {
+    if (reviewData) {
+      form.reset({
+        clinic_treatment_id: reviewData.clinic_treatment_id,
+        rating: reviewData.rating || 4,
+        review: reviewData.review || "",
+        images: Array.isArray(reviewData.images)
+          ? reviewData.images.map((url: string) => ({ url, status: "old" }))
+          : [],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewData]);
 
   const mutation = useMutation({
     mutationFn: async (values: ReviewFormValues) => {
       if (!user_id) throw new Error("로그인이 필요합니다."); // Login required
-      // Delete removed images from Supabase storage on submit
-      const removedUrls = getRemovedImageUrls();
+      if (!reviewData) throw new Error("리뷰 정보를 불러올 수 없습니다."); // Review not loaded
+
+      // 1. Find removed image URLs (old images marked as deleted)
+      const removedUrls = values.images
+        .filter(
+          (img) => img.status === "deleted" && !img.url.startsWith("data:")
+        )
+        .map((img) => img.url);
       for (const url of removedUrls) {
         try {
           await deleteFileFromSupabase(url, { bucket: "review-images" });
@@ -124,19 +142,33 @@ export default function EditReviewPage() {
           console.error("Failed to delete image from storage", err);
         }
       }
-      // Only save Supabase URLs (not data: or blob:) in the DB
-      const supabaseUrls = (values.images.previews || []).filter(
-        (url) =>
-          typeof url === "string" &&
-          !url.startsWith("data:") &&
-          !url.startsWith("blob:")
-      );
+
+      // 2. Upload new images and collect their Supabase URLs
+      const uploadedUrls: string[] = [];
+      for (const img of values.images) {
+        if (img.status === "new" && img.file) {
+          const url = await uploadFileToSupabase(img.file, {
+            bucket: "review-images",
+            folder: user_id,
+            allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+            maxSizeMB: 10,
+          });
+          uploadedUrls.push(url);
+        }
+      }
+
+      // 3. Only keep Supabase URLs for old images not deleted
+      const supabaseUrls = values.images
+        .filter((img) => img.status === "old")
+        .map((img) => img.url);
+
+      // 4. Save the combined array
       return updateReview({
         review_id: reviewId,
         rating: values.rating,
         review: values.review,
         clinic_treatment_id: values.clinic_treatment_id,
-        images: supabaseUrls,
+        images: [...supabaseUrls, ...uploadedUrls],
       });
     },
     onSuccess: () => {
@@ -171,7 +203,7 @@ export default function EditReviewPage() {
         <form className="flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
           {/* Treatment selection */}
           <div className="px-4">
-            {treatmentsLoading ? (
+            {!treatmentsData ? (
               <div> 로딩 트리트먼트{/**loading treatmnents */}</div>
             ) : (
               <FormSelect

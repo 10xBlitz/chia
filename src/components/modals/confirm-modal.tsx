@@ -1,16 +1,18 @@
-// filepath: /Users/dev7/Desktop/real-projects/chia/src/app/admin/clinic/confirm-delete-modal.tsx
-import { Modal } from "@/components/ui/modal";
-import { Button } from "../ui/button";
+"use client";
 
-export function ConfirmDeleteModal({
-  open,
-  onConfirm,
-  onCancel,
-  title,
-  description,
-  confirmLabel = "삭제", // Delete
-  cancelLabel = "취소", // Cancel
-}: {
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "../ui/button";
+import React from "react";
+
+interface ConfirmModalProps {
   open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -18,35 +20,54 @@ export function ConfirmDeleteModal({
   description: string;
   confirmLabel?: string; // Button label for confirm (default: 삭제)
   cancelLabel?: string; // Button label for cancel (default: 취소)
-}) {
+  loading?: boolean;
+}
+
+export function ConfirmModal({
+  open,
+  onConfirm,
+  onCancel,
+  title,
+  description,
+  confirmLabel = "삭제", // Delete
+  cancelLabel = "취소", // Cancel
+  loading = false,
+}: ConfirmModalProps) {
   return (
-    <Modal
-      isOpen={open}
-      title={title}
-      description={description}
-      onClose={onCancel}
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onCancel();
+      }}
     >
-      <div className="flex flex-col gap-4 items-center justify-center py-4">
-        <div className="flex gap-4 w-full justify-center">
+      <DialogContent showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle className="font-pretendard-600">{title}</DialogTitle>
+          <DialogDescription className="font-pretendard-500">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
           <Button
             type="button"
             className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
             onClick={onConfirm}
+            disabled={loading}
           >
-            {confirmLabel} {/**Delete */}
+            {loading ? "삭제 중..." : confirmLabel} {/* Deleting... / Delete */}
           </Button>
-          <Button
-            type="button"
-            className="px-4 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCancel();
-            }}
-          >
-            {cancelLabel} {/**Cancel */}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              className="px-4 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300"
+              onClick={onCancel}
+              disabled={loading}
+            >
+              {cancelLabel} {/* Cancel */}
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
