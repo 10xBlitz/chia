@@ -1,6 +1,8 @@
 "use client";
 
+import MobileLayout from "@/components/layout/mobile-layout";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   loadTossPayments,
   TossPaymentsWidgets,
@@ -18,7 +20,11 @@ export default function CheckoutPage() {
     : 50; // 기본 금액 50원
 
   const orderId = searchParams.get("orderId") || "-xZTsRbXHDRL30IBrjM0t";
-  const [amount, setAmount] = useState({
+  const eventName = searchParams.get("eventName") || "";
+  const treatmentName = searchParams.get("treatmentName") || "";
+  const treatmentOriginalPrice =
+    searchParams.get("treatmentOriginalPrice") || "";
+  const [amount] = useState({
     currency: "KRW",
     value: amountParams, // 기본 금액 50원
   });
@@ -80,7 +86,7 @@ export default function CheckoutPage() {
   }, [widgets, amount]);
 
   return (
-    <div className="wrapper">
+    <MobileLayout>
       <div className="box_section">
         {/* 결제 UI */}
         <div id="payment-method" />
@@ -88,32 +94,29 @@ export default function CheckoutPage() {
         <div id="agreement" />
         {/* 쿠폰 체크박스 */}
         <div>
-          <div>
-            <label htmlFor="coupon-box">
-              <input
-                id="coupon-box"
-                type="checkbox"
-                aria-checked="true"
-                disabled={!ready}
-                onChange={(event) => {
-                  // ------  주문서의 결제 금액이 변경되었을 경우 결제 금액 업데이트 ------
-                  setAmount({
-                    currency: "KRW",
-                    value: event.target.checked
-                      ? amount.value - 5_000
-                      : amount.value + 5_000,
-                  });
-                }}
-              />
-              <span>{amountParams}원 쿠폰 적용</span>
-            </label>
+          {/* 결제 정보 표시 */}
+          <div className="mb-4 p-4 rounded-sm bg-gray-50 border text-base grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+            <Label className="text-right">주문 번호 {/* Order ID */}</Label>
+            <span className="font-semibold text-left">{orderId}</span>
+            <Label className="text-right">이벤트가 {/* Event Price */}</Label>
+            <span className="font-semibold text-left">{amount.value}원</span>
+            <Label className="text-right">이벤트명 {/* Event Name */}</Label>
+            <span className="font-semibold text-left">{eventName}</span>
+            <Label className="text-right">시술명 {/* Treatment Name */}</Label>
+            <span className="font-semibold text-left">{treatmentName}</span>
+            <Label className="text-right">
+              시술 원가 {/* Treatment Original Price */}
+            </Label>
+            <span className="font-semibold text-left">
+              {treatmentOriginalPrice}원
+            </span>
           </div>
         </div>
 
         {/* 결제하기 버튼 */}
         {widgets && (
           <Button
-            className="button"
+            className="w-full"
             disabled={!ready}
             onClick={async () => {
               try {
@@ -143,6 +146,6 @@ export default function CheckoutPage() {
           </Button>
         )}
       </div>
-    </div>
+    </MobileLayout>
   );
 }

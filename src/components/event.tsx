@@ -22,7 +22,7 @@ export default function EventCarousel() {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("event")
-        .select("*, clinic_treatment(*)");
+        .select("*, clinic_treatment(*,treatment(*))");
       if (error) throw error;
       return data;
     },
@@ -122,12 +122,14 @@ export default function EventCarousel() {
               <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
                 {event.image_url ? (
                   <Link
-                    href={`/patient/reservation/payment?orderId=${
+                    href={`/patient/payment/event?orderId=${
                       event.id
                     }&amount=${calculateDiscountedPrice(
                       event.clinic_treatment.price,
                       event.discount
-                    )}`}
+                    )}&eventName=${event.title}&treatmentName=${
+                      event.clinic_treatment.treatment.treatment_name
+                    }&treatmentOriginalPrice=${event.clinic_treatment.price}`}
                     className="block h-full"
                   >
                     <Image

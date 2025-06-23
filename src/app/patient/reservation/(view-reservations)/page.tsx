@@ -85,7 +85,21 @@ export default function ReservationListPage() {
                   className="rounded-md px-4 h-8 text-sm font-medium border border-gray-200 bg-gray-50 text-gray-500"
                   variant="default"
                   tabIndex={-1}
-                  onClick={() => router.push(`/patient/reservation/payment`)}
+                  onClick={() =>
+                    router.push(
+                      `/patient/payment/reservation?reservation_id=${
+                        r.id
+                      }&treatment_id=${
+                        r.clinic_treatment?.treatment?.id
+                      }&treatment_name=${
+                        r.clinic_treatment?.treatment?.treatment_name || ""
+                      }&clinic_id=${
+                        r.clinic_treatment?.clinic?.id
+                      }&clinic_name=${
+                        r.clinic_treatment?.clinic?.clinic_name || ""
+                      }&total_amount=${r.clinic_treatment?.price || 0}`
+                    )
+                  }
                 >
                   결제하기 {/* Pay */}
                 </Button>
