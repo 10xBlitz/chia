@@ -270,6 +270,9 @@ export const ClinicModal = ({
 
   // For custom day_of_week input
 
+  const inputClassName = "text-sm sm:text-[16px] h-[40px] sm:h-[45px]";
+  const formLabelClassName = "text-sm sm:text-[16px]";
+
   return (
     <>
       <Modal
@@ -286,11 +289,13 @@ export const ClinicModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="py-2">
             <div className="flex flex-col gap-8 w-full items-start justify-center">
               {/* 왼쪽: 병원 정보 (Left: Clinic Info) */}
-              <div className="flex flex-col gap-5 w-full">
+              <div className="flex flex-col gap-3 w-full">
                 <FormInput
                   control={form.control}
                   name="clinic_name"
                   label="병원 이름" // Clinic Name
+                  formLabelClassName={formLabelClassName}
+                  inputClassName={inputClassName}
                   placeholder="여기에 병원 이름을 입력하세요." // Enter clinic name here
                 />
                 <FormInput
@@ -299,22 +304,36 @@ export const ClinicModal = ({
                   label="클리닉 링크" // Clinic Link
                   placeholder="여기에 클리닉 링크를 입력하세요." // Enter clinic link here
                   type="url"
+                  formLabelClassName={formLabelClassName}
+                  inputClassName={inputClassName}
                 />
                 <FormContactNumber
                   control={form.control}
                   name="contact_number"
                   label="연락처" // Contact Number
                   placeholder="연락처를 입력하세요." // Enter contact number here
+                  formLabelClassName={formLabelClassName}
+                  inputClassName={
+                    "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
+                  }
                 />
                 <FormAddress
                   control={form.control}
                   name="location"
                   label="위치" // Location
+                  formLabelClassName={formLabelClassName}
+                  inputClassName={
+                    "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
+                  }
                 />
                 <FormAddress
                   control={form.control}
                   name="region"
                   label="지역" // Region
+                  formLabelClassName={formLabelClassName}
+                  inputClassName={
+                    "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
+                  }
                 />
                 <FormDatePicker
                   control={form.control}
@@ -329,9 +348,9 @@ export const ClinicModal = ({
                     accept="image/*"
                     multiple
                     onChange={handleClinicImagesChange}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="mt-2  mb-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-">
                     {clinicImagePreviews.map((src, idx) => (
                       <Image
                         key={idx}

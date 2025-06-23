@@ -52,6 +52,7 @@ type FormContactNumberProps<T extends FieldValues> = {
   defaultCountry?: Country;
   formItemClassName?: string;
   formLabelClassName?: string;
+  inputClassName?: string;
 };
 
 export default function FormContactNumber<T extends FieldValues>({
@@ -61,6 +62,7 @@ export default function FormContactNumber<T extends FieldValues>({
   defaultCountry = "KR",
   formItemClassName,
   formLabelClassName,
+  inputClassName,
 }: FormContactNumberProps<T>) {
   return (
     <FormField
@@ -81,6 +83,7 @@ export default function FormContactNumber<T extends FieldValues>({
               defaultCountry={defaultCountry}
               onChange={field.onChange}
               value={field.value}
+              className={inputClassName}
             />
           </FormControl>
           <FormMessage />

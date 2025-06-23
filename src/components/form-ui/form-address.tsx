@@ -48,6 +48,7 @@ type FormAddressProps<T extends FieldValues> = {
   label: string;
   formItemClassName?: string;
   formLabelClassName?: string;
+  inputClassName?: string; // Optional class for the AddressSelector input
 };
 
 export default function FormAddress<T extends FieldValues>({
@@ -56,6 +57,7 @@ export default function FormAddress<T extends FieldValues>({
   label,
   formItemClassName,
   formLabelClassName,
+  inputClassName,
 }: FormAddressProps<T>) {
   return (
     <FormField
@@ -78,6 +80,7 @@ export default function FormAddress<T extends FieldValues>({
               }
               initialCity={field.value?.split(",")[0] || ""}
               initialRegion={field.value?.split(",")[1] || ""}
+              className={inputClassName}
             />
           </FormControl>
           <FormMessage />

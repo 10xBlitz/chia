@@ -63,7 +63,10 @@ const InputComponent = React.forwardRef<
   React.ComponentProps<"input">
 >(({ className, ...props }, ref) => (
   <Input
-    className={cn("rounded-e-md rounded-s-none h-[45px]", className)}
+    className={cn(
+      "rounded-e-md rounded-s-none text-sm sm:text-[16px] h-[40px] sm:h-[45px]",
+      className
+    )}
     {...props}
     ref={ref}
   />
@@ -95,7 +98,7 @@ const CountrySelect = ({
         <Button
           type="button"
           variant="outline"
-          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 px-3 focus:z-10"
+          className="flex gap-1 rounded-e-none rounded-s-md border-r-0 px-3 focus:z-10 text-sm sm:text-[16px] h-[40px] sm:h-[45px]"
           disabled={disabled}
         >
           <FlagComponent

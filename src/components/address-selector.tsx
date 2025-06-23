@@ -17,6 +17,7 @@ interface AddressSelectorProps {
   initialCity?: string;
   initialRegion?: string;
   disabled?: boolean; // Optional prop to disable the selector
+  className?: string; // Optional className for custom styling
 }
 
 export default function AddressSelector({
@@ -24,6 +25,7 @@ export default function AddressSelector({
   initialCity,
   initialRegion,
   disabled = false, // Default to false if not provided
+  className,
 }: AddressSelectorProps) {
   const [selectedCity, setSelectedCity] = useState<string | null>(
     initialCity || null
@@ -86,7 +88,10 @@ export default function AddressSelector({
           }
         }}
         variant="outline"
-        className="w-full min-h-[45px] justify-start text-left text-gray-700" // Adjust style as needed
+        className={cn(
+          "w-full min-h-[45px] justify-start text-left text-gray-700",
+          className
+        )} // Adjust style as needed
       >
         {displayAddress}
       </Button>
