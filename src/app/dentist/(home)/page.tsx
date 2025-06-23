@@ -22,7 +22,7 @@ const quickActions = [
   {
     href: "/dentist/quotation",
     icon: QuotationIcon,
-    label: "즐겨찾기", // Favorites
+    label: "견적보기", //  Quotation View
   },
 ];
 

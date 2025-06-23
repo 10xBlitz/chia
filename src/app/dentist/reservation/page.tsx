@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,13 +10,45 @@ import HeaderWithBackButton from "@/components/header-with-back-button";
 import { ko } from "date-fns/locale";
 import { calculateAge } from "@/lib/utils";
 import { useUserStore } from "@/providers/user-store-provider";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+
+const YEARS = Array.from(
+  { length: 300 },
+  (_, i) => new Date().getFullYear() - 100 + i
+);
+const MONTHS = [
+  "1월",
+  "2월",
+  "3월",
+  "4월",
+  "5월",
+  "6월",
+  "7월",
+  "8월",
+  "9월",
+  "10월",
+  "11월",
+  "12월",
+];
 
 export default function DentistReservationPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
   const [selectedReservationId, setSelectedReservationId] = useState<
     string | null
   >(null);
   const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    setDisplayMonth(selectedDate);
+  }, [selectedDate]);
 
   // Query for reservations
   const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
@@ -24,6 +56,22 @@ export default function DentistReservationPage() {
     queryFn: () => fetchReservations(user?.clinic_id, selectedDate),
     enabled: !!user?.clinic_id,
   });
+
+  // Navigation handlers
+  const handlePrevMonth = () => {
+    setDisplayMonth((prev) => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() - 1);
+      return newDate;
+    });
+  };
+  const handleNextMonth = () => {
+    setDisplayMonth((prev) => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + 1);
+      return newDate;
+    });
+  };
 
   return (
     <>
@@ -44,9 +92,71 @@ export default function DentistReservationPage() {
             day_selected:
               "!bg-[#287DFA] text-white hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
           }}
+          month={displayMonth}
+          onMonthChange={setDisplayMonth}
         />
+
+        {/* Year & Month selectors and navigation */}
+        <div className="flex justify-center items-center gap-2 mt-2">
+          <button
+            type="button"
+            aria-label="이전 달"
+            className="rounded-md p-2 hover:bg-accent transition"
+            onClick={handlePrevMonth}
+          >
+            <ChevronLeftIcon className="w-5 h-5" />
+          </button>
+          <Select
+            value={String(displayMonth.getFullYear())}
+            onValueChange={(yearStr) => {
+              const year = Number(yearStr);
+              const newDate = new Date(displayMonth);
+              newDate.setFullYear(year);
+              setDisplayMonth(newDate);
+            }}
+          >
+            <SelectTrigger className="w-full max-w-[100px]">
+              <SelectValue placeholder="연도" />
+            </SelectTrigger>
+            <SelectContent className="max-h-48 overflow-auto">
+              {YEARS.map((year) => (
+                <SelectItem key={year} value={String(year)}>
+                  {year}년
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={String(displayMonth.getMonth())}
+            onValueChange={(monthStr) => {
+              const month = Number(monthStr);
+              const newDate = new Date(displayMonth);
+              newDate.setMonth(month);
+              setDisplayMonth(newDate);
+            }}
+          >
+            <SelectTrigger className="w-[80px]">
+              <SelectValue placeholder="월" />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((monthName, idx) => (
+                <SelectItem key={monthName} value={String(idx)}>
+                  {monthName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            type="button"
+            aria-label="다음 달"
+            className="rounded-md p-2 hover:bg-accent transition"
+            onClick={handleNextMonth}
+          >
+            <ChevronRightIcon className="w-5 h-5" />
+          </button>
+        </div>
       </div>
-      <div className="mt-10">
+      <div className="mt-10 ">
         <h2 className="font-bold text-lg mb-2">
           예약 내역 {/**Reservation details */}
         </h2>
@@ -76,7 +186,7 @@ export default function DentistReservationPage() {
                 <span className="text-sm text-black flex-1 ml-2 truncate max-w-[80%]">
                   {r.user.full_name} ·{" "}
                   {calculateAge(new Date(r.user.birthdate))}세 ·
-                  {r.clinic_treatment.treatment.treatment_name}
+                  {r?.clinic_treatment?.treatment?.treatment_name}
                 </span>
               </div>
               <Checkbox
