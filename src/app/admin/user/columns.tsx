@@ -8,9 +8,7 @@ import { calculateAge } from "@/lib/utils";
 
 import { CellAction } from "./cell-actions";
 
-export type UserTable = Tables<"user">;
-
-export const columns: ColumnDef<UserTable>[] = [
+export const columns: ColumnDef<Tables<"user">>[] = [
   {
     accessorKey: "category",
     header: "범주", // Category
@@ -21,7 +19,7 @@ export const columns: ColumnDef<UserTable>[] = [
     ),
   },
   {
-    accessorKey: "age",
+    accessorKey: "birthdate", // Use birthdate for sorting
     header: ({ column }) => {
       return (
         <Button
@@ -34,6 +32,7 @@ export const columns: ColumnDef<UserTable>[] = [
       );
     },
     cell: ({ row }) => <>{calculateAge(new Date(row.original.birthdate))}</>,
+    enableSorting: true,
   },
   {
     accessorKey: "full_name",

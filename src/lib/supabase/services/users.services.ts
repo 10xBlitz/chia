@@ -14,9 +14,11 @@ interface Filters {
 export async function getPaginatedUsers(
   page = 1,
   limit = 10,
-  filters: Filters = {}
+  filters: Filters = {},
+  sort: string = "created_at",
+  order: string = "desc"
 ) {
-  console.log("---->getPaginatedUsers", { page, limit, filters });
+  console.log("---->getPaginatedUsers", { page, limit, filters, sort, order });
 
   if (limit > 1000) {
     throw Error("limit exceeds 1000");
@@ -31,7 +33,8 @@ export async function getPaginatedUsers(
   let query = supabaseClient
     .from("user")
     .select("*", { count: "exact" })
-    .order("id", { ascending: true })
+    .eq("login_status", "active")
+    .order(sort, { ascending: order === "asc" })
     .range(offset, offset + limit - 1);
 
   // Filters
@@ -259,4 +262,13 @@ export async function registerDentist({
   }
 
   return result.data;
+}
+
+export async function setUserDeleted(userId: string) {
+  // Set the user's status to deleted
+  const { error } = await supabaseClient
+    .from("user")
+    .update({ login_status: "inactive" })
+    .eq("id", userId);
+  if (error) throw error;
 }

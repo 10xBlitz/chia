@@ -48,13 +48,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { addDays, format } from "date-fns";
-import { DateRange } from "react-day-picker";
 import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  // currentPage: number;
-  // currentLimit: number;
   paginatedData: {
     data: TData[];
     totalItems: number | null;
@@ -62,16 +59,22 @@ interface DataTableProps<TData, TValue> {
     hasNextPage: boolean;
     hasPrevPage: boolean;
   };
+  sorting: SortingState;
+  onSortingChange: (
+    updater:
+      | SortingState
+      | ((old: SortingState) => SortingState)
+  ) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
-
   paginatedData,
+  sorting,
+  onSortingChange,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const searchParam = useSearchParams();
-  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -83,19 +86,25 @@ export function DataTable<TData, TValue>({
   const limitParam = searchParam.get("limit")
     ? Number(searchParam.get("limit"))
     : 10;
-  const [page, setPage] = React.useState(pageParam);
-  const [limit, setLimit] = React.useState(limitParam);
+  const category = searchParam.get("category") || "all"; // Default to "all"
+  const datesParam = searchParam.get("dates");
+  let dates: { from: Date; to: Date } | undefined;
+  if (datesParam) {
+    const decodedDates = JSON.parse(decodeURIComponent(datesParam));
+    dates = {
+      from: decodedDates.from ? new Date(decodedDates.from) : new Date(),
+      to: decodedDates.to ? new Date(decodedDates.to) : addDays(new Date(), 5),
+    };
+  } else {
+    dates = {
+      from: new Date(),
+      to: addDays(new Date(), 5),
+    };
+  }
 
   const [fullName, setFullName] = React.useState(
     searchParam.get("full_name") || ""
   );
-  const [category, setCategory] = React.useState(
-    searchParam.get("category") || ""
-  );
-  const [dates, setDates] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 5),
-  });
 
   const debouncedFullName = useDebounce(fullName || "", 500);
   //-- End search params states
@@ -105,7 +114,7 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
@@ -114,7 +123,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       pagination: {
         pageIndex: 0,
-        pageSize: limit,
+        pageSize: limitParam,
       },
     },
   });
@@ -124,34 +133,34 @@ export function DataTable<TData, TValue>({
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParam.toString());
 
-      //update or delete the param
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
+      params.set(key, value);
 
       //reset pagination when filter or limit changes
       if (key !== "page") {
         params.set("page", "1");
-        setPage(1);
-        setLimit(10);
       }
 
-      //update local state
-      if (key === "page") setPage(Number(value));
-
-      if (key === "limit") setLimit(Number(value));
-
-      router.push(`?${params.toString()}`, { scroll: false });
+      router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [router, searchParam]
+    [searchParam, router]
   );
 
   //debounced the fullName so that it doesn't trigger the search params update on every keystroke
   React.useEffect(() => {
     updateParam("full_name", debouncedFullName);
   }, [debouncedFullName, updateParam]);
+
+  //auto add search params tothe URL
+  React.useEffect(() => {
+    const params = new URLSearchParams(searchParam.toString());
+    params.set("page", String(pageParam));
+    params.set("limit", String(limitParam));
+    params.set("category", category);
+    params.set("full_name", fullName);
+    params.set("dates", JSON.stringify(dates));
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, []);
+
   return (
     <div>
       <div className="flex items-center gap-3 py-4">
@@ -165,7 +174,6 @@ export function DataTable<TData, TValue>({
           value={category}
           defaultValue={category}
           onValueChange={(value) => {
-            setCategory(value);
             updateParam("category", value);
           }}
         >
@@ -217,7 +225,6 @@ export function DataTable<TData, TValue>({
               selected={dates}
               locale={ko}
               onSelect={(dates) => {
-                setDates(dates);
                 updateParam("dates", JSON.stringify(dates));
               }}
               numberOfMonths={2}
@@ -280,11 +287,11 @@ export function DataTable<TData, TValue>({
           <p className="text-sm font-medium">페이지당 행 수</p>{" "}
           {/* Rows per page */}
           <Select
-            value={`${limit}`}
+            value={`${limitParam}`}
             onValueChange={(value) => updateParam("limit", value)}
           >
             <SelectTrigger className="h-8 w-[70px] bg-white">
-              <SelectValue placeholder={limit} />
+              <SelectValue placeholder={limitParam} />
             </SelectTrigger>
             <SelectContent side="top">
               {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -297,7 +304,7 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
-            {page} / {paginatedData.totalPages} 페이지{" "}
+            {pageParam} / {paginatedData.totalPages} 페이지{" "}
             {/* Page {page} of {paginatedData.totalPages} */}
           </div>
           <Button
@@ -313,7 +320,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => updateParam("page", (page - 1).toString())}
+            onClick={() => updateParam("page", (pageParam - 1).toString())}
             disabled={!paginatedData.hasPrevPage}
           >
             <span className="sr-only">이전 페이지로 이동</span>{" "}
@@ -323,7 +330,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => updateParam("page", (page + 1).toString())}
+            onClick={() => updateParam("page", (pageParam + 1).toString())}
             disabled={!paginatedData.hasNextPage}
           >
             <span className="sr-only">다음 페이지로 이동</span>{" "}

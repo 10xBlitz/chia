@@ -8,14 +8,39 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { EditIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
-import { UserTable } from "./columns";
+import { setUserDeleted } from "@/lib/supabase/services/users.services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { useState } from "react";
+import { Tables } from "@/lib/supabase/types";
 
 interface CellActionProps {
-  data: UserTable;
+  data: Tables<"user">;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
-  console.log(data);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const queryClient = useQueryClient();
+  // Mutation for deleting user
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await setUserDeleted(data.id);
+    },
+    onSuccess: () => {
+      toast.success("사용자가 삭제되었습니다."); // User deleted
+      setConfirmOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ["users"], // Invalidate the users query to refresh the data
+      });
+    },
+    onError: (err) => {
+      console.log("Error deleting user:", err);
+      toast.error("삭제에 실패했습니다. " + err.message); // Failed to delete
+      setConfirmOpen(false);
+    },
+  });
+
   return (
     <>
       <DropdownMenu>
@@ -27,14 +52,28 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
             <EditIcon className="h-4 w-4" /> {/* 수정 (Update) */} 수정
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Trash2Icon className="h-4 w-4" /> {/* 삭제 (Delete) */} 삭제
+          <DropdownMenuItem
+            onClick={() => setConfirmOpen(true)}
+            className="text-red-600 cursor-pointer"
+          >
+            <Trash2Icon className="h-4 w-4 text-red-600" />{" "}
+            {/* 삭제 (Delete) */} 삭제
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ConfirmModal
+        open={confirmOpen}
+        onConfirm={() => deleteMutation.mutate()}
+        onCancel={() => setConfirmOpen(false)}
+        title="사용자 삭제 확인" // Confirm User Deletion
+        description="정말로 이 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다." // Are you sure you want to delete this user? This action cannot be undone.
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        loading={deleteMutation.isPending}
+      />
     </>
   );
 };

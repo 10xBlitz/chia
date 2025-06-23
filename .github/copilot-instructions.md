@@ -25,6 +25,7 @@ This is a Next.js 15+ App Router project for a dental clinic platform. It uses S
 - **If there are Korean words in the UI, always add English translations as comments for developers.**
 - **If there is Supabase data fetching, put the logic in the lib/supabase/services folder and attach it to the existing services there. Services are categorized by table; each table should have its own service file.**
 - **Always be mindful of expensive database calls. Avoid unnecessary or redundant queries, and optimize data fetching to minimize load on the database.**
+- **You do not need to use or import types from `src/lib/supabase/types.ts` in your code. That file is for Copilot's internal understanding of the database structure only.**
 
 ---
 

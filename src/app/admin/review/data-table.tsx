@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { addDays, format } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -212,6 +213,7 @@ export function DataTable<TData, TValue>({
               mode="range"
               defaultMonth={dates?.from}
               selected={dates}
+              locale={ko}
               onSelect={(dates) => {
                 setDates(dates);
                 updateParam("dates", JSON.stringify(dates));
