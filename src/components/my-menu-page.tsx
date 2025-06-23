@@ -18,11 +18,15 @@ interface ProfilePageProps {
     label: string;
   }[];
   editProfileLink: string;
+  serviceInquiryLink: string;
+  termsOfServiceLink: string;
 }
 
 export default function MyMenuPage({
   actions,
   editProfileLink,
+  serviceInquiryLink,
+  termsOfServiceLink,
 }: ProfilePageProps) {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
@@ -126,9 +130,7 @@ export default function MyMenuPage({
           <div className="bg-white">
             <Button
               variant={"ghost"}
-              onClick={async () => {
-                router.push("/patient/profile/chat");
-              }}
+              onClick={() => router.push(serviceInquiryLink)}
               className="flex items-center w-full justify-between "
             >
               <span className="ml-2">
@@ -139,7 +141,7 @@ export default function MyMenuPage({
             </Button>
             <Button
               variant={"ghost"}
-              onClick={() => router.push("/patient/profile/terms-of-service")}
+              onClick={() => router.push(termsOfServiceLink)}
               className="flex items-center w-full justify-between "
             >
               <span className="ml-2">이용약관 {/* Terms of Service */}</span>

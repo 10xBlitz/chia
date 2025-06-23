@@ -28,7 +28,12 @@ const quickActions = [
 
 const DentistHome = () => {
   return (
-    <MyMenuPage editProfileLink="/dentist/profile" actions={quickActions} />
+    <MyMenuPage
+      editProfileLink="/dentist/profile"
+      actions={quickActions}
+      serviceInquiryLink="/dentist/profile/chat"
+      termsOfServiceLink="/dentist/profile/terms-of-service"
+    />
   );
 };
 

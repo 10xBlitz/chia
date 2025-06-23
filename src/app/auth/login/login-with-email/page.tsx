@@ -30,6 +30,7 @@ import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import FormInput from "@/components/form-ui/form-input";
 import { createClient, supabaseClient } from "@/lib/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }),
@@ -40,6 +41,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State to control password visibility
   const router = useRouter();
   const userRole = useUserStore((state) => state.user?.role);
   const loginStatus = useUserStore((state) => state.user?.login_status);
@@ -164,13 +166,24 @@ export default function LoginForm() {
                             </Link>
                           </div>
                           <FormControl>
-                            <Input
-                              type="password"
-                              className="h-[45px]"
-                              // 비밀번호를 입력하세요 (Enter your password)
-                              placeholder="비밀번호를 입력하세요"
-                              {...field}
-                            />
+                            <div className="relative">
+                              <Input
+                                type={showPassword ? "text" : "password"}
+                                className="h-[45px] pr-10"
+                                // 비밀번호를 입력하세요 (Enter your password)
+                                placeholder="비밀번호를 입력하세요"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                onClick={() => setShowPassword((v) => !v)}
+                                aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"} // Hide/Show password
+                              >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                              </button>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>

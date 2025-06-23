@@ -39,6 +39,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Allow public access to /api/check-email
+  if (request.nextUrl.pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&

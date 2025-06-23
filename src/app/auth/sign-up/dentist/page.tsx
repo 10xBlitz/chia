@@ -40,98 +40,6 @@ const steps = [
   { label: "검토" }, // Review
 ];
 
-// Review Step Component
-function ReviewStep({
-  form,
-  treatments,
-  departments,
-  hospitals,
-}: {
-  form: ReturnType<typeof useForm<DentistSignupFormType>>;
-  treatments: Tables<"treatment">[];
-  departments: Tables<"clinic_department">[];
-  hospitals: { id: string; clinic_name: string }[];
-}) {
-  const values = form.getValues();
-
-  // Map treatment IDs to names
-  const treatmentNames =
-    Array.isArray(values.treatments) && treatments
-      ? values.treatments
-          .map((id) => {
-            const t = treatments.find((item) => item.id === id);
-            return t ? t.treatment_name : id;
-          })
-          .join(", ")
-      : "";
-
-  // Map department IDs to names
-  const departmentNames =
-    Array.isArray(values.departments) && departments
-      ? values.departments
-          .map((id) => {
-            const d = departments.find((item) => item.id === id);
-            return d ? d.department_name : id;
-          })
-          .join(", ")
-      : "";
-
-  // Map clinic_id to clinic_name
-  const clinicName =
-    hospitals?.find((h) => h.id === values.clinic_id)?.clinic_name ||
-    values.clinic_id ||
-    "";
-
-  return (
-    <div className="p-6 bg-white rounded-lg">
-      <div className="mb-4">
-        <strong className="block">이름: {/* Name */}</strong>
-        <div>{values.full_name}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">이메일: {/* Email */}</strong>
-        <div>{values.email}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">성별: {/* Gender */}</strong>
-        <div>{values.gender}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">연락처: {/* Contact Number */}</strong>
-        <div>{values.contact_number}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">생년월일: {/* Birthdate */}</strong>
-        <div>
-          {values.birthdate
-            ? format(new Date(values.birthdate), "yyyy.MM.dd")
-            : ""}
-        </div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">거주지: {/* Residence */}</strong>
-        <div>{values.residence}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">근무지: {/* Workplace */}</strong>
-        <div>{values.work_place}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">병원명: {/* Clinic Name */}</strong>
-        <div>{clinicName}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">치료: {/* Treatments */}</strong>
-        <div>{treatmentNames}</div>
-      </div>
-      <div className="mb-4">
-        <strong className="block">진료과목: {/* Departments */}</strong>
-        <div>{departmentNames}</div>
-      </div>
-    </div>
-  );
-}
-
 export default function DentistSignupPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -238,7 +146,31 @@ export default function DentistSignupPage() {
     mutate(data);
   };
 
-  const nextStep = () => {
+  const checkEmail = async (email: string) => {
+    console.log("--->checkEmail: ", email);
+    const res = await fetch("/api/check-email", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const { exists } = await res.json();
+
+    console.log("--->checkEmail response: ", exists);
+    return exists;
+  };
+
+  const nextStep = async () => {
+    console.log("--->next step clicked, currentStep: ", currentStep);
+    //validate if email is existing already in database when in step 1
+    if (currentStep === 1) {
+      const isRegistered = await checkEmail(form.getValues("email"));
+
+      if (isRegistered) {
+        toast.error("이미 등록된 이메일입니다."); // Email already registered
+        return;
+      }
+    }
+
     setDirection("next");
     setCurrentStep((prev) => Math.min(prev + 1, steps.length));
   };
@@ -462,7 +394,7 @@ export default function DentistSignupPage() {
               <Button
                 type="button"
                 className="w-[49%] btn-primary"
-                onClick={nextStep}
+                onClick={async () => await nextStep()}
                 disabled={!isStepValid}
               >
                 다음 {/* Next */}
@@ -483,5 +415,97 @@ export default function DentistSignupPage() {
         </form>
       </Form>
     </MobileLayout>
+  );
+}
+
+// Review Step Component
+function ReviewStep({
+  form,
+  treatments,
+  departments,
+  hospitals,
+}: {
+  form: ReturnType<typeof useForm<DentistSignupFormType>>;
+  treatments: Tables<"treatment">[];
+  departments: Tables<"clinic_department">[];
+  hospitals: { id: string; clinic_name: string }[];
+}) {
+  const values = form.getValues();
+
+  // Map treatment IDs to names
+  const treatmentNames =
+    Array.isArray(values.treatments) && treatments
+      ? values.treatments
+          .map((id) => {
+            const t = treatments.find((item) => item.id === id);
+            return t ? t.treatment_name : id;
+          })
+          .join(", ")
+      : "";
+
+  // Map department IDs to names
+  const departmentNames =
+    Array.isArray(values.departments) && departments
+      ? values.departments
+          .map((id) => {
+            const d = departments.find((item) => item.id === id);
+            return d ? d.department_name : id;
+          })
+          .join(", ")
+      : "";
+
+  // Map clinic_id to clinic_name
+  const clinicName =
+    hospitals?.find((h) => h.id === values.clinic_id)?.clinic_name ||
+    values.clinic_id ||
+    "";
+
+  return (
+    <div className="p-6 bg-white rounded-lg">
+      <div className="mb-4">
+        <strong className="block">이름: {/* Name */}</strong>
+        <div>{values.full_name}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">이메일: {/* Email */}</strong>
+        <div>{values.email}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">성별: {/* Gender */}</strong>
+        <div>{values.gender}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">연락처: {/* Contact Number */}</strong>
+        <div>{values.contact_number}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">생년월일: {/* Birthdate */}</strong>
+        <div>
+          {values.birthdate
+            ? format(new Date(values.birthdate), "yyyy.MM.dd")
+            : ""}
+        </div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">거주지: {/* Residence */}</strong>
+        <div>{values.residence}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">근무지: {/* Workplace */}</strong>
+        <div>{values.work_place}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">병원명: {/* Clinic Name */}</strong>
+        <div>{clinicName}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">치료: {/* Treatments */}</strong>
+        <div>{treatmentNames}</div>
+      </div>
+      <div className="mb-4">
+        <strong className="block">진료과목: {/* Departments */}</strong>
+        <div>{departmentNames}</div>
+      </div>
+    </div>
   );
 }

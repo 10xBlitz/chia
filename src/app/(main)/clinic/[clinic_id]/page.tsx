@@ -30,10 +30,10 @@ import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { fetchClinicDetail } from "@/lib/supabase/services/clinics.services";
 
 const TABS = [
-  { key: "info", label: "병원정보" },
-  { key: "photos", label: "사진" },
-  { key: "treatments", label: "진료정보" },
-  { key: "reviews", label: "리뷰" },
+  { key: "info", label: "병원정보" }, // Hospital Info
+  { key: "photos", label: "사진" }, // Photos
+  { key: "treatments", label: "진료정보" }, // Treatment Info
+  { key: "reviews", label: "리뷰" }, // Reviews
 ];
 
 const PAGE_SIZE = 10;
@@ -94,7 +94,7 @@ export default function ClinicSingleViewPage() {
         images: review.images || [],
         rating: review.rating || "0",
         created_at: review.created_at,
-        review: review.review || "리뷰 내용이 없습니다.", // Default message if no review text
+        review: review.review || "리뷰 내용이 없습니다.", // No review content
       }))
     ) || [];
 
@@ -165,7 +165,7 @@ export default function ClinicSingleViewPage() {
   const handleCopyAddress = () => {
     if (clinic?.location) {
       navigator.clipboard.writeText(String(clinic.location));
-      toast.success("주소가 클립보드에 복사되었습니다.");
+      toast.success("주소가 클립보드에 복사되었습니다."); // Address copied to clipboard
     }
   };
 
@@ -189,6 +189,7 @@ export default function ClinicSingleViewPage() {
           <p className="text-red-500">
             병원 정보를 불러오는 데 오류가 발생했습니다. 나중에 다시
             시도해주세요.
+            {/* Failed to load hospital info. Please try again later. */}
           </p>
           <Button
             variant="outline"
@@ -196,6 +197,7 @@ export default function ClinicSingleViewPage() {
             onClick={() => router.push("/")}
           >
             홈으로 돌아가기
+            {/* Go back to home */}
           </Button>
         </div>
       </MobileLayout>
@@ -275,12 +277,14 @@ export default function ClinicSingleViewPage() {
                 {clinic.working_hour && clinic.working_hour.length > 0
                   ? clinic.working_hour[0].time_open
                   : "9:30 ~ 14:00"}
+                {/* Clinic closes today */}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
               <span>
                 전화번호
+                {/* Phone number */}
                 <Link
                   href={`tel:${clinic.contact_number}`}
                   className=" underline"
@@ -296,7 +300,7 @@ export default function ClinicSingleViewPage() {
             >
               <Youtube className="h-4 w-4" />
               <span>
-                유튜브{" "}
+                유튜브 {/* YouTube */}
                 <span className="underline cursor-pointer text-ellipsis ">
                   {clinic.link?.split("/watch")[0]}
                 </span>
@@ -325,6 +329,7 @@ export default function ClinicSingleViewPage() {
             {/* 진료 시간 (Opening Hours) */}
             <div className="mt-6">
               <div className="font-semibold text-xl mb-2">진료 시간</div>
+              {/* Opening Hours */}
               {/* Today section */}
               <div className="bg-blue-50 rounded-xl p-4 flex justify-between items-center mb-4">
                 <div>
@@ -500,6 +505,7 @@ export default function ClinicSingleViewPage() {
               {isLoadingReviews && (
                 <div className="text-center text-gray-400 py-8">
                   리뷰를 불러오는 중입니다...
+                  {/* Loading reviews... */}
                 </div>
               )}
               {!isLoadingReviews && reviews.length === 0 && (
@@ -528,6 +534,7 @@ export default function ClinicSingleViewPage() {
                   disabled={isFetchingNextPage}
                 >
                   {isFetchingNextPage ? "로딩 중..." : "리뷰 더보기"}
+                  {/* Load more reviews */}
                 </Button>
               )}
             </div>

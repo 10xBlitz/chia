@@ -11,10 +11,12 @@ import toast from "react-hot-toast";
 import { updateUserPassword } from "@/lib/supabase/services/users.services";
 import { useMutation } from "@tanstack/react-query";
 import FormInput from "@/components/form-ui/form-input";
+import { supabaseClient } from "@/lib/supabase/client";
 
 // Zod schema for validation
 const formSchema = z
   .object({
+    oldPassword: z.string().min(6, "기존 비밀번호를 입력해주세요."), // Please enter your old password.
     password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다."), // Password must be at least 6 characters long.
     confirmPassword: z.string(),
   })
@@ -38,6 +40,7 @@ export function EditPasswordModal({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
+      oldPassword: "",
       password: "",
       confirmPassword: "",
     },
@@ -47,22 +50,28 @@ export function EditPasswordModal({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
       if (!user) throw new Error("사용자 정보가 없습니다."); // User information is missing.
 
-      updateUserPassword(values.password)
-        .then(() => {
-          toast.success("비밀번호가 성공적으로 수정되었습니다."); // Your password has been successfully updated.
-        })
-        .catch((error) => {
-          console.error("Error updating password:", error);
-          toast.error("비밀번호 수정에 실패했습니다."); // Failed to update password.
-        });
+      // 1. Re-authenticate user with old password
+      const {
+        data: { session },
+        error: signInError,
+      } = await supabaseClient.auth.signInWithPassword({
+        email: user.email,
+        password: values.oldPassword,
+      });
+      if (signInError || !session) {
+        throw new Error("기존 비밀번호가 올바르지 않습니다."); // Old password is incorrect.
+      }
+
+      // 2. Update password
+      await updateUserPassword(values.password);
     },
     onSuccess: () => {
       toast.success("비밀번호가 성공적으로 수정되었습니다."); // Your password has been successfully updated.
       onClose();
     },
     onError: (err) => {
-      console.error("Error updating profile:", err);
-      toast.error("알 수 없는 오류가 발생했습니다."); // An unknown error occurred.
+      const msg = err?.message || "알 수 없는 오류가 발생했습니다."; // An unknown error occurred.
+      toast.error(msg);
     },
   });
 
@@ -73,7 +82,7 @@ export function EditPasswordModal({
   return (
     <Modal
       title="비밀번호 수정" // Edit Password
-      description="비밀번호를 수정하려면 새 비밀번호를 입력해주세요." // Please enter your new password to edit your password.
+      description="비밀번호를 수정하려면 기존 비밀번호와 새 비밀번호를 입력해주세요." // Please enter your old and new password to change your password.
       isOpen={open}
       isLong={true}
       onClose={onClose}
@@ -83,6 +92,13 @@ export function EditPasswordModal({
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-4 py-2"
         >
+          <FormInput
+            control={form.control}
+            name="oldPassword"
+            type="password"
+            label="기존 비밀번호" // Old Password
+            placeholder="기존 비밀번호를 입력해주세요." // Please enter your old password.
+          />
           <FormInput
             control={form.control}
             name="password"

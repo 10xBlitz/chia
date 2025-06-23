@@ -62,6 +62,16 @@ export default function MainPage() {
     });
   };
 
+  let userLink = "";
+  if (user?.role === "admin") {
+    userLink = "/admin";
+  } else if (user?.role === "patient") {
+    userLink = "/patient/profile";
+  } else if (user?.role === "dentist") {
+    userLink = "/dentist";
+  } else {
+    userLink = "/auth/login"; // Default to login if no role matches
+  }
   return (
     <>
       <header className="pb-3 flex justify-between items-center px-4">
@@ -72,11 +82,11 @@ export default function MainPage() {
           alt="logo"
         />
         {user?.id ? (
-          <Link href={user?.role === "admin" ? "/admin" : "/patient/profile"}>
+          <Link href={userLink}>
             <UserIcon className="min-w-7 min-h-7" />
           </Link>
         ) : (
-          <Link href="/auth/login">
+          <Link href={userLink}>
             <Button className="bg-white text-black border-1 hover:bg-black/20">
               로그인 {/**Login */}
             </Button>
@@ -186,7 +196,7 @@ export default function MainPage() {
           )}
         </div>
       </main>
-      {user?.id && <BottomNavigation />}
+      {user?.id && user.role === "patient" && <BottomNavigation />}
       <Footer />
       {/* Spacer to prevent footer overlap on mobile */}
       {user?.id && <div className="h-14"></div>}
