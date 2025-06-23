@@ -49,6 +49,13 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { addDays, format } from "date-fns";
 import { ko } from "date-fns/locale";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -61,17 +68,23 @@ interface DataTableProps<TData, TValue> {
   };
   sorting: SortingState;
   onSortingChange: (
-    updater:
-      | SortingState
-      | ((old: SortingState) => SortingState)
+    updater: SortingState | ((old: SortingState) => SortingState)
   ) => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
-export function DataTable<TData, TValue>({
+const textSize = "text-[12px] sm:text-sm";
+
+export function DataTable<TData extends { id: string }, TValue>({
   columns,
   paginatedData,
   sorting,
   onSortingChange,
+  isLoading = false,
+  isError = false,
+  errorMessage,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const searchParam = useSearchParams();
@@ -106,7 +119,7 @@ export function DataTable<TData, TValue>({
     searchParam.get("full_name") || ""
   );
 
-  const debouncedFullName = useDebounce(fullName || "", 500);
+  const debouncedFullName = useDebounce(fullName || "", 300);
   //-- End search params states
 
   const table = useReactTable({
@@ -128,15 +141,13 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  // Wrap updateParam in useCallback to prevent it from changing on every render
+  // Only reset page to 1 if a filter or limit changes
   const updateParam = React.useCallback(
-    (key: string, value: string) => {
+    (key: string, value: string, options?: { resetPage?: boolean }) => {
       const params = new URLSearchParams(searchParam.toString());
-
       params.set(key, value);
-
-      //reset pagination when filter or limit changes
-      if (key !== "page") {
+      // Only reset page if explicitly requested (e.g., filter/limit change)
+      if (options?.resetPage) {
         params.set("page", "1");
       }
 
@@ -145,39 +156,51 @@ export function DataTable<TData, TValue>({
     [searchParam, router]
   );
 
-  //debounced the fullName so that it doesn't trigger the search params update on every keystroke
+  // Debounce fullName and update param, resetting page
   React.useEffect(() => {
-    updateParam("full_name", debouncedFullName);
-  }, [debouncedFullName, updateParam]);
+    const current = searchParam.get("full_name") || "";
+    if (debouncedFullName !== current) {
+      updateParam("full_name", debouncedFullName, { resetPage: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedFullName]);
 
-  //auto add search params tothe URL
+  // Ensure default date range is present in params
   React.useEffect(() => {
     const params = new URLSearchParams(searchParam.toString());
-    params.set("page", String(pageParam));
-    params.set("limit", String(limitParam));
-    params.set("category", category);
-    params.set("full_name", fullName);
-    params.set("dates", JSON.stringify(dates));
-    router.replace(`?${params.toString()}`, { scroll: false });
-  }, []);
+    if (!params.get("dates")) {
+      const from = new Date();
+      const to = addDays(new Date(), 5);
+      params.set(
+        "dates",
+        JSON.stringify({ from: from.toISOString(), to: to.toISOString() })
+      );
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParam, router]);
+
+  const [selectedUser, setSelectedUser] = React.useState<TData | null>(null);
+  const [isPanelOpen, setIsPanelOpen] = React.useState(false);
 
   return (
-    <div>
+    <div className="relative max-w-[90dvw] mx-auto">
       <div className="flex items-center gap-3 py-4">
         <Input
           placeholder="이름으로 검색" // Search by name
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
-          className="w-[300px] bg-white h-[45px]"
+          className={cn("bg-white h-[40] sm:h-[45px] max-w-[300px]", textSize)}
         />
         <Select
           value={category}
           defaultValue={category}
           onValueChange={(value) => {
-            updateParam("category", value);
+            updateParam("category", value, { resetPage: true });
           }}
         >
-          <SelectTrigger className="w-[300px] min-h-[45px] bg-white">
+          <SelectTrigger
+            className={cn("min-h-[40] sm:min-h-[45px] bg-white", textSize)}
+          >
             <SelectValue placeholder="카테고리를 선택하세요" />{" "}
             {/* Select a category */}
           </SelectTrigger>
@@ -198,8 +221,9 @@ export function DataTable<TData, TValue>({
               id="date"
               variant={"outline"}
               className={cn(
-                "w-[300px] justify-start text-left font-normal",
-                !dates && "text-muted-foreground"
+                " justify-start text-left font-normal h-[40] sm:h-[45px]",
+                !dates && "text-muted-foreground",
+                textSize
               )}
             >
               <CalendarIcon />
@@ -225,21 +249,30 @@ export function DataTable<TData, TValue>({
               selected={dates}
               locale={ko}
               onSelect={(dates) => {
-                updateParam("dates", JSON.stringify(dates));
+                updateParam("dates", JSON.stringify(dates), {
+                  resetPage: true,
+                });
               }}
               numberOfMonths={2}
             />
           </PopoverContent>
         </Popover>
       </div>
-      <div className="rounded-md border bg-white">
-        <Table>
+      <div className="rounded-md border bg-white w-full overflow-x-auto">
+        <Table className={cn("w-full", textSize)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const colClass =
+                    header.column.columnDef.meta &&
+                    typeof header.column.columnDef.meta === "object" &&
+                    "className" in header.column.columnDef.meta
+                      ? (header.column.columnDef.meta as { className?: string })
+                          .className || ""
+                      : "";
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className={colClass}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -252,45 +285,130 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
+
+          {isError ? (
+            <TableBody>
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  결과 없음 {/* No results */}
+                <TableCell colSpan={columns.length} className="text-center">
+                  {errorMessage || "오류 발생"} {/* An error occurred */}
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
+            </TableBody>
+          ) : null}
+          {isLoading ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  로딩 중... {/* Loading... */}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : (
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelectedUser(row.original);
+                      setIsPanelOpen(true);
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const colClass =
+                        cell.column.columnDef.meta &&
+                        typeof cell.column.columnDef.meta === "object" &&
+                        "className" in cell.column.columnDef.meta
+                          ? (
+                              cell.column.columnDef.meta as {
+                                className?: string;
+                              }
+                            ).className || ""
+                          : "";
+                      return (
+                        <TableCell key={cell.id} className={colClass}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    결과 없음 {/* No results */}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          )}
         </Table>
       </div>
+      {/* User Info Side Panel */}
+      <Sheet open={isPanelOpen} onOpenChange={setIsPanelOpen}>
+        <SheetContent side="right" className="max-w-md w-full">
+          <SheetHeader>
+            <SheetTitle>유저 정보 {/* User Info */}</SheetTitle>
+            <SheetDescription>
+              선택한 유저의 모든 정보를 표시합니다.{" "}
+              {/* Shows all selected user info */}
+            </SheetDescription>
+          </SheetHeader>
+          {selectedUser && (
+            <div className="mt-4 space-y-2  break-all px-5 text-sm">
+              {Object.entries(selectedUser).map(([key, value]) => {
+                // Korean label map
+                const keyLabels: Record<string, string> = {
+                  id: "아이디", // ID
+                  full_name: "성명", // Full Name
+                  birthdate: "생년월일", // Birthdate
+                  gender: "성별", // Gender
+                  contact_number: "연락처", // Contact Number
+                  residence: "거주지", // Residence
+                  work_place: "직장", // Workplace
+                  role: "역할", // Role
+                  login_status: "로그인 상태", // Login Status
+                  created_at: "생성일", // Created At
+                  updated_at: "수정일", // Updated At
+                  // Add more mappings as needed
+                };
+                const label = keyLabels[key] || key; // fallback to key if not mapped
+                return (
+                  <div key={key} className="flex gap-2 border-b py-1">
+                    <span className="font-semibold min-w-[90px] capitalize">
+                      {label}
+                    </span>
+                    <span>
+                      {typeof value === "object" && value !== null
+                        ? JSON.stringify(value, null, 2)
+                        : String(value)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">페이지당 행 수</p>{" "}
+          <p className={cn("font-medium", textSize)}>페이지당 행 수</p>{" "}
           {/* Rows per page */}
           <Select
             value={`${limitParam}`}
-            onValueChange={(value) => updateParam("limit", value)}
+            onValueChange={(value) =>
+              updateParam("limit", value, { resetPage: true })
+            }
           >
-            <SelectTrigger className="h-8 w-[70px] bg-white">
+            <SelectTrigger className={cn("h-8 w-[70px] bg-white", textSize)}>
               <SelectValue placeholder={limitParam} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -303,7 +421,12 @@ export function DataTable<TData, TValue>({
           </Select>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center text-sm font-medium">
+          <div
+            className={cn(
+              "flex items-center justify-center font-medium",
+              textSize
+            )}
+          >
             {pageParam} / {paginatedData.totalPages} 페이지{" "}
             {/* Page {page} of {paginatedData.totalPages} */}
           </div>

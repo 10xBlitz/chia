@@ -44,7 +44,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
           <Button variant="ghost" className="h-8 w-8 p-0">
             {/* 메뉴 열기 (Open menu) */}
             <span className="sr-only">메뉴 열기</span>
@@ -56,7 +56,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <EditIcon className="h-4 w-4" /> {/* 수정 (Update) */} 수정
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => setConfirmOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmOpen(true);
+            }}
             className="text-red-600 cursor-pointer"
           >
             <Trash2Icon className="h-4 w-4 text-red-600" />{" "}
@@ -73,6 +76,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         confirmLabel="삭제"
         cancelLabel="취소"
         loading={deleteMutation.isPending}
+        className="max-w-[80dvw]"
       />
     </>
   );

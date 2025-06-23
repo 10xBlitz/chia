@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface ConfirmModalProps {
   open: boolean;
@@ -21,6 +22,7 @@ interface ConfirmModalProps {
   confirmLabel?: string; // Button label for confirm (default: 삭제)
   cancelLabel?: string; // Button label for cancel (default: 취소)
   loading?: boolean;
+  className?: string; // Optional className for additional styling
 }
 
 export function ConfirmModal({
@@ -32,6 +34,7 @@ export function ConfirmModal({
   confirmLabel = "삭제", // Delete
   cancelLabel = "취소", // Cancel
   loading = false,
+  className,
 }: ConfirmModalProps) {
   return (
     <Dialog
@@ -40,18 +43,23 @@ export function ConfirmModal({
         if (!v) onCancel();
       }}
     >
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} className={cn(className)}>
         <DialogHeader>
-          <DialogTitle className="font-pretendard-600">{title}</DialogTitle>
-          <DialogDescription className="font-pretendard-500">
+          <DialogTitle className="font-pretendard-600 text-md sm:text-xl">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="font-pretendard-500 text-sm">
             {description}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <Button
             type="button"
             className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.stopPropagation();
+              onConfirm();
+            }}
             disabled={loading}
           >
             {loading ? "삭제 중..." : confirmLabel} {/* Deleting... / Delete */}
@@ -60,7 +68,10 @@ export function ConfirmModal({
             <Button
               type="button"
               className="px-4 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300"
-              onClick={onCancel}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCancel();
+              }}
               disabled={loading}
             >
               {cancelLabel} {/* Cancel */}

@@ -8,7 +8,10 @@ import { calculateAge } from "@/lib/utils";
 
 import { CellAction } from "./cell-actions";
 
-export const columns: ColumnDef<Tables<"user">>[] = [
+export const columns: ColumnDef<
+  Tables<"user">,
+  unknown & { meta?: { className?: string } }
+>[] = [
   {
     accessorKey: "category",
     header: "범주", // Category
@@ -17,43 +20,61 @@ export const columns: ColumnDef<Tables<"user">>[] = [
         1
       )}`}</div>
     ),
+    meta: { className: "hidden sm:table-cell max-w-[100px]" }, // Hide on mobile
   },
   {
     accessorKey: "birthdate", // Use birthdate for sorting
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          나이 {/**age */}
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="relative mr-3 flex items-center justify-center w-full">
+          <Button
+            variant="ghost"
+            className="flex min-w-[20px] items-center justify-center px-0"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            <span className="text-xs sm:text-md font-semibold text-center">
+              나이
+            </span>{" "}
+            {/* age */}
+          </Button>
+        </div>
       );
     },
     cell: ({ row }) => <>{calculateAge(new Date(row.original.birthdate))}</>,
     enableSorting: true,
+    meta: { className: " text-center" },
   },
+  {
+    accessorKey: "sort",
+    header: () => (
+      <>
+        <ArrowUpDown className="size-3" />
+      </>
+    ),
+    meta: { className: "-translate-x-4" }, // Hide on mobile
+  },
+
   {
     accessorKey: "full_name",
     header: "성명", // Full Name
+    meta: { className: "hidden sm:table-cell -ml-10" }, // Hide on mobile
   },
   {
     accessorKey: "residence",
     header: "거주", //residence
+    meta: { className: "" },
   },
   {
     accessorKey: "work_place",
     header: "직장", //workplace
   },
-
   {
     accessorKey: "contact_number",
     header: "연락처", // Contact Number
+    meta: { className: "hidden sm:table-cell" }, // Hide on mobile
   },
-
   {
     id: "actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
+    cell: ({ row }) => <CellAction data={row.original} />, // 액션 // Action
   },
 ];
