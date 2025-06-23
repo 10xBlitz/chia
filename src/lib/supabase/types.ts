@@ -217,19 +217,19 @@ export type Database = {
           clinic_id: string
           created_at: string
           id: number
-          patient_id: string
+          patient_id: string | null
         }
         Insert: {
           clinic_id: string
           created_at?: string
           id?: number
-          patient_id: string
+          patient_id?: string | null
         }
         Update: {
           clinic_id?: string
           created_at?: string
           id?: number
-          patient_id?: string
+          patient_id?: string | null
         }
         Relationships: [
           {

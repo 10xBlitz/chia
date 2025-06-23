@@ -6,9 +6,11 @@ import {
   checkIfClinicIsFavorite,
   removeClinicFromFavorites,
 } from "@/lib/supabase/services/favorites.service";
-import Link from "next/link";
 import BookmarkButton from "@/components/bookmark";
 import { cn } from "@/lib/utils";
+import { supabaseClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export interface ClinicCardProps {
   total_reviews: number;
@@ -31,6 +33,7 @@ export default function ClinicCard(props: ClinicCardProps) {
   const showBookmark = props.showBookmark ?? true;
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const checkFavorite = async () => {
@@ -61,26 +64,35 @@ export default function ClinicCard(props: ClinicCardProps) {
     }
   };
 
+  // Add view count and redirect logic
+  const handleCardClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!props.id) return;
+
+    const { error } = await supabaseClient
+      .from("clinic_view")
+      .insert({ clinic_id: props.id, patient_id: user?.id || null });
+
+    if (error) {
+      console.error("Error logging clinic view:", error);
+      toast.error("클리닉 조회에 실패했습니다."); // Failed to log clinic view
+      return;
+    }
+
+    router.push(`/clinic/${props.id}`);
+  };
+
   const avgReviews = props.avg_reviews_per_treatment
     ? props.avg_reviews_per_treatment.toFixed(1)
     : "0.0";
   const totalReviews = props.total_reviews || 0;
 
   return (
-    <Link
-      href={`/clinic/${props.id}`}
-      className={cn("p-4 border-b", props.className)}
-      onClick={(e) => {
-        // Prevent navigation if the click originated from the bookmark button
-        const target = e.target as HTMLElement;
-        if (
-          target.closest("button[data-bookmark]") ||
-          target.getAttribute("data-bookmark") !== null
-        ) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }}
+    <div
+      role="button"
+      tabIndex={0}
+      className={cn("p-4 border-b cursor-pointer", props.className)}
+      onClick={handleCardClick}
     >
       <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-gray-200 mb-3">
         {props.pictures && props.pictures[0] && (
@@ -89,10 +101,6 @@ export default function ClinicCard(props: ClinicCardProps) {
             alt={props.clinic_name}
             fill
             className="object-cover"
-            // onError={(e) => {
-            //   const target = e.target as HTMLImageElement;
-            //   target.src = "/images/auth-main.svg";
-            // }}
           />
         )}
         {user?.id && showBookmark && (
@@ -115,6 +123,6 @@ export default function ClinicCard(props: ClinicCardProps) {
         <span>{avgReviews}</span>
         <span className="ml-1">({totalReviews})</span>
       </div>
-    </Link>
+    </div>
   );
 }

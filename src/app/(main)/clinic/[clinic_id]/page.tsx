@@ -6,7 +6,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock3, Phone, Youtube, EditIcon } from "lucide-react";
@@ -146,20 +145,6 @@ export default function ClinicSingleViewPage() {
     };
     checkFavorite();
   }, [user?.id, clinic?.id]);
-
-  useEffect(() => {
-    const addViewCount = async () => {
-      if (!clinic_id) return;
-      if (!user?.id) return;
-      const { error } = await supabaseClient
-        .from("clinic_view")
-        .insert([{ clinic_id: clinic_id, patient_id: user?.id }]);
-      if (error) {
-        console.error("Error updating view count:", error.message);
-      }
-    };
-    addViewCount();
-  }, [clinic_id, user?.id]);
 
   // Copy address to clipboard
   const handleCopyAddress = () => {
