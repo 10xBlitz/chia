@@ -1,3 +1,4 @@
+import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { TablesInsert } from "../types";
 import {
@@ -60,22 +61,22 @@ export async function getPaginatedClinicEvents(
       query = query.filter("clinic_treatment.clinic", "not.is", null);
     }
 
-    console.log("----> After clinic_name filter:");
-
-    console.log("Supabase client:", supabaseClient);
-    const session = await supabaseClient.auth.getSession();
-    console.log("Supabase session:", session);
+    if (filters.date_range?.from && filters.date_range?.to) {
+      query = query.gte(
+        "created_at",
+        startOfDay(new Date(filters.date_range.from)).toDateString()
+      );
+      query = query.lte(
+        "created_at",
+        endOfDay(new Date(filters.date_range.to)).toDateString()
+      );
+    }
 
     const { data, error, count } = await query;
-
-    console.log("----> Query result:", { data, error, count });
 
     if (error) throw error;
 
     const totalPages = count ? Math.ceil(count / limit) : 1;
-
-    console.log("----> Total items:", count);
-    console.log("----> Total pages:", totalPages);
 
     return {
       data,
