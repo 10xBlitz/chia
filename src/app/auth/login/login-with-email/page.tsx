@@ -52,6 +52,8 @@ export default function LoginForm() {
   let forgotPasswordRedirect = "";
   const isDentistLogin = title === "치과 의사로 로그인"; //title for dentist login
   const isPatientLogin = title === "이메일로 로그인하기"; //title for patient login
+  const isAdminLogin = title === "관리자로 로그인"; //title for admin login
+
   if (isPatientLogin) {
     signUpLink = "/auth/sign-up/patient";
     forgotPasswordRedirect = "/";
@@ -59,6 +61,11 @@ export default function LoginForm() {
   if (isDentistLogin) {
     signUpLink = "/auth/sign-up/dentist";
     forgotPasswordRedirect = "/dentist";
+  }
+
+  if (isAdminLogin) {
+    signUpLink = "/auth/sign-up/admin";
+    forgotPasswordRedirect = "/admin";
   }
 
   const client = createClient();
@@ -179,9 +186,17 @@ export default function LoginForm() {
                                 tabIndex={-1}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                                 onClick={() => setShowPassword((v) => !v)}
-                                aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"} // Hide/Show password
+                                aria-label={
+                                  showPassword
+                                    ? "비밀번호 숨기기"
+                                    : "비밀번호 보기"
+                                } // Hide/Show password
                               >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                {showPassword ? (
+                                  <EyeOff size={20} />
+                                ) : (
+                                  <Eye size={20} />
+                                )}
                               </button>
                             </div>
                           </FormControl>

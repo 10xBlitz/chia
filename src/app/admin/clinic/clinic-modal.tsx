@@ -92,7 +92,7 @@ const formSchema = z.object({
   contact_number: z.string().min(1, "Contact number is required"),
   location: z.string().min(1, "Location is required"),
   region: z.string().min(1, "Region is required"),
-  link: z.string().url("Link must be a valid URL").optional(),
+  link: z.string().optional(),
   opening_date: z.date({ required_error: "Opening date is required" }),
   pictures: z.any().optional(), // For clinic images
   treatments: z.array(
@@ -303,7 +303,6 @@ export const ClinicModal = ({
                   name="link"
                   label="클리닉 링크" // Clinic Link
                   placeholder="여기에 클리닉 링크를 입력하세요." // Enter clinic link here
-                  type="url"
                   formLabelClassName={formLabelClassName}
                   inputClassName={inputClassName}
                 />

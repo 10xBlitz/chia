@@ -272,3 +272,44 @@ export async function setUserDeleted(userId: string) {
     .eq("id", userId);
   if (error) throw error;
 }
+
+/**
+ * Registers a new admin user.
+ * @param data - Admin signup form data
+ */
+export async function registerAdmin(data: {
+  full_name: string;
+  email: string;
+  password: string;
+  gender: string;
+  contact_number: string;
+  birthdate: string; // ISO string
+  residence: string;
+  work_place: string;
+  adminPassword: string;
+}) {
+  // Check admin password via API route (server-side)
+  const res = await fetch("/api/admin-signup-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: data.adminPassword }),
+  });
+  const result = await res.json();
+  if (!result.success) {
+    throw new Error(result.error || "관리자 비밀번호가 올바르지 않습니다.");
+  }
+  // Register user using the shared registerUser function
+  const { data: userData } = await registerUser({
+    email: data.email,
+    password: data.password,
+    full_name: data.full_name,
+    gender: data.gender,
+    contact_number: data.contact_number,
+    birthdate: data.birthdate,
+    residence: data.residence,
+    work_place: data.work_place,
+    role: "admin",
+    clinic_id: null, // Admins do not belong to a clinic
+  });
+  return userData;
+}

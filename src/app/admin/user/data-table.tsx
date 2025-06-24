@@ -76,6 +76,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 const textSize = "text-[12px] sm:text-sm";
+const filterTextSize = "text-[10px] sm:text-xs";
 
 export function DataTable<TData extends { id: string }, TValue>({
   columns,
@@ -189,7 +190,10 @@ export function DataTable<TData extends { id: string }, TValue>({
           placeholder="이름으로 검색" // Search by name
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
-          className={cn("bg-white h-[40] sm:h-[45px] max-w-[300px]", textSize)}
+          className={cn(
+            "bg-white h-[40] sm:h-[45px] max-w-[300px]",
+            filterTextSize
+          )}
         />
         <Select
           value={category}
@@ -199,7 +203,10 @@ export function DataTable<TData extends { id: string }, TValue>({
           }}
         >
           <SelectTrigger
-            className={cn("min-h-[40] sm:min-h-[45px] bg-white", textSize)}
+            className={cn(
+              "min-h-[40] sm:min-h-[45px] bg-white",
+              filterTextSize
+            )}
           >
             <SelectValue placeholder="카테고리를 선택하세요" />{" "}
             {/* Select a category */}
@@ -223,7 +230,7 @@ export function DataTable<TData extends { id: string }, TValue>({
               className={cn(
                 " justify-start text-left font-normal h-[40] sm:h-[45px]",
                 !dates && "text-muted-foreground",
-                textSize
+                filterTextSize
               )}
             >
               <CalendarIcon />

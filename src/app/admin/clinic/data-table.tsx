@@ -66,6 +66,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 const textSize = "text-[12px] sm:text-sm";
+const filterTextSize = "text-[10px] sm:text-xs";
 
 export function DataTable<TData, TValue>({
   columns,
@@ -89,7 +90,9 @@ export function DataTable<TData, TValue>({
   const limitParam = searchParam.get("limit")
     ? Number(searchParam.get("limit"))
     : 10;
-  const [clinicName, setClinicName] = React.useState(searchParam.get("clinic_name") || "");
+  const [clinicName, setClinicName] = React.useState(
+    searchParam.get("clinic_name") || ""
+  );
   const datesParam = searchParam.get("dates");
   let dates: { from: Date; to: Date } | undefined;
   if (datesParam) {
@@ -172,7 +175,7 @@ export function DataTable<TData, TValue>({
             onChange={(event) => setClinicName(event.target.value)}
             className={cn(
               "max-w-[300px] bg-white h-[40] sm:h-[45px]",
-              textSize
+              filterTextSize
             )}
           />
           <Popover>
@@ -183,7 +186,7 @@ export function DataTable<TData, TValue>({
                 className={cn(
                   "justify-start text-left font-normal h-[40] sm:h-[45px]",
                   !dates && "text-muted-foreground",
-                  textSize
+                  filterTextSize
                 )}
               >
                 <CalendarIcon />
@@ -220,9 +223,14 @@ export function DataTable<TData, TValue>({
         </div>
         <Button
           onClick={onClickAdd}
-          className="bg-white text-black h-[40] sm:h-[45px] border-1 hover:bg-black/20"
+          className={cn(
+            "bg-white text-black h-[40] sm:h-[45px] border-1 hover:bg-black/20",
+            filterTextSize
+          )}
         >
-          <PlusSquareIcon className="h-4 w-4" /> 클리닉 추가 {/**Add Clinic */}
+          <PlusSquareIcon className="size-3 sm:size-4" />{" "}
+          <span className="hidden sm:inline">클리닉 추가</span>
+          {/**Add Clinic */}
         </Button>
       </div>
       <div className="rounded-md border bg-white w-full overflow-x-auto">
