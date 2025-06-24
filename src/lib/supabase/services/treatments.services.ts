@@ -1,9 +1,14 @@
+import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { uploadFileToSupabase } from "./upload-file.services";
 
 interface TreatmentFilters {
   treatment_name?: string;
   clinic_id?: string;
+  date_range?: {
+    from?: string;
+    to?: string;
+  };
 }
 
 const IMAGE_BUCKET = "treatment-images";
@@ -35,6 +40,18 @@ export async function getPaginatedTreatments(
   if (filters.treatment_name) {
     query = query.ilike("treatment_name", `%${filters.treatment_name}%`);
   }
+
+  if (filters.date_range?.from && filters.date_range?.to) {
+    query = query.gte(
+      "created_at",
+      startOfDay(new Date(filters.date_range.from)).toISOString()
+    );
+    query = query.lte(
+      "created_at",
+      endOfDay(new Date(filters.date_range.to)).toISOString()
+    );
+  }
+
   // Add more filters here as needed
 
   const { data, error, count } = await query;

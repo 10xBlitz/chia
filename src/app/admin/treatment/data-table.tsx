@@ -47,7 +47,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { addDays, format } from "date-fns";
-import { DateRange } from "react-day-picker";
 import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
@@ -62,6 +61,9 @@ interface DataTableProps<TData, TValue> {
   onClickAdd: () => void;
 }
 
+const textSize = "text-[12px] sm:text-sm";
+const filterTextSize = "text-[10px] sm:text-xs";
+
 export function DataTable<TData, TValue>({
   columns,
   paginatedData,
@@ -74,24 +76,39 @@ export function DataTable<TData, TValue>({
     []
   );
 
+  // Use search params for pagination and filters (no local state)
   const pageParam = searchParam.get("page")
     ? Number(searchParam.get("page"))
     : 1;
   const limitParam = searchParam.get("limit")
     ? Number(searchParam.get("limit"))
     : 10;
-  const [page, setPage] = React.useState(pageParam);
-  const [limit, setLimit] = React.useState(limitParam);
+  const treatmentName = searchParam.get("treatment_name") || "";
+  const datesParam = searchParam.get("dates");
+  let dates: { from: Date; to: Date } | undefined;
+  if (datesParam) {
+    try {
+      const decodedDates = JSON.parse(decodeURIComponent(datesParam));
+      dates = {
+        from: decodedDates.from ? new Date(decodedDates.from) : new Date(),
+        to: decodedDates.to
+          ? new Date(decodedDates.to)
+          : addDays(new Date(), 5),
+      };
+    } catch {
+      dates = {
+        from: new Date(),
+        to: addDays(new Date(), 5),
+      };
+    }
+  } else {
+    dates = {
+      from: new Date(),
+      to: addDays(new Date(), 5),
+    };
+  }
 
-  const [treatmentName, setTreatmentName] = React.useState(
-    searchParam.get("treatment_name") || ""
-  );
-  const [dates, setDates] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 5),
-  });
-
-  const debouncedTreatmentName = useDebounce(treatmentName || "", 500);
+  const debouncedTreatmentName = useDebounce(treatmentName, 300);
 
   const table = useReactTable({
     data: paginatedData.data,
@@ -107,44 +124,62 @@ export function DataTable<TData, TValue>({
       columnFilters,
       pagination: {
         pageIndex: 0,
-        pageSize: limit,
+        pageSize: limitParam,
       },
     },
   });
 
+  // Only reset page to 1 if a filter or limit changes
   const updateParam = React.useCallback(
-    (key: string, value: string) => {
+    (key: string, value: string, options?: { resetPage?: boolean }) => {
       const params = new URLSearchParams(searchParam.toString());
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-      if (key !== "page") {
+      params.set(key, value);
+      if (options?.resetPage) {
         params.set("page", "1");
-        setPage(1);
-        setLimit(10);
       }
-      if (key === "page") setPage(Number(value));
-      if (key === "limit") setLimit(Number(value));
-      router.push(`?${params.toString()}`, { scroll: false });
+      router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [router, searchParam]
+    [searchParam, router]
   );
 
+  // Debounce treatmentName and update param, resetting page
   React.useEffect(() => {
-    updateParam("treatment_name", debouncedTreatmentName);
-  }, [debouncedTreatmentName, updateParam]);
+    const current = searchParam.get("treatment_name") || "";
+    if (debouncedTreatmentName !== current) {
+      updateParam("treatment_name", debouncedTreatmentName, {
+        resetPage: true,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedTreatmentName]);
+
+  // Ensure default date range is present in params
+  React.useEffect(() => {
+    const params = new URLSearchParams(searchParam.toString());
+    if (!params.get("dates")) {
+      const from = new Date();
+      const to = addDays(new Date(), 5);
+      params.set(
+        "dates",
+        JSON.stringify({ from: from.toISOString(), to: to.toISOString() })
+      );
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  }, [searchParam, router]);
 
   return (
-    <div className="w-full flex-1 ">
-      <div className="flex items-center justify-between gap-3 py-4 ">
+    <div className="w-full flex-1 max-w-[90dvw] mx-auto">
+      <div className="flex items-center justify-between gap-3 py-4 flex-wrap">
         <div className="flex items-center gap-3">
           <Input
             placeholder="치료명 검색" // Search by treatment name
             value={treatmentName}
-            onChange={(event) => setTreatmentName(event.target.value)}
-            className="w-[300px] bg-white h-[45px]"
+            onChange={(event) =>
+              updateParam("treatment_name", event.target.value, {
+                resetPage: true,
+              })
+            }
+            className={cn("max-w-sm h-[45px] bg-white", filterTextSize)}
           />
           <Popover>
             <PopoverTrigger asChild>
@@ -152,8 +187,9 @@ export function DataTable<TData, TValue>({
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "w-[300px] justify-start text-left font-normal",
-                  !dates && "text-muted-foreground"
+                  "justify-start text-left font-normal h-[40] sm:h-[45px]",
+                  !dates && "text-muted-foreground",
+                  filterTextSize
                 )}
               >
                 <CalendarIcon />
@@ -179,23 +215,38 @@ export function DataTable<TData, TValue>({
                 selected={dates}
                 locale={ko}
                 onSelect={(dates) => {
-                  setDates(dates);
-                  updateParam("dates", JSON.stringify(dates));
+                  if (dates?.from && dates?.to) {
+                    updateParam(
+                      "dates",
+                      JSON.stringify({
+                        from: dates.from.toISOString(),
+                        to: dates.to.toISOString(),
+                      }),
+                      { resetPage: true }
+                    );
+                  }
                 }}
                 numberOfMonths={2}
               />
             </PopoverContent>
           </Popover>
         </div>
+
         <Button
           onClick={onClickAdd}
-          className="bg-white text-black border-1 hover:bg-black/20"
+          className={cn(
+            "bg-white text-black h-[40] sm:h-[45px] border-1 hover:bg-black/20",
+            filterTextSize
+          )}
         >
-          <PlusSquareIcon className="h-4 w-4" /> 치료 추가{/* Add Treatment */}
+          <PlusSquareIcon className="size-3 sm:size-4" />{" "}
+          <span className="hidden sm:inline">
+            치료 추가{/* Add Treatment */}
+          </span>
         </Button>
       </div>
       <div className="rounded-md border bg-white">
-        <Table>
+        <Table className={cn("w-full", textSize)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -246,15 +297,17 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">
+          <p className={cn("font-medium", textSize)}>
             페이지당 행 수 {/**Rows per page */}
           </p>
           <Select
-            value={`${limit}`}
-            onValueChange={(value) => updateParam("limit", value)}
+            value={`${limitParam}`}
+            onValueChange={(value) =>
+              updateParam("limit", value, { resetPage: true })
+            }
           >
-            <SelectTrigger className="h-8 w-[70px] bg-white">
-              <SelectValue placeholder={limit} />
+            <SelectTrigger className={cn("h-8 w-[70px] bg-white", textSize)}>
+              <SelectValue placeholder={limitParam} />
             </SelectTrigger>
             <SelectContent side="top">
               {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -266,8 +319,13 @@ export function DataTable<TData, TValue>({
           </Select>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center text-sm font-medium">
-            {page} / {paginatedData.totalPages} 페이지
+          <div
+            className={cn(
+              "flex items-center justify-center font-medium",
+              textSize
+            )}
+          >
+            {pageParam} / {paginatedData.totalPages} 페이지
           </div>
           <Button
             variant="outline"
@@ -281,7 +339,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => updateParam("page", (page - 1).toString())}
+            onClick={() => updateParam("page", (pageParam - 1).toString())}
             disabled={!paginatedData.hasPrevPage}
           >
             <span className="sr-only">Go to previous page</span>
@@ -290,7 +348,7 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => updateParam("page", (page + 1).toString())}
+            onClick={() => updateParam("page", (pageParam + 1).toString())}
             disabled={!paginatedData.hasNextPage}
           >
             <span className="sr-only">Go to next page</span>

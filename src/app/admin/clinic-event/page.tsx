@@ -43,7 +43,7 @@ export default function ClinicEventPage() {
   };
 
   return (
-    <div className="py-10">
+    <div className="py-4">
       <ClinicEventModal
         open={openModal}
         onClose={() => setOpenModal(false)}

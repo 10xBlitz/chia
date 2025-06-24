@@ -110,7 +110,8 @@ export const TreatmentModal = ({
       fieldOnChange("");
     }
   };
-
+  const inputClassName = "text-sm sm:text-[16px] h-[40px] sm:h-[45px]";
+  const formLabelClassName = "text-sm sm:text-[16px]";
   return (
     <Modal
       title={data ? "치료 편집" : "치료 추가"} // "Edit Treatment" or "Add Treatment"
@@ -128,6 +129,8 @@ export const TreatmentModal = ({
             name="treatment_name"
             label="치료명" // "Treatment Name"
             placeholder="여기에 치료 이름을 입력하세요" // "Enter treatment name here"
+            formLabelClassName={formLabelClassName}
+            inputClassName={inputClassName}
           />
           <FormField
             control={form.control}

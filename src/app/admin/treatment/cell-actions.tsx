@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { EditIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
 import { TreatmentModal } from "./treatment-modal";
 import { TreatmentTable } from "./columns";
 import { supabaseClient } from "@/lib/supabase/client";
@@ -24,9 +23,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     undefined
   );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const { page, limit, filters } = validateTreatmentQueryParams(searchParams);
 
   // Use Tanstack mutation for delete
   const deleteMutation = useMutation({
@@ -40,13 +37,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     onSuccess: () => {
       setShowDeleteModal(false);
       queryClient.invalidateQueries({
-        queryKey: [
-          "treatments",
-          page,
-          limit,
-          filters.treatment_name,
-          filters.date_range,
-        ],
+        queryKey: ["treatments"],
       });
     },
     onError: () => {
@@ -77,13 +68,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
               }
             }, 500);
             queryClient.invalidateQueries({
-              queryKey: [
-                "treatments",
-                page,
-                limit,
-                filters.treatment_name,
-                filters.date_range,
-              ],
+              queryKey: ["treatments"],
             });
           }}
         />
@@ -91,10 +76,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
       <ConfirmModal
         open={showDeleteModal}
-        // 시술 삭제 (Delete Treatment)
-        title="시술 삭제"
-        // 시술 \"{data.treatment_name}\"을(를) 삭제하시겠습니까? (Are you sure you want to delete treatment ...)
+        title="시술 삭제" // (Delete Treatment)
         description={`시술 \"${data.treatment_name}\"을(를) 삭제하시겠습니까?`}
+        // 시술 \"{data.treatment_name}\"을(를) 삭제하시겠습니까? (Are you sure you want to delete treatment ...)
         onCancel={() => {
           setTimeout(() => {
             const body = document.querySelector("body");
@@ -146,35 +130,3 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     </>
   );
 };
-
-export function validateTreatmentQueryParams(
-  searchParams: ReadonlyURLSearchParams
-) {
-  const pageParam = searchParams.get("page");
-  const limitParam = searchParams.get("limit");
-  const treatmentNameParam = searchParams.get("treatment_name");
-  const encodedDates = searchParams.get("dates");
-
-  const page = pageParam ? Number(pageParam) : 1;
-  const limit =
-    limitParam && Number(limitParam) < 1000 ? Number(limitParam) : 10;
-
-  const dateRange: { from?: string; to?: string } = {};
-
-  if (encodedDates) {
-    try {
-      const decoded = JSON.parse(decodeURIComponent(encodedDates));
-      if (decoded?.from) dateRange.from = decoded.from;
-      if (decoded?.to) dateRange.to = decoded.to;
-    } catch (error) {
-      console.error("Invalid dates parameter:", error);
-    }
-  }
-
-  const filters = {
-    treatment_name: treatmentNameParam || undefined,
-    date_range: Object.keys(dateRange).length > 0 ? dateRange : undefined,
-  };
-
-  return { page, limit, filters };
-}

@@ -163,9 +163,11 @@ export function DataTable<TData, TValue>({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const textSize = "text-[12px] sm:text-sm";
+  const filterTextSize = "text-[10px] sm:text-xs";
 
   return (
-    <div>
+    <div className="max-w-[90dvw] mx-auto">
       <div className="flex items-center justify-between gap-3 py-4">
         <div className="flex items-center gap-3">
           <Input
@@ -176,7 +178,7 @@ export function DataTable<TData, TValue>({
                 resetPage: true,
               })
             }
-            className="max-w-sm h-[45px] bg-white"
+            className={cn("max-w-sm h-[45px] bg-white", filterTextSize)}
           />
           <Popover>
             <PopoverTrigger asChild>
@@ -184,8 +186,9 @@ export function DataTable<TData, TValue>({
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "w-[300px] justify-start text-left font-normal",
-                  !dates && "text-muted-foreground"
+                  "justify-start text-left font-normal h-[40] sm:h-[45px]",
+                  !dates && "text-muted-foreground",
+                  filterTextSize
                 )}
               >
                 <CalendarIcon />
@@ -229,14 +232,18 @@ export function DataTable<TData, TValue>({
         </div>
         <Button
           onClick={onClickAdd}
-          className="bg-white text-black border-1 hover:bg-black/20"
+          className={cn(
+            "bg-white text-black h-[40] sm:h-[45px] border-1 hover:bg-black/20",
+            filterTextSize
+          )}
         >
-          <PlusSquareIcon className="h-4 w-4" /> 클리닉 이벤트 추가{" "}
+          <PlusSquareIcon className="size-3 sm:size-4" />{" "}
+          <span className="hidden sm:inline">클리닉 이벤트 추가</span>
           {/* Add Clinic Event */}
         </Button>
       </div>
       <div className="rounded-md border bg-white">
-        <Table>
+        <Table className={cn("w-full", textSize)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -288,7 +295,7 @@ export function DataTable<TData, TValue>({
 
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">
+          <p className={cn("font-medium", textSize)}>
             페이지당 행 수 {/**Rows per page */}
           </p>
           <Select
@@ -297,7 +304,7 @@ export function DataTable<TData, TValue>({
               updateParam("limit", value, { resetPage: true })
             }
           >
-            <SelectTrigger className="h-8 w-[70px] bg-white">
+            <SelectTrigger className={cn("h-8 w-[70px] bg-white", textSize)}>
               <SelectValue placeholder={limitParam} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -310,7 +317,12 @@ export function DataTable<TData, TValue>({
           </Select>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="flex items-center justify-center text-sm font-medium">
+          <div
+            className={cn(
+              "flex items-center justify-center font-medium",
+              textSize
+            )}
+          >
             {/* Page {table.getState().pagination.pageIndex + 1} of{" "} */}
             {/* {table.getPageCount()} */}
             {/**page */} {pageParam} / {paginatedData.totalPages} 페이지
