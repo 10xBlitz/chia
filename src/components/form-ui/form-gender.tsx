@@ -16,6 +16,7 @@ type FormGenderProps<T extends FieldValues> = {
   placeholder?: string;
   formItemClassName?: string;
   formLabelClassName?: string;
+  disabled?: boolean; // Optional prop to disable the selector
 };
 
 /**
@@ -49,6 +50,7 @@ type FormGenderProps<T extends FieldValues> = {
  * @param label - The label for the gender selector (string)
  * @param formItemClassName - Custom class for the FormItem
  * @param formLabelClassName - Custom class for the FormLabel
+ * @param disabled - Optional prop to disable the selector (boolean)
  */
 
 export default function FormGender<T extends FieldValues>({
@@ -57,6 +59,7 @@ export default function FormGender<T extends FieldValues>({
   label,
   formItemClassName,
   formLabelClassName,
+  disabled = false,
 }: FormGenderProps<T>) {
   return (
     <FormField
@@ -76,7 +79,7 @@ export default function FormGender<T extends FieldValues>({
             <GenderSelector
               onValueChange={field.onChange}
               value={field.value}
-              disabled={field.disabled} // Set to true if you want to disable the selector
+              disabled={disabled} // Set to true if you want to disable the selector
             />
           </FormControl>
           <FormMessage />

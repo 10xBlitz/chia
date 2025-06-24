@@ -15,6 +15,7 @@ type FormDatePickerProps<T extends FieldValues> = {
   label: string;
   formItemClassName?: string;
   formLabelClassName?: string;
+  disabled?: boolean; // Optional prop to disable the date picker
 };
 
 /**
@@ -48,6 +49,7 @@ type FormDatePickerProps<T extends FieldValues> = {
  * @param label - The label for the date picker (string)
  * @param formItemClassName - Custom class for the FormItem
  * @param formLabelClassName - Custom class for the FormLabel
+ * @param disabled - Optional prop to disable the date picker
  */
 
 export default function FormDatePicker<T extends FieldValues>({
@@ -56,6 +58,7 @@ export default function FormDatePicker<T extends FieldValues>({
   label,
   formItemClassName,
   formLabelClassName,
+  disabled = false,
 }: FormDatePickerProps<T>) {
   return (
     <FormField
@@ -75,7 +78,7 @@ export default function FormDatePicker<T extends FieldValues>({
             <KoreanDatePicker
               onChange={field.onChange}
               value={field.value}
-              disabled={field.disabled}
+              disabled={disabled}
             />
           </FormControl>
           <FormMessage />
