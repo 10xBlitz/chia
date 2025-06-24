@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useState } from "react";
 import { Tables } from "@/lib/supabase/types";
-import EditPatientModal from "@/app/admin/user/edit-patient-modal";
+import EditBasicInfoModal from "./edit-basic-info-modal";
 // import { EditPasswordModal } from "@/components/modals/edit-password-modal";
 
 interface CellActionProps {
@@ -60,9 +60,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             className="cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              if (data.role === "patient") {
-                setEditOpen(true);
-              }
+              setEditOpen(true);
             }}
           >
             <EditIcon className="h-4 w-4" /> {/* 수정 (Update) */} 수정
@@ -89,7 +87,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <EditPatientModal
+      <EditBasicInfoModal
         open={editOpen}
         onClose={() => setEditOpen(false)}
         user={data}

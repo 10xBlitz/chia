@@ -24,6 +24,7 @@ interface KoreanDatePickerProps {
   value?: Date | undefined;
   onChange?: (date: Date | undefined) => void;
   disabled?: boolean;
+  className?: string; // Optional className for custom styling
 }
 
 const YEARS = Array.from(
@@ -49,6 +50,7 @@ export function KoreanDatePicker({
   value,
   onChange,
   disabled = false,
+  className = "",
 }: KoreanDatePickerProps) {
   const [displayMonth, setDisplayMonth] = React.useState<Date>(
     value ?? new Date()
@@ -94,7 +96,8 @@ export function KoreanDatePicker({
           className={cn(
             "w-full text-left flex justify-between font-normal",
             !value && !disabled && "text-muted-foreground",
-            disabled && "cursor-not-allowed opacity-50"
+            disabled && "cursor-not-allowed opacity-50",
+            className
           )}
         >
           {value
