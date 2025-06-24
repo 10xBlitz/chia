@@ -42,7 +42,7 @@ const MapAddressSelector: React.FC<MapAddressSelectorProps> = ({
     const fetchAddress = async () => {
       if (!marker) return;
       try {
-        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+        const apiKey = "";
         const res = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker.lat},${marker.lng}&key=${apiKey}`
         );
@@ -53,6 +53,7 @@ const MapAddressSelector: React.FC<MapAddressSelectorProps> = ({
           setAddress("");
         }
       } catch (e) {
+        console.error("Error fetching address:", e);
         setAddress("");
       }
     };

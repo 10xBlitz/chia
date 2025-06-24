@@ -65,6 +65,7 @@ function DialogContent({
           className
         )}
         {...props}
+        onClick={(e) => e.stopPropagation()}
       >
         {children}
         {showCloseButton && (

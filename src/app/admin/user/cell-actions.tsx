@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useState } from "react";
 import { Tables } from "@/lib/supabase/types";
+import EditPatientModal from "@/app/admin/user/edit-patient-modal";
+// import { EditPasswordModal } from "@/components/modals/edit-password-modal";
 
 interface CellActionProps {
   data: Tables<"user">;
@@ -21,6 +23,8 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  // const [editPasswordOpen, setEditPasswordOpen] = useState(false);
   const queryClient = useQueryClient();
   // Mutation for deleting user
   const deleteMutation = useMutation({
@@ -52,9 +56,27 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (data.role === "patient") {
+                setEditOpen(true);
+              }
+            }}
+          >
             <EditIcon className="h-4 w-4" /> {/* 수정 (Update) */} 수정
           </DropdownMenuItem>
+          {/* <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditPasswordOpen(true);
+            }}
+          >
+            <EditIcon className="h-4 w-4" />
+             비밀번호 수정 (Edit Password)  비밀번호 수정
+          </DropdownMenuItem> */}
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
@@ -62,11 +84,25 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             }}
             className="text-red-600 cursor-pointer"
           >
-            <Trash2Icon className="h-4 w-4 text-red-600" />{" "}
+            <Trash2Icon className="h-4 w-4 text-red-600" />
             {/* 삭제 (Delete) */} 삭제
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <EditPatientModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        user={data}
+        onSuccess={() => {
+          setEditOpen(false);
+          queryClient.invalidateQueries({ queryKey: ["users"] });
+        }}
+      />
+      {/* <EditPasswordModal
+        open={editPasswordOpen}
+        onClose={() => setEditPasswordOpen(false)}
+        userData={data}
+      /> */}
       <ConfirmModal
         open={confirmOpen}
         onConfirm={() => deleteMutation.mutate()}
