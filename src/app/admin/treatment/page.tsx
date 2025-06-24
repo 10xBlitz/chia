@@ -72,9 +72,7 @@ export default function TreatmentsPage() {
   );
 }
 
-export function validateTreatmentQueryParams(
-  searchParams: ReadonlyURLSearchParams
-) {
+function validateTreatmentQueryParams(searchParams: ReadonlyURLSearchParams) {
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
   const treatmentNameParam = searchParams.get("treatment_name");
