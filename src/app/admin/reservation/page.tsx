@@ -6,10 +6,11 @@ import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
+import { addDays } from "date-fns";
 
 export default function ReservationPage() {
   const searchParams = useSearchParams();
-  const { page, limit, filters } = validateClinicQueryParams(searchParams);
+  const { page, limit, filters } = validateReservationQueryParams(searchParams);
 
   const { isError, error, data, isLoading } = useQuery({
     queryKey: [
@@ -25,16 +26,25 @@ export default function ReservationPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  // Provide fallback paginatedData for loading state
+  const paginatedData = data || {
+    data: [],
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  };
+
   return (
     <div className="py-10">
       {isError && <div className="bg-red-500/20">{error.message}</div>}
       {isLoading && <Loading />}
-      {data && <DataTable columns={columns} paginatedData={data} />}
+      <DataTable columns={columns} paginatedData={paginatedData} />
     </div>
   );
 }
 
-function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
+function validateReservationQueryParams(searchParams: ReadonlyURLSearchParams) {
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
   const fullNameParam = searchParams.get("full_name");
@@ -55,6 +65,10 @@ function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
     } catch (error) {
       console.error("Invalid dates parameter:", error);
     }
+  } else {
+    // Set default date range if not present
+    dateRange.from = new Date().toISOString().split("T")[0];
+    dateRange.to = addDays(new Date(), 5).toISOString().split("T")[0];
   }
 
   const filters = {
