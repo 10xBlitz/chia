@@ -64,12 +64,9 @@ export default function ViewQuotationPage() {
               </span>
               <span className="text-gray-600 truncate flex-1 mr-4 whitespace-nowrap">
                 {q.region?.split(",")[1]?.trim() || q.region} ·{" "}
-                {q.treatment?.treatment_name || "선택된 치료 없음"}{" "}
-                {
-                  q.clinic_id
-                    ? "치과" /* Dental Clinic */
-                    : "공개견적" /* Public Quotation */
-                }
+                {q.treatment?.treatment_name || "선택된 치료 없음"}
+                {" · "}
+                {q.clinic_id ? "사적인" /* Private */ : "공공의" /* Public  */}
               </span>
               <Button
                 className={`rounded-md px-4 h-9 font-medium ${
@@ -108,15 +105,19 @@ async function fetchQuotations(
     .from("quotation")
     .select("*, treatment(*), bid(*)")
     .order("created_at", { ascending: false })
+    .eq("status", "active")
     .limit(100);
 
   // Properly quote region if it contains a comma
-  const quotedRegion =
-    region.includes(",") ? `"${region}"` : region;
+  const quotedRegion = region.includes(",") ? `"${region}"` : region;
 
   // treatment_id.in.(...) should not have quotes around each id
   const treatmentsList = treatments.join(",");
 
+  // This filter retrieves all quotations that are either:
+  //    Private to the clinic, OR
+  //    Public and no treatment, then match region, OR
+  //    Public with treatment and match clinic region and matching any of the clinic’s treatments.
   const filter = [
     `clinic_id.eq.${clinic_id}`,
     `and(clinic_id.is.null,treatment_id.is.null,region.eq.${quotedRegion})`,

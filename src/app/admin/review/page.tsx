@@ -6,7 +6,6 @@ import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { getPaginatedReviews } from "@/lib/supabase/services/reviews.services";
-import { addDays } from "date-fns";
 
 export default function ReviewPage() {
   const searchParams = useSearchParams();
@@ -36,7 +35,7 @@ export default function ReviewPage() {
   };
 
   return (
-    <div className="py-10">
+    <div className="p-4">
       {isError && <div className="bg-red-500/20">{error.message}</div>}
       {isLoading && <Loading />}
       <DataTable columns={columns} paginatedData={paginatedData} />
@@ -67,8 +66,8 @@ function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
     }
   } else {
     // Set default date range if not present
-    dateRange.from = new Date().toISOString().split("T")[0];
-    dateRange.to = addDays(new Date(), 5).toISOString().split("T")[0];
+    dateRange.from = undefined;
+    dateRange.to = undefined;
   }
 
   const filters = {

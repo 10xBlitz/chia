@@ -29,7 +29,7 @@ import FormGender from "@/components/form-ui/form-gender";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormAddress from "@/components/form-ui/form-address";
 import FormTextarea from "@/components/form-ui/form-textarea";
-import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
+import FormMultiImageUploadV2 from "@/components/form-ui/form-multi-image-upload-v2";
 
 export default function CreateQuotationPage() {
   const router = useRouter();
@@ -115,6 +115,16 @@ export default function CreateQuotationPage() {
     mutation.mutate(values);
   };
 
+  //add loading state for when user state is not yet available
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-gray-500">사용자 정보를 불러오는 중...</p>
+        {/* Loading user information... */}
+      </div>
+    );
+  }
+
   return (
     <>
       <Form {...form}>
@@ -197,7 +207,7 @@ export default function CreateQuotationPage() {
             maxLength={QUOTATION_MAX_TEXT}
           />
           {/* Image upload */}
-          <FormMultiImageUpload
+          <FormMultiImageUploadV2
             control={form.control}
             name="images" // for { images: { files: File[], previews: string[] } }
             maxImages={QUOTATION_MAX_IMAGES}

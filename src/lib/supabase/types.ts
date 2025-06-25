@@ -734,6 +734,22 @@ export type Database = {
           latest_message_created_at: string
         }[]
       }
+      get_paginated_users_with_email: {
+        Args: {
+          p_page?: number
+          p_limit?: number
+          p_full_name?: string
+          p_category?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_sort?: string
+          p_order?: string
+        }
+        Returns: {
+          items: Json
+          total: number
+        }[]
+      }
     }
     Enums: {
       banner_type: "main" | "sub"

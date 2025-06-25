@@ -12,7 +12,6 @@ import { useState } from "react";
 import { TreatmentModal } from "./treatment-modal";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { addDays } from "date-fns";
 
 export default function TreatmentsPage() {
   const searchParams = useSearchParams();
@@ -43,7 +42,7 @@ export default function TreatmentsPage() {
   };
 
   return (
-    <div className="py-10 ">
+    <div className="p-4 ">
       <TreatmentModal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -91,8 +90,8 @@ function validateTreatmentQueryParams(searchParams: ReadonlyURLSearchParams) {
       console.error("Invalid dates parameter:", error);
     }
   } else {
-    dateRange.from = new Date().toISOString().split("T")[0];
-    dateRange.to = addDays(new Date(), 5).toISOString().split("T")[0];
+    dateRange.from = undefined;
+    dateRange.to = undefined;
   }
 
   const filters = {

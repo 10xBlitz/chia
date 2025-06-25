@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
@@ -97,15 +97,16 @@ export function DataTable<TData, TValue>({
   let dates: { from: Date; to: Date } | undefined;
   if (datesParam) {
     const decodedDates = JSON.parse(decodeURIComponent(datesParam));
-    dates = {
-      from: decodedDates.from ? new Date(decodedDates.from) : new Date(),
-      to: decodedDates.to ? new Date(decodedDates.to) : addDays(new Date(), 5),
-    };
+    if (decodedDates.from && decodedDates.to) {
+      dates = {
+        from: new Date(decodedDates.from),
+        to: new Date(decodedDates.to),
+      };
+    } else {
+      dates = undefined;
+    }
   } else {
-    dates = {
-      from: new Date(),
-      to: addDays(new Date(), 5),
-    };
+    dates = undefined;
   }
 
   const debouncedClinicName = useDebounce(clinicName || "", 300);
@@ -151,20 +152,6 @@ export function DataTable<TData, TValue>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedClinicName]);
 
-  // Ensure default date range is present in params
-  React.useEffect(() => {
-    const params = new URLSearchParams(searchParam.toString());
-    if (!params.get("dates")) {
-      const from = new Date();
-      const to = addDays(new Date(), 5);
-      params.set(
-        "dates",
-        JSON.stringify({ from: from.toISOString(), to: to.toISOString() })
-      );
-      router.replace(`?${params.toString()}`, { scroll: false });
-    }
-  }, [searchParam, router]);
-
   return (
     <div className="max-w-[90dvw] mx-auto">
       <div className="flex items-center justify-between gap-3 py-4">
@@ -193,11 +180,11 @@ export function DataTable<TData, TValue>({
                 {dates?.from ? (
                   dates.to ? (
                     <>
-                      {format(dates.from, "LLL dd, y")} -{" "}
-                      {format(dates.to, "LLL dd, y")}
+                      {format(dates.from, "yyyy년 M월 d일", { locale: ko })} -{" "}
+                      {format(dates.to, "yyyy년 M월 d일", { locale: ko })}
                     </>
                   ) : (
-                    format(dates.from, "LLL dd, y")
+                    format(dates.from, "yyyy년 M월 d일", { locale: ko })
                   )
                 ) : (
                   <span>날짜 선택</span> // Pick a date

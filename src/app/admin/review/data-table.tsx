@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
 interface DataTableProps<TData, TValue> {
@@ -89,25 +89,17 @@ export function DataTable<TData, TValue>({
   const datesParam = searchParam.get("dates");
   let dates: { from: Date; to: Date } | undefined;
   if (datesParam) {
-    try {
-      const decodedDates = JSON.parse(decodeURIComponent(datesParam));
+    const decodedDates = JSON.parse(decodeURIComponent(datesParam));
+    if (decodedDates.from && decodedDates.to) {
       dates = {
-        from: decodedDates.from ? new Date(decodedDates.from) : new Date(),
-        to: decodedDates.to
-          ? new Date(decodedDates.to)
-          : addDays(new Date(), 5),
+        from: new Date(decodedDates.from),
+        to: new Date(decodedDates.to),
       };
-    } catch {
-      dates = {
-        from: new Date(),
-        to: addDays(new Date(), 5),
-      };
+    } else {
+      dates = undefined;
     }
   } else {
-    dates = {
-      from: new Date(),
-      to: addDays(new Date(), 5),
-    };
+    dates = undefined;
   }
 
   const debouncedFullName = useDebounce(fullName, 300);
@@ -153,21 +145,6 @@ export function DataTable<TData, TValue>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedFullName]);
 
-  // Ensure default date range is present in params
-  React.useEffect(() => {
-    const params = new URLSearchParams(searchParam.toString());
-    if (!params.get("dates")) {
-      const from = new Date();
-      const to = addDays(new Date(), 5);
-      params.set(
-        "dates",
-        JSON.stringify({ from: from.toISOString(), to: to.toISOString() })
-      );
-      router.replace(`?${params.toString()}`, { scroll: false });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className="w-full flex-1 max-w-[90dvw] mx-auto">
       <div className="flex items-center justify-between gap-3 py-4 flex-wrap">
@@ -200,7 +177,7 @@ export function DataTable<TData, TValue>({
                     format(dates.from, "LLL dd, y")
                   )
                 ) : (
-                  <span>Pick a date</span>
+                  <span>날짜 선택</span> // Pick a date
                 )}
               </Button>
             </PopoverTrigger>

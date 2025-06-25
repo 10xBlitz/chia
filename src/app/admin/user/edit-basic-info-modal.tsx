@@ -7,7 +7,6 @@ import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Tables } from "@/lib/supabase/types";
 import { updateUserProfile } from "@/lib/supabase/services/users.services";
 import toast from "react-hot-toast";
 import FormInput from "@/components/form-ui/form-input";
@@ -15,6 +14,7 @@ import FormGender from "@/components/form-ui/form-gender";
 import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
+import { UserColumn } from "./columns";
 
 const formSchema = z.object({
   full_name: z.string().min(1, "이름을 입력하세요."), // Please enter a name
@@ -28,7 +28,7 @@ const formSchema = z.object({
 interface EditBasicInfoModalProps {
   open: boolean;
   onClose: () => void;
-  user: Tables<"user">;
+  user: UserColumn;
   onSuccess?: () => void;
 }
 

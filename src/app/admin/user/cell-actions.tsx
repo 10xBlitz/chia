@@ -13,12 +13,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useState } from "react";
-import { Tables } from "@/lib/supabase/types";
 import EditBasicInfoModal from "./edit-basic-info-modal";
+import { UserColumn } from "./columns";
 // import { EditPasswordModal } from "@/components/modals/edit-password-modal";
 
 interface CellActionProps {
-  data: Tables<"user">;
+  data: UserColumn;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {

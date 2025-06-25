@@ -70,6 +70,55 @@ export async function getPaginatedUsers(
   };
 }
 
+/**
+ * Fetch paginated users with email using the Supabase RPC function.
+ * Supports same filters as getPaginatedUsers, but also returns email.
+ */
+export async function getPaginatedUsersWithEmail(
+  page = 1,
+  limit = 10,
+  filters: Filters = {},
+  sort: string = "created_at",
+  order: string = "desc"
+) {
+  const { full_name, category, date_range } = filters;
+  const { data, error } = await supabaseClient.rpc(
+    "get_paginated_users_with_email",
+    {
+      p_page: page,
+      p_limit: limit,
+      p_full_name: full_name || undefined,
+      p_category: category || undefined,
+      p_date_from: date_range?.from
+        ? startOfDay(date_range.from).toISOString()
+        : undefined,
+      p_date_to: date_range?.to || undefined,
+      p_sort: sort,
+      p_order: order,
+    }
+  );
+  if (error) throw error;
+
+  // data is an array with one object: { items: [...], total: number }
+  const result =
+    Array.isArray(data) && data.length > 0 ? data[0] : { items: [], total: 0 };
+  // Ensure items is always an array of objects
+  const items = Array.isArray(result.items)
+    ? result.items
+    : typeof result.items === "string"
+    ? JSON.parse(result.items)
+    : [];
+  const totalPages = result.total ? Math.ceil(result.total / limit) : 1;
+
+  return {
+    data: items,
+    totalItems: result.total ?? 0,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
+}
+
 // Update user profile fields (except email)
 export async function updateUserProfile(
   userId: string,

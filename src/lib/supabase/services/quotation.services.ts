@@ -90,7 +90,7 @@ export async function getPaginatedQuotations(
   let query = supabaseClient
     .from("quotation")
     .select("*, treatment(*), bid(*)", { count: "exact" })
-    .order("created_at", { ascending: true })
+    .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (filters.patient_id) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar } from "@/components/ui/calendar";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
@@ -41,9 +41,9 @@ const MONTHS = [
 export default function DentistReservationPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
-  const [selectedReservationId, setSelectedReservationId] = useState<
-    string | null
-  >(null);
+  // const [selectedReservationId, setSelectedReservationId] = useState<
+  //   string | null
+  // >(null);
   const user = useUserStore((state) => state.user);
 
   useEffect(() => {
@@ -189,11 +189,11 @@ export default function DentistReservationPage() {
                   {r?.clinic_treatment?.treatment?.treatment_name}
                 </span>
               </div>
-              <Checkbox
+              {/* <Checkbox
                 checked={selectedReservationId === r.id}
                 onCheckedChange={() => setSelectedReservationId(r.id)}
                 className="bg-gray-100 w-5 h-5"
-              />
+              /> */}
             </div>
           ))}
         </div>

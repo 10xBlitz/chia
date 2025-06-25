@@ -51,6 +51,7 @@ import { KoreanTimePicker } from "@/components/time-picker";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import BottomNavigation from "@/components/bottom-navigation";
 import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
+import { getDisabledWeekdaysForClinic } from "@/lib/supabase/services/get-disabled-weekdays-for-clinic";
 
 // Zod schema for validation
 const reservationSchema = z.object({
@@ -72,7 +73,7 @@ export default function CreateReservation() {
   if (!clinic_id) {
     router.push("/patient/home");
   }
-  const { data: treatments } = useQuery({
+  const { data: treatments, isLoading } = useQuery({
     queryKey: ["treatments"],
     queryFn: async () =>
       await getPaginatedClinicTreatments(clinic_id as string, 1, 100),
@@ -130,6 +131,14 @@ export default function CreateReservation() {
   const selectedDayOfWeek = selectedDate
     ? getKoreanDayOfWeek(selectedDate)
     : undefined;
+
+  // --- Add logic to get disabled weekdays for the clinic ---
+  const [disabledWeekdays, setDisabledWeekdays] = useState<number[]>([]);
+  useEffect(() => {
+    if (clinic_id) {
+      getDisabledWeekdaysForClinic(clinic_id).then(setDisabledWeekdays);
+    }
+  }, [clinic_id]);
 
   const { data: workingHours } = useQuery({
     queryKey: ["working-hours", clinic_id, selectedDayOfWeek],
@@ -189,6 +198,7 @@ export default function CreateReservation() {
                         <KoreanDatePicker
                           value={field.value}
                           onChange={field.onChange}
+                          disabledWeekdays={disabledWeekdays}
                         />
                       </FormControl>
                       <FormMessage />
@@ -214,83 +224,81 @@ export default function CreateReservation() {
                 />
               </div>
             </div>
-            <div>
-              {treatments?.data && treatments.data.length > 0 && (
-                <FormField
-                  control={form.control}
-                  name="clinicTreatment"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>치료 {/**Treatment */}</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn(
-                                "w-full justify-between",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value
-                                ? treatments.data.find(
-                                    (treatment) => treatment.id === field.value
-                                  )?.treatment?.treatment_name
-                                : "관심 시술을 선택하세요"}{" "}
-                              {/** Select a treatment */}
-                              <ChevronsUpDown className="opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder="치료법 검색..." // Search treatment
-                              className="h-9"
-                            />
-                            <CommandList>
-                              <CommandEmpty>
-                                치료법이 발견되지 않았습니다{" "}
-                                {/**No treatment found. */}
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {treatments.data &&
-                                  treatments.data.map((treatment) => (
-                                    <CommandItem
-                                      value={
-                                        treatment?.treatment?.treatment_name
-                                      }
-                                      key={treatment.id}
-                                      onSelect={() => {
-                                        form.setValue(
-                                          "clinicTreatment",
-                                          treatment.id
-                                        );
-                                      }}
-                                    >
-                                      {treatment?.treatment?.treatment_name}
-                                      <Check
-                                        className={cn(
-                                          "ml-auto",
-                                          treatment.id === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
+            {isLoading && <>Loading</>}
+
+            {!isLoading && treatments?.data && treatments.data.length > 0 && (
+              <FormField
+                control={form.control}
+                name="clinicTreatment"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>치료 {/**Treatment */}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value
+                              ? treatments.data.find(
+                                  (treatment) => treatment.id === field.value
+                                )?.treatment?.treatment_name
+                              : "관심 시술을 선택하세요"}{" "}
+                            {/** Select a treatment */}
+                            <ChevronsUpDown className="opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="치료법 검색..." // Search treatment
+                            className="h-9"
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              치료법이 발견되지 않았습니다{" "}
+                              {/**No treatment found. */}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {treatments.data &&
+                                treatments.data.map((treatment) => (
+                                  <CommandItem
+                                    value={treatment?.treatment?.treatment_name}
+                                    key={treatment.id}
+                                    onSelect={() => {
+                                      form.setValue(
+                                        "clinicTreatment",
+                                        treatment.id
+                                      );
+                                    }}
+                                  >
+                                    {treatment?.treatment?.treatment_name}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto",
+                                        treatment.id === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <div>
               <FormLabel className="font-semibold">
                 상담 유형 {/**Consultation Type */}
@@ -349,7 +357,7 @@ export default function CreateReservation() {
                         htmlFor="terms"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        Use my contact number
+                        내 연락처를 사용하세요 {/* Use my contact number */}
                       </label>
                     </div>
                     <FormMessage />

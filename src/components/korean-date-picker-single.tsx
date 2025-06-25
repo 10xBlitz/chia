@@ -25,6 +25,7 @@ interface KoreanDatePickerProps {
   onChange?: (date: Date | undefined) => void;
   disabled?: boolean;
   className?: string; // Optional className for custom styling
+  disabledWeekdays?: number[]; // 0 (Sunday) to 6 (Saturday)
 }
 
 const YEARS = Array.from(
@@ -51,6 +52,7 @@ export function KoreanDatePicker({
   onChange,
   disabled = false,
   className = "",
+  disabledWeekdays = [], // New prop for disabling weekdays
 }: KoreanDatePickerProps) {
   const [displayMonth, setDisplayMonth] = React.useState<Date>(
     value ?? new Date()
@@ -86,6 +88,8 @@ export function KoreanDatePicker({
     setDisplayMonth(newDate);
   }
 
+  console.log("--->value", value);
+
   return (
     <Popover open={open} modal={true} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
@@ -106,7 +110,6 @@ export function KoreanDatePicker({
           <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
-
       <PopoverContent className="w-auto p-4" align="start">
         {/* Year & Month selectors */}
         <div className="flex justify-center items-center gap-2 mb-2">
@@ -169,6 +172,8 @@ export function KoreanDatePicker({
           onMonthChange={(date) => {
             if (!disabled) setDisplayMonth(date);
           }}
+          // Disable days based on disabledWeekdays prop
+          disabled={(date) => disabledWeekdays.includes(date.getDay())}
         />
       </PopoverContent>
     </Popover>

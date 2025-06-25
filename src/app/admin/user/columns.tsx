@@ -3,13 +3,27 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import { Tables } from "@/lib/supabase/types";
 import { calculateAge } from "@/lib/utils";
 
 import { CellAction } from "./cell-actions";
 
+export type UserColumn = {
+  id: string;
+  full_name: string;
+  role: string;
+  created_at: string;
+  login_status: string;
+  gender: string;
+  birthdate: string;
+  residence: string;
+  work_place: string;
+  contact_number: string;
+  clinic_id: string;
+  email: string;
+};
+
 export const columns: ColumnDef<
-  Tables<"user">,
+  UserColumn,
   unknown & { meta?: { className?: string } }
 >[] = [
   {
@@ -22,6 +36,7 @@ export const columns: ColumnDef<
     ),
     meta: { className: "hidden sm:table-cell max-w-[100px]" }, // Hide on mobile
   },
+
   {
     accessorKey: "birthdate", // Use birthdate for sorting
     header: ({ column }) => {
@@ -52,6 +67,12 @@ export const columns: ColumnDef<
       </>
     ),
     meta: { className: "-translate-x-4" }, // Hide on mobile
+  },
+
+  {
+    accessorKey: "email",
+    header: "이메일", // Email
+    meta: { className: "hidden sm:table-cell " }, // Hide on mobile
   },
 
   {

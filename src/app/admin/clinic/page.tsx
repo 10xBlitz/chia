@@ -12,7 +12,6 @@ import Loading from "@/components/loading";
 import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
 import { ClinicModal } from "./clinic-modal";
 import { useState } from "react";
-import { addDays } from "date-fns";
 
 export default function ClinicPage() {
   const searchParams = useSearchParams();
@@ -37,7 +36,7 @@ export default function ClinicPage() {
   };
 
   return (
-    <div className="py-4">
+    <div className="p-4">
       <ClinicModal
         open={openModal}
         onClose={() => setOpenModal(false)}
@@ -85,8 +84,8 @@ function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
       console.error("Invalid dates parameter:", error);
     }
   } else {
-    dateRange.from = new Date().toISOString().split("T")[0];
-    dateRange.to = addDays(new Date(), 5).toISOString().split("T")[0];
+    dateRange.from = undefined;
+    dateRange.to = undefined;
   }
 
   const filters = {

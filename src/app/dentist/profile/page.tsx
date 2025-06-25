@@ -57,6 +57,7 @@ export default function ProfilePage() {
     : "0000.00.00";
   const clinicContact = user?.clinic?.contact_number || "02-123-1234";
   const clinicAddress = user?.clinic?.location;
+  const clinicRegion = user?.clinic?.region;
 
   return (
     <div className="flex flex-col">
@@ -141,6 +142,11 @@ export default function ProfilePage() {
           <InfoRow
             label="소재지" // Location
             value={clinicAddress}
+            emptyText="소재지 등록" // Register Location
+          />
+          <InfoRow
+            label="소재지 지역" // Location Region
+            value={clinicRegion}
             emptyText="소재지 등록" // Register Location
           />
         </div>
