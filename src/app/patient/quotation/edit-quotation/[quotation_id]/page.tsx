@@ -194,7 +194,7 @@ export default function EditQuotationPage() {
       <HeaderWithBackButton title="견적 수정" /> {/* Edit Quotation */}
       <Form {...form}>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 pb-20"
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FormSelect

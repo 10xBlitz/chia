@@ -30,7 +30,7 @@ export default function BookmarkButton({
       {isActive ? (
         <BookmarkCheck
           strokeWidth={1}
-          className={`fill-yellow-300 min-h-6 min-w-6 text-black ${activeStyle}`}
+          className={`fill-blue-500 min-h-6 min-w-6 text-black ${activeStyle}`}
         />
       ) : (
         <Bookmark className={`min-h-6 min-w-6 text-black ${notActiveStyle}`} />

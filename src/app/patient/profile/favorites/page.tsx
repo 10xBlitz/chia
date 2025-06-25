@@ -8,7 +8,7 @@ import { removeClinicFromFavorites } from "@/lib/supabase/services/favorites.ser
 import { getPaginatedFavoriteClinics } from "@/lib/supabase/services/favorite-clinics.services";
 import ClinicCard from "@/components/clinic-card";
 import { Button } from "@/components/ui/button";
-import { XIcon } from "lucide-react";
+import { BookmarkCheckIcon } from "lucide-react";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 import BottomNavigation from "@/components/bottom-navigation";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
@@ -93,7 +93,8 @@ export default function FavoriteClinicsPage() {
               <div key={fav.id} className="relative">
                 <ClinicCard {...fav} showBookmark={false} />
                 <Button
-                  className="absolute top-8 w-10 h-10 bg-red-600 right-3 z-10 p-1 text-white  hover:bg-red-500"
+                  className="absolute top-6 w-10 h-10 right-6 z-10 p-1 text-white "
+                  variant={"ghost"}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -105,7 +106,10 @@ export default function FavoriteClinicsPage() {
                   }}
                   aria-label="Remove from favorites"
                 >
-                  <XIcon className="h-4 w-4" />
+                  <BookmarkCheckIcon
+                    strokeWidth={1}
+                    className={`fill-blue-500 size-8 text-black `}
+                  />
                 </Button>
               </div>
             ))}

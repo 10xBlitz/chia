@@ -111,8 +111,9 @@ export default function ClinicCard(props: ClinicCardProps) {
               e.stopPropagation();
               handleBookmarkClick(e);
             }}
-            notActiveStyle="text-white"
-            className="absolute top-2 right-2 z-10 rounded-full p-1"
+            notActiveStyle="fill-blue-500 text-blue-600 size-7"
+            activeStyle="size-7"
+            className="absolute top-2 right-2 z-10 p-1"
             data-bookmark
           />
         )}

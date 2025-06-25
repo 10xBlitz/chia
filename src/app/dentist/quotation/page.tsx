@@ -34,6 +34,8 @@ export default function ViewQuotationPage() {
       treatments.length > 0,
   });
 
+  console.log("---->quotations: ", quotations);
+
   return (
     <>
       <HeaderWithBackButton title="견적 목록" />
@@ -70,7 +72,7 @@ export default function ViewQuotationPage() {
               </span>
               <Button
                 className={`rounded-md px-4 h-9 font-medium ${
-                  q.bid
+                  q.bid.length > 0
                     ? "border border-gray-200 bg-white text-gray-500"
                     : "bg-blue-600 text-white"
                 }`}
