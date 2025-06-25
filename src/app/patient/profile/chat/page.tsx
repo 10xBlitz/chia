@@ -87,7 +87,7 @@ export default function ChatPage() {
     enabled: !!chatRoom?.id && !!roomCategory,
     getNextPageParam: (lastPage) => {
       if (!lastPage || lastPage.length === 0) return undefined;
-      return lastPage[lastPage.length - 1].createdAt;
+      return lastPage[lastPage.length - 1].created_at;
     },
     refetchOnWindowFocus: false,
     initialPageParam: "",

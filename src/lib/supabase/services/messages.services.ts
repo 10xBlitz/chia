@@ -8,10 +8,17 @@ import { TablesInsert } from "../types";
  * @param pageParam this is used for pagination, it should be the created_at timestamp of the last message fetched in the previous page
  * @returns
  */
+export interface FetchedMessage {
+  id: string;
+  content: string;
+  user: { name: string; id: string };
+  created_at: string;
+}
+
 export async function fetchMessagesOfRoom(
   chatRoomId: string,
   pageParam?: string
-) {
+): Promise<FetchedMessage[]> {
   if (!chatRoomId) return [];
   const PAGE_SIZE = 20;
   let query = supabaseClient
@@ -34,8 +41,11 @@ export async function fetchMessagesOfRoom(
     data?.map((msg) => ({
       id: msg.id,
       content: msg.content,
-      user: { name: msg.sender?.full_name || "Unknown Sender" },
-      createdAt: msg.created_at,
+      user: {
+        name: msg.sender?.full_name || "Unknown Sender",
+        id: msg.sender_id,
+      },
+      created_at: msg.created_at,
     })) || []
   );
 }

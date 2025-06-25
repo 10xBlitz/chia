@@ -72,7 +72,7 @@ export const RealtimeChat = ({
 
     // Sort by creation date
     const sortedMessages = uniqueMessages.sort((a, b) =>
-      a.createdAt.localeCompare(b.createdAt)
+      a.created_at.localeCompare(b.created_at)
     );
 
     return sortedMessages;
@@ -125,7 +125,7 @@ export const RealtimeChat = ({
                           - ﻿월~ 금 : 10:00 ~ 18:00
                           - 점심시간 : 13:00 ~ 14:00`,
     user: { name: "고객센터" }, // Customer Service
-    createdAt: new Date().toISOString(),
+    created_at: new Date().toISOString(),
   };
 
   // Infinite scroll: load more when scrolled to top
@@ -237,7 +237,7 @@ export const RealtimeChat = ({
             if (
               isLastOwnMessage &&
               adminLastReadAt &&
-              new Date(message.createdAt) <= new Date(adminLastReadAt)
+              new Date(message.created_at) <= new Date(adminLastReadAt)
             ) {
               forceStatus = "seen";
             }

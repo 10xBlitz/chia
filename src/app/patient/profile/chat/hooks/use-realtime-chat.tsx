@@ -14,7 +14,7 @@ export interface ChatMessage {
   user: {
     name: string;
   };
-  createdAt: string;
+  created_at: string;
 }
 
 const EVENT_MESSAGE_TYPE = "message";
@@ -59,7 +59,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
         user: {
           name: username,
         },
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       };
 
       // Update local state immediately for the sender

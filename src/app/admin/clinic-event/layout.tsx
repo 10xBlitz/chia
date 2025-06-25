@@ -1,6 +1,6 @@
 "use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./sidebar";
+import { AppSidebar } from "../sidebar";
 import { usePathname } from "next/navigation";
 import React from "react";
 
@@ -25,7 +25,7 @@ export default function AdminLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex w-full">
+      <div className="flex w-[100dvw]">
         {/* Appbar for mobile with sidebar trigger and page title */}
         <div className="md:hidden fixed top-0 left-0 w-full z-50 h-14 flex items-center bg-white/95 backdrop-blur shadow border-b border-gray-200 px-2">
           <SidebarTrigger className="ml-2 " />
@@ -34,7 +34,7 @@ export default function AdminLayout({
           </span>
         </div>
         <AppSidebar />
-        <main className="flex-1 p-5 mt-8 md:mt-0 bg-[#F1F1F5]">{children}</main>
+        <main className="flex-1 mt-8 md:mt-0 bg-[#F1F1F5]">{children}</main>
       </div>
     </SidebarProvider>
   );

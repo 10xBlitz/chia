@@ -1,4 +1,4 @@
-import { startOfDay } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -32,7 +32,7 @@ export async function getPaginatedReviews(
     .select(
       `
       *,
-      patient:patient_id ( 
+      patient:patient_id!inner( 
           id, 
           full_name, 
           residence, 
@@ -61,12 +61,7 @@ export async function getPaginatedReviews(
   // }
 
   if (filters.full_name) {
-    query = query.ilike(
-      "reservation.patient.full_name",
-      `%${filters.full_name}%`
-    );
-    query = query.not("reservation", "is", null);
-    query = query.not("reservation.patient", "is", null);
+    query = query.ilike("patient.full_name", `%${filters.full_name}%`);
   }
 
   if (filters.clinic_id) {
@@ -77,9 +72,12 @@ export async function getPaginatedReviews(
   if (filters.date_range?.from && filters.date_range?.to) {
     query = query.gte(
       "created_at",
-      startOfDay(filters.date_range.from).toISOString()
+      startOfDay(filters.date_range.from).toDateString()
     );
-    query = query.lte("created_at", filters.date_range.to);
+    query = query.lte(
+      "created_at",
+      endOfDay(filters.date_range.to).toDateString()
+    );
   }
 
   if (filters.patient_id) {

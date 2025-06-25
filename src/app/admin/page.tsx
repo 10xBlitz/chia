@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import AdminLayout from "./layout";
+import AdminLayout from "./treatment/layout";
 import { AppSidebar } from "./sidebar";
 
 export default function Page() {
