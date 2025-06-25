@@ -78,8 +78,9 @@ export default function BidsPage() {
                 {/* Dental Clinic */}
                 {" · "}
                 {
-                  b.expected_price
-                    ? `${b.expected_price.toLocaleString()}원`
+                  typeof b.expected_price_min === "number" &&
+                  typeof b.expected_price_max === "number"
+                    ? `최소 ${b.expected_price_min.toLocaleString()}원 ~ 최대 ${b.expected_price_max.toLocaleString()}원`
                     : "가격 미정" /* Price not set */
                 }
               </span>

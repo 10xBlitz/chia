@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { useUserStore } from "@/providers/user-store-provider";
+import { BidAnswerSkeleton } from "@/app/dentist/quotation/view-bid/[quotation_id]/bid-answer-skeleton";
 
 export default function ViewBidPage() {
   const params = useParams();
@@ -25,6 +26,7 @@ export default function ViewBidPage() {
     queryKey: ["bid", quotation?.id],
     queryFn: () => fetchBid(quotation?.id, user?.clinic_id),
     enabled: !!quotation?.id && !!user?.clinic_id,
+    retry: 1,
   });
 
   return (
@@ -34,7 +36,6 @@ export default function ViewBidPage() {
       />{" "}
       {/**This is the quote submitted by 00. */}
       {/* Public Quotation */}
-      {isLoading && <div>로딩 중... {/* Loading... */}</div>}
       <div className="mb-6">
         <div className="mb-3">
           <label className="block text-xs text-gray-500 mb-1">
@@ -91,50 +92,55 @@ export default function ViewBidPage() {
         </div>
       </div>
       {/* Bid Info (bottom part) */}
-      <div className="border-t pt-6 mt-2">
-        <div className="font-semibold mb-3">답변 {/* Answer */}</div>
-        <div className="mb-2">
-          <span className="block text-xs text-gray-500 mb-1">
-            병원명 {/* Clinic Name */}
-          </span>
-          <div>{bid?.clinic_treatment?.clinic?.clinic_name || "-"}</div>
-        </div>
-        <div className="mb-2">
-          <span className="block text-xs text-gray-500 mb-1">
-            추천 시술 {/* Recommended Treatment */}
-          </span>
-          <div>{bid?.clinic_treatment?.treatment?.treatment_name || "-"}</div>
-        </div>
-        <div className="mb-2">
-          <span className="block text-xs text-gray-500 mb-1">
-            예상 견적 {/* Estimated Price */}
-          </span>
-          <div>
-            {bid?.expected_price
-              ? `최소 ${bid.expected_price.toLocaleString()}원`
-              : "-"}
+      {isLoading ? (
+        <BidAnswerSkeleton />
+      ) : (
+        <div className="border-t pt-6 mt-2">
+          <div className="font-semibold mb-3">답변 {/* Answer */}</div>
+          <div className="mb-2">
+            <span className="block text-xs text-gray-500 mb-1">
+              병원명 {/* Clinic Name */}
+            </span>
+            <div>{bid?.clinic_treatment?.clinic?.clinic_name || "-"}</div>
+          </div>
+          <div className="mb-2">
+            <span className="block text-xs text-gray-500 mb-1">
+              추천 시술 {/* Recommended Treatment */}
+            </span>
+            <div>{bid?.clinic_treatment?.treatment?.treatment_name || "-"}</div>
+          </div>
+          <div className="mb-2">
+            <span className="block text-xs text-gray-500 mb-1">
+              예상 견적 {/* Estimated Price */}
+            </span>
+            <div>
+              {typeof bid?.expected_price_min === "number" &&
+              typeof bid?.expected_price_max === "number"
+                ? `최소 ${bid.expected_price_min.toLocaleString()}원 ~ 최대 ${bid.expected_price_max.toLocaleString()}원`
+                : "-"}
+            </div>
+          </div>
+          <div className="mb-2">
+            <span className="block text-xs text-gray-500 mb-1">
+              추가 설명 {/* Additional Explanation */}
+            </span>
+            <div className="border rounded-lg px-3 py-2 bg-gray-50 min-h-[56px]">
+              {bid?.additional_explanation || ""}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <input
+              type="checkbox"
+              checked={!!bid?.recommend_quick_visit}
+              readOnly
+              className="accent-blue-600"
+            />
+            <span className="text-sm">
+              빠른 내원 추천 {/* Recommend Quick Visit */}
+            </span>
           </div>
         </div>
-        <div className="mb-2">
-          <span className="block text-xs text-gray-500 mb-1">
-            추가 설명 {/* Additional Explanation */}
-          </span>
-          <div className="border rounded-lg px-3 py-2 bg-gray-50 min-h-[56px]">
-            {bid?.additional_explanation || ""}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <input
-            type="checkbox"
-            checked={!!bid?.recommend_quick_visit}
-            readOnly
-            className="accent-blue-600"
-          />
-          <span className="text-sm">
-            빠른 내원 추천 {/* Recommend Quick Visit */}
-          </span>
-        </div>
-      </div>
+      )}
       {/* Contact Button */}
       <div className="py-6 flex gap-3">
         <Button

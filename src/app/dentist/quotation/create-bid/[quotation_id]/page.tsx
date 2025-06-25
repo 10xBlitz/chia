@@ -48,8 +48,11 @@ export default function CreateBidPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       treatmentId: existingBid?.clinic_treatment_id || "",
-      expectedPrice: existingBid?.expected_price
-        ? String(existingBid.expected_price)
+      expectedPriceMin: existingBid?.expected_price_min
+        ? String(existingBid.expected_price_min)
+        : "",
+      expectedPriceMax: existingBid?.expected_price_max
+        ? String(existingBid.expected_price_max)
         : "",
       additionalExplanation: existingBid?.additional_explanation || "",
       recommendQuickVisit: existingBid?.recommend_quick_visit || false,
@@ -64,7 +67,12 @@ export default function CreateBidPage() {
         quotation_id: quotationId,
         additional_explanation: values.additionalExplanation,
         clinic_treatment_id: values.treatmentId,
-        expected_price: Number(values.expectedPrice.replace(/[^0-9]/g, "")),
+        expected_price_min: Number(
+          values.expectedPriceMin.replace(/[^0-9]/g, "")
+        ),
+        expected_price_max: Number(
+          values.expectedPriceMax.replace(/[^0-9]/g, "")
+        ),
         recommend_quick_visit: values.recommendQuickVisit,
       }),
     onSuccess: () => {
@@ -106,14 +114,35 @@ export default function CreateBidPage() {
               ))}
           </FormSelect>
 
-          <FormInput
-            control={form.control}
-            name="expectedPrice"
-            label="예상 가격" // Expected Price
-            type="number"
-            disabled={isDisabled}
-            placeholder="예상 가격을 여기에 입력하세요" // Enter expected price here
-          />
+          {/* Price Range Input - Professional UI */}
+          <div>
+            <label className="block font-pretendard-600 text-[16px] text-sm text-gray-700 mb-1">
+              예상 가격 범위{" "}
+              <span className="text-xs text-gray-400">(최소~최대, 원)</span>{" "}
+              {/* Expected Price Range in KRW (Min~Max, Won) */}
+            </label>
+            <div className="flex items-center gap-2">
+              <FormInput
+                control={form.control}
+                name="expectedPriceMin"
+                label=""
+                type="number"
+                disabled={isDisabled}
+                placeholder="최소 가격" // Min Price
+                inputClassName="flex-1 rounded-r-none"
+              />
+              <span className="mx-1 text-gray-500">~</span>
+              <FormInput
+                control={form.control}
+                name="expectedPriceMax"
+                label=""
+                type="number"
+                disabled={isDisabled}
+                placeholder="최대 가격" // Max Price
+                inputClassName="flex-1 rounded-l-none"
+              />
+            </div>
+          </div>
 
           <FormTextarea
             control={form.control}
@@ -126,6 +155,7 @@ export default function CreateBidPage() {
           <FormCheckbox
             control={form.control}
             name="recommendQuickVisit"
+            formItemClassName="flex gap-3 items-center"
             label="빠른 내원 추천" // Recommend Quick Visit
             disabled={isDisabled}
           />
@@ -151,16 +181,30 @@ export default function CreateBidPage() {
 const formSchema = z
   .object({
     treatmentId: z.string().min(1, "추천 시술을 선택하세요."), // Select a recommended treatment.
-    expectedPrice: z.string().min(1, "예상 가격을 입력하세요."), // Enter the expected price.
+    expectedPriceMin: z.string().min(1, "예상 최소 가격을 입력하세요."), // Enter the expected min price.
+    expectedPriceMax: z.string().min(1, "예상 최대 가격을 입력하세요."), // Enter the expected max price.
     additionalExplanation: z
       .string()
       .max(300, "300자 이내로 입력하세요.") // Enter within 300 characters.
       .optional(),
     recommendQuickVisit: z.boolean(),
   })
-  .refine((data) => parseInt(data.expectedPrice), {
-    path: ["expectedPrice"],
-    message: "유효한 가격을 입력하세요.", // Enter a valid price.
-  });
+  .refine(
+    (data) =>
+      parseInt(data.expectedPriceMin) <= parseInt(data.expectedPriceMax),
+    {
+      path: ["expectedPriceMax"],
+      message: "최대 가격은 최소 가격보다 크거나 같아야 합니다.", // Max price must be greater than or equal to min price.
+    }
+  )
+  .refine(
+    (data) =>
+      parseInt(data.expectedPriceMin) > 0 &&
+      parseInt(data.expectedPriceMax) > 0,
+    {
+      path: ["expectedPriceMin", "expectedPriceMax"],
+      message: "가격은 0보다 커야 합니다.", // Price must be greater than 0.
+    }
+  );
 
 type FormValues = z.infer<typeof formSchema>;

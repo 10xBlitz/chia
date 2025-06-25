@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/providers/user-store-provider";
@@ -70,22 +69,20 @@ export default function ViewQuotationPage() {
                 {" · "}
                 {q.clinic_id ? "사적인" /* Private */ : "공공의" /* Public  */}
               </span>
-              <Button
-                className={`rounded-md px-4 h-9 font-medium ${
+              <button
+                className={`rounded-md px-4 h-9 font-medium min-w-22 ${
                   q.bid.length > 0
-                    ? "border border-gray-200 bg-white text-gray-500"
-                    : "bg-blue-600 text-white"
+                    ? "bg-blue-600 text-white"
+                    : "border border-gray-200 bg-white text-gray-500"
                 }`}
-                variant={q.bid ? "outline" : "default"}
                 tabIndex={-1}
-                onClick={(e) => e.stopPropagation()}
               >
                 {
-                  q.clinic_id
-                    ? "답변완료" /* Answered */
-                    : "답변확인" /* Check Answers */
+                  q.bid.length > 0
+                    ? "답변됨" /* Answered */
+                    : "입찰 추가" /* Check Answers */
                 }
-              </Button>
+              </button>
             </div>
           ))}
         </div>

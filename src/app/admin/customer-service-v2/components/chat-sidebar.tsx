@@ -65,7 +65,7 @@ export function ChatSidebar({ patientId }: ChatSidebarProps) {
       });
       // Optionally, you can also invalidate unread count for that room
       queryClient.invalidateQueries({
-        queryKey: ["unread-count", roomId],
+        queryKey: ["unread-count"],
       });
       // If the admin is currently viewing this room, update last_admin_read_at in the DB
       if (currentRoomId === roomId) {

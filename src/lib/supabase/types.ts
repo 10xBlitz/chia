@@ -38,7 +38,8 @@ export type Database = {
           additional_explanation: string | null
           clinic_treatment_id: string
           created_at: string
-          expected_price: number
+          expected_price_max: number
+          expected_price_min: number
           id: string
           quotation_id: string
           recommend_quick_visit: boolean
@@ -48,7 +49,8 @@ export type Database = {
           additional_explanation?: string | null
           clinic_treatment_id: string
           created_at?: string
-          expected_price: number
+          expected_price_max: number
+          expected_price_min: number
           id?: string
           quotation_id: string
           recommend_quick_visit: boolean
@@ -58,7 +60,8 @@ export type Database = {
           additional_explanation?: string | null
           clinic_treatment_id?: string
           created_at?: string
-          expected_price?: number
+          expected_price_max?: number
+          expected_price_min?: number
           id?: string
           quotation_id?: string
           recommend_quick_visit?: boolean

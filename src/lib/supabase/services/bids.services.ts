@@ -62,7 +62,8 @@ export async function insertBid(values: TablesInsert<"bid">) {
     .insert({
       quotation_id: values.quotation_id,
       clinic_treatment_id: values.clinic_treatment_id,
-      expected_price: values.expected_price,
+      expected_price_min: values.expected_price_min,
+      expected_price_max: values.expected_price_max,
       additional_explanation: values.additional_explanation || null,
       recommend_quick_visit: values.recommend_quick_visit,
     })

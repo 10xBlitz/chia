@@ -219,8 +219,9 @@ export default function ViewBidPage() {
             예상 견적 {/* Estimated Price */}
           </span>
           <div>
-            {bid?.expected_price
-              ? `최소 ${bid.expected_price.toLocaleString()}원`
+            {typeof bid?.expected_price_min === "number" &&
+            typeof bid?.expected_price_max === "number"
+              ? `최소 ${bid.expected_price_min.toLocaleString()}원 ~ 최대 ${bid.expected_price_max.toLocaleString()}원`
               : "-"}
           </div>
         </div>
