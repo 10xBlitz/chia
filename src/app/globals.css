@@ -135,3 +135,19 @@
     background-color: #1e6bb8;
   }
 }
+
+.has-reservation-dot {
+  position: relative;
+}
+.has-reservation-dot::after {
+  content: "";
+  display: block;
+  width: 0.375rem;
+  height: 0.375rem;
+  background: #287dfa;
+  border-radius: 9999px;
+  position: absolute;
+  left: 50%;
+  bottom: 0.2rem;
+  transform: translateX(-50%);
+}

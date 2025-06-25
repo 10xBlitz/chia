@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar } from "@/components/ui/calendar";
-// import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
+import { format, lastDayOfMonth } from "date-fns";
 import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { ko } from "date-fns/locale";
@@ -18,6 +16,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ReservationDotCalendar } from "@/components/ui/reservation-dot-calendar";
 
 const YEARS = Array.from(
   { length: 300 },
@@ -57,6 +56,33 @@ export default function DentistReservationPage() {
     enabled: !!user?.clinic_id,
   });
 
+  // Collect all reservation dates in the current month for dot marking
+  const { data: reservationDays = [] } = useQuery({
+    queryKey: ["reservation-days", user?.clinic_id, displayMonth],
+    queryFn: async () => {
+      if (!user?.clinic_id) return [];
+      const year = format(displayMonth, "yyyy");
+      const lastDay = format(lastDayOfMonth(displayMonth), "dd");
+      const { data } = await supabaseClient
+        .from("reservation")
+        .select("reservation_date, clinic_treatment(*)")
+        .eq("clinic_treatment.clinic_id", user.clinic_id)
+        .gte("reservation_date", `${year}-${format(displayMonth, "MM")}-01`)
+        .lte(
+          "reservation_date",
+          `${year}-${format(displayMonth, "MM")}-${lastDay}`
+        )
+        .order("reservation_date", { ascending: true });
+      // Return unique dates as strings
+      return data
+        ? Array.from(new Set(data.map((r) => r.reservation_date)))
+        : [];
+    },
+    enabled: !!user?.clinic_id && !!displayMonth,
+  });
+
+  console.log(reservationDays);
+
   // Navigation handlers
   const handlePrevMonth = () => {
     setDisplayMonth((prev) => {
@@ -79,21 +105,12 @@ export default function DentistReservationPage() {
         title={format(selectedDate, "M.d.(eee)", { locale: ko })}
       />
       <div className="w-full">
-        <Calendar
-          locale={ko}
-          mode="single"
+        <ReservationDotCalendar
           selected={selectedDate}
           onSelect={(d) => d && setSelectedDate(d)}
-          style={{ minWidth: "100%" }}
-          className="sm:w-full sm:min-w-full"
-          classNames={{
-            months: "flex flex-col  gap-2",
-            row: "flex w-full sm:min-w-full mt-2 justify-between",
-            day_selected:
-              "!bg-[#287DFA] text-white hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-          }}
-          month={displayMonth}
+          displayMonth={displayMonth}
           onMonthChange={setDisplayMonth}
+          reservationDays={reservationDays}
         />
 
         {/* Year & Month selectors and navigation */}

@@ -95,7 +95,7 @@ export async function fetchUnreadMessageCountOfRoom(
     .gt("created_at", lastPatientReadAt);
   if (error) {
     //not throw error here, so that it returns 0
-    console.error(
+    console.log(
       `Error fetching unread count for room ${roomId}:`,
       error.message
     );
