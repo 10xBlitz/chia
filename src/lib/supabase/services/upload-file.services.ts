@@ -112,3 +112,5 @@ export async function deleteFileFromSupabase(
 
   return true;
 }
+
+export const BANNER_IMAGE_BUCKET = "banner-images";

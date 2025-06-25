@@ -21,6 +21,7 @@ import {
   BookMarked,
   ChevronUp,
   HospitalIcon,
+  ImagesIcon,
   MessageSquareMoreIcon,
   SettingsIcon,
   SyringeIcon,
@@ -52,9 +53,15 @@ const items = [
     icon: SyringeIcon,
   },
   {
+    title: "배너 관리", // Banner Management
+    url: "/admin/banner",
+    icon: BookMarked,
+  },
+
+  {
     title: "예약 관리", // Reservation Management
     url: "/admin/reservation",
-    icon: BookMarked,
+    icon: ImagesIcon,
   },
   {
     title: "리뷰 관리", // Review Management
