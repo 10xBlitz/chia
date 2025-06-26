@@ -6,7 +6,7 @@ import {
   checkIfClinicIsFavorite,
   removeClinicFromFavorites,
 } from "@/lib/supabase/services/favorites.service";
-import BookmarkButton from "@/components/bookmark";
+import CornerBookmarkButton from "@/components/corner-bookmark-button";
 import { cn } from "@/lib/utils";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -93,7 +93,7 @@ export default function ClinicCard(props: ClinicCardProps) {
       className={cn("p-4 border-b cursor-pointer", props.className)}
       onClick={handleCardClick}
     >
-      <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-gray-200 mb-3">
+      <div className="relative w-full h-56 rounded-md overflow-hidden bg-gray-200 mb-3">
         {props.pictures && props.pictures[0] && (
           <Image
             src={props.pictures[0]}
@@ -103,17 +103,17 @@ export default function ClinicCard(props: ClinicCardProps) {
           />
         )}
         {user?.id && user.role && showBookmark && (
-          <BookmarkButton
+          <CornerBookmarkButton
             isActive={isFavorite}
-            handleBookmarkClick={(e) => {
+            onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               handleBookmarkClick(e);
             }}
-            notActiveStyle="fill-blue-500 text-blue-600 size-7"
-            activeStyle="size-7"
-            className="absolute top-2 right-2 z-10 p-1"
-            data-bookmark
+            className="top-0 right-1"
+            ariaLabel={
+              isFavorite ? "Remove from favorites" : "Add to favorites"
+            }
           />
         )}
       </div>

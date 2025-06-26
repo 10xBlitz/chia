@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import React from "react";
 
@@ -22,7 +23,7 @@ export default function BookmarkButton({
     <Button
       type="button"
       variant="ghost"
-      className={className}
+      className={cn(className, "group hover:bg-transparent")}
       onClick={handleBookmarkClick}
       aria-label={isActive ? "Remove from favorites" : "Add to favorites"}
       {...props}
@@ -30,10 +31,12 @@ export default function BookmarkButton({
       {isActive ? (
         <BookmarkCheck
           strokeWidth={1}
-          className={`fill-blue-500 min-h-6 min-w-6 text-black ${activeStyle}`}
+          className={`fill-blue-500  min-h-6 min-w-6 text-black ${activeStyle}`}
         />
       ) : (
-        <Bookmark className={`min-h-6 min-w-6 text-black ${notActiveStyle}`} />
+        <Bookmark
+          className={`min-h-6 min-w-6 group-hover:fill-blue-600 text-black ${notActiveStyle}`}
+        />
       )}
     </Button>
   );
