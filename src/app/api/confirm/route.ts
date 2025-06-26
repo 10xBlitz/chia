@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 
+//토스페이먼츠 결제 확인을 위한 API입니다.
+// This API is used to confirm Toss Payments.
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { paymentKey, orderId, amount } = body;

@@ -29,6 +29,7 @@ export default function MainPage() {
   const searchParams = useSearchParams();
   let filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "근무지"
   const user = useUserStore((state) => state.user);
+
   const router = useRouter();
 
   // Fetch clinics data with React Query
@@ -72,6 +73,7 @@ export default function MainPage() {
   } else {
     userLink = "/auth/login"; // Default to login if no role matches
   }
+
   return (
     <>
       <header className="pb-3 flex justify-between items-center px-4">

@@ -1,9 +1,16 @@
+"use client";
 import MobileLayout from "@/components/layout/mobile-layout";
 import { Button } from "@/components/ui/button";
+import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 
 const PatientHomePage = () => {
+  const kakaoLoginHandler = async () => {
+    await supabaseClient.auth.signInWithOAuth({
+      provider: "kakao",
+    });
+  };
   return (
     <MobileLayout className="min-h-dvh flex flex-col  ">
       <div className="flex flex-col gap-10">
@@ -48,6 +55,7 @@ const PatientHomePage = () => {
           letterSpacing: "-2.5%",
           fontWeight: 600,
         }}
+        onClick={kakaoLoginHandler}
       >
         <Image
           src={"/icons/message-filled.svg"}
