@@ -12,6 +12,7 @@ export type Database = {
       banner: {
         Row: {
           banner_type: Database["public"]["Enums"]["banner_type"]
+          clinic_id: string
           created_at: string
           id: string
           image: string
@@ -19,6 +20,7 @@ export type Database = {
         }
         Insert: {
           banner_type: Database["public"]["Enums"]["banner_type"]
+          clinic_id: string
           created_at?: string
           id?: string
           image: string
@@ -26,12 +28,21 @@ export type Database = {
         }
         Update: {
           banner_type?: Database["public"]["Enums"]["banner_type"]
+          clinic_id?: string
           created_at?: string
           id?: string
           image?: string
           title?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "banner_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bid: {
         Row: {

@@ -14,7 +14,7 @@ import { Modal } from "@/components/ui/modal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import {
   insertBanner,
@@ -31,12 +31,14 @@ import {
   deleteFileFromSupabase,
   BANNER_IMAGE_BUCKET,
 } from "@/lib/supabase/services/upload-file.services";
+import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
 
 const bannerFormSchema = z.object({
   id: z.string().optional(),
   banner_type: z.enum(["main", "sub"]),
   title: z.string().optional(),
   image: z.string(),
+  clinic_id: z.string().min(1, "클리닉을 선택하세요"), // Please select a clinic
 });
 
 type BannerFormValues = z.infer<typeof bannerFormSchema>;
@@ -149,17 +151,26 @@ export function BannerModal({
           banner_type: data.banner_type,
           title: data.title || "",
           image: data.image || "",
+          clinic_id: data.clinic_id || "",
         }
       : {
           banner_type: "main",
           title: "",
           image: "",
+          clinic_id: "",
         },
   });
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Fetch clinics for dropdown (first 100, sorted by name)
+  const { data: clinicsPage, isLoading: clinicsLoading } = useQuery({
+    queryKey: ["paginated-clinics-dropdown"],
+    queryFn: () => getPaginatedClinics(1, 100),
+  });
+  const clinics = clinicsPage?.data || [];
 
   const mutation = useMutation({
     mutationFn: async (values: BannerFormValues) => {
@@ -189,9 +200,17 @@ export function BannerModal({
         }
       }
       if (data?.id) {
-        await updateBanner(data.id, { ...values, image: imageUrl });
+        await updateBanner(data.id, {
+          ...values,
+          image: imageUrl,
+          clinic_id: values.clinic_id,
+        });
       } else {
-        await insertBanner({ ...values, image: imageUrl });
+        await insertBanner({
+          ...values,
+          image: imageUrl,
+          clinic_id: values.clinic_id,
+        });
       }
     },
     onSuccess: () => {
@@ -234,12 +253,44 @@ export function BannerModal({
             label="배너 유형" // Banner Type
             placeholder="배너 유형을 선택하세요" // Select banner type
           >
-            <SelectItem value="main" className="cursor-pointer">
+            <SelectItem
+              value="main"
+              className="cursor-pointer hover:bg-gray-100"
+            >
               메인
             </SelectItem>
-            <SelectItem value="sub" className="cursor-pointer">
+            <SelectItem
+              value="sub"
+              className="cursor-pointer hover:bg-gray-100"
+            >
               서브
             </SelectItem>
+          </FormSelect>
+
+          <FormSelect
+            control={form.control}
+            name="clinic_id"
+            label="클리닉" // Clinic
+            placeholder="클리닉을 선택하세요" // Please select a clinic
+            disabled={clinicsLoading}
+            loading={clinicsLoading}
+          >
+            {clinics.length ? (
+              clinics.map((clinic: { id: string; clinic_name: string }) => (
+                <SelectItem
+                  key={clinic.id}
+                  value={clinic.id}
+                  className="cursor-pointer hover:bg-gray-100"
+                >
+                  {clinic.clinic_name}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="" disabled>
+                {clinicsLoading ? "로딩 중..." : "클리닉 없음"}{" "}
+                {/* Loading... / No clinics */}
+              </SelectItem>
+            )}
           </FormSelect>
 
           <FormInput
