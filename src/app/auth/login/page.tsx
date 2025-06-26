@@ -10,7 +10,7 @@ const PatientHomePage = () => {
     await supabaseClient.auth.signInWithOAuth({
       provider: "kakao",
       options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/v1/callback`,
       },
     });
   };
