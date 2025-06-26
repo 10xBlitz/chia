@@ -148,8 +148,8 @@ export default function ClinicSingleViewPage() {
 
   // Copy address to clipboard
   const handleCopyAddress = () => {
-    if (clinic?.location) {
-      navigator.clipboard.writeText(String(clinic.location));
+    if (clinic?.region) {
+      navigator.clipboard.writeText(String(clinic.region));
       toast.success("주소가 클립보드에 복사되었습니다."); // Address copied to clipboard
     }
   };
@@ -253,7 +253,7 @@ export default function ClinicSingleViewPage() {
           <div className="flex flex-col gap-2 text-gray-700 text-[15px]">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-black" />
-              <span>{clinic.location || "no location"}</span>
+              <span>{clinic.region || "no location"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
@@ -389,7 +389,7 @@ export default function ClinicSingleViewPage() {
                     height="100%"
                     style={{ border: 0, minHeight: 160 }}
                     src={`https://www.google.com/maps?q=${encodeURIComponent(
-                      clinic.location || clinic.region || ""
+                      clinic.region || ""
                     )}&output=embed`}
                     allowFullScreen
                     loading="lazy"
@@ -397,9 +397,7 @@ export default function ClinicSingleViewPage() {
                   />
                 </div>
                 <div className="flex justify-between items-center">
-                  <div className="text-sm">
-                    {clinic.location || "no location"}
-                  </div>
+                  <div className="text-sm">{clinic.region || "no region"}</div>
                   <Button
                     size="sm"
                     variant="outline"

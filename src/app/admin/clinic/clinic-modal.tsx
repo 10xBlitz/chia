@@ -90,7 +90,6 @@ export type ClinicHour = {
 const formSchema = z.object({
   clinic_name: z.string().min(1, "Clinic name is required"),
   contact_number: z.string().min(1, "Contact number is required"),
-  location: z.string().min(1, "Location is required"),
   region: z.string().min(1, "Region is required"),
   link: z.string().optional(),
   opening_date: z.date({ required_error: "Opening date is required" }),
@@ -146,7 +145,6 @@ export const ClinicModal = ({
       ? {
           clinic_name: data.clinic_name,
           contact_number: data.contact_number,
-          location: data.location,
           region: data.region,
           link: data.link || "",
           opening_date: data.opening_date
@@ -181,7 +179,6 @@ export const ClinicModal = ({
       : {
           clinic_name: "",
           contact_number: "",
-          location: "",
           link: "",
           region: "",
           opening_date: new Date(),
@@ -311,15 +308,6 @@ export const ClinicModal = ({
                   name="contact_number"
                   label="연락처" // Contact Number
                   placeholder="연락처를 입력하세요." // Enter contact number here
-                  formLabelClassName={formLabelClassName}
-                  inputClassName={
-                    "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
-                  }
-                />
-                <FormAddress
-                  control={form.control}
-                  name="location"
-                  label="위치" // Location
                   formLabelClassName={formLabelClassName}
                   inputClassName={
                     "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"

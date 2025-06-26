@@ -60,7 +60,6 @@ export async function getPaginatedFavoriteClinics(
     created_at: item.clinic.created_at,
     id: item.id,
     link: item.clinic.link,
-    location: item.clinic.location,
     opening_date: item.clinic.opening_date,
     pictures: item.clinic.pictures,
     region: item.clinic.region,

@@ -20,7 +20,6 @@ export interface ClinicCardProps {
   created_at: string;
   id: string;
   link: string | null;
-  location: string;
   opening_date: string;
   pictures: string[] | null;
   region: string;

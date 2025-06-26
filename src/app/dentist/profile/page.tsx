@@ -56,7 +56,6 @@ export default function ProfilePage() {
     ? format(new Date(user.clinic.created_at), "yyyy.MM.dd")
     : "0000.00.00";
   const clinicContact = user?.clinic?.contact_number || "02-123-1234";
-  const clinicAddress = user?.clinic?.location;
   const clinicRegion = user?.clinic?.region;
 
   return (
@@ -138,11 +137,6 @@ export default function ProfilePage() {
             label="연락처" // Contact
             value={clinicContact}
             emptyText="연락처 등록" // Register Contact
-          />
-          <InfoRow
-            label="소재지" // Location
-            value={clinicAddress}
-            emptyText="소재지 등록" // Register Location
           />
           <InfoRow
             label="소재지 지역" // Location Region
