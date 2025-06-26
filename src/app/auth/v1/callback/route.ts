@@ -32,12 +32,16 @@ export async function GET(request: Request) {
         console.log(
           "----> forwardedHost detected, redirecting to it with next path"
         );
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(
+          `https://${forwardedHost}${next}/auth/sign-up/finish-signup-for-kakao`
+        );
       } else {
         console.log(
           "----> no forwardedHost, redirecting to origin with next path"
         );
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(
+          `${origin}${next}/auth/sign-up/finish-signup-for-kakao`
+        );
       }
     }
   }
