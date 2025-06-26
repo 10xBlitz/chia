@@ -9,6 +9,9 @@ const PatientHomePage = () => {
   const kakaoLoginHandler = async () => {
     await supabaseClient.auth.signInWithOAuth({
       provider: "kakao",
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
     });
   };
   return (
