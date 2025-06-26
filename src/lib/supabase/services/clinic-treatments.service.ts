@@ -30,15 +30,19 @@ export async function markClinicTreatmentDeleted(
  */
 export async function insertClinicTreatment(
   clinicId: string,
-  treatmentId: string,
-  price: number
+  treatmentId: string
 ) {
-  await supabaseClient.from("clinic_treatment").insert({
-    clinic_id: clinicId,
-    treatment_id: treatmentId,
-    price,
-    status: "active",
-  });
+  const { data, error } = await supabaseClient
+    .from("clinic_treatment")
+    .insert({
+      clinic_id: clinicId,
+      treatment_id: treatmentId,
+      status: "active",
+    })
+    .select();
+
+  if (error) throw error;
+  return data[0];
 }
 
 /**
@@ -52,12 +56,11 @@ export async function insertClinicTreatment(
  */
 export async function updateClinicTreatment(
   clinicId: string,
-  treatmentId: string,
-  price: number
+  treatmentId: string
 ) {
   await supabaseClient
     .from("clinic_treatment")
-    .update({ price, status: "active" })
+    .update({ status: "active" })
     .eq("clinic_id", clinicId)
     .eq("treatment_id", treatmentId);
 }

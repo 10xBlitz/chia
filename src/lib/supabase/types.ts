@@ -186,7 +186,6 @@ export type Database = {
           clinic_id: string
           created_at: string
           id: string
-          price: number
           status: Database["public"]["Enums"]["record_status"]
           treatment_id: string
         }
@@ -194,7 +193,6 @@ export type Database = {
           clinic_id: string
           created_at?: string
           id?: string
-          price: number
           status?: Database["public"]["Enums"]["record_status"]
           treatment_id: string
         }
@@ -202,7 +200,6 @@ export type Database = {
           clinic_id?: string
           created_at?: string
           id?: string
-          price?: number
           status?: Database["public"]["Enums"]["record_status"]
           treatment_id?: string
         }

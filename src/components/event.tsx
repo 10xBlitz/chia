@@ -125,11 +125,11 @@ export default function EventCarousel() {
                     href={`/patient/payment/event?orderId=${
                       event.id
                     }&amount=${calculateDiscountedPrice(
-                      event.clinic_treatment.price,
+                      0,
                       event.discount
                     )}&eventName=${event.title}&treatmentName=${
                       event.clinic_treatment.treatment.treatment_name
-                    }&treatmentOriginalPrice=${event.clinic_treatment.price}`}
+                    }&treatmentOriginalPrice=${0}`}
                     className="block h-full"
                   >
                     <Image

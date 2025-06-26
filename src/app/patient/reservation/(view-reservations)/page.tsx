@@ -97,7 +97,7 @@ export default function ReservationListPage() {
                         r.clinic_treatment?.clinic?.id
                       }&clinic_name=${
                         r.clinic_treatment?.clinic?.clinic_name || ""
-                      }&total_amount=${r.clinic_treatment?.price || 0}`
+                      }&total_amount=${0}`
                     )
                   }
                 >

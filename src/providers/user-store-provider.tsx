@@ -42,32 +42,6 @@ const defaultUserState = {
   login_status: "inactive" as Tables<"user">["login_status"], // Default to inactive
 };
 
-// --- Helper: Ensure Kakao user has correct role and profile ---
-// async function ensureKakaoUserRoleAndProfile(user: {
-//   id: string;
-//   app_metadata?: { provider?: string };
-//   user_metadata?: Record<string, unknown> & {
-//     role?: string;
-//     full_name?: string;
-//     gender?: string;
-//     birthdate?: string;
-//     contact_number?: string;
-//     residence?: string;
-//     work_place?: string;
-//   };
-// }) {
-//   // 1. Set role in Auth if needed
-//   if (
-//     user.app_metadata?.provider === "kakao" &&
-//     user.user_metadata?.role !== "patient"
-//   ) {
-//     await supabaseClient.auth.updateUser({
-//       data: { ...user.user_metadata, role: "patient" },
-//     });
-//   }
-//   // // 2. Create profile in user table if missing
-// }
-
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const storeRef = useRef<UserStoreApi | null>(null);
   // useState to ensure children are rendered only after the store is definitely initialized

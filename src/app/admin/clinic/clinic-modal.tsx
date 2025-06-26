@@ -11,9 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
-
 import { CheckIcon, Trash2Icon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -51,7 +49,7 @@ import {
 } from "@/lib/supabase/services/upload-file.services";
 import FormInput from "@/components/form-ui/form-input";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
-import FormAddress from "@/components/form-ui/form-address";
+// import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import {
   Select,
@@ -67,6 +65,7 @@ import {
 import FormTextarea from "@/components/form-ui/form-textarea";
 import { Enums } from "@/lib/supabase/types";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import AddressSearch from "@/components/AddressSearch";
 
 // 요일을 한글로, 영어 주석 추가 (Days of week in Korean, with English comments)
 const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
@@ -99,7 +98,6 @@ const formSchema = z.object({
       treatment_id: z.string().nullable(),
       treatment_name: z.string().min(1, "Treatment name is required"),
       image_url: z.any(),
-      price: z.coerce.number().min(0, "Price is required"),
       action: z.enum(["new", "updated", "deleted", "old"]),
     })
   ),
@@ -155,7 +153,6 @@ export const ClinicModal = ({
               treatment_id: item.treatment.id.toString(),
               treatment_name: item.treatment.treatment_name,
               image_url: item.treatment.image_url,
-              price: item.price,
               action: "old",
             })) || [],
           clinic_hours:
@@ -313,7 +310,7 @@ export const ClinicModal = ({
                     "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
                   }
                 />
-                <FormAddress
+                {/* <FormAddress
                   control={form.control}
                   name="region"
                   label="지역" // Region
@@ -321,6 +318,15 @@ export const ClinicModal = ({
                   inputClassName={
                     "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
                   }
+                /> */}
+                <AddressSearch
+                  id="address"
+                  defaultValue={form.getValues("region")}
+                  onAddressSelect={(value) => form.setValue("region", value)}
+                  onChange={(e) => form.setValue("region", e.target.value)}
+                  className={`mt-2 ${
+                    form.formState.dirtyFields.region ? "border-red-500" : ""
+                  }`}
                 />
                 <FormDatePicker
                   control={form.control}
@@ -504,36 +510,6 @@ export const ClinicModal = ({
                             )}
                           />
                         )}
-                        <FormField
-                          control={form.control}
-                          name={`treatments.${index}.price`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>가격</FormLabel> {/* Price */}
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                    const currentTreatment = form.getValues(
-                                      `treatments.${index}.action`
-                                    );
-                                    if (currentTreatment === "old") {
-                                      form.setValue(
-                                        `treatments.${index}.action`,
-                                        "updated"
-                                      );
-                                    }
-                                  }}
-                                  type="number"
-                                  className="w-full h-[45px]"
-                                  placeholder="가격을 입력하세요."
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
                       </div>
                       {/* 오른쪽: 이미지 (Right: Image) */}
                       <div className="flex flex-col gap-2 items-center h-full justify-between">
@@ -606,7 +582,6 @@ export const ClinicModal = ({
                       treatment_id: "",
                       treatment_name: "",
                       image_url: "",
-                      price: 0,
                       action: "new",
                     })
                   }
@@ -877,9 +852,9 @@ async function saveTreatmentsForClinic(
     if (t.action === "deleted" && t.treatment_id) {
       await markClinicTreatmentDeleted(clinicId, t.treatment_id);
     } else if (t.action === "new" && t.treatment_id) {
-      await insertClinicTreatment(clinicId, t.treatment_id, t.price);
+      await insertClinicTreatment(clinicId, t.treatment_id);
     } else if ((t.action === "updated" || !t.action) && t.treatment_id) {
-      await updateClinicTreatment(clinicId, t.treatment_id, t.price);
+      await updateClinicTreatment(clinicId, t.treatment_id);
     }
     // else: skip
   }

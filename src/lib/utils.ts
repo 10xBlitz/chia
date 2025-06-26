@@ -107,3 +107,14 @@ export const getKoreanDayOfWeek = (
   const d = typeof date === "string" ? new Date(date) : date;
   return days[d.getDay()];
 };
+
+/**
+ * Extracts the region (시/도 + 구/군) from a full Korean address string.
+ * E.g. "부산 부산진구 가야대로 지하 719 (부전동, 지하철 부암역)" => "부산 부산진구"
+ * Returns the first two space-separated parts.
+ */
+export function extractRegionFromAddress(address: string): string {
+  if (!address) return "";
+  const parts = address.split(" ");
+  return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : address;
+}
