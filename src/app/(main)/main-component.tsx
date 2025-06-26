@@ -167,16 +167,16 @@ export default function MainPage() {
                         review(*)
                       )
                     `}
-              pageSize={5}
+              pageSize={100}
               // Only skip first 3 clinics, fetch all remaining
               trailingQuery={(query) => {
                 let addressFilter = "";
                 if (filterOption === "근무지") {
                   //workplace
-                  addressFilter = user?.work_place?.split(",")[1] || "";
+                  addressFilter = user?.work_place || "";
                 } else if (filterOption === "거주") {
                   //residence
-                  addressFilter = user?.residence?.split(",")[1] || "";
+                  addressFilter = user?.residence || "";
                 }
                 let q = query;
                 if (addressFilter) {
@@ -188,7 +188,7 @@ export default function MainPage() {
               }}
               renderItem={(item, index) => {
                 return (
-                  index > 3 && (
+                  index >= 3 && (
                     <ClinicCard {...(item as ClinicCardProps)} key={item.id} />
                   )
                 );
