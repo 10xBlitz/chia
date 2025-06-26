@@ -11,9 +11,6 @@ export async function GET(request: Request) {
     // if "next" is not a relative URL, use the default
     next = "/";
   }
-  console.log("---> forwarded host", request.headers.get("x-forwarded-host"));
-  console.log("---> code", code);
-  console.log("---> origin", origin);
 
   if (code) {
     const supabase = await createClient();
@@ -36,7 +33,7 @@ export async function GET(request: Request) {
         console.log(
           "----> no forwardedHost, redirecting to origin with next path"
         );
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`${origin}${next}`);
       }
     }
   }
