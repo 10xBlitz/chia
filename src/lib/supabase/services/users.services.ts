@@ -362,3 +362,38 @@ export async function registerAdmin(data: {
   });
   return userData;
 }
+
+/**
+ * Register a user from Kakao OAuth (no email/password, just profile info)
+ */
+export async function registerKakaoUser(
+  data: Omit<Tables<"user">, "created_at" | "login_status"> & {
+    email: string;
+  }
+): Promise<{ data: Tables<"user"> }> {
+  // Insert user profile into 'user' table (assume Auth user already exists)
+  const { data: userData, error: insertError } = await supabaseClient
+    .from("user")
+    .insert([
+      {
+        full_name: data.full_name,
+        gender: data.gender,
+        birthdate: data.birthdate,
+        residence: data.residence,
+        work_place: data.work_place,
+        role: data.role,
+        contact_number: data.contact_number,
+        clinic_id: data.clinic_id,
+        id: data.id, // should be the Supabase Auth user id
+      },
+    ])
+    .select()
+    .single();
+
+  await supabaseClient.auth.updateUser({
+    data: { role: "patient" },
+  });
+
+  if (insertError) throw insertError;
+  return { data: userData };
+}

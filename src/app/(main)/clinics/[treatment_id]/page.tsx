@@ -36,7 +36,7 @@ export default function ClinicsPage() {
       <div className="flex flex-col">
         <header className="pb-3 flex justify-between items-center px-4">
           <BackButton link="/" />
-          {user?.id ? (
+          {user?.id && user.role ? (
             <Link href="/patient/profile">
               <UserIcon className="min-w-7 min-h-7" />
             </Link>
@@ -55,7 +55,7 @@ export default function ClinicsPage() {
             <div className="text-sm">
               지금 걸어갈 수 있는 병원 {/** Hospitals you can walk to now */}
             </div>
-            {user?.id && (
+            {user?.id && user.role && (
               <Select
                 value={filterOption}
                 onValueChange={handleSortOptionChange}
@@ -131,7 +131,7 @@ export default function ClinicsPage() {
             />
           </div>
         </main>
-        {user?.id && <BottomNavigation />}
+        {user?.id && user.role && <BottomNavigation />}
       </div>
     </MobileLayout>
   );

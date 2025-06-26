@@ -11,12 +11,13 @@ import Step2 from "./step-2";
 import { fullSchema, step1Schema, step2Schema } from "./schema";
 import { AnimatePresence, motion } from "framer-motion";
 import Step3 from "./step-3";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 import { registerUser } from "@/lib/supabase/services/users.services";
 import MobileLayout from "@/components/layout/mobile-layout";
 import HeaderWithBackButton from "@/components/header-with-back-button";
+import { useUserStore } from "@/providers/user-store-provider";
 
 const steps = [
   { label: "계정" }, // Account
@@ -25,20 +26,25 @@ const steps = [
 ];
 
 const SignupPage = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  // Set currentStep from search params, default to 1
+  const stepParam = Number(searchParams.get("step")) || 1;
+  const [currentStep, setCurrentStep] = useState(stepParam);
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
   const [confirmPasswordError, setConfirmPasswordError] = useState<
     string | null
   >(null);
-  const router = useRouter();
+
+  const user = useUserStore((state) => state.user);
 
   const form = useForm<z.infer<typeof fullSchema>>({
     resolver: zodResolver(fullSchema),
     mode: "onChange",
     defaultValues: {
-      name: "",
-      email: "",
+      name: user?.full_name || "",
+      email: user?.email || "",
       password: "",
       confirmPassword: "",
       gender: "",
@@ -109,6 +115,16 @@ const SignupPage = () => {
     setDirection("prev");
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
+
+  // Keep step in search params in sync with currentStep
+  useEffect(() => {
+    if (searchParams.get("step") !== String(currentStep)) {
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      params.set("step", String(currentStep));
+      router.replace(`?${params.toString()}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
 
   // Variants for swipe animation with directional support
   const variants = {

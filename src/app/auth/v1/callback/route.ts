@@ -12,8 +12,9 @@ export async function GET(request: Request) {
     next = "/";
   }
 
+  const supabase = await createClient();
+
   if (code) {
-    const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
@@ -23,7 +24,10 @@ export async function GET(request: Request) {
           "=--->local environment detected, redirecting to origin with next path"
         );
         // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-        return NextResponse.redirect(`${origin}${next}`);
+
+        return NextResponse.redirect(
+          `${origin}${next}/auth/sign-up/finish-signup-for-kakao`
+        );
       } else if (forwardedHost) {
         console.log(
           "----> forwardedHost detected, redirecting to it with next path"

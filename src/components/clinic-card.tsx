@@ -103,7 +103,7 @@ export default function ClinicCard(props: ClinicCardProps) {
             className="object-cover"
           />
         )}
-        {user?.id && showBookmark && (
+        {user?.id && user.role && showBookmark && (
           <BookmarkButton
             isActive={isFavorite}
             handleBookmarkClick={(e) => {

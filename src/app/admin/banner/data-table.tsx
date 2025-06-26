@@ -106,7 +106,6 @@ export function DataTable<TData, TValue>({
   // Keep input in sync with param (e.g. on back/forward navigation)
   React.useEffect(() => {
     setBannerTitleInput(bannerTitleParam);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bannerTitleParam]);
 
   // Debounce bannerTitle and update param, resetting page

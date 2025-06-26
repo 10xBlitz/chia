@@ -29,7 +29,6 @@ export default function MainPage() {
   const searchParams = useSearchParams();
   let filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "근무지"
   const user = useUserStore((state) => state.user);
-
   const router = useRouter();
 
   // Fetch clinics data with React Query
@@ -83,7 +82,7 @@ export default function MainPage() {
           width={76}
           alt="logo"
         />
-        {user?.id ? (
+        {user?.id && user.role ? (
           <Link href={userLink}>
             <UserIcon className="min-w-7 min-h-7" />
           </Link>
@@ -103,7 +102,7 @@ export default function MainPage() {
           <div className="text-sm">
             지금 걸어갈 수 있는 병원 {/** Hospitals you can walk to now */}
           </div>
-          {user?.id && (
+          {user?.id && user.role && (
             <Select value={filterOption} onValueChange={handleSortOptionChange}>
               <SelectTrigger className="w-[100px] text-sm">
                 <SelectValue />

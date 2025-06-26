@@ -6,9 +6,11 @@ import { motion } from "framer-motion";
 export const Stepper = ({
   steps,
   currentStep,
+  className,
 }: {
   steps: { label: string; sub?: string }[];
   currentStep: number;
+  className?: string;
 }) => {
   // If there are 4 steps, use smaller text
   const stepperTextClass =
@@ -18,7 +20,8 @@ export const Stepper = ({
     <ol
       className={cn(
         "flex font-retendard-600 items-center justify-between w-full p-3 space-x-2 font-medium text-center text-gray-500 rounded-lg dark:text-gray-400 dark:bg-gray-800 sm:p-4  rtl:space-x-reverse",
-        stepperTextClass
+        stepperTextClass,
+        className
       )}
     >
       {steps.map((step, index) => {

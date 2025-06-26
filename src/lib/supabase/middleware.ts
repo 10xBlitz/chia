@@ -82,6 +82,15 @@ export async function updateSession(request: NextRequest) {
       url.pathname = "/forbidden";
       return NextResponse.redirect(url);
     }
+
+    // if (!role && publicRoutes.includes(request.nextUrl.pathname)) {
+    //   // User is logged in but has no role, redirect to profile setup
+    //   console.log("--->includes:", request.nextUrl.pathname);
+    //   const url = request.nextUrl.clone();
+    //   url.pathname = "/auth/sign-up/finish-signup-for-kakao";
+    //   url.searchParams.set("message", "회원가입을 완료해주세요");
+    //   return NextResponse.redirect(url);
+    // }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
