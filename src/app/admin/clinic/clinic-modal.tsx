@@ -66,51 +66,7 @@ import FormTextarea from "@/components/form-ui/form-textarea";
 import { Enums } from "@/lib/supabase/types";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import AddressSearch from "@/components/AddressSearch";
-
-// 요일을 한글로, 영어 주석 추가 (Days of week in Korean, with English comments)
-const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
-  "월요일", // Monday
-  "화요일", // Tuesday
-  "수요일", // Wednesday
-  "목요일", // Thursday
-  "금요일", // Friday
-  "토요일", // Saturday
-  "일요일", // Sunday
-  "점심시간", // Lunch Break
-];
-
-// Add ClinicHour type for typing
-export type ClinicHour = {
-  day_of_week: string;
-  time_open: string;
-  note?: string;
-};
-
-const formSchema = z.object({
-  clinic_name: z.string().min(1, "Clinic name is required"),
-  contact_number: z.string().min(1, "Contact number is required"),
-  region: z.string().min(1, "Region is required"),
-  link: z.string().optional(),
-  opening_date: z.date({ required_error: "Opening date is required" }),
-  pictures: z.any().optional(), // For clinic images
-  treatments: z.array(
-    z.object({
-      treatment_id: z.string().nullable(),
-      treatment_name: z.string().min(1, "Treatment name is required"),
-      image_url: z.any(),
-      action: z.enum(["new", "updated", "deleted", "old"]),
-    })
-  ),
-  clinic_hours: z
-    .array(
-      z.object({
-        day_of_week: z.string().min(1, "Day is required"),
-        time_open: z.string().min(1, "Time is required"),
-        note: z.string().optional(),
-      })
-    )
-    .optional(),
-});
+import { DAYS_OF_WEEK, formSchema } from "./clinic-modal.types";
 
 export const ClinicModal = ({
   data,
@@ -143,7 +99,10 @@ export const ClinicModal = ({
       ? {
           clinic_name: data.clinic_name,
           contact_number: data.contact_number,
+          full_address: data.full_address,
+          detail_address: data.detail_address || undefined,
           region: data.region,
+          city: data.city,
           link: data.link || "",
           opening_date: data.opening_date
             ? new Date(data.opening_date)
@@ -178,6 +137,9 @@ export const ClinicModal = ({
           contact_number: "",
           link: "",
           region: "",
+          city: "",
+          full_address: "",
+          detail_address: "",
           opening_date: new Date(),
           treatments: [],
           clinic_hours: [],
@@ -235,6 +197,8 @@ export const ClinicModal = ({
       setLoading(false);
       toast.success(data ? "Clinic updated" : "Clinic created");
       onSuccess();
+      setClinicImageFiles([]);
+      setClinicImagePreviews([]);
       onClose();
     },
     onError: (error) => {
@@ -276,6 +240,8 @@ export const ClinicModal = ({
         isLong={true}
         onClose={() => {
           form.reset();
+          setClinicImageFiles([]);
+          setClinicImagePreviews([]);
           onClose();
         }}
       >
@@ -322,11 +288,33 @@ export const ClinicModal = ({
                 <AddressSearch
                   id="address"
                   defaultValue={form.getValues("region")}
-                  onAddressSelect={(value) => form.setValue("region", value)}
-                  onChange={(e) => form.setValue("region", e.target.value)}
+                  onAddressSelect={(fullAddress, city, region) => {
+                    console.log("---->clinic modal: address: ", {
+                      fullAddress,
+                      city,
+                      region,
+                    });
+                    form.setValue("region", region);
+                    form.setValue("city", city);
+                    form.setValue("full_address", fullAddress);
+                  }}
+                  onChange={(e) => {
+                    form.setValue("region", e.target.value);
+                  }}
                   className={`mt-2 ${
                     form.formState.dirtyFields.region ? "border-red-500" : ""
                   }`}
+                />
+
+                <FormInput
+                  control={form.control}
+                  name="detail_address"
+                  label="상세 주소" // Detail Address
+                  formLabelClassName={formLabelClassName}
+                  inputClassName={
+                    "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
+                  }
+                  placeholder="상세 주소를 입력하세요." // Enter detail address here
                 />
                 <FormDatePicker
                   control={form.control}
@@ -379,6 +367,7 @@ export const ClinicModal = ({
                       <Button
                         className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
                         type="button"
+                        disabled={mutation.status === "pending"}
                         onClick={() => setDeleteIndex(index)}
                       >
                         <Trash2Icon className="h-4 w-4" />
@@ -765,6 +754,10 @@ async function updateClinicWithImages(
     ...values,
     link: values.link || "",
     pictures: clinicPictures,
+    detail_address: values.detail_address || null,
+    region: values.region || "",
+    city: values.city || "",
+    full_address: values.full_address || "",
     opening_date: values.opening_date.toDateString(),
   };
 
@@ -818,6 +811,10 @@ async function addClinicWithImages(
     link: values.link || "",
     pictures: clinicPictures,
     opening_date: values.opening_date.toDateString(),
+    region: values.region || "",
+    city: values.city || "",
+    full_address: values.full_address || "",
+    detail_address: values.detail_address || null,
   };
   const newClinicId = await insertClinic(clinicPayload, clinicPictures);
 

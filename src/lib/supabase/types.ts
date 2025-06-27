@@ -132,9 +132,12 @@ export type Database = {
       }
       clinic: {
         Row: {
+          city: string
           clinic_name: string
           contact_number: string
           created_at: string
+          detail_address: string | null
+          full_address: string
           id: string
           link: string | null
           opening_date: string
@@ -142,19 +145,25 @@ export type Database = {
           region: string
         }
         Insert: {
+          city?: string
           clinic_name: string
           contact_number: string
           created_at?: string
+          detail_address?: string | null
+          full_address?: string
           id?: string
           link?: string | null
           opening_date: string
           pictures?: string[] | null
-          region: string
+          region?: string
         }
         Update: {
+          city?: string
           clinic_name?: string
           contact_number?: string
           created_at?: string
+          detail_address?: string | null
+          full_address?: string
           id?: string
           link?: string | null
           opening_date?: string

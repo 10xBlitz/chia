@@ -8,7 +8,52 @@ declare global {
 }
 
 interface UseAddressSearchProps {
-  onAddressSelect?: (address: string) => void;
+  onAddressSelect?: ({
+    fullAddress,
+    city,
+    region,
+  }: {
+    fullAddress: string;
+    city: string;
+    region: string;
+  }) => void;
+}
+
+// Daum Postcode API result type
+export interface DaumPostcodeData {
+  address: string;
+  addressEnglish: string;
+  addressType: "R" | "J";
+  apartment: "Y" | "N";
+  autoJibunAddress: string;
+  autoJibunAddressEnglish: string;
+  autoRoadAddress: string;
+  autoRoadAddressEnglish: string;
+  bcode: string;
+  bname: string;
+  bname1: string;
+  bname2: string;
+  buildingCode: string;
+  buildingName: string;
+  hname: string;
+  jibunAddress: string;
+  jibunAddressEnglish: string;
+  noSelected: string;
+  postcode: string;
+  postcode1: string;
+  postcode2: string;
+  postcodeSeq: string;
+  roadAddress: string;
+  roadAddressEnglish: string;
+  roadname: string;
+  roadnameCode: string;
+  sido: string;
+  sigungu: string;
+  sigunguCode: string;
+  userLanguageType: string;
+  zonecode: string;
+  query: string;
+  [key: string]: any;
 }
 
 export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
@@ -117,46 +162,49 @@ export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
   // }, [validateLocation]);
 
   const handleSetAddress = useCallback(
-    (newAddress: string | null) => {
-      if (newAddress !== addressRef.current) {
-        console.log("Updating address:", newAddress);
+    (
+      fullAddress: string | null,
+      city: string | null,
+      region: string | null
+    ) => {
+      if (fullAddress !== addressRef.current) {
+        console.log("Updating address:", fullAddress);
 
         // Validate immediately
-        if (newAddress && newAddress.trim() !== "") {
-          const isJeju =
-            newAddress.includes("제주") ||
-            newAddress.toLowerCase().includes("jeju");
+        if (fullAddress && fullAddress.trim() !== "") {
+          // const isJeju =
+          //   newAddress.includes("제주") ||
+          //   newAddress.toLowerCase().includes("jeju");
+          // const isUlleung =
+          //   newAddress.includes("울릉도") ||
+          //   newAddress.toLowerCase().includes("ulleung");
+          // const isDokdo =
+          //   newAddress.includes("독도") ||
+          //   newAddress.toLowerCase().includes("dokdo");
+          // const isRemoteIsland = isUlleung || isDokdo;
+          // if (isJeju) {
+          //   setIsJejuOrRemoteIsland(true);
+          //   setIsValidLocation(false);
+          //   setError("제주도는 배송이 불가능합니다");
+          //   return; // Don't update address if it's Jeju
+          // }
+          // if (isRemoteIsland) {
+          //   setIsJejuOrRemoteIsland(true);
+          //   setIsValidLocation(false);
+          //   setError("울릉도 및 독도는 배송이 불가능합니다");
+          //   return; // Don't update address if it's remote island
+          // }
+          // validateLocation(fullAddress);
+        }
 
-          const isUlleung =
-            newAddress.includes("울릉도") ||
-            newAddress.toLowerCase().includes("ulleung");
-          const isDokdo =
-            newAddress.includes("독도") ||
-            newAddress.toLowerCase().includes("dokdo");
-
-          const isRemoteIsland = isUlleung || isDokdo;
-
-          if (isJeju) {
-            setIsJejuOrRemoteIsland(true);
-            setIsValidLocation(false);
-            setError("제주도는 배송이 불가능합니다");
-            return; // Don't update address if it's Jeju
-          }
-
-          if (isRemoteIsland) {
-            setIsJejuOrRemoteIsland(true);
-            setIsValidLocation(false);
-            setError("울릉도 및 독도는 배송이 불가능합니다");
-            return; // Don't update address if it's remote island
-          }
-
-          validateLocation(newAddress);
+        if (!fullAddress || !city || !region) {
+          return;
         }
 
         // Only proceed if not Jeju
-        addressRef.current = newAddress;
-        setAddress(newAddress);
-        props.onAddressSelect?.(newAddress || "");
+        addressRef.current = fullAddress;
+        setAddress(fullAddress);
+        props.onAddressSelect?.({ fullAddress, city, region });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,7 +218,7 @@ export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
     }
 
     new window.daum.Postcode({
-      oncomplete: function (data: any) {
+      oncomplete: function (data: DaumPostcodeData) {
         // Get the full address
         let fullAddress = data.address;
         let extraAddress = "";
@@ -187,8 +235,13 @@ export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
           }
           fullAddress += extraAddress ? ` (${extraAddress})` : "";
         }
+        console.log("---->Selected address:", {
+          fullAddress,
+          sido: data.sido, //city
+          sigungu: data.sigungu, //region
+        });
 
-        handleSetAddress(fullAddress);
+        handleSetAddress(fullAddress, data.sido, data.sigungu);
       },
       onclose: function (state: string) {
         // Handle popup close

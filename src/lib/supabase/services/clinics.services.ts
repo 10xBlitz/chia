@@ -183,6 +183,9 @@ export async function updateClinic(
     .update({
       clinic_name: values.clinic_name,
       contact_number: values.contact_number,
+      full_address: values.full_address,
+      detail_address: values.detail_address || null,
+      city: values.city,
       region: values.region,
       opening_date: values.opening_date,
       link: values.link,
@@ -201,7 +204,10 @@ export async function insertClinic(
     .insert({
       clinic_name: values.clinic_name,
       contact_number: values.contact_number,
+      detail_address: values.detail_address || null,
+      city: values.city,
       region: values.region,
+      full_address: values.full_address,
       opening_date: values.opening_date,
       link: values.link,
       pictures,

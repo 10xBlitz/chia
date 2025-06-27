@@ -3,12 +3,12 @@ import { Input } from "@/components/ui/input";
 import { useAddressSearch } from "@/hooks/useAddressSearch";
 import { Search } from "lucide-react";
 import React, { useRef, useState } from "react";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { Alert, AlertDescription } from "./ui/alert";
 
 interface AddressSearchProps {
   id?: string;
-  onAddressSelect?: (address: string) => void;
+  onAddressSelect?: (fullAddress: string, city: string, region: string) => void;
   onValidationChange?: (isValid: boolean) => void;
   defaultValue?: string;
   placeholder?: string;
@@ -39,24 +39,32 @@ const AddressSearch = ({
   const isFromAddressSearchRef = useRef(false);
   const isEnglish = false;
 
-  const onUpdateAddress = (newAddress: string) => {
+  const onUpdateAddress = ({
+    fullAddress,
+    city,
+    region,
+  }: {
+    fullAddress: string;
+    city: string;
+    region: string;
+  }) => {
     // Add validation check before updating
     // Check for Jeju first
-    if (
-      newAddress.includes("제주") ||
-      newAddress.toLowerCase().includes("jeju")
-    ) {
-      const message = isEnglish
-        ? "Delivery to Jeju Island is not available"
-        : "제주도는 배송이 불가능합니다";
-      toast(message);
-      return;
-    }
+    // if (
+    //   newAddress.includes("제주") ||
+    //   newAddress.toLowerCase().includes("jeju")
+    // ) {
+    //   const message = isEnglish
+    //     ? "Delivery to Jeju Island is not available"
+    //     : "제주도는 배송이 불가능합니다";
+    //   toast(message);
+    //   return;
+    // }
     isFromAddressSearchRef.current = true;
-    setInputValue(newAddress);
+    setInputValue(fullAddress || "");
 
     if (onAddressSelect) {
-      onAddressSelect(newAddress);
+      onAddressSelect(fullAddress, city, region);
       const inputElement = document.getElementById(id || "");
       if (inputElement) {
         inputElement.blur();
@@ -97,7 +105,7 @@ const AddressSearch = ({
 
     // Notify parent if address is cleared
     if (newValue === "" && onAddressSelect) {
-      onAddressSelect("");
+      onAddressSelect("", "", "");
     }
   };
 

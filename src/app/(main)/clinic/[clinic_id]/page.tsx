@@ -253,7 +253,7 @@ export default function ClinicSingleViewPage() {
           <div className="flex flex-col gap-2 text-gray-700 text-[15px]">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-black" />
-              <span>{clinic.region || "no location"}</span>
+              <span>{clinic.full_address || "no location"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />

@@ -37,13 +37,17 @@ export default function MainPage() {
   const { data: clinicsData = [], isLoading } = useQuery({
     queryKey: ["clinics", filterOption],
     queryFn: async () => {
+      // work address is stored as "city,region" in user.work_place
+      // residence is stored as "city,region" in user.residence
       if (filterOption === "근무지") {
-        filterOption = user?.work_place || "";
+        filterOption = user?.work_place?.split(",")[1] || "";
       } else if (filterOption === "거주") {
-        filterOption = user?.residence || "";
+        filterOption = user?.residence?.split(",")[1] || "";
       } else {
         filterOption = ""; // Reset to empty for "모두" or other cases
       }
+
+      console.log("---->filterOption: ", filterOption);
       const result = await getPaginatedClinicsWthReviews(1, 3, {
         region: filterOption,
       });
@@ -175,10 +179,10 @@ export default function MainPage() {
                 let addressFilter = "";
                 if (filterOption === "근무지") {
                   //workplace
-                  addressFilter = user?.work_place || "";
+                  addressFilter = user?.work_place.split(",")[1] || "";
                 } else if (filterOption === "거주") {
                   //residence
-                  addressFilter = user?.residence || "";
+                  addressFilter = user?.residence.split(",")[1] || "";
                 }
                 let q = query;
                 if (addressFilter) {

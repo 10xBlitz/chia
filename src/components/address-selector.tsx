@@ -222,8 +222,9 @@ export default function AddressSelector({
 }
 
 const koreanAddressData = {
+  //city or sido
   서울특별시: [
-    "강남구",
+    "강남구", //region or sigungu
     "강동구",
     "강북구",
     "강서구",
@@ -249,6 +250,7 @@ const koreanAddressData = {
     "중구",
     "중랑구",
   ],
+
   부산광역시: [
     "강서구",
     "금정구",

@@ -15,8 +15,16 @@ export const columns: ColumnDef<ClinicTable>[] = [
     header: "병원 이름", // Clinic Name
   },
   {
-    accessorKey: "location",
-    header: "위치", // Location
+    accessorKey: "full_address",
+    header: "전체 주소", // Full Address
+  },
+  {
+    accessorKey: "city",
+    header: "도시", // City
+  },
+  {
+    accessorKey: "region",
+    header: "지역", // Region
   },
   {
     accessorKey: "contact_number",

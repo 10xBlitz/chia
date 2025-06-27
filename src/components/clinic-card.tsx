@@ -22,6 +22,9 @@ export interface ClinicCardProps {
   link: string | null;
   opening_date: string;
   pictures: string[] | null;
+  full_address: string;
+  detail_address?: string | null;
+  city: string;
   region: string;
   className?: string;
   showBookmark?: boolean;

@@ -99,13 +99,15 @@ export default function ClinicsPage() {
               pageSize={5}
               // Only skip first 3 clinics, fetch all remaining
               trailingQuery={(query) => {
+                //we store work address as "city,region" in database
+                //we store residence as "city,region" in database
                 let addressFilter = "";
                 if (filterOption === "근무지") {
                   //workplace
-                  addressFilter = user?.work_place || "";
+                  addressFilter = user?.work_place.split(",")[1] || "";
                 } else if (filterOption === "거주") {
                   //residence
-                  addressFilter = user?.residence || "";
+                  addressFilter = user?.residence.split(",")[1] || "";
                 }
                 let q = query;
                 if (addressFilter) {

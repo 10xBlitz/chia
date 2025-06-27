@@ -62,6 +62,9 @@ export async function getPaginatedFavoriteClinics(
     link: item.clinic.link,
     opening_date: item.clinic.opening_date,
     pictures: item.clinic.pictures,
+    full_address: item.clinic.full_address,
+    detail_address: item.clinic.detail_address || null,
+    city: item.clinic.city,
     region: item.clinic.region,
   }));
 
