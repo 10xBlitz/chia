@@ -54,9 +54,9 @@ export default function CustomerServiceV2Page() {
 
   // Desktop: show sidebar and chat
   return (
-    <div className="flex h-full w-full bg-gray-100 overflow-hidden">
+    <div className="flex h-full w-full bg-gray-100 overflow-y-hidden">
       <ChatSidebar />
-      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col overflow-y-hidden">
         <ChatUI roomId={currentRoomId} currentUserId={currentUserId} />
       </div>
     </div>
