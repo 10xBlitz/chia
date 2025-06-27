@@ -39,7 +39,7 @@ export const columns: ColumnDef<
 >[] = [
   {
     accessorKey: "category",
-    header: "범주", // Category
+    header: "유형", // Type
     cell: ({ row }) => <div>{translateRole(row.original.role)}</div>,
     meta: { className: "hidden sm:table-cell max-w-[100px]" }, // Hide on mobile
   },
