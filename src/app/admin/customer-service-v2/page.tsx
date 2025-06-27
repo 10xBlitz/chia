@@ -33,17 +33,20 @@ export default function CustomerServiceV2Page() {
 
   // Mobile: show sidebar or chat, not both
   if (isMobile) {
-    if (!currentRoomId) {
-      return (
-        <div className="h-[100dvh] w-full bg-gray-100 mt-5">
+    return (
+      <div className="h-full w-full bg-gray-100 flex flex-col mt-5 overflow-hidden">
+        {/* Always render sidebar, but hide it when a room is open */}
+        <div className={currentRoomId ? "hidden" : ""}>
           <ChatSidebar />
         </div>
-      );
-    }
-    return (
-      <div className="h-[100dvh] w-full bg-gray-100 flex flex-col  mt-5">
-        <div className="flex-1 min-h-0 flex flex-col">
-          <ChatUI roomId={currentRoomId} currentUserId={currentUserId} />
+        <div
+          className={`flex-1 min-h-0 flex flex-col overflow-hidden ${
+            !currentRoomId ? "hidden" : ""
+          }`}
+        >
+          {currentRoomId && (
+            <ChatUI roomId={currentRoomId} currentUserId={currentUserId} />
+          )}
         </div>
       </div>
     );
@@ -51,9 +54,9 @@ export default function CustomerServiceV2Page() {
 
   // Desktop: show sidebar and chat
   return (
-    <div className="flex h-[100dvh] w-full bg-gray-100">
+    <div className="flex h-full w-full bg-gray-100 overflow-hidden">
       <ChatSidebar />
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <ChatUI roomId={currentRoomId} currentUserId={currentUserId} />
       </div>
     </div>

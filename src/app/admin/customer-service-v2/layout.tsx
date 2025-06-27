@@ -26,8 +26,14 @@ export default function CustomerServiceLayout({
 
   // Helper: detect mobile
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const setCurrentRoomId = useRoomSelectionStore((s) => s.setCurrentRoomId);
+  const setCurrentRoom = useRoomSelectionStore((s) => s.setCurrentRoom);
   const currentRoomId = useRoomSelectionStore((s) => s.currentRoomId);
+  const currentRoomUserName = useRoomSelectionStore(
+    (s) => s.currentRoomUserName
+  );
+  const currentRoomCategory = useRoomSelectionStore(
+    (s) => s.currentRoomCategory
+  );
 
   return (
     <SidebarProvider>
@@ -38,18 +44,24 @@ export default function CustomerServiceLayout({
           {isMobile && currentRoomId && (
             <button
               className="ml-2 p-2 rounded hover:bg-gray-100"
-              onClick={() => setCurrentRoomId(null)}
+              onClick={() => setCurrentRoom(null, null, null)}
               aria-label="뒤로가기"
             >
               ←
             </button>
           )}
           <span className="ml-4 text-base font-semibold truncate">
-            {currentTitle}
+            {isMobile && currentRoomId
+              ? `${currentRoomCategory ? `[${currentRoomCategory}] ` : ""}${
+                  currentRoomUserName || ""
+                }`
+              : currentTitle}
           </span>
         </div>
         <AppSidebar />
-        <main className="flex-1 mt-8 md:mt-0 bg-[#F1F1F5]">{children}</main>
+        <main className="flex-1 mt-8 md:mt-0 bg-[#F1F1F5] overflow-hidden">
+          {children}
+        </main>
       </div>
     </SidebarProvider>
   );

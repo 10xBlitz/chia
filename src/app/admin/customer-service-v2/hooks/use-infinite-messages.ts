@@ -9,8 +9,8 @@ export function useInfiniteMessages(roomId: string | null) {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getNextPageParam: (lastPage: any[] | undefined) => {
-      if (!lastPage || lastPage.length < 20) return undefined;
-      return lastPage[lastPage.length - 1].createdAt;
+      if (!lastPage || lastPage.length < 15) return undefined;
+      return lastPage[lastPage.length - 1].created_at;
     },
     enabled: !!roomId,
     staleTime: 1000 * 5,

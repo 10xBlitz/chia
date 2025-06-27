@@ -4,7 +4,12 @@ import { Tables, TablesUpdate } from "../types";
 export async function createChatRoom(userId: string, category: string) {
   const { data: newRoom, error } = await supabaseClient
     .from("chat_room")
-    .insert({ patient_id: userId, category })
+    .insert({
+      patient_id: userId,
+      category,
+      last_admin_read_at: new Date().toDateString(),
+      last_user_read_at: new Date().toDateString(),
+    })
     .select()
     .single();
 
@@ -82,6 +87,8 @@ export async function updateRoom(
  */
 export async function updateLastAdminReadAt(roomId: string, date?: string) {
   const now = date || new Date().toISOString();
+
+  console.log("--->Updating last_admin_read_at for room:", roomId, "to", now);
   const { error } = await supabaseClient
     .from("chat_room")
     .update({ last_admin_read_at: now })

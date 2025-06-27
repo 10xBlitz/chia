@@ -55,7 +55,12 @@ export const columns: ColumnDef<
         </div>
       );
     },
-    cell: ({ row }) => <>{calculateAge(new Date(row.original.birthdate))}</>,
+    cell: ({ row }) => (
+      <>
+        {new Date(row.original.birthdate).toLocaleDateString("ko-KR")} (
+        {calculateAge(new Date(row.original.birthdate))})
+      </>
+    ),
     enableSorting: true,
     meta: { className: " text-center" },
   },

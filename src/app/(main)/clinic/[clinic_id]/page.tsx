@@ -198,6 +198,9 @@ export default function ClinicSingleViewPage() {
           {user?.id && (
             <BookmarkButton
               isActive={isFavorite}
+              className=""
+              activeStyle="!-mr-3  !min-h-9 !min-w-9"
+              notActiveStyle="!-mr-3 !min-h-9 !min-w-9 stroke-1"
               handleBookmarkClick={handleBookmarkClick}
             />
           )}

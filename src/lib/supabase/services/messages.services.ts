@@ -20,7 +20,7 @@ export async function fetchMessagesOfRoom(
   pageParam?: string
 ): Promise<FetchedMessage[]> {
   if (!chatRoomId) return [];
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 15;
   let query = supabaseClient
     .from("message")
     .select("*, sender:sender_id(full_name)")

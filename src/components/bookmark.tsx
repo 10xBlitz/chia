@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import React from "react";
 
 interface BookmarkButtonProps
@@ -29,7 +29,7 @@ export default function BookmarkButton({
       {...props}
     >
       {isActive ? (
-        <BookmarkCheck
+        <Bookmark
           strokeWidth={1}
           className={`fill-blue-500  min-h-6 min-w-6 text-black ${activeStyle}`}
         />
