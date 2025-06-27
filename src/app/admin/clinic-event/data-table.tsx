@@ -216,8 +216,8 @@ export function DataTable<TData, TValue>({
           )}
         >
           <PlusSquareIcon className="size-3 sm:size-4" />{" "}
-          <span className="hidden sm:inline">클리닉 이벤트 추가</span>
-          {/* Add Clinic Event */}
+          <span className="hidden sm:inline">병원 이벤트 추가</span>
+          {/* Add Hospital Event */}
         </Button>
       </div>
       <div className="rounded-md border bg-white">

@@ -38,7 +38,7 @@ const bannerFormSchema = z.object({
   banner_type: z.enum(["main", "sub"]),
   title: z.string().optional(),
   image: z.string(),
-  clinic_id: z.string().min(1, "클리닉을 선택하세요"), // Please select a clinic
+  clinic_id: z.string().min(1, "병원을 선택해주세요"), // Please select a hospital
 });
 
 type BannerFormValues = z.infer<typeof bannerFormSchema>;
@@ -270,8 +270,8 @@ export function BannerModal({
           <FormSelect
             control={form.control}
             name="clinic_id"
-            label="클리닉" // Clinic
-            placeholder="클리닉을 선택하세요" // Please select a clinic
+            label="병원" // Hospital
+            placeholder="병원을 선택해주세요" // Please select a clinic
             disabled={clinicsLoading}
             loading={clinicsLoading}
           >
@@ -287,7 +287,7 @@ export function BannerModal({
               ))
             ) : (
               <SelectItem value="" disabled>
-                {clinicsLoading ? "로딩 중..." : "클리닉 없음"}{" "}
+                {clinicsLoading ? "로딩 중..." : "병원 없음"}{" "}
                 {/* Loading... / No clinics */}
               </SelectItem>
             )}

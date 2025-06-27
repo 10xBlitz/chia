@@ -128,7 +128,7 @@ export const ClinicEventModal = ({
     },
     onSuccess: () => {
       toast.success(
-        data ? "클리닉 이벤트 업데이트" : "클리닉 이벤트가 생성되었습니다"
+        data ? "병원 이벤트 업데이트" : "병원 이벤트가 생성되었습니다"
       ); // "Clinic event updated" or "Clinic event created"
       onSuccess();
       onClose();
@@ -180,7 +180,7 @@ export const ClinicEventModal = ({
 
   return (
     <Modal
-      title={data ? "클리닉 이벤트 편집" : "클리닉 이벤트 추가"}
+      title={data ? "병원 이벤트 편집" : "병원 이벤트 추가"}
       description={""}
       isOpen={open}
       isLong={false}
@@ -195,8 +195,8 @@ export const ClinicEventModal = ({
             <FormSelect
               control={form.control}
               name="clinic_id"
-              label="클리닉" // "Clinic"
-              placeholder="클리닉을 선택해주세요." // "Please select a clinic"
+              label="병원" // "Hospital"
+              placeholder="병원을 선택해주세요." // "Please select a hospital"
             >
               {clinics?.data.map((clinic) => (
                 <SelectItem

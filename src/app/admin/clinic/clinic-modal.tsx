@@ -261,8 +261,8 @@ export const ClinicModal = ({
                 <FormInput
                   control={form.control}
                   name="link"
-                  label="클리닉 링크" // Clinic Link
-                  placeholder="여기에 클리닉 링크를 입력하세요." // Enter clinic link here
+                  label="병원 병원" // Hospital Link
+                  placeholder="여기에 병원 링크를 입력하세요." // Enter hospital link here
                   formLabelClassName={formLabelClassName}
                   inputClassName={inputClassName}
                 />
@@ -726,7 +726,7 @@ async function updateClinicWithImages(
     for (let i = 0; i < values.pictures.length; i++) {
       const file = values.pictures[i];
       if (file instanceof File) {
-        setProgress?.("클리닉 이미지 업로드 중: " + (i + 1));
+        setProgress?.("병원 이미지 업로드 중: " + (i + 1));
         const publicUrl = await uploadFileToSupabase(file, {
           bucket: CLINIC_IMAGE_BUCKET,
           allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
@@ -795,7 +795,7 @@ async function addClinicWithImages(
   const clinicPictures: string[] = [];
   for (let i = 0; i < values.pictures.length; i++) {
     const file = values.pictures[i] as File;
-    if (setProgress) setProgress("클리닉 이미지 업로드 중: " + (i + 1));
+    if (setProgress) setProgress("병원 이미지 업로드 중: " + (i + 1));
     const publicUrl = await uploadFileToSupabase(file, {
       bucket: CLINIC_IMAGE_BUCKET,
       allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,

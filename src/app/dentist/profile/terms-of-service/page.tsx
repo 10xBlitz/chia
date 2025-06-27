@@ -29,7 +29,7 @@ export default function TermsOfServicePage() {
                 이용약관 (Terms of Service)
               </h1>
               <p className="mb-4">
-                본 웹사이트는 치과 진료 예약, 클리닉 정보 제공, 리뷰 작성 등
+                본 웹사이트는 치과 진료 예약, 병원 정보 제공, 리뷰 작성 등
                 환자와 치과를 연결하는 플랫폼입니다.
                 {/* This website is a platform connecting patients and dental clinics for appointments, clinic information, and reviews. */}
                 서비스를 이용함으로써 아래의 약관에 동의하게 됩니다.
@@ -38,7 +38,7 @@ export default function TermsOfServicePage() {
               <h2 className="font-semibold mt-6 mb-2">1. 서비스 목적</h2>{" "}
               {/* 1. Purpose of Service */}
               <p className="mb-4">
-                본 플랫폼은 환자와 치과 클리닉 간의 예약, 상담, 리뷰 등 다양한
+                본 플랫폼은 환자와 치과 병원 간의 예약, 상담, 리뷰 등 다양한
                 서비스를 제공합니다. 모든 정보는 사용자 편의를 위해 제공되며,
                 진료의 최종 책임은 각 치과에 있습니다.
                 {/* This platform provides various services such as appointments, consultations, and reviews between patients and dental clinics. All information is for user convenience; final responsibility for treatment lies with each clinic. */}

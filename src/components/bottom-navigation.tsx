@@ -94,27 +94,19 @@ const navItems = [
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g clipPath="url(#clip0_51_4636)">
-          <path d="M24 0H0V24H24V0Z" fill="white" />
-          <path
-            d="M4 17C4 14.7909 5.79086 13 8 13H16C18.2091 13 20 14.7909 20 17V18.5C20 19.3284 19.3284 20 18.5 20H5.5C4.67157 20 4 19.3284 4 18.5V17Z"
-            fill={isActive ? "#4285F4" : "#ACACAC"}
-            stroke={isActive ? "#4285F4" : "#ACACAC"}
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M12 10C13.6569 10 15 8.65685 15 7C15 5.34315 13.6569 4 12 4C10.3431 4 9 5.34315 9 7C9 8.65685 10.3431 10 12 10Z"
-            fill={isActive ? "#4285F4" : "#ACACAC"}
-            stroke={isActive ? "#4285F4" : "#ACACAC"}
-            strokeWidth="1.5"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip0_51_4636">
-            <rect width="24" height="24" fill="white" />
-          </clipPath>
-        </defs>
+        <path
+          d="M4 17C4 14.7909 5.79086 13 8 13H16C18.2091 13 20 14.7909 20 17V18.5C20 19.3284 19.3284 20 18.5 20H5.5C4.67157 20 4 19.3284 4 18.5V17Z"
+          fill={isActive ? "#4285F4" : "#ACACAC"}
+          stroke={isActive ? "#4285F4" : "#ACACAC"}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M12 10C13.6569 10 15 8.65685 15 7C15 5.34315 13.6569 4 12 4C10.3431 4 9 5.34315 9 7C9 8.65685 10.3431 10 12 10Z"
+          fill={isActive ? "#4285F4" : "#ACACAC"}
+          stroke={isActive ? "#4285F4" : "#ACACAC"}
+          strokeWidth="1.5"
+        />
       </svg>
     ),
   },
@@ -130,8 +122,12 @@ export default function BottomNavigation({
   const pathname = usePathname();
   const router = useRouter();
 
+  const handleNavClick = (path: string) => {
+    router.push(path);
+  };
+
   return (
-    <div
+    <nav
       className="fixed max-w-[450px] border-t z-[10] mx-auto bottom-0 left-0 right-0 bg-white flex justify-around items-center p-3"
       style={{
         pointerEvents: "auto",
@@ -142,19 +138,20 @@ export default function BottomNavigation({
         const isActive =
           index === forceActiveIndex ? true : pathname === item.path;
         return (
-          <div
-            key={item.path}
-            onClick={() => router.push(item.path)}
+          <button
+            key={`nav-${index}-${item.path}`}
+            onClick={() => handleNavClick(item.path)}
             className={cn(
               "flex flex-col items-center cursor-pointer",
               isActive ? "text-blue-500 fill-blue-500" : "text-gray-400"
             )}
+            type="button"
           >
             {item.icon(isActive)}
             <span className="text-xs mt-1">{item.label}</span>
-          </div>
+          </button>
         );
       })}
-    </div>
+    </nav>
   );
 }

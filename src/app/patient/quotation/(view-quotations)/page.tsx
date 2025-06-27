@@ -21,16 +21,21 @@ export default function ViewQuotationPage() {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["quotations", userId, pageSize],
-      queryFn: async ({ pageParam = 1 }) =>
-        getPaginatedQuotations(pageParam, pageSize, { patient_id: userId }),
+      queryFn: async ({ pageParam = 1 }) => {
+        if (!userId) return { data: [] };
+        return getPaginatedQuotations(pageParam, pageSize, {
+          patient_id: userId,
+        });
+      },
       getNextPageParam: (lastPage, allPages) =>
         lastPage?.data?.length === pageSize ? allPages.length + 1 : undefined,
       enabled: !!userId,
       initialPageParam: 1,
+      staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
-  // Flatten all loaded quotations
-  const allQuotations = data?.pages.flatMap((page) => page.data) || [];
+  // Flatten all loaded quotations with safety check
+  const allQuotations = data?.pages?.flatMap((page) => page?.data || []) || [];
 
   const handleQuotationClick = (
     quotation_id: string,
@@ -70,9 +75,9 @@ export default function ViewQuotationPage() {
 
       {allQuotations.length > 0 && (
         <div className="flex flex-col gap-3">
-          {allQuotations.map((q: Quotation) => (
+          {allQuotations.map((q: Quotation, index) => (
             <QuotationListItem
-              key={q.id}
+              key={`${q.id}-${index}`}
               quotation={q}
               onClick={handleQuotationClick}
             />
@@ -134,13 +139,15 @@ function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
     q.treatment?.treatment_name || "선택된 치료 없음"
   } 공개견적`;
 
+  const handleClick = () => {
+    onClick(q.id, detail, q.clinic_id, q.bid?.[0]?.id ?? null);
+  };
+
   return (
     <div
       className="flex text-sm items-center w-full py-1 cursor-pointer"
       style={{ minHeight: 48 }}
-      onClick={() => {
-        onClick(q.id, detail, q.clinic_id, q.bid?.[0]?.id ?? null);
-      }}
+      onClick={handleClick}
     >
       <span className="font-bold text-black text-left whitespace-nowrap mr-4">
         {new Date(q.created_at).toLocaleDateString("ko-KR", {
@@ -160,7 +167,6 @@ function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
             : "border border-gray-200 bg-white text-gray-500"
         }`}
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
       >
         {q.bid.length > 0 ? "답변완료" : "답변 없음"}
       </div>

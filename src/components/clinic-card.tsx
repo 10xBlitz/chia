@@ -77,7 +77,7 @@ export default function ClinicCard(props: ClinicCardProps) {
 
     if (error) {
       console.error("Error logging clinic view:", error);
-      toast.error("클리닉 조회에 실패했습니다."); // Failed to log clinic view
+      toast.error("병원 조회에 실패했습니다."); // Failed to log hospital view
       return;
     }
 
