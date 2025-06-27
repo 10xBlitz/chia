@@ -34,7 +34,7 @@ export const columns: ColumnDef<ClinicEventTable>[] = [
   },
   {
     accessorKey: "date_rage",
-    header: "날짜 범위", //date range
+    header: "기간", //Period
     cell: ({ row }) => {
       const dates = parseDateFromSupabase(row.original.date_range as string);
 
@@ -54,7 +54,7 @@ export const columns: ColumnDef<ClinicEventTable>[] = [
   },
   {
     accessorKey: "image",
-    header: "영상", //image
+    header: "이미지", // Image
     cell: ({ row }) => (
       <>
         {row.original.image_url ? (

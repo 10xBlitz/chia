@@ -44,7 +44,7 @@ export const columns: ColumnDef<ReviewTable>[] = [
   },
   {
     accessorKey: "clinic_name",
-    header: "치과 이름", // Clinic Name
+    header: "병원", // Hospital
     cell: ({ row }) => (
       <div>{row.original.clinic_treatment.clinic.clinic_name}</div>
     ),

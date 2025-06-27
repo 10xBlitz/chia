@@ -104,10 +104,7 @@ export default function MainPage() {
         <MainBannerCarousel />
         <TreatmentCategoryScroll />
         {/* Sorting options */}
-        <div className="flex justify-between items-center p-4">
-          <div className="text-sm">
-            지금 걸어갈 수 있는 병원 {/** Hospitals you can walk to now */}
-          </div>
+        <div className="flex justify-end items-center px-6 py-2">
           {user?.id && user.role && (
             <Select value={filterOption} onValueChange={handleSortOptionChange}>
               <SelectTrigger className="w-[100px] text-sm">
@@ -141,7 +138,9 @@ export default function MainPage() {
           {clinicsData &&
             clinicsData
               .slice(0, 2)
-              .map((item) => <ClinicCard {...item} key={item.id} />)}
+              .map((item) => (
+                <ClinicCard {...item} key={item.id} showBookmark={true} />
+              ))}
           {/* No clinics found message when user filters */}
           {clinicsData && clinicsData.length === 0 && filterOption && (
             <p className="text-center text-gray-500 px-4 py-15">

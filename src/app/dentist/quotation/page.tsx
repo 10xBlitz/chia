@@ -67,20 +67,24 @@ export default function ViewQuotationPage() {
                 {q.region?.split(",")[1]?.trim() || q.region} ·{" "}
                 {q.treatment?.treatment_name || "선택된 치료 없음"}
                 {" · "}
-                {q.clinic_id ? "사적인" /* Private */ : "공공의" /* Public  */}
+                {
+                  q.clinic_id
+                    ? "병원문의" /* Hospital Inquiry */
+                    : "공개입찰" /* Public Bidding  */
+                }
               </span>
               <button
                 className={`rounded-md px-4 h-9 font-medium min-w-22 ${
                   q.bid.length > 0
-                    ? "bg-blue-600 text-white"
-                    : "border border-gray-200 bg-white text-gray-500"
+                    ? "border border-gray-200 bg-white text-gray-500"
+                    : "bg-blue-600 text-white"
                 }`}
                 tabIndex={-1}
               >
                 {
                   q.bid.length > 0
-                    ? "답변됨" /* Answered */
-                    : "입찰 추가" /* Check Answers */
+                    ? "단변완료" /* Short-term completion */
+                    : "단변하기" /* Shorten */
                 }
               </button>
             </div>

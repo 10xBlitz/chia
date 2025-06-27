@@ -246,7 +246,7 @@ export default function ViewBidPage() {
         </div>
       </div>
       {/* Contact Button */}
-      <div className="py-6">
+      <div className="py-6 mb-20">
         <Button className="w-full btn-primary text-white" disabled>
           연락하기 {/* Contact */}
         </Button>

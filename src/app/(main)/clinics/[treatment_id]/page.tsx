@@ -51,10 +51,7 @@ export default function ClinicsPage() {
           <TreatmentCategoryScroll activeId={params.treatment_id} />
 
           {/* Sorting options */}
-          <div className="flex justify-between items-center p-4">
-            <div className="text-sm">
-              지금 걸어갈 수 있는 병원 {/** Hospitals you can walk to now */}
-            </div>
+          <div className="flex justify-end items-center px-8 py-2">
             {user?.id && user.role && (
               <Select
                 value={filterOption}
@@ -82,7 +79,7 @@ export default function ClinicsPage() {
           </div>
 
           {/* Custom clinic/event/sub-banner order */}
-          <div className="flex flex-col gap-4 flex-1 px-2">
+          <div className="flex flex-col gap-4 flex-1">
             {/* 5. Rest of clinics with infinite scroll */}
             <InfiniteList
               key={filterOption} // Reset list when sort changes

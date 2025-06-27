@@ -28,7 +28,7 @@ export const columns: ColumnDef<ClinicTable>[] = [
   },
   {
     accessorKey: "contact_number",
-    header: "연락하다", // Contact Number
+    header: "연락처", // Contact
   },
   {
     accessorKey: "views",

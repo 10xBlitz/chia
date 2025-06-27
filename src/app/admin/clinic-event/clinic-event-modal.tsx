@@ -245,7 +245,7 @@ export const ClinicEventModal = ({
           <FormDateRangePicker
             control={form.control}
             name="date_range"
-            label="날짜 범위" // "Date Range"
+            label="기간" // "Period"
           />
 
           <FormTextarea

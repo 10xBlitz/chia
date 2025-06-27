@@ -6,11 +6,11 @@ import {
   checkIfClinicIsFavorite,
   removeClinicFromFavorites,
 } from "@/lib/supabase/services/favorites.service";
-import CornerBookmarkButton from "@/components/corner-bookmark-button";
 import { cn } from "@/lib/utils";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import BookmarkButton from "./bookmark";
 
 export interface ClinicCardProps {
   total_reviews: number;
@@ -106,17 +106,25 @@ export default function ClinicCard(props: ClinicCardProps) {
           />
         )}
         {user?.id && user.role && showBookmark && (
-          <CornerBookmarkButton
+          // <CornerBookmarkButton
+          //   isActive={isFavorite}
+          //   onClick={(e) => {
+          //     e.preventDefault();
+          //     e.stopPropagation();
+          //     handleBookmarkClick(e);
+          //   }}
+          //   className="top-0 right-1"
+          //   ariaLabel={
+          //     isFavorite ? "Remove from favorites" : "Add to favorites"
+          //   }
+          // />
+
+          <BookmarkButton
             isActive={isFavorite}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleBookmarkClick(e);
-            }}
-            className="top-0 right-1"
-            ariaLabel={
-              isFavorite ? "Remove from favorites" : "Add to favorites"
-            }
+            handleBookmarkClick={handleBookmarkClick}
+            className="absolute top-2 right-1"
+            activeStyle="group-hover:fill-blue-600 fill-blue-500 stroke-1 !size-8"
+            notActiveStyle="group-hover:fill-blue-600 group-hover:text-blue-700 group-hover:stroke-1 stroke-2 text-white !size-8"
           />
         )}
       </div>
