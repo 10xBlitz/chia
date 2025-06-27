@@ -56,6 +56,11 @@ export const columns: ColumnDef<ReviewTable>[] = [
   {
     accessorKey: "review",
     header: "리뷰", // Review
+    cell: ({ row }) => (
+      <div className="max-w-xs whitespace-pre-wrap break-words">
+        {row.original.review || "리뷰 없음"}
+      </div>
+    ),
   },
   // {
   //   id: "actions",

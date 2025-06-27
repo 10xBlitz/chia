@@ -7,6 +7,17 @@ import { calculateAge } from "@/lib/utils";
 
 import { CellAction } from "./cell-actions";
 
+// Role translation function
+const translateRole = (role: string): string => {
+  const roleTranslations: Record<string, string> = {
+    patient: "환자", // Patient
+    dentist: "치과의사", // Dentist
+    admin: "관리자", // Admin
+    "dentist employee": "치과 직원", // Dentist Employee
+  };
+  return roleTranslations[role] || role;
+};
+
 export type UserColumn = {
   id: string;
   full_name: string;
@@ -29,11 +40,7 @@ export const columns: ColumnDef<
   {
     accessorKey: "category",
     header: "범주", // Category
-    cell: ({ row }) => (
-      <div>{`${row.original.role[0].toUpperCase()}${row.original.role.substring(
-        1
-      )}`}</div>
-    ),
+    cell: ({ row }) => <div>{translateRole(row.original.role)}</div>,
     meta: { className: "hidden sm:table-cell max-w-[100px]" }, // Hide on mobile
   },
 

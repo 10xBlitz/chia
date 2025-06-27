@@ -8,6 +8,7 @@ import {
 } from "@/lib/supabase/services/messages.services";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ChatMessage {
   id: string;
@@ -28,8 +29,11 @@ export function ChatUI({ roomId, currentUserId }: ChatUIProps) {
   const isLoadingMore = useRef(false);
 
   // Infinite messages query
-  const { data, isLoading, isFetching, fetchNextPage, hasNextPage, refetch } =
+  const { data, isLoading, isFetching, fetchNextPage, hasNextPage } =
     useInfiniteMessages(roomId);
+
+  // Get query client for cache updates
+  const queryClient = useQueryClient();
 
   // Flatten and reverse for chat order (oldest at top, newest at bottom)
   const messages: ChatMessage[] = (data?.pages.flat() || [])
@@ -54,12 +58,49 @@ export function ChatUI({ roomId, currentUserId }: ChatUIProps) {
     }
   }, [isFetching]);
 
-  // Realtime: refetch on new message in this room
+  // Realtime: optimistically update cache with new messages
   useMessagesRealtime(
     roomId,
-    useCallback(() => {
-      refetch();
-    }, [refetch])
+    useCallback(
+      (rawMessage) => {
+        if (!roomId) return;
+
+        // Convert raw message to FetchedMessage format (simplified, without user details)
+        const newMessage: FetchedMessage = {
+          id: rawMessage.id,
+          content: rawMessage.content,
+          created_at: rawMessage.created_at,
+          user: {
+            id: rawMessage.sender_id,
+            name: "Unknown", // We'll get the real name on next refetch if needed
+          },
+        };
+
+        // Optimistically add the new message to the first page of the infinite query
+        queryClient.setQueryData(
+          ["messages", roomId],
+          (oldData: { pages: FetchedMessage[][] } | undefined) => {
+            if (!oldData?.pages) return oldData;
+
+            const firstPage = oldData.pages[0] || [];
+            const messageExists = firstPage.some(
+              (msg: FetchedMessage) => msg.id === newMessage.id
+            );
+
+            if (messageExists) return oldData; // Message already exists
+
+            return {
+              ...oldData,
+              pages: [
+                [newMessage, ...firstPage], // Add to first page (newest messages)
+                ...oldData.pages.slice(1),
+              ],
+            };
+          }
+        );
+      },
+      [roomId, queryClient]
+    )
   );
 
   const handleSend = async (e: React.FormEvent) => {

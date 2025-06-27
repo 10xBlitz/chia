@@ -57,6 +57,17 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 
+// Role translation function
+const translateRole = (role: string): string => {
+  const roleTranslations: Record<string, string> = {
+    patient: "환자", // Patient
+    dentist: "치과의사", // Dentist
+    admin: "관리자", // Admin
+    "dentist employee": "치과 직원", // Dentist Employee
+  };
+  return roleTranslations[role] || role;
+};
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   paginatedData: {
@@ -256,7 +267,7 @@ export function DataTable<TData extends { id: string }, TValue>({
         <Table className={cn("w-full", textSize)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="bg-muted/50">
                 {headerGroup.headers.map((header) => {
                   const colClass =
                     header.column.columnDef.meta &&
@@ -266,7 +277,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                           .className || ""
                       : "";
                   return (
-                    <TableHead key={header.id} className={colClass}>
+                    <TableHead key={header.id} className={cn(colClass)}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -363,6 +374,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                 const keyLabels: Record<string, string> = {
                   id: "아이디", // ID
                   full_name: "성명", // Full Name
+                  email: "이메일", // Email
                   birthdate: "생년월일", // Birthdate
                   gender: "성별", // Gender
                   contact_number: "연락처", // Contact Number
@@ -370,6 +382,7 @@ export function DataTable<TData extends { id: string }, TValue>({
                   work_place: "직장", // Workplace
                   role: "역할", // Role
                   login_status: "로그인 상태", // Login Status
+                  clinic_id: "클리닉 ID", // Clinic ID
                   created_at: "생성일", // Created At
                   updated_at: "수정일", // Updated At
                   // Add more mappings as needed
@@ -381,7 +394,17 @@ export function DataTable<TData extends { id: string }, TValue>({
                       {label}
                     </span>
                     <span>
-                      {typeof value === "object" && value !== null
+                      {key === "role"
+                        ? translateRole(String(value))
+                        : key === "created_at" && value
+                        ? new Date(String(value)).toLocaleDateString("ko-KR", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : typeof value === "object" && value !== null
                         ? JSON.stringify(value, null, 2)
                         : String(value)}
                     </span>

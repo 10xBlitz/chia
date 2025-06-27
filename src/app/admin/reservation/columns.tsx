@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { CellAction } from "./cell-actions";
 import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 export type ReservationTable = {
   id: string;
@@ -76,7 +77,9 @@ export const columns: ColumnDef<ReservationTable>[] = [
     header: "예약일", // Reservation Date
     cell: ({ row }) => (
       <div>
-        {format(row.original.reservation_date, "yyyy-MM-dd hh:mm:ss a")}
+        {format(row.original.reservation_date, "yyyy년 M월 d일 HH:mm", {
+          locale: ko,
+        })}
       </div>
     ),
   },
