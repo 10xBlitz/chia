@@ -160,7 +160,7 @@ export default function MainPage() {
             <InfiniteList
               key={filterOption} // Reset list when sort changes
               tableName="clinic"
-              className="px-4"
+              className=""
               columns={`
                       *,
                       clinic_treatment(
