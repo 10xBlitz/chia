@@ -106,7 +106,10 @@ export function PatientChatUI({ roomId, currentUserId }: PatientChatUIProps) {
                 </span>
                 {msg.content}
                 <span className="block text-[10px] text-right opacity-50 mt-1">
-                  {new Date(msg.created_at).toLocaleTimeString("ko-KR", {
+                  {new Date(msg.created_at).toLocaleString("ko-KR", {
+                    year: "2-digit",
+                    month: "2-digit",
+                    day: "2-digit",
                     hour: "2-digit",
                     minute: "2-digit",
                   })}

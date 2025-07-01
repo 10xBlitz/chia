@@ -77,10 +77,6 @@ export default function CreateReservation() {
     queryKey: ["treatments"],
     queryFn: async () =>
       await getPaginatedClinicTreatments(clinic_id as string, 1, 100),
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   const user = useUserStore((state) => state.user);
@@ -266,7 +262,7 @@ export default function CreateReservation() {
                               {/**No treatment found. */}
                             </CommandEmpty>
                             <CommandGroup>
-                              {treatments.data &&
+                              {treatments.data.length > 0 &&
                                 treatments.data.map((treatment) => (
                                   <CommandItem
                                     value={treatment?.treatment?.treatment_name}

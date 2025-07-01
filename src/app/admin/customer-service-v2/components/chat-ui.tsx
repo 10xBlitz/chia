@@ -337,7 +337,10 @@ export function ChatUI({ roomId, currentUserId }: ChatUIProps) {
                     {msg.content}
                     <div className="flex items-center justify-between mt-1">
                       <span className="block text-[10px] text-right opacity-50">
-                        {new Date(msg.createdAt).toLocaleTimeString("ko-KR", {
+                        {new Date(msg.createdAt).toLocaleString("ko-KR", {
+                          year: "2-digit",
+                          month: "2-digit",
+                          day: "2-digit",
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
