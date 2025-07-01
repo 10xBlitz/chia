@@ -27,6 +27,7 @@ import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skele
 import ClinicReviewCardSkeleton from "@/components/loading-skeletons/clinic-review-skeleton";
 import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { getClinic } from "@/lib/supabase/services/clinics.services";
+// import ZoomableImage from "@/components/zoomable-image";
 
 const TABS = [
   { key: "info", label: "병원정보" }, // Hospital Info
@@ -506,6 +507,8 @@ export default function ClinicSingleViewPage() {
                     fill
                     className="object-cover"
                   />
+
+                  {/* <ZoomableImage src={pic} alt={`clinic-photo-${idx}`} /> */}
                 </div>
               ))}
             </div>
