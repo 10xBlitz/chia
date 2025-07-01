@@ -1,3 +1,80 @@
+/**
+ * FormMultiImageUploadV2 Component Usage Instructions
+ * ==================================================
+ *
+ * This component provides a standardized multi-image upload interface that works with React Hook Form.
+ * It handles both new file uploads and existing images from the database.
+ *
+ * EXPECTED DATA FORMAT:
+ * The component expects the form field value to be an object with:
+ * {
+ *   files: File[],      // Array of File objects for new uploads
+ *   previews: string[]  // Array of URLs (data URLs or Supabase URLs)
+ * }
+ *
+ * SETUP INSTRUCTIONS:
+ *
+ * 1. Form Schema (Zod):
+ * ```typescript
+ * const formSchema = z.object({
+ *   images: z.object({
+ *     files: z.array(z.instanceof(File)).optional(),
+ *     previews: z.array(z.string()).optional(),
+ *   }).optional(),
+ * });
+ * ```
+ *
+ * 2. Form Default Values:
+ * ```typescript
+ * const form = useForm({
+ *   defaultValues: {
+ *     images: {
+ *       files: [],
+ *       previews: existingImageUrls, // e.g., ["https://...", "https://..."]
+ *     },
+ *   },
+ * });
+ * ```
+ *
+ * 3. Component Usage:
+ * ```tsx
+ * <FormMultiImageUploadV2
+ *   control={form.control}
+ *   name="images"
+ *   label="사진 첨부"
+ *   maxImages={5}
+ * />
+ * ```
+ *
+ * 4. Form Submission:
+ * ```typescript
+ * const onSubmit = (values) => {
+ *   const { files, previews } = values.images || { files: [], previews: [] };
+ *
+ *   // Convert to backend format if needed
+ *   const allImages = [...(files || []), ...(previews || [])];
+ *
+ *   // Handle file uploads and existing URLs
+ *   // Files need to be uploaded to storage
+ *   // Previews are already URLs (existing images)
+ * };
+ * ```
+ *
+ * FEATURES:
+ * - Supports existing images (shows as "old" status)
+ * - Supports new file uploads (shows as "new" status)
+ * - Soft delete for existing images (marks as "deleted" but keeps in array)
+ * - Hard delete for new images (removes from array)
+ * - Image preview with remove buttons
+ * - File validation and limits
+ * - Toast notifications for errors
+ *
+ * IMAGE STATUS TRACKING:
+ * - "old": Existing images from database
+ * - "new": Newly uploaded files
+ * - "deleted": Existing images marked for deletion
+ */
+
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 import {
   FormField,
@@ -30,7 +107,17 @@ type FormImageUploadProps<T extends FieldValues> = {
 };
 
 /**
- * FormMultiImageUploadV2 - version that always expects an object with files and previews, and supports old/new/deleted status.
+ * FormMultiImageUploadV2 - A standardized multi-image upload component for React Hook Form
+ *
+ * Always expects an object with files and previews arrays, and supports old/new/deleted status tracking.
+ * Use this component when you need to handle both existing images and new file uploads.
+ *
+ * @param control - React Hook Form control object
+ * @param name - Field name in the form (should match schema)
+ * @param label - Display label for the upload section
+ * @param maxImages - Maximum number of images allowed (default: 5)
+ * @param formItemClassName - Optional CSS class for the form item wrapper
+ * @param formLabelClassName - Optional CSS class for the form label
  */
 export default function FormMultiImageUploadV2<T extends FieldValues>({
   control,

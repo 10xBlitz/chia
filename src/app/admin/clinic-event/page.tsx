@@ -8,7 +8,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import Loading from "@/components/loading";
 import { ClinicEventModal } from "./clinic-event-modal";
 import { useState } from "react";
 import { getPaginatedClinicEvents } from "@/lib/supabase/services/clinic-event.services";
@@ -19,7 +18,7 @@ export default function ClinicEventPage() {
   const [openModal, setOpenModal] = useState(false);
   const { page, limit, filters } = validateClinicEventQueryParams(searchParams);
 
-  const { isError, error, data, isLoading } = useQuery({
+  const { isError, error, data, isFetching } = useQuery({
     queryKey: [
       "clinic-events",
       page,
@@ -59,11 +58,11 @@ export default function ClinicEventPage() {
         }
       />
       {isError && <div className="bg-red-500/20">{error.message}</div>}
-      {isLoading && <Loading />}
       <DataTable
         columns={columns}
         paginatedData={paginatedData}
         onClickAdd={() => setOpenModal(true)}
+        isLoading={isFetching}
       />
     </div>
   );

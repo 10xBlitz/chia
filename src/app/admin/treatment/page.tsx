@@ -6,7 +6,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import Loading from "@/components/loading";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import { useState } from "react";
 import { TreatmentModal } from "./treatment-modal";
@@ -19,7 +18,7 @@ export default function TreatmentsPage() {
   const [openModal, setOpenModal] = useState(false);
   const { page, limit, filters } = validateTreatmentQueryParams(searchParams);
 
-  const { isError, error, data, isLoading } = useQuery({
+  const { isError, error, data, isFetching } = useQuery({
     queryKey: [
       "treatments",
       page,
@@ -59,11 +58,11 @@ export default function TreatmentsPage() {
         }
       />
       {isError && <div className="bg-red-500/20">{error.message}</div>}
-      {isLoading && <Loading />}
       <DataTable
         columns={columns}
         paginatedData={paginatedData}
         onClickAdd={() => setOpenModal(true)}
+        isLoading={isFetching}
       />
     </div>
   );

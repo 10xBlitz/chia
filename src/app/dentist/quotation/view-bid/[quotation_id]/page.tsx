@@ -8,6 +8,7 @@ import Image from "next/image";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { useUserStore } from "@/providers/user-store-provider";
 import { BidAnswerSkeleton } from "@/app/dentist/quotation/view-bid/[quotation_id]/bid-answer-skeleton";
+import { calculateAge } from "@/lib/utils";
 
 export default function ViewBidPage() {
   const params = useParams();
@@ -53,6 +54,22 @@ export default function ViewBidPage() {
             {quotation?.region?.split(",")[1]?.trim() ||
               quotation?.region ||
               "-"}
+          </div>
+        </div>
+        <div className="mb-3">
+          <label className="block text-xs text-gray-500 mb-1">
+            생년월일 / 나이 {/* Birthdate / Age */}
+          </label>
+          <div className="border rounded-lg px-3 py-2 bg-gray-50">
+            {quotation?.birthdate ? (
+              <>
+                {new Date(quotation.birthdate).toLocaleDateString("ko-KR")} 
+                {" "}
+                ({calculateAge(new Date(quotation.birthdate))}세) {/* years old */}
+              </>
+            ) : (
+              "-"
+            )}
           </div>
         </div>
         <div className="mb-3">

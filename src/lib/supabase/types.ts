@@ -139,10 +139,12 @@ export type Database = {
           detail_address: string | null
           full_address: string
           id: string
+          introduction: string | null
           link: string | null
           opening_date: string
           pictures: string[] | null
           region: string
+          status: Database["public"]["Enums"]["record_status"]
         }
         Insert: {
           city?: string
@@ -152,10 +154,12 @@ export type Database = {
           detail_address?: string | null
           full_address?: string
           id?: string
+          introduction?: string | null
           link?: string | null
           opening_date: string
           pictures?: string[] | null
           region?: string
+          status?: Database["public"]["Enums"]["record_status"]
         }
         Update: {
           city?: string
@@ -165,10 +169,12 @@ export type Database = {
           detail_address?: string | null
           full_address?: string
           id?: string
+          introduction?: string | null
           link?: string | null
           opening_date?: string
           pictures?: string[] | null
           region?: string
+          status?: Database["public"]["Enums"]["record_status"]
         }
         Relationships: []
       }
@@ -307,6 +313,7 @@ export type Database = {
           discount: number
           id: string
           image_url: string | null
+          status: Database["public"]["Enums"]["record_status"] | null
           title: string
         }
         Insert: {
@@ -317,6 +324,7 @@ export type Database = {
           discount: number
           id?: string
           image_url?: string | null
+          status?: Database["public"]["Enums"]["record_status"] | null
           title: string
         }
         Update: {
@@ -327,6 +335,7 @@ export type Database = {
           discount?: number
           id?: string
           image_url?: string | null
+          status?: Database["public"]["Enums"]["record_status"] | null
           title?: string
         }
         Relationships: [
@@ -749,6 +758,9 @@ export type Database = {
           last_admin_read_at: string
           last_patient_read_at: string
           latest_message_created_at: string
+          latest_message: string
+          latest_message_sender_id: string
+          latest_message_sender_full_name: string
         }[]
       }
       get_paginated_users_with_email: {

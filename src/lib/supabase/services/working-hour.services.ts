@@ -30,3 +30,44 @@ export async function fetchClinicWorkingHours(
   if (error) throw error;
   return data;
 }
+
+// --- Working Hours (Clinic Hours) ---
+
+/**
+ * Inserts all working hours for a clinic. Overwrites existing hours if used after deleteClinicWorkingHours.
+ * @param clinicId - The clinic ID
+ * @param hours - Array of working hour objects
+ */
+export async function insertClinicWorkingHours(
+  clinicId: string,
+  hours: Array<{
+    day_of_week: Enums<"day_of_week">;
+    time_open: string;
+    note?: string;
+  }>
+) {
+  if (!clinicId || !Array.isArray(hours)) return;
+  if (hours.length === 0) return;
+  const { error } = await supabaseClient.from("working_hour").insert(
+    hours.map((h) => ({
+      clinic_id: clinicId,
+      day_of_week: h.day_of_week,
+      time_open: h.time_open,
+      note: h.note || null,
+    }))
+  );
+  if (error) throw error;
+}
+
+/**
+ * Deletes all working hours for a clinic. Useful before re-inserting on update.
+ * @param clinicId - The clinic ID
+ */
+export async function deleteClinicWorkingHours(clinicId: string) {
+  if (!clinicId) return;
+  const { error } = await supabaseClient
+    .from("working_hour")
+    .delete()
+    .eq("clinic_id", clinicId);
+  if (error) throw error;
+}

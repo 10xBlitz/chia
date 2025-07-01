@@ -24,9 +24,17 @@ export async function getPaginatedFavoriteClinics(
   let favoriteClinicsQuery = supabaseClient
     .from("favorite_clinic")
     .select("*, clinic(*)", { count: "exact" })
-    .filter("patient_id", "eq", filters.user_id)
+
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
+
+  if (filters.user_id) {
+    favoriteClinicsQuery = favoriteClinicsQuery.filter(
+      "patient_id",
+      "eq",
+      filters.user_id
+    );
+  }
 
   if (filters.region) {
     favoriteClinicsQuery = favoriteClinicsQuery.eq("region", filters.region);
@@ -56,6 +64,7 @@ export async function getPaginatedFavoriteClinics(
 
   const clinics = favoriteClinics.map((item) => ({
     clinic_name: item.clinic.clinic_name,
+    introduction: item.clinic.introduction || null,
     contact_number: item.clinic.contact_number,
     created_at: item.clinic.created_at,
     id: item.id,
@@ -65,6 +74,7 @@ export async function getPaginatedFavoriteClinics(
     full_address: item.clinic.full_address,
     detail_address: item.clinic.detail_address || null,
     city: item.clinic.city,
+    status: item.clinic.status,
     region: item.clinic.region,
   }));
 

@@ -1,6 +1,6 @@
 import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
-import { Enums, Tables } from "../types";
+import { TablesInsert, TablesUpdate } from "../types";
 
 interface Filters {
   clinic_name?: string | null;
@@ -39,13 +39,14 @@ export async function getPaginatedClinics(
      working_hour(*),
      clinic_treatment (
         *,
-        treatment (*)
+        treatment!inner (*)
       )
    
     `,
       { count: "exact" }
     )
     .filter("clinic_treatment.status", "not.eq", "deleted")
+    .filter("status", "not.eq", "deleted") // Only show active clinics
     .order("clinic_name", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -120,6 +121,7 @@ export async function getPaginatedClinicsWthReviews(
       `,
       { count: "exact" }
     )
+    .filter("status", "not.eq", "deleted") // Only show active clinics
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -175,7 +177,7 @@ export async function getPaginatedClinicsWthReviews(
 
 export async function updateClinic(
   clinicId: string,
-  values: Omit<Tables<"clinic">, "id" | "created_at">,
+  values: TablesUpdate<"clinic">,
   pictures: string[]
 ) {
   const { error } = await supabaseClient
@@ -189,6 +191,7 @@ export async function updateClinic(
       region: values.region,
       opening_date: values.opening_date,
       link: values.link,
+      introduction: values.introduction || null,
       pictures,
     })
     .eq("id", clinicId);
@@ -196,7 +199,7 @@ export async function updateClinic(
 }
 
 export async function insertClinic(
-  values: Omit<Tables<"clinic">, "id" | "created_at">,
+  values: TablesInsert<"clinic">,
   pictures: string[]
 ) {
   const { data: insertedClinic, error } = await supabaseClient
@@ -210,6 +213,7 @@ export async function insertClinic(
       full_address: values.full_address,
       opening_date: values.opening_date,
       link: values.link,
+      introduction: values.introduction || null,
       pictures,
     })
     .select("id")
@@ -218,8 +222,7 @@ export async function insertClinic(
   return insertedClinic.id;
 }
 
-// Fetch clinic detail (no reviews, no views)
-export async function fetchClinicDetail(clinic_id: string) {
+export async function getClinic(clinic_id: string) {
   const { data, error } = await supabaseClient
     .from("clinic")
     .select(
@@ -237,6 +240,8 @@ export async function fetchClinicDetail(clinic_id: string) {
       `
     )
     .eq("id", clinic_id)
+    .filter("status", "not.eq", "deleted") // Only get active clinics
+    .filter("clinic_treatment.status", "not.eq", "deleted")
     .single();
   console.log("---->error", error);
   if (error) throw error;
@@ -245,43 +250,44 @@ export async function fetchClinicDetail(clinic_id: string) {
   return data;
 }
 
-// --- Working Hours (Clinic Hours) ---
-
 /**
- * Inserts all working hours for a clinic. Overwrites existing hours if used after deleteClinicWorkingHours.
- * @param clinicId - The clinic ID
- * @param hours - Array of working hour objects
+ * Soft delete a clinic by setting a status or adding a deleted flag
+ * Since the schema might not have a deleted_at column, we'll use an approach
+ * that marks the clinic as inactive or deleted without removing the data
  */
-export async function insertClinicWorkingHours(
-  clinicId: string,
-  hours: Array<{
-    day_of_week: Enums<"day_of_week">;
-    time_open: string;
-    note?: string;
-  }>
-) {
-  if (!clinicId || !Array.isArray(hours)) return;
-  if (hours.length === 0) return;
-  const { error } = await supabaseClient.from("working_hour").insert(
-    hours.map((h) => ({
-      clinic_id: clinicId,
-      day_of_week: h.day_of_week,
-      time_open: h.time_open,
-      note: h.note || null,
-    }))
-  );
-  if (error) throw error;
+export async function softDeleteClinic(clinicId: string) {
+  // Option 1: If there's a status field, set it to 'deleted' or 'inactive'
+  // Option 2: If there's no status field, we could add a custom field
+  // For now, let's try to update with a status approach
+
+  const { error } = await supabaseClient
+    .from("clinic")
+    .update({
+      // Assuming we add a status field or use an existing one
+      // This might need to be adjusted based on the actual schema
+      status: "deleted",
+    })
+    .eq("id", clinicId);
+
+  if (error) {
+    // If status field doesn't exist, we'll fall back to hard delete
+    // but ideally the database should be modified to support soft delete
+    console.warn("Soft delete failed, status field might not exist:", error);
+    throw new Error(
+      "소프트 삭제를 지원하지 않습니다. 데이터베이스 스키마를 확인하세요."
+    ); // Soft delete not supported. Please check database schema.
+  }
 }
 
 /**
- * Deletes all working hours for a clinic. Useful before re-inserting on update.
- * @param clinicId - The clinic ID
+ * Hard delete a clinic (permanent deletion)
+ * Use this only when soft delete is not available
  */
-export async function deleteClinicWorkingHours(clinicId: string) {
-  if (!clinicId) return;
+export async function hardDeleteClinic(clinicId: string) {
   const { error } = await supabaseClient
-    .from("working_hour")
+    .from("clinic")
     .delete()
-    .eq("clinic_id", clinicId);
+    .eq("id", clinicId);
+
   if (error) throw error;
 }

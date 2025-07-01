@@ -25,6 +25,10 @@ export const formSchema = z.object({
     .string()
     .min(1, "병원 이름을 입력하세요.") // Please enter the clinic name.
     .max(100, "병원 이름은 100자 이내여야 합니다."), // Clinic name must be 100 characters or less.
+  introduction: z
+    .string()
+    .max(500, "소개글은 500자 이내여야 합니다.") // Introduction must be 500 characters or less.
+    .optional(),
   contact_number: z
     .string()
     .min(1, "연락처를 입력하세요.") // Please enter the contact number.
@@ -33,10 +37,7 @@ export const formSchema = z.object({
     .string()
     .min(1, "주소를 입력하세요.") // Please enter the address.
     .max(200, "주소는 200자 이내여야 합니다."), // Address must be 200 characters or less.
-  detail_address: z
-    .string()
-    .max(100, "상세 주소는 100자 이내여야 합니다.") // Detail address must be 100 characters or less.
-    .optional(),
+  detail_address: z.string().min(1, "필수항목입니다"), // Required field
   city: z
     .string()
     .min(1, "도시를 입력하세요.") // Please enter the city.
@@ -50,18 +51,55 @@ export const formSchema = z.object({
     .max(200, "링크는 200자 이내여야 합니다.") // Link must be 200 characters or less.
     .optional(),
   opening_date: z.date({ required_error: "개원일을 선택하세요." }), // Please select the opening date.
-  pictures: z.any().optional(), // For clinic images
-  treatments: z.array(
-    z.object({
-      treatment_id: z.string().nullable(),
-      treatment_name: z
-        .string()
-        .min(1, "진료 항목명을 입력하세요.") // Please enter the treatment name.
-        .max(100, "진료 항목명은 100자 이내여야 합니다."), // Treatment name must be 100 characters or less.
-      image_url: z.any(),
-      action: z.enum(["new", "updated", "deleted", "old"]),
+  pictures: z
+    .object({
+      files: z.array(z.instanceof(File)).optional(),
+      previews: z.array(z.string()).optional(),
     })
-  ),
+    .optional(), // For clinic images - object with files and previews arrays
+  treatments: z
+    .array(
+      z
+        .object({
+          treatment_id: z.string().nullable(),
+          treatment_name: z
+            .string()
+            .min(1, "진료 항목명을 입력하세요.") // Please enter the treatment name.
+            .max(100, "진료 항목명은 100자 이내여야 합니다."), // Treatment name must be 100 characters or less.
+          image_url: z.any(),
+          action: z.enum(["new", "updated", "deleted", "old"]),
+        })
+        .refine(
+          (treatment) => {
+            // Individual treatment validation
+            if (treatment.action !== "deleted") {
+              return (
+                treatment.treatment_id && treatment.treatment_id.trim() !== ""
+              );
+            }
+            return true;
+          },
+          {
+            message: "진료 항목을 선택해주세요.", // Please select a treatment.
+            path: ["treatment_id"],
+          }
+        )
+    )
+    .refine(
+      (treatments) => {
+        // Check that all non-deleted treatments have a valid treatment_id
+        const nonDeletedTreatments = treatments.filter(
+          (t) => t.action !== "deleted"
+        );
+        return nonDeletedTreatments.every(
+          (t) => t.treatment_id && t.treatment_id.trim() !== ""
+        );
+      },
+      {
+        message: "모든 진료 항목에는 진료명을 선택해야 합니다.", // All treatments must have a treatment selected.
+        path: ["treatments"], // This will show the error at the treatments level
+      }
+    ),
   clinic_hours: z
     .array(
       z.object({

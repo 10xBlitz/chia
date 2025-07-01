@@ -56,6 +56,7 @@ export default function DentistSignupPage() {
       const { data } = await supabaseClient
         .from("clinic")
         .select("id, clinic_name")
+        .filter("status", "not.eq", "deleted") // Only show active clinics
         .order("clinic_name", { ascending: true });
       return data || [];
     },

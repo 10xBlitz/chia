@@ -46,6 +46,7 @@ export async function getPaginatedClinicEvents(
     let query = supabaseClient
       .from("event")
       .select("*, clinic_treatment(clinic(*)) ", { count: "exact" })
+      .neq("status", "deleted")
       .order("created_at", { ascending: true })
       .range(offset, offset + limit - 1);
 
@@ -190,6 +191,18 @@ export async function updateClinicEvent(
     .select()
     .single();
   progress(null);
+  if (error) throw error;
+  return data;
+}
+
+export async function softDeleteClinicEvent(eventId: string) {
+  const { data, error } = await supabaseClient
+    .from("event")
+    .update({ status: "deleted" })
+    .eq("id", eventId)
+    .select()
+    .single();
+
   if (error) throw error;
   return data;
 }

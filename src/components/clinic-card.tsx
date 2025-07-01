@@ -11,11 +11,13 @@ import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import BookmarkButton from "./bookmark";
+import { Enums } from "@/lib/supabase/types";
 
 export interface ClinicCardProps {
   total_reviews: number;
   avg_reviews_per_treatment: number;
   clinic_name: string;
+  introduction: string | null;
   contact_number: string;
   created_at: string;
   id: string;
@@ -27,6 +29,7 @@ export interface ClinicCardProps {
   city: string;
   region: string;
   className?: string;
+  status: Enums<"record_status">;
   showBookmark?: boolean;
 }
 

@@ -6,7 +6,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import Loading from "@/components/loading";
 import { BannerModal } from "./banner-modal";
 import { useState } from "react";
 import { getPaginatedBanners } from "@/lib/supabase/services/banner.services";
@@ -19,7 +18,7 @@ export default function BannerPage() {
   const [openModal, setOpenModal] = useState(false);
   const { page, limit, filters } = validateBannerQueryParams(searchParams);
 
-  const { data, isLoading } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: [
       "banners",
       page,
@@ -69,15 +68,13 @@ export default function BannerPage() {
           배너 관리 {/* Banner Management */}
         </h1>
       </div>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <DataTable
-          columns={columns}
-          paginatedData={paginatedData}
-          onClickAdd={() => setOpenModal(true)}
-        />
-      )}
+
+      <DataTable
+        columns={columns}
+        paginatedData={paginatedData}
+        onClickAdd={() => setOpenModal(true)}
+        isLoading={isFetching}
+      />
     </div>
   );
 }

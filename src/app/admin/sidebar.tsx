@@ -18,15 +18,17 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import {
-  BookMarked,
+  Calendar,
   ChevronUp,
-  HospitalIcon,
-  ImagesIcon,
-  MessageSquareMoreIcon,
-  SettingsIcon,
-  SyringeIcon,
+  Hospital,
+  MessageCircle,
+  Settings,
+  Stethoscope,
+  Star,
   User2,
   Users,
+  Zap,
+  Image,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -40,43 +42,43 @@ const items = [
   {
     title: "병원 관리", // Clinic Management
     url: "/admin/clinic",
-    icon: HospitalIcon,
+    icon: Hospital,
   },
   {
     title: "병원 이벤트", // Clinic Event
     url: "/admin/clinic-event",
-    icon: HospitalIcon,
+    icon: Zap,
   },
   {
     title: "진료 항목", // Treatments
     url: "/admin/treatment",
-    icon: SyringeIcon,
+    icon: Stethoscope,
   },
   {
     title: "배너 관리", // Banner Management
     url: "/admin/banner",
-    icon: BookMarked,
+    icon: Image,
   },
 
   {
     title: "예약 관리", // Reservation Management
     url: "/admin/reservation",
-    icon: ImagesIcon,
+    icon: Calendar,
   },
   {
     title: "리뷰 관리", // Review Management
     url: "/admin/review",
-    icon: BookMarked,
+    icon: Star,
   },
   {
     title: "고객센터", // Customer Service
     url: "/admin/customer-service-v2",
-    icon: MessageSquareMoreIcon,
+    icon: MessageCircle,
   },
   {
     title: "설정", // Settings
     url: "/admin/settings",
-    icon: SettingsIcon,
+    icon: Settings,
   },
 ];
 

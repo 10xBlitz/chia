@@ -8,7 +8,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Tables } from "@/lib/supabase/types";
 import { SortingState } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
@@ -56,7 +56,7 @@ export default function UserPage() {
     [router, searchParams, sorting]
   );
 
-  const { isError, error, data, isLoading } = useQuery({
+  const { isError, error, data, isFetching } = useQuery({
     queryKey: [
       "users",
       page,
@@ -69,6 +69,8 @@ export default function UserPage() {
     ],
     queryFn: async () =>
       await getPaginatedUsersWithEmail(page, limit, filters, sort, order),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Provide fallback paginatedData for loading state
@@ -88,7 +90,7 @@ export default function UserPage() {
         paginatedData={paginatedData}
         sorting={sorting}
         onSortingChange={onSortingChange}
-        isLoading={isLoading}
+        isLoading={isFetching}
       />
     </div>
   );

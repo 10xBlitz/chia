@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { CellAction } from "./cell-actions";
 
 // import { CellAction } from "./cell-actions";
 
@@ -62,8 +63,8 @@ export const columns: ColumnDef<ReviewTable>[] = [
       </div>
     ),
   },
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => <CellAction data={row.original} />, // 액션 // Action
-  // },
+  {
+    id: "actions",
+    cell: ({ row }) => <CellAction data={row.original} />, // 액션 // Action
+  },
 ];

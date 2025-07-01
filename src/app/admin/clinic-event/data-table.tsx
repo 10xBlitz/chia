@@ -60,12 +60,18 @@ interface DataTableProps<TData, TValue> {
     hasPrevPage: boolean;
   };
   onClickAdd: () => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   paginatedData,
   onClickAdd,
+  isLoading = false,
+  isError = false,
+  errorMessage,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const searchParam = useSearchParams();
@@ -240,6 +246,64 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
+
+          {isError ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  {errorMessage || "오류 발생"} {/* An error occurred */}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : null}
+          {isLoading ? (
+            <TableBody>
+              {Array.from({ length: limitParam }).map((_, index) => (
+                <TableRow key={index}>
+                  {columns.map((_, colIndex) => (
+                    <TableCell key={colIndex} className="h-12">
+                      <div className="flex items-center space-x-2">
+                        {colIndex === 0 ? (
+                          // First column - typically ID or event image
+                          <div 
+                            className="h-4 w-16 bg-gray-200 rounded animate-pulse"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          ></div>
+                        ) : colIndex === columns.length - 1 ? (
+                          // Last column - typically actions
+                          <div className="flex space-x-1">
+                            <div 
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{ animationDelay: `${index * 50 + 100}ms` }}
+                            ></div>
+                            <div 
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{ animationDelay: `${index * 50 + 150}ms` }}
+                            ></div>
+                            <div 
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{ animationDelay: `${index * 50 + 200}ms` }}
+                            ></div>
+                          </div>
+                        ) : (
+                          // Other columns - event name, clinic, dates, etc.
+                          <div 
+                            className={`h-4 bg-gray-200 rounded animate-pulse ${
+                              colIndex === 1 ? 'w-32' : // Event name - wider
+                              colIndex === 2 ? 'w-28' : // Clinic name - medium
+                              colIndex === 3 ? 'w-24' : // Date - smaller
+                              colIndex % 2 === 0 ? 'w-20' : 'w-24'
+                            }`}
+                            style={{ animationDelay: `${index * 50 + colIndex * 25}ms` }}
+                          ></div>
+                        )}
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          ) : (
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -268,6 +332,7 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
+          )}
         </Table>
       </div>
 

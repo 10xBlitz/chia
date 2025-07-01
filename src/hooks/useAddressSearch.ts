@@ -246,7 +246,7 @@ export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
       onclose: function (state: string) {
         // Handle popup close
         if (state === "FORCE_CLOSE") {
-          setError("해당 지역은 배송이 불가능합니다"); // "This area is not available for delivery"
+          // setError("해당 지역은 배송이 불가능합니다"); // "This area is not available for delivery"
         } else if (state === "COMPLETE_CLOSE") {
           // Normal close after selection, don't set error
         }

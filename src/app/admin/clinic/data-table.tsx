@@ -252,11 +252,59 @@ export function DataTable<TData, TValue>({
           ) : null}
           {isLoading ? (
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center">
-                  로딩 중... {/* Loading... */}
-                </TableCell>
-              </TableRow>
+              {Array.from({ length: limitParam }).map((_, index) => (
+                <TableRow key={index}>
+                  {columns.map((_, colIndex) => (
+                    <TableCell key={colIndex} className="h-12">
+                      <div className="flex items-center space-x-2">
+                        {colIndex === 0 ? (
+                          // First column - typically ID or image
+                          <div
+                            className="h-4 w-16 bg-gray-200 rounded animate-pulse"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          ></div>
+                        ) : colIndex === columns.length - 1 ? (
+                          // Last column - typically actions
+                          <div className="flex space-x-1">
+                            <div
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{
+                                animationDelay: `${index * 50 + 100}ms`,
+                              }}
+                            ></div>
+                            <div
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{
+                                animationDelay: `${index * 50 + 150}ms`,
+                              }}
+                            ></div>
+                            <div
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{
+                                animationDelay: `${index * 50 + 200}ms`,
+                              }}
+                            ></div>
+                          </div>
+                        ) : (
+                          // Other columns - text content with varying widths
+                          <div
+                            className={`h-4 bg-gray-200 rounded animate-pulse ${
+                              colIndex % 3 === 0
+                                ? "w-24"
+                                : colIndex % 3 === 1
+                                ? "w-32"
+                                : "w-20"
+                            }`}
+                            style={{
+                              animationDelay: `${index * 50 + colIndex * 25}ms`,
+                            }}
+                          ></div>
+                        )}
+                      </div>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
             </TableBody>
           ) : (
             <TableBody>

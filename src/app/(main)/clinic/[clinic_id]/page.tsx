@@ -26,12 +26,12 @@ import ClinicReviewCard from "@/components/clinic-review-card";
 import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skeleton";
 import ClinicReviewCardSkeleton from "@/components/loading-skeletons/clinic-review-skeleton";
 import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
-import { fetchClinicDetail } from "@/lib/supabase/services/clinics.services";
+import { getClinic } from "@/lib/supabase/services/clinics.services";
 
 const TABS = [
   { key: "info", label: "병원정보" }, // Hospital Info
-  { key: "photos", label: "사진" }, // Photos
   { key: "treatments", label: "진료정보" }, // Treatment Info
+  { key: "photos", label: "사진" }, // Photos
   { key: "reviews", label: "리뷰" }, // Reviews
 ];
 
@@ -54,17 +54,27 @@ export default function ClinicSingleViewPage() {
     error: clinicError,
   } = useQuery({
     queryKey: ["clinic-detail", clinic_id],
-    queryFn: () => fetchClinicDetail(clinic_id),
+    queryFn: () => getClinic(clinic_id),
     enabled: !!clinic_id,
   });
 
   // Use anchor IDs for scroll-to-section
   const tabAnchors = {
     info: "clinic-info",
-    photos: "clinic-photos",
     treatments: "clinic-treatments",
+    photos: "clinic-photos",
     reviews: "clinic-reviews",
   };
+
+  // const days1 = [
+  //   "일", // Sunday
+  //   "월", // Monday
+  //   "화", // Tuesday
+  //   "수", // Wednesday
+  //   "목", // Thursday
+  //   "금", // Friday
+  //   "토", // Saturday
+  // ];
 
   // Infinite query for reviews
   const {
@@ -107,13 +117,13 @@ export default function ClinicSingleViewPage() {
   const handleTabClick = (key: keyof typeof tabAnchors) => {
     const refMap = {
       info: infoRef,
-      photos: photosRef,
       treatments: treatmentsRef,
+      photos: photosRef,
       reviews: reviewsRef,
     };
     const ref = refMap[key];
     if (ref && ref.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -149,7 +159,7 @@ export default function ClinicSingleViewPage() {
   // Copy address to clipboard
   const handleCopyAddress = () => {
     if (clinic?.region) {
-      navigator.clipboard.writeText(String(clinic.region));
+      navigator.clipboard.writeText(String(clinic.full_address));
       toast.success("주소가 클립보드에 복사되었습니다."); // Address copied to clipboard
     }
   };
@@ -261,10 +271,25 @@ export default function ClinicSingleViewPage() {
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
               <span>
-                진료종료 오늘{" "}
-                {clinic.working_hour && clinic.working_hour.length > 0
-                  ? clinic.working_hour[0].time_open
-                  : "9:30 ~ 14:00"}
+                진료 오늘 {/* Clinic closes today */}
+                {(() => {
+                  // Map JS day to Korean day string
+                  const days = [
+                    "일요일", // Sunday
+                    "월요일", // Monday
+                    "화요일", // Tuesday
+                    "수요일", // Wednesday
+                    "목요일", // Thursday
+                    "금요일", // Friday
+                    "토요일", // Saturday
+                  ];
+                  const todayIdx = new Date().getDay();
+                  const todayKor = days[todayIdx === 0 ? 0 : todayIdx]; // 0 is Sunday
+                  const wh =
+                    clinic.working_hour &&
+                    clinic.working_hour.find((w) => w.day_of_week === todayKor);
+                  return wh ? wh.time_open : "00:00 - 00:00";
+                })()}
                 {/* Clinic closes today */}
               </span>
             </div>
@@ -314,6 +339,18 @@ export default function ClinicSingleViewPage() {
         <div className="flex-1 overflow-auto px-4 pb-20">
           {/* Info Section */}
           <div id={tabAnchors.info} ref={infoRef} className="scroll-mt-16">
+            {/* 병원 소개 (Clinic Introduction) */}
+            {clinic.introduction && (
+              <div className="mt-6">
+                <div className="font-semibold text-xl mb-2">병원 소개</div>
+                {/* Clinic Introduction */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {clinic.introduction}
+                  </p>
+                </div>
+              </div>
+            )}
             {/* 진료 시간 (Opening Hours) */}
             <div className="mt-6">
               <div className="font-semibold text-xl mb-2">진료 시간</div>
@@ -353,7 +390,11 @@ export default function ClinicSingleViewPage() {
                     점심 시간 {/* Lunch time */}
                   </div>
                   <div className="text-base mt-1">
-                    전화 문의{/**Phone Inquiry */}
+                    {
+                      clinic.working_hour.find(
+                        (item) => item.day_of_week === "점심시간"
+                      )?.time_open
+                    }
                   </div>
                   {/* Call for info */}
                 </div>
@@ -392,7 +433,7 @@ export default function ClinicSingleViewPage() {
                     height="100%"
                     style={{ border: 0, minHeight: 160 }}
                     src={`https://www.google.com/maps?q=${encodeURIComponent(
-                      clinic.region || ""
+                      clinic.full_address || ""
                     )}&output=embed`}
                     allowFullScreen
                     loading="lazy"
@@ -413,29 +454,30 @@ export default function ClinicSingleViewPage() {
                 </div>
               </div>
             </div>
-            <div
-              className="mt-6"
-              id={tabAnchors.treatments}
-              ref={treatmentsRef}
-            >
-              <div className="font-semibold mb-2 text-xl">
-                시설 {/**Treatments */}
-              </div>
-              <div className=" mb-2">
-                총{" "}
-                {clinic.clinic_treatment ? clinic.clinic_treatment.length : 0}개{" "}
-                {/**A total of {number} */}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {clinic.clinic_treatment?.map((ct) => (
-                  <span
-                    key={ct.id}
-                    className="bg-gray-100 rounded-md px-3 py-1 text-xs"
-                  >
-                    {ct.treatment?.treatment_name}
-                  </span>
-                ))}
-              </div>
+          </div>
+
+          {/* Treatments Section */}
+          <div
+            id={tabAnchors.treatments}
+            ref={treatmentsRef}
+            className="scroll-mt-16 mt-10"
+          >
+            <div className="font-semibold mb-2 text-xl">
+              진료 항목 {/** Medical Items */}
+            </div>
+            <div className=" mb-2">
+              총 {clinic.clinic_treatment ? clinic.clinic_treatment.length : 0}
+              개 {/**A total of {number} */}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {clinic.clinic_treatment?.map((ct) => (
+                <span
+                  key={ct.id}
+                  className="bg-gray-100 rounded-md px-3 py-1 text-xs"
+                >
+                  {ct.treatment?.treatment_name}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -463,20 +505,6 @@ export default function ClinicSingleViewPage() {
               ))}
             </div>
           </div>
-
-          {/* Treatments Section */}
-          {/* <div
-          id={tabAnchors.treatments}
-          ref={treatmentsRef}
-          className="scroll-mt-16 mt-10"
-        >
-          <div className="font-semibold mb-2">진료 항목</div>{" "}
-          <ul className="list-disc list-inside text-sm">
-            {clinic.clinic_treatment?.map((ct: any) => (
-              <li key={ct.id}>{ct.treatment?.treatment_name}</li>
-            ))}
-          </ul>
-        </div> */}
 
           {/* Reviews Section */}
           <div

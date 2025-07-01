@@ -51,6 +51,7 @@ import FormInput from "@/components/form-ui/form-input";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
 // import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
+import FormMultiImageUploadV2 from "@/components/form-ui/form-multi-image-upload-v2";
 import {
   Select,
   SelectTrigger,
@@ -58,15 +59,16 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import {
-  insertClinicWorkingHours,
-  deleteClinicWorkingHours,
-} from "@/lib/supabase/services/clinics.services";
+
 import FormTextarea from "@/components/form-ui/form-textarea";
-import { Enums } from "@/lib/supabase/types";
+import { Enums, TablesUpdate } from "@/lib/supabase/types";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import AddressSearch from "@/components/AddressSearch";
 import { DAYS_OF_WEEK, formSchema } from "./clinic-modal.types";
+import {
+  deleteClinicWorkingHours,
+  insertClinicWorkingHours,
+} from "@/lib/supabase/services/working-hour.services";
 
 export const ClinicModal = ({
   data,
@@ -81,10 +83,6 @@ export const ClinicModal = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
-  const [clinicImagePreviews, setClinicImagePreviews] = useState<string[]>(
-    data?.pictures || []
-  );
-  const [clinicImageFiles, setClinicImageFiles] = useState<File[]>([]);
 
   // Fetch all treatments from DB for the select dropdown
   const { data: allTreatments, isLoading: treatmentsLoading } =
@@ -98,15 +96,20 @@ export const ClinicModal = ({
     defaultValues: data
       ? {
           clinic_name: data.clinic_name,
+          introduction: data.introduction || "",
           contact_number: data.contact_number,
           full_address: data.full_address,
-          detail_address: data.detail_address || undefined,
+          detail_address: data.detail_address || "",
           region: data.region,
           city: data.city,
           link: data.link || "",
           opening_date: data.opening_date
             ? new Date(data.opening_date)
             : new Date(),
+          pictures: {
+            files: [],
+            previews: data.pictures || [],
+          },
           treatments:
             data.clinic_treatment?.map((item) => ({
               treatment_id: item.treatment.id.toString(),
@@ -134,6 +137,7 @@ export const ClinicModal = ({
         }
       : {
           clinic_name: "",
+          introduction: "",
           contact_number: "",
           link: "",
           region: "",
@@ -141,12 +145,21 @@ export const ClinicModal = ({
           full_address: "",
           detail_address: "",
           opening_date: new Date(),
+          pictures: {
+            files: [],
+            previews: [],
+          },
           treatments: [],
           clinic_hours: [],
         },
   });
 
-  const { fields, append, remove, update } = useFieldArray({
+  const {
+    fields: treatmentFields,
+    append,
+    remove,
+    update,
+  } = useFieldArray({
     control: form.control,
     name: "treatments",
   });
@@ -164,28 +177,24 @@ export const ClinicModal = ({
   const imagePreviews = useRef<{ [key: number]: string }>({});
 
   // Handle clinic images selection and preview
-  const handleClinicImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setClinicImageFiles(files);
-    const previews: string[] = [];
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        previews.push(reader.result as string);
-        if (previews.length === files.length) {
-          setClinicImagePreviews(previews);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-    if (files.length === 0) setClinicImagePreviews([]);
-  };
-
   const mutation = useMutation({
     mutationKey: [data ? "update_clinic" : "add_clinic", data?.id],
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      values.pictures =
-        clinicImageFiles.length > 0 ? clinicImageFiles : data?.pictures || [];
+      // Convert the pictures object format to the expected format
+      const picturesValue = values.pictures || { files: [], previews: [] };
+      const newFiles = picturesValue.files || [];
+      const existingUrls =
+        picturesValue.previews?.filter(
+          (url: string) =>
+            !newFiles.some((file: File) => URL.createObjectURL(file) === url)
+        ) || [];
+
+      // Combine new files and existing URLs
+      values.pictures = {
+        files: newFiles,
+        previews: existingUrls,
+      };
+
       if (data) {
         return updateClinicWithImages(values, data!.id, setProgress);
       } else {
@@ -197,8 +206,6 @@ export const ClinicModal = ({
       setLoading(false);
       toast.success(data ? "Clinic updated" : "Clinic created");
       onSuccess();
-      setClinicImageFiles([]);
-      setClinicImagePreviews([]);
       onClose();
     },
     onError: (error) => {
@@ -209,20 +216,33 @@ export const ClinicModal = ({
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setLoading(true);
+    console.log("---->clinic modal onSubmit: ", values);
     mutation.mutate(values);
   };
 
-  // Track which treatment index is being confirmed for deletion
-  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  // Track which treatment field ID is being confirmed for deletion
+  const [deleteFieldId, setDeleteFieldId] = useState<string | null>(null);
 
-  const confirmRemoveTreatment = (index: number) => {
-    const treatment = form.getValues(`treatments.${index}`);
+  const confirmRemoveTreatment = (fieldId: string) => {
+    // Find the real index in the treatmentFields array using the field id
+    const realIndex = treatmentFields.findIndex(
+      (field) => field.id === fieldId
+    );
+    if (realIndex === -1) return;
+
+    const treatment = form.getValues(`treatments.${realIndex}`);
+    console.log(
+      "---->confirmRemoveTreatment: ",
+      treatment,
+      "realIndex:",
+      realIndex
+    );
     if (treatment.action === "old") {
       // Existing treatment: mark as deleted
-      update(index, { ...treatment, action: "deleted" });
+      update(realIndex, { ...treatment, action: "deleted" });
     } else {
       // New treatment: remove from array
-      remove(index);
+      remove(realIndex);
     }
   };
 
@@ -240,8 +260,6 @@ export const ClinicModal = ({
         isLong={true}
         onClose={() => {
           form.reset();
-          setClinicImageFiles([]);
-          setClinicImagePreviews([]);
           onClose();
         }}
       >
@@ -258,6 +276,17 @@ export const ClinicModal = ({
                   inputClassName={inputClassName}
                   placeholder="여기에 병원 이름을 입력하세요." // Enter clinic name here
                 />
+
+                <FormTextarea
+                  control={form.control}
+                  name="introduction"
+                  label="병원 소개" // Clinic Introduction
+                  placeholder="병원을 소개하는 글을 작성해주세요..." // Write an introduction about your clinic...
+                  maxLength={500}
+                  formLabelClassName={formLabelClassName}
+                  inputClassName="h-[100px]"
+                />
+
                 <FormInput
                   control={form.control}
                   name="link"
@@ -276,18 +305,9 @@ export const ClinicModal = ({
                     "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
                   }
                 />
-                {/* <FormAddress
-                  control={form.control}
-                  name="region"
-                  label="지역" // Region
-                  formLabelClassName={formLabelClassName}
-                  inputClassName={
-                    "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
-                  }
-                /> */}
                 <AddressSearch
                   id="address"
-                  defaultValue={form.getValues("region")}
+                  defaultValue={form.getValues("full_address")}
                   onAddressSelect={(fullAddress, city, region) => {
                     console.log("---->clinic modal: address: ", {
                       fullAddress,
@@ -322,246 +342,247 @@ export const ClinicModal = ({
                   label="개원일" // Opening Date
                 />
                 {/* 병원 이미지 (Clinic Images) */}
-                <div>
-                  <FormLabel>병원 이미지</FormLabel> {/* Clinic Images */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleClinicImagesChange}
-                    className="mt-2  mb-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
-                  <div className="flex flex-wrap gap-2 mt-">
-                    {clinicImagePreviews.map((src, idx) => (
-                      <Image
-                        key={idx}
-                        src={src}
-                        alt={`clinic-img-${idx}`}
-                        width={80}
-                        height={80}
-                        className="rounded object-cover"
-                      />
-                    ))}
-                  </div>
-                </div>
+                <FormMultiImageUploadV2
+                  control={form.control}
+                  name="pictures"
+                  label="병원 이미지" // Clinic Images
+                  maxImages={10}
+                  formLabelClassName={formLabelClassName}
+                />
               </div>
               {/* 진료 항목 (Treatments Section) */}
               <div className="flex flex-col w-full max-w-xl">
                 <div className="font-semibold mb-2">진료 항목</div>{" "}
                 {/* Treatments */}
-                {fields.length === 0 && (
+                {/* Show treatments level validation error */}
+                {form.formState.errors.treatments && (
+                  <p className="text-sm text-red-500 mb-2">
+                    {form.formState.errors.treatments.message}
+                  </p>
+                )}
+                {treatmentFields.length === 0 && (
                   <p className="text-sm text-muted-foreground">
                     아직 추가된 진료 항목이 없습니다. 플러스 아이콘을 클릭하여
                     진료 항목을 추가하세요.
                     {/* No treatments added yet. Click the plus icon to add a treatment. */}
                   </p>
                 )}
-                {fields
+                {treatmentFields
                   .filter((filterT) => filterT.action !== "deleted")
-                  .map((item, index) => (
-                    <section
-                      key={item.id + index}
-                      className="relative grid grid-cols-2 gap-3 items-stretch w-full border rounded-md p-4 mb-2"
-                    >
-                      {/* 오른쪽 상단 삭제 버튼 (Delete button at top right) */}
-                      <Button
-                        className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
-                        type="button"
-                        disabled={mutation.status === "pending"}
-                        onClick={() => setDeleteIndex(index)}
+                  .map((item, filteredIndex) => {
+                    // Find the real index in the original treatmentFields array
+                    const realIndex = treatmentFields.findIndex(
+                      (field) => field.id === item.id
+                    );
+
+                    return (
+                      <section
+                        key={item.id + filteredIndex}
+                        className="relative grid grid-cols-2 gap-3 items-stretch w-full border rounded-md p-4 mb-2"
                       >
-                        <Trash2Icon className="h-4 w-4" />
-                      </Button>
-                      {/* 진료명 및 가격 (Treatment Name and Price) */}
-                      <div className="flex flex-col gap-2 justify-between h-full">
-                        {treatmentsLoading ? (
-                          <div>로딩 중... {/* Loading... */}</div>
-                        ) : (
-                          <FormField
-                            control={form.control}
-                            name={`treatments.${index}.treatment_id`}
-                            render={({ field }) => (
-                              <FormItem className="flex flex-col">
-                                <FormLabel>진료명</FormLabel> {/* Treatment */}
-                                <Combobox
-                                  value={field.value}
-                                  onValueChange={(e) => {
-                                    field.onChange(e);
-                                    const selected = allTreatments?.data.find(
-                                      (t) => t.id === e
-                                    );
-                                    if (selected) {
-                                      form.setValue(
-                                        `treatments.${index}.treatment_name`,
-                                        selected.treatment_name
+                        {/* 오른쪽 상단 삭제 버튼 (Delete button at top right) */}
+                        <Button
+                          className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
+                          type="button"
+                          disabled={mutation.status === "pending"}
+                          onClick={() => setDeleteFieldId(item.id)}
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                        </Button>
+                        {/* 진료명 및 가격 (Treatment Name and Price) */}
+                        <div className="flex flex-col gap-2 justify-between h-full">
+                          {treatmentsLoading ? (
+                            <div>로딩 중... {/* Loading... */}</div>
+                          ) : (
+                            <FormField
+                              control={form.control}
+                              name={`treatments.${realIndex}.treatment_id`}
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel>진료명</FormLabel>{" "}
+                                  {/* Treatment */}
+                                  <Combobox
+                                    value={field.value}
+                                    onValueChange={(e) => {
+                                      field.onChange(e);
+                                      const selected = allTreatments?.data.find(
+                                        (t) => t.id === e
                                       );
-                                      form.setValue(
-                                        `treatments.${index}.image_url`,
-                                        selected.image_url || ""
-                                      );
-                                    }
-                                    const currentTreatments =
-                                      form.getValues("treatments");
-                                    currentTreatments.forEach((t, idx) => {
-                                      if (
-                                        idx !== index &&
-                                        t.treatment_id === e &&
-                                        t.action !== "deleted"
-                                      ) {
+                                      if (selected) {
                                         form.setValue(
-                                          `treatments.${idx}.treatment_id`,
-                                          ""
+                                          `treatments.${realIndex}.treatment_name`,
+                                          selected.treatment_name
                                         );
                                         form.setValue(
-                                          `treatments.${idx}.treatment_name`,
-                                          ""
-                                        );
-                                        form.setValue(
-                                          `treatments.${idx}.image_url`,
-                                          ""
+                                          `treatments.${realIndex}.image_url`,
+                                          selected.image_url || ""
                                         );
                                       }
-                                    });
-                                  }}
-                                  filterItems={(inputValue, items) =>
-                                    items.filter(({ value }) => {
-                                      const selectedIds = form
-                                        .getValues("treatments")
-                                        .filter(
-                                          (t, idx) =>
-                                            idx !== index &&
-                                            t.action !== "deleted"
-                                        )
-                                        .map((t) => t.treatment_id);
-                                      if (selectedIds.includes(value))
-                                        return false;
-                                      const treatment =
-                                        allTreatments?.data.find(
-                                          (t) => t.id === value
+                                      const currentTreatments =
+                                        form.getValues("treatments");
+                                      currentTreatments.forEach((t, idx) => {
+                                        if (
+                                          idx !== realIndex &&
+                                          t.treatment_id === e &&
+                                          t.action !== "deleted"
+                                        ) {
+                                          form.setValue(
+                                            `treatments.${idx}.treatment_id`,
+                                            ""
+                                          );
+                                          form.setValue(
+                                            `treatments.${idx}.treatment_name`,
+                                            ""
+                                          );
+                                          form.setValue(
+                                            `treatments.${idx}.image_url`,
+                                            ""
+                                          );
+                                        }
+                                      });
+                                    }}
+                                    filterItems={(inputValue, items) =>
+                                      items.filter(({ value }) => {
+                                        const selectedIds = form
+                                          .getValues("treatments")
+                                          .filter(
+                                            (t, idx) =>
+                                              idx !== realIndex &&
+                                              t.action !== "deleted"
+                                          )
+                                          .map((t) => t.treatment_id);
+                                        if (selectedIds.includes(value))
+                                          return false;
+                                        const treatment =
+                                          allTreatments?.data.find(
+                                            (t) => t.id === value
+                                          );
+                                        return (
+                                          !inputValue ||
+                                          (treatment &&
+                                            treatment.treatment_name
+                                              .toLowerCase()
+                                              .includes(
+                                                inputValue.toLowerCase()
+                                              ))
                                         );
-                                      return (
-                                        !inputValue ||
-                                        (treatment &&
-                                          treatment.treatment_name
-                                            .toLowerCase()
-                                            .includes(inputValue.toLowerCase()))
-                                      );
-                                    })
-                                  }
-                                >
-                                  <ComboboxInput
-                                    placeholder="진료 항목을 선택하세요..."
-                                    className="cursor-pointer"
-                                    disabled={
-                                      form.getValues(
-                                        `treatments.${index}.action`
-                                      ) === "old"
+                                      })
                                     }
-                                  />{" "}
-                                  {/* Pick a treatment... */}
-                                  <ComboboxContent>
-                                    {allTreatments?.data.map(
-                                      ({ id, treatment_name, image_url }) => (
-                                        <ComboboxItem
-                                          key={id}
-                                          value={id}
-                                          label={treatment_name}
-                                          className="ps-8"
-                                        >
-                                          <span className="text-sm text-foreground flex items-center gap-2">
-                                            {image_url && (
-                                              <Image
-                                                src={image_url}
-                                                alt={treatment_name}
-                                                width={24}
-                                                height={24}
-                                                className="rounded object-cover"
-                                              />
-                                            )}
-                                            {treatment_name}
-                                          </span>
-                                          {field.value === id && (
-                                            <span className="absolute start-2 top-0 flex h-full items-center justify-center">
-                                              <CheckIcon className="size-4" />
+                                  >
+                                    <ComboboxInput
+                                      placeholder="진료 항목을 선택하세요..."
+                                      className="cursor-pointer"
+                                      disabled={
+                                        form.getValues(
+                                          `treatments.${realIndex}.action`
+                                        ) === "old"
+                                      }
+                                    />{" "}
+                                    {/* Pick a treatment... */}
+                                    <ComboboxContent>
+                                      {allTreatments?.data.map(
+                                        ({ id, treatment_name, image_url }) => (
+                                          <ComboboxItem
+                                            key={id}
+                                            value={id}
+                                            label={treatment_name}
+                                            className="ps-8"
+                                          >
+                                            <span className="text-sm text-foreground flex items-center gap-2">
+                                              {image_url && (
+                                                <Image
+                                                  src={image_url}
+                                                  alt={treatment_name}
+                                                  width={24}
+                                                  height={24}
+                                                  className="rounded object-cover"
+                                                />
+                                              )}
+                                              {treatment_name}
                                             </span>
-                                          )}
-                                        </ComboboxItem>
-                                      )
-                                    )}
-                                    <ComboboxEmpty>
-                                      검색 결과가 없습니다.
-                                    </ComboboxEmpty>{" "}
-                                    {/* No results. */}
-                                  </ComboboxContent>
-                                </Combobox>
+                                            {field.value === id && (
+                                              <span className="absolute start-2 top-0 flex h-full items-center justify-center">
+                                                <CheckIcon className="size-4" />
+                                              </span>
+                                            )}
+                                          </ComboboxItem>
+                                        )
+                                      )}
+                                      <ComboboxEmpty>
+                                        검색 결과가 없습니다.
+                                      </ComboboxEmpty>{" "}
+                                      {/* No results. */}
+                                    </ComboboxContent>
+                                  </Combobox>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </div>
+                        {/* 오른쪽: 이미지 (Right: Image) */}
+                        <div className="flex flex-col gap-2 items-center h-full justify-between">
+                          <FormField
+                            control={form.control}
+                            name={`treatments.${realIndex}.image_url`}
+                            render={() => (
+                              <FormItem className="h-full flex flex-col justify-between">
+                                <FormLabel>이미지</FormLabel> {/* Image */}
+                                <FormControl>
+                                  <div className="flex flex-col h-full justify-between">
+                                    {(form.getValues(
+                                      `treatments.${realIndex}.image_url`
+                                    ) &&
+                                      typeof form.getValues(
+                                        `treatments.${realIndex}.image_url`
+                                      ) !== "string" &&
+                                      imagePreviews.current[realIndex] && (
+                                        <Image
+                                          src={imagePreviews.current[realIndex]}
+                                          alt="미리보기"
+                                          width={140}
+                                          height={140}
+                                          className="mt-2 w-full h-[92px] object-cover rounded"
+                                        />
+                                      )) ||
+                                      (typeof form.getValues(
+                                        `treatments.${realIndex}.image_url`
+                                      ) === "string" &&
+                                        form.getValues(
+                                          `treatments.${realIndex}.image_url`
+                                        ) && (
+                                          <Image
+                                            src={
+                                              form.getValues(
+                                                `treatments.${realIndex}.image_url`
+                                              ) as string
+                                            }
+                                            width={140}
+                                            height={140}
+                                            alt="미리보기"
+                                            className="mt-2 w-full h-[92px] object-cover rounded"
+                                          />
+                                        ))}
+                                  </div>
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                        )}
-                      </div>
-                      {/* 오른쪽: 이미지 (Right: Image) */}
-                      <div className="flex flex-col gap-2 items-center h-full justify-between">
-                        <FormField
-                          control={form.control}
-                          name={`treatments.${index}.image_url`}
-                          render={() => (
-                            <FormItem className="h-full flex flex-col justify-between">
-                              <FormLabel>이미지</FormLabel> {/* Image */}
-                              <FormControl>
-                                <div className="flex flex-col h-full justify-between">
-                                  {(form.getValues(
-                                    `treatments.${index}.image_url`
-                                  ) &&
-                                    typeof form.getValues(
-                                      `treatments.${index}.image_url`
-                                    ) !== "string" &&
-                                    imagePreviews.current[index] && (
-                                      <Image
-                                        src={imagePreviews.current[index]}
-                                        alt="미리보기"
-                                        width={140}
-                                        height={140}
-                                        className="mt-2 w-full h-[92px] object-cover rounded"
-                                      />
-                                    )) ||
-                                    (typeof form.getValues(
-                                      `treatments.${index}.image_url`
-                                    ) === "string" &&
-                                      form.getValues(
-                                        `treatments.${index}.image_url`
-                                      ) && (
-                                        <Image
-                                          src={
-                                            form.getValues(
-                                              `treatments.${index}.image_url`
-                                            ) as string
-                                          }
-                                          width={140}
-                                          height={140}
-                                          alt="미리보기"
-                                          className="mt-2 w-full h-[92px] object-cover rounded"
-                                        />
-                                      ))}
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                        </div>
+                        <ConfirmModal
+                          title="진료 항목 삭제 확인" // Confirm Remove Treatment
+                          description={`정말로 ${item.treatment_name} 항목을 삭제하시겠습니까?`} // Are you sure you want to remove ...
+                          open={deleteFieldId === item.id}
+                          onCancel={() => setDeleteFieldId(null)}
+                          onConfirm={() => {
+                            setDeleteFieldId(null);
+                            confirmRemoveTreatment(item.id);
+                          }}
                         />
-                      </div>
-                      <ConfirmModal
-                        title="진료 항목 삭제 확인" // Confirm Remove Treatment
-                        description={`정말로 ${item.treatment_name} 항목을 삭제하시겠습니까?`} // Are you sure you want to remove ...
-                        open={deleteIndex === index}
-                        onCancel={() => setDeleteIndex(null)}
-                        onConfirm={() => {
-                          setDeleteIndex(null);
-                          confirmRemoveTreatment(index);
-                        }}
-                      />
-                    </section>
-                  ))}
+                      </section>
+                    );
+                  })}
                 <Button
                   type="button"
                   className="w-full mt-4"
@@ -601,6 +622,7 @@ export const ClinicModal = ({
                           className="absolute top-2 right-2 text-white bg-red-500 p-2 h-8 w-8"
                           type="button"
                           onClick={() => removeClinicHour(index)}
+                          disabled={mutation.status === "pending"}
                         >
                           <Trash2Icon className="h-4 w-4" />
                         </Button>
@@ -609,6 +631,7 @@ export const ClinicModal = ({
                           <FormField
                             control={form.control}
                             name={`clinic_hours.${index}.day_of_week`}
+                            disabled={mutation.status === "pending"}
                             render={({ field }) => (
                               <FormItem className="flex flex-col">
                                 <FormLabel className="text-[16px] font-pretendard-600">
@@ -647,6 +670,7 @@ export const ClinicModal = ({
                             label="진료 시간" // Clinic Hours
                             placeholder="예: 09:00 - 18:00" // e.g. 09:00 - 18:00
                             type="text"
+                            disabled={mutation.status === "pending"}
                           />
                         </section>
 
@@ -657,6 +681,7 @@ export const ClinicModal = ({
                           control={form.control}
                           name={`clinic_hours.${index}.note`}
                           label="비고" // Note
+                          disabled={mutation.status === "pending"}
                           placeholder="예: 점심시간 없음" // e.g. No lunch break
                         />
                       </section>
@@ -698,66 +723,82 @@ async function updateClinicWithImages(
   clinicId: string,
   setProgress?: (prog: string | null) => void
 ) {
-  // Check if there are any new images to upload (at least one File in the array)
-  const hasNewImages =
-    Array.isArray(values.pictures) &&
-    values.pictures.some((img) => img instanceof File);
+  // Get current clinic pictures from database
+  const { data: currentClinic } = await supabaseClient
+    .from("clinic")
+    .select("pictures")
+    .eq("id", clinicId)
+    .single();
 
-  let clinicPictures: string[] = [];
+  const currentPictures = currentClinic?.pictures || [];
 
-  if (hasNewImages) {
-    // Remove old images
-    const { data: clinic } = await supabaseClient
-      .from("clinic")
-      .select("pictures")
-      .eq("id", clinicId)
-      .single();
+  // Handle pictures: convert { files, previews } to array
+  const newFiles = values.pictures?.files || [];
+  const remainingPreviews = values.pictures?.previews || [];
 
-    if (clinic?.pictures && clinic.pictures.length > 0) {
-      for (let idx = 0; idx < clinic.pictures.length; idx++) {
-        const pic = clinic.pictures[idx];
-        await deleteFileFromSupabase(pic, {
+  // Filter out data URLs - only work with actual Supabase URLs
+  const validCurrentPictures = currentPictures.filter(
+    (url: string) => url && !url.startsWith("data:")
+  );
+  const validRemainingPreviews = remainingPreviews.filter(
+    (url: string) => url && !url.startsWith("data:")
+  );
+
+  // Find deleted images by comparing current DB pictures with remaining previews
+  const deletedImages = validCurrentPictures.filter(
+    (currentUrl: string) => !validRemainingPreviews.includes(currentUrl)
+  );
+
+  // Delete removed images from storage
+  if (deletedImages.length > 0) {
+    setProgress?.("삭제된 이미지 제거 중...");
+    for (const deletedUrl of deletedImages) {
+      try {
+        await deleteFileFromSupabase(deletedUrl, {
           bucket: CLINIC_IMAGE_BUCKET,
         });
+      } catch (error) {
+        console.error("Failed to delete image:", deletedUrl, error);
       }
     }
+  }
 
-    // Upload new images (replace all)
-    for (let i = 0; i < values.pictures.length; i++) {
-      const file = values.pictures[i];
-      if (file instanceof File) {
-        setProgress?.("병원 이미지 업로드 중: " + (i + 1));
+  // Upload new files
+  const uploadedUrls: string[] = [];
+  if (newFiles.length > 0) {
+    for (let i = 0; i < newFiles.length; i++) {
+      const file = newFiles[i];
+      setProgress?.(`병원 이미지 업로드 중: ${i + 1}/${newFiles.length}`);
+      try {
         const publicUrl = await uploadFileToSupabase(file, {
           bucket: CLINIC_IMAGE_BUCKET,
           allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
           maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
         });
-        clinicPictures.push(publicUrl);
-      } else if (typeof file === "string") {
-        // If the image is already a URL, keep it
-        clinicPictures.push(file);
+        uploadedUrls.push(publicUrl);
+      } catch (error) {
+        console.error("Failed to upload image:", file.name, error);
+        throw error;
       }
     }
-    setProgress?.(null);
-  } else {
-    // No new images, keep the existing ones
-    const { data: clinic } = await supabaseClient
-      .from("clinic")
-      .select("pictures")
-      .eq("id", clinicId)
-      .single();
-    clinicPictures = clinic?.pictures || [];
   }
 
+  // Combine remaining valid previews (existing images) with newly uploaded images
+  const clinicPictures = [...validRemainingPreviews, ...uploadedUrls];
+
+  setProgress?.(null);
+
   // Update clinic (with new or existing images)
-  const clinicPayload = {
+  const clinicPayload: TablesUpdate<"clinic"> = {
     ...values,
     link: values.link || "",
+    introduction: values.introduction || null,
     pictures: clinicPictures,
     detail_address: values.detail_address || null,
     region: values.region || "",
     city: values.city || "",
     full_address: values.full_address || "",
+    status: "active",
     opening_date: values.opening_date.toDateString(),
   };
 
@@ -793,15 +834,36 @@ async function addClinicWithImages(
 ) {
   // Upload images
   const clinicPictures: string[] = [];
-  for (let i = 0; i < values.pictures.length; i++) {
-    const file = values.pictures[i] as File;
-    if (setProgress) setProgress("병원 이미지 업로드 중: " + (i + 1));
-    const publicUrl = await uploadFileToSupabase(file, {
-      bucket: CLINIC_IMAGE_BUCKET,
-      allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
-      maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
-    });
-    clinicPictures.push(publicUrl);
+
+  // Handle pictures: convert { files, previews } to array
+  const picturesArray: (File | string)[] = [];
+  if (values.pictures?.files) {
+    picturesArray.push(...values.pictures.files);
+  }
+  if (values.pictures?.previews) {
+    // Only include actual URLs, not data URLs
+    const validPreviews = values.pictures.previews.filter(
+      (url: string) => url && !url.startsWith("data:")
+    );
+    picturesArray.push(...validPreviews);
+  }
+
+  if (picturesArray.length > 0) {
+    for (let i = 0; i < picturesArray.length; i++) {
+      const item = picturesArray[i];
+      if (item instanceof File) {
+        if (setProgress) setProgress("병원 이미지 업로드 중: " + (i + 1));
+        const publicUrl = await uploadFileToSupabase(item, {
+          bucket: CLINIC_IMAGE_BUCKET,
+          allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+          maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+        });
+        clinicPictures.push(publicUrl);
+      } else if (typeof item === "string") {
+        // Keep existing URLs
+        clinicPictures.push(item);
+      }
+    }
   }
   if (setProgress) setProgress(null);
 
@@ -809,6 +871,7 @@ async function addClinicWithImages(
   const clinicPayload = {
     ...values,
     link: values.link || "",
+    introduction: values.introduction || null,
     pictures: clinicPictures,
     opening_date: values.opening_date.toDateString(),
     region: values.region || "",

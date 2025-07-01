@@ -215,6 +215,7 @@ export const ClinicEventModal = ({
             name="clinic_treatment_id"
             label="치료"
             placeholder="치료를 선택해주세요." // "Please select a treatment"
+            disabled={!form.getValues("clinic_id") || !treatments?.data?.length}
           >
             {treatments?.data?.map((treatment) => (
               <SelectItem

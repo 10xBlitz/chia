@@ -104,8 +104,12 @@ export default function TreatmentCategoryScroll({
               "flex flex-col items-center flex-shrink-0",
               activeId === treatment.id && "text-blue-500 font-bold"
             )} // Active treatment color
+            draggable={false}
           >
-            <div className="relative w-13 h-13 rounded-full overflow-hidden">
+            <div
+              className="relative w-13 h-13 rounded-full overflow-hidden"
+              draggable={false}
+            >
               {treatment.image_url ? (
                 <Image
                   draggable={false}

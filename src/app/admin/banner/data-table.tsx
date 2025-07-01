@@ -60,12 +60,18 @@ interface DataTableProps<TData, TValue> {
     hasPrevPage: boolean;
   };
   onClickAdd: () => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   paginatedData,
   onClickAdd,
+  isLoading = false,
+  isError = false,
+  errorMessage,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const searchParam = useSearchParams();
@@ -261,34 +267,108 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+
+          {isError ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  {errorMessage || "오류 발생"} {/* An error occurred */}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : null}
+          {isLoading ? (
+            <TableBody>
+              {Array.from({ length: limitParam }).map((_, index) => (
+                <TableRow key={index}>
+                  {columns.map((_, colIndex) => (
+                    <TableCell key={colIndex} className="h-12">
+                      <div className="flex items-center space-x-2">
+                        {colIndex === 0 ? (
+                          // First column - typically ID or banner image thumbnail
+                          <div
+                            className="h-8 w-12 bg-gray-200 rounded animate-pulse"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          ></div>
+                        ) : colIndex === columns.length - 1 ? (
+                          // Last column - typically actions
+                          <div className="flex space-x-1">
+                            <div
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{
+                                animationDelay: `${index * 50 + 100}ms`,
+                              }}
+                            ></div>
+                            <div
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{
+                                animationDelay: `${index * 50 + 150}ms`,
+                              }}
+                            ></div>
+                            <div
+                              className="h-6 w-6 bg-gray-200 rounded animate-pulse"
+                              style={{
+                                animationDelay: `${index * 50 + 200}ms`,
+                              }}
+                            ></div>
+                          </div>
+                        ) : (
+                          // Other columns - banner title, type, status, dates, etc.
+                          <div
+                            className={`h-4 bg-gray-200 rounded animate-pulse ${
+                              colIndex === 1
+                                ? "w-40" // Banner title - widest
+                                : colIndex === 2
+                                ? "w-20" // Type - smaller
+                                : colIndex === 3
+                                ? "w-16" // Status - smallest
+                                : colIndex === 4
+                                ? "w-28" // Date - medium
+                                : colIndex % 2 === 0
+                                ? "w-24"
+                                : "w-32"
+                            }`}
+                            style={{
+                              animationDelay: `${index * 50 + colIndex * 25}ms`,
+                            }}
+                          ></div>
+                        )}
+                      </div>
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  결과 없음
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+              ))}
+            </TableBody>
+          ) : (
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    결과 없음
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          )}
         </Table>
       </div>
 

@@ -30,6 +30,7 @@ import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormAddress from "@/components/form-ui/form-address";
 import FormTextarea from "@/components/form-ui/form-textarea";
 import FormMultiImageUploadV2 from "@/components/form-ui/form-multi-image-upload-v2";
+import { calculateAge } from "@/lib/utils";
 
 export default function CreateQuotationPage() {
   const router = useRouter();
@@ -79,7 +80,7 @@ export default function CreateQuotationPage() {
       name: "",
       gender: "",
       birthdate: new Date(),
-      residence: "",
+      residence: "-",
       concern: "",
     },
   });
@@ -194,11 +195,20 @@ export default function CreateQuotationPage() {
             name="birthdate"
             label="생년월일" // Birthdate
           />
-          <FormAddress
+          {/* Age display - 나이 표시 (Age display) */}
+          {form.watch("birthdate") && (
+            <div className="flex items-center gap-2 px-1">
+              <span className="text-sm text-gray-600">나이: {/* Age: */}</span>
+              <span className="text-sm font-medium text-blue-600">
+                {calculateAge(form.watch("birthdate"))}세 {/* years old */}
+              </span>
+            </div>
+          )}
+          {/* <FormAddress
             control={form.control}
             name="residence"
             label="거주" // Residence
-          />
+          /> */}
           <FormTextarea
             control={form.control}
             name="concern"
