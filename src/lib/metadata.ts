@@ -19,10 +19,11 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     description = DEFAULT_DESCRIPTION,
     path = "",
     image = DEFAULT_IMAGE,
-    type = "website"
+    type = "website",
   } = options;
 
-  const fullTitle = title === DEFAULT_TITLE ? title : `${title} | ${DEFAULT_TITLE}`;
+  const fullTitle =
+    title === DEFAULT_TITLE ? title : `${title} | ${DEFAULT_TITLE}`;
   const url = `${BASE_URL}${path}`;
 
   return {
