@@ -4,7 +4,7 @@ import "./fonts.css";
 import { UserStoreProvider } from "@/providers/user-store-provider";
 import CustomQueryClientProvider from "@/providers/query-client-provider";
 import { ToasterProvider } from "@/providers/toast-provider";
-import { Metadata } from "next";
+import { generateMetadata as createMetadata } from "@/lib/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,28 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-  description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-  icons: {
-    icon: "https://chia-azure.vercel.app/images/chia-logo.svg",
-  },
-  openGraph: {
-    title: "치과 시술 플랫폼", // "Dental Procedure Platform"
-    description: "치과 시술 견적 및 예약 플랫폼", // "Dental Procedure Quotation and Reservation Platform"
-    url: "https://chia-azure.vercel.app",
-    siteName: "Chia",
-    images: [
-      {
-        url: "https://chia-azure.vercel.app/images/chia-logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Chia Logo",
-      },
-    ],
-    locale: "ko_KR",
-  },
-};
+export const metadata = createMetadata();
 
 export default function RootLayout({
   children,
