@@ -41,6 +41,7 @@ import { format } from "date-fns";
 import { cn, getKoreanDayOfWeek } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useUserStore } from "@/providers/user-store-provider";
 import { PhoneInput } from "@/components/phone-input";
 import { supabaseClient } from "@/lib/supabase/client";
@@ -73,10 +74,22 @@ export default function CreateReservation() {
   if (!clinic_id) {
     router.push("/patient/home");
   }
+
+  // State for treatment search
+  const [treatmentSearchTerm, setTreatmentSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(treatmentSearchTerm, 300);
+
+  // Query for treatments with search functionality
   const { data: treatments, isLoading } = useQuery({
-    queryKey: ["treatments"],
+    queryKey: ["clinic-treatments", clinic_id, debouncedSearchTerm],
     queryFn: async () =>
-      await getPaginatedClinicTreatments(clinic_id as string, 1, 100),
+      await getPaginatedClinicTreatments(
+        clinic_id as string,
+        1,
+        50,
+        debouncedSearchTerm ? { treatment_name: debouncedSearchTerm } : {}
+      ),
+    enabled: !!clinic_id,
   });
 
   const user = useUserStore((state) => state.user);
@@ -220,81 +233,104 @@ export default function CreateReservation() {
                 />
               </div>
             </div>
-            {isLoading && <>Loading</>}
 
-            {!isLoading && treatments?.data && treatments.data.length > 0 && (
-              <FormField
-                control={form.control}
-                name="clinicTreatment"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>치료 {/**Treatment */}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "w-full justify-between",
-                              !field.value && "text-muted-foreground"
+            <FormField
+              control={form.control}
+              name="clinicTreatment"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>치료 {/**Treatment */}</FormLabel>
+                  <Popover
+                    onOpenChange={(open) => {
+                      if (open && field.value) {
+                        // When opening, show the selected treatment name in search
+                        const selectedTreatment = treatments?.data?.find(
+                          (treatment) => treatment.id === field.value
+                        );
+                        if (selectedTreatment) {
+                          setTreatmentSearchTerm(
+                            selectedTreatment.treatment?.treatment_name || ""
+                          );
+                        }
+                      } else if (!open) {
+                        // When closing, clear the search term
+                        setTreatmentSearchTerm("");
+                      }
+                    }}
+                  >
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? treatments?.data &&
+                              treatments.data.find(
+                                (treatment) => treatment.id === field.value
+                              )?.treatment?.treatment_name
+                            : "관심 시술을 선택하세요"}{" "}
+                          {/** Select a treatment */}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          placeholder="치료법 검색..." // Search treatment
+                          className="h-9"
+                          value={treatmentSearchTerm}
+                          onValueChange={setTreatmentSearchTerm}
+                        />
+                        <CommandList>
+                          <CommandEmpty>
+                            {isLoading ? (
+                              <div className="py-2">검색 중...</div> // Searching...
+                            ) : (
+                              "치료법이 발견되지 않았습니다" // No treatment found
                             )}
-                          >
-                            {field.value
-                              ? treatments.data.find(
-                                  (treatment) => treatment.id === field.value
-                                )?.treatment?.treatment_name
-                              : "관심 시술을 선택하세요"}{" "}
-                            {/** Select a treatment */}
-                            <ChevronsUpDown className="opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full p-0">
-                        <Command>
-                          <CommandInput
-                            placeholder="치료법 검색..." // Search treatment
-                            className="h-9"
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              치료법이 발견되지 않았습니다{" "}
-                              {/**No treatment found. */}
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {treatments.data.length > 0 &&
-                                treatments.data.map((treatment) => (
-                                  <CommandItem
-                                    value={treatment?.treatment?.treatment_name}
-                                    key={treatment.id}
-                                    onSelect={() => {
-                                      form.setValue(
-                                        "clinicTreatment",
-                                        treatment.id
-                                      );
-                                    }}
-                                  >
-                                    {treatment?.treatment?.treatment_name}
-                                    <Check
-                                      className={cn(
-                                        "ml-auto",
-                                        treatment.id === field.value
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {!isLoading &&
+                              treatments?.data &&
+                              treatments.data.length > 0 &&
+                              treatments.data.map((treatment) => (
+                                <CommandItem
+                                  value={treatment?.treatment?.treatment_name}
+                                  key={treatment.id}
+                                  onSelect={() => {
+                                    form.setValue(
+                                      "clinicTreatment",
+                                      treatment.id
+                                    );
+                                    setTreatmentSearchTerm(""); // Clear search after selection
+                                  }}
+                                >
+                                  {treatment?.treatment?.treatment_name}
+                                  <Check
+                                    className={cn(
+                                      "ml-auto",
+                                      treatment.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div>
               <FormLabel className="font-semibold">
                 상담 유형 {/**Consultation Type */}

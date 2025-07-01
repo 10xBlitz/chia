@@ -94,7 +94,10 @@ export async function getPaginatedClinicTreatments(
 
   // Filters
   if (filters?.treatment_name) {
-    query = query.ilike("treatment_name", `%${filters.treatment_name}%`);
+    query = query.ilike(
+      "treatment.treatment_name",
+      `%${filters.treatment_name}%`
+    );
   }
   // Add more filters here as needed
 
@@ -212,3 +215,5 @@ export async function updateTreatment(
 
   return data;
 }
+
+// searchClinicTreatments removed. Use getPaginatedClinicTreatments with { treatment_name: searchTerm } for searching.
