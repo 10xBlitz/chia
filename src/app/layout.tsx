@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "Chia",
     images: [
       {
-        url: "https://chia-azure.vercel.app/images/chia-logo.svg",
+        url: "https://chia-azure.vercel.app/images/chia-logo.png",
         width: 1200,
         height: 630,
         alt: "Chia Logo",
