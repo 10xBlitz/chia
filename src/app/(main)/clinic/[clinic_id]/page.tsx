@@ -66,16 +66,6 @@ export default function ClinicSingleViewPage() {
     reviews: "clinic-reviews",
   };
 
-  // const days1 = [
-  //   "일", // Sunday
-  //   "월", // Monday
-  //   "화", // Tuesday
-  //   "수", // Wednesday
-  //   "목", // Thursday
-  //   "금", // Friday
-  //   "토", // Saturday
-  // ];
-
   // Infinite query for reviews
   const {
     data: reviewsPages,
@@ -271,7 +261,24 @@ export default function ClinicSingleViewPage() {
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
               <span>
-                진료 오늘 {/* Clinic closes today */}
+                (
+                {(() => {
+                  const days = [
+                    "일", // Sunday
+                    "월", // Monday
+                    "화", // Tuesday
+                    "수", // Wednesday
+                    "목", // Thursday
+                    "금", // Friday
+                    "토", // Saturday
+                  ];
+
+                  const todayIdx = new Date().getDay();
+                  const todayKor = days[todayIdx === 0 ? 0 : todayIdx];
+
+                  return todayKor;
+                })()}
+                ){" "}
                 {(() => {
                   // Map JS day to Korean day string
                   const days = [
@@ -340,17 +347,15 @@ export default function ClinicSingleViewPage() {
           {/* Info Section */}
           <div id={tabAnchors.info} ref={infoRef} className="scroll-mt-16">
             {/* 병원 소개 (Clinic Introduction) */}
-            {clinic.introduction && (
-              <div className="mt-6">
-                <div className="font-semibold text-xl mb-2">병원 소개</div>
-                {/* Clinic Introduction */}
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {clinic.introduction}
-                  </p>
-                </div>
+            <div className="mt-6">
+              <div className="font-semibold text-xl mb-2">병원 소개</div>
+              {/* Clinic Introduction */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {clinic.introduction}
+                </p>
               </div>
-            )}
+            </div>
             {/* 진료 시간 (Opening Hours) */}
             <div className="mt-6">
               <div className="font-semibold text-xl mb-2">진료 시간</div>
