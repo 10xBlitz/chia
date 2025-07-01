@@ -3,17 +3,19 @@ import { z } from "zod";
 export const clinicEventFormSchema = z
   .object({
     id: z.string().optional(),
-    clinic_id: z.string({ required_error: "Clinic ID is required" }),
-    title: z.string({ required_error: "Title is required" }),
+    clinic_id: z.string({ required_error: "필수항목입니다" }),
+    title: z.string({ required_error: "필수항목입니다" }),
     description: z.string().optional(),
     date_range: z.object(
       { from: z.date(), to: z.date() },
-      { required_error: "Date range is required" }
+      { required_error: "필수항목입니다" }
     ),
-    clinic_treatment_id: z.string({
-      required_error: "Treatment is required",
-    }),
-    discount: z.string({ required_error: "Discount is required" }),
+    clinic_treatment_id: z
+      .string({
+        required_error: "필수항목입니다",
+      })
+      .min(1, "필수항목입니다"),
+    discount: z.string({ required_error: "필수항목입니다" }),
     image: z.any(),
   })
   .refine(
@@ -24,7 +26,7 @@ export const clinicEventFormSchema = z
       values.image === null ||
       (Array.isArray(values.image) && values.image.length === 0),
     {
-      message: "Image is required",
+      message: "필수항목입니다",
       path: ["image"],
     }
   )

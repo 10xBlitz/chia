@@ -3,7 +3,7 @@ import { z } from "zod";
 export const treatmentModalFormSchema = z
   .object({
     id: z.string().optional(),
-    treatment_name: z.string().min(1, "Treatment name is required"),
+    treatment_name: z.string().min(1, "필수항목입니다"),
     image_url: z.any(),
   })
   .refine(
@@ -14,7 +14,7 @@ export const treatmentModalFormSchema = z
       values.image_url === null ||
       (Array.isArray(values.image_url) && values.image_url.length === 0),
     {
-      message: "Image is required",
+      message: "필수항목입니다",
       path: ["image_url"],
     }
   )

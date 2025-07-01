@@ -73,8 +73,8 @@ export const ClinicEventModal = ({
           description: "",
           discount: "0",
           image: "",
-          clinic_id: "",
-          clinic_treatment_id: "",
+          clinic_id: undefined, // Use undefined for unselected
+          clinic_treatment_id: undefined, // Use undefined for unselected
           date_range: {
             from: new Date(),
             to: new Date(),
