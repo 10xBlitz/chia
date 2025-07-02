@@ -814,45 +814,37 @@ async function addClinicWithImages(
   const clinicPictures: string[] = [];
 
   for (const img of images) {
-    if (img.status === "deleted") {
-      // Do not add to DB array
-      continue;
-    }
+    if (img.status === "deleted") continue; // skip deleted
+
     if (img.status === "old" && typeof img.file === "string") {
       clinicPictures.push(img.file);
-    } else if (img.status === "new" && img.file instanceof File) {
-      setProgress?.("병원 이미지 업로드 중...");
-      try {
-        const publicUrl = await uploadFileToSupabase(img.file, {
-          bucket: CLINIC_IMAGE_BUCKET,
-          allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
-          maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
-        });
-        clinicPictures.push(publicUrl);
-      } catch (error) {
-        console.error("Failed to upload image:", img.file.name, error);
-        throw error;
-      }
-    } else if (
-      img.status === "updated" &&
-      img.file instanceof File &&
-      img.oldUrl
-    ) {
+      continue;
+    }
+
+    if (img.status === "new" && img.file instanceof File) {
+      setProgress?.("병원 이미지 업로드 중..."); // Uploading new images...
+      const publicUrl = await uploadFileToSupabase(img.file, {
+        bucket: CLINIC_IMAGE_BUCKET,
+        allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+        maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+      });
+      clinicPictures.push(publicUrl);
+      continue;
+    }
+
+    if (img.status === "updated" && img.file instanceof File && img.oldUrl) {
       // For new clinics, treat updated as new (upload only)
       setProgress?.("병원 이미지 업로드 중...");
-      try {
-        const publicUrl = await uploadFileToSupabase(img.file, {
-          bucket: CLINIC_IMAGE_BUCKET,
-          allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
-          maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
-        });
-        clinicPictures.push(publicUrl);
-      } catch (error) {
-        console.error("Failed to upload updated image:", img.file.name, error);
-        throw error;
-      }
+      const publicUrl = await uploadFileToSupabase(img.file, {
+        bucket: CLINIC_IMAGE_BUCKET,
+        allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+        maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+      });
+      clinicPictures.push(publicUrl);
+      continue;
     }
   }
+
   setProgress?.(null);
 
   // Create clinic
