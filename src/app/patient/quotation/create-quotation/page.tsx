@@ -101,7 +101,7 @@ export default function CreateQuotationPage() {
         : [];
       return createQuotation({
         ...values,
-        region: values.region,
+        region: values.region.split(",")[1]?.trim() || "", // Use first part of region
         user_id: user.id,
         clinic_id,
         images: files,

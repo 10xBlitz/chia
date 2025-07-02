@@ -137,7 +137,7 @@ interface QuotationListItemProps {
 function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
   const detail = `${q.region?.split(",")[1]?.trim() || q.region} · ${
     q.treatment?.treatment_name || "선택된 치료 없음"
-  } 공개견적`;
+  } · 공개견적`;
 
   const handleClick = () => {
     onClick(q.id, detail, q.clinic_id, q.bid?.[0]?.id ?? null);

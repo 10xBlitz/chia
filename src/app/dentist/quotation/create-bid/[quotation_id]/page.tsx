@@ -28,10 +28,17 @@ export default function CreateBidPage() {
   const user = useUserStore((selector) => selector.user);
   const queryClient = useQueryClient();
 
-  const { data: availableTreatments } = useQuery({
+  const { data: treatments } = useQuery({
     queryKey: ["clinic_treatments", user?.clinic_id],
-    queryFn: () =>
-      getPaginatedClinicTreatments(user?.clinic_id as string, 1, 1000),
+    queryFn: async () => {
+      const result = await getPaginatedClinicTreatments(
+        user?.clinic_id as string,
+        1,
+        1000
+      );
+
+      return result.data || [];
+    },
     enabled: !!user?.clinic_id,
   });
 
@@ -98,21 +105,21 @@ export default function CreateBidPage() {
           onSubmit={form.handleSubmit((e) => insertBidMutation.mutate(e))}
           className="max-w-md mx-auto p-4 space-y-6"
         >
-          <FormSelect
-            control={form.control}
-            disabled={isDisabled}
-            name="treatmentId"
-            label="추천 시술" // Recommended Treatment
-            placeholder="시술을 선택하세요" // Please select a treatment
-          >
-            {availableTreatments &&
-              availableTreatments?.data?.length > 0 &&
-              availableTreatments?.data?.map((t) => (
+          {treatments && treatments?.length > 0 && (
+            <FormSelect
+              control={form.control}
+              disabled={isDisabled}
+              name="treatmentId"
+              label="추천 시술" // Recommended Treatment
+              placeholder="시술을 선택하세요" // Please select a treatment
+            >
+              {treatments.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
                   {t.treatment.treatment_name} {/* Treatment Name */}
                 </SelectItem>
               ))}
-          </FormSelect>
+            </FormSelect>
+          )}
 
           {/* Price Range Input - Professional UI */}
           <div>

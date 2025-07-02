@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { calculateAge } from "@/lib/utils";
 
 // Fetch quotation details
 
@@ -30,6 +31,9 @@ export default function ViewBidPage() {
   const params = useParams();
   const bidId = searchParams.get("bid_id") as string;
   const quotationId = params?.quotation_id as string;
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Fetch quotation details
   const { data: quotation, isLoading: isQuotationLoading } = useQuery({
@@ -47,10 +51,6 @@ export default function ViewBidPage() {
   const clinicName = quotation?.clinic
     ? quotation.clinic.clinic_name
     : bid?.clinic_treatment.clinic.clinic_name;
-
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -122,16 +122,7 @@ export default function ViewBidPage() {
           </DropdownMenu>
         }
       />
-      <ConfirmModal
-        open={showDeleteModal}
-        onCancel={() => setShowDeleteModal(false)}
-        onConfirm={() => deleteMutation.mutate()}
-        title="입찰 삭제 확인" // Confirm Bid Delete
-        description="정말로 이 입찰을 삭제하시겠습니까?" // Are you sure you want to delete this bid?
-        confirmLabel="삭제" // Delete
-        cancelLabel="취소" // Cancel
-        loading={deleteMutation.isPending}
-      />
+
       {/* Quotation */}
       {isQuotationLoading && <QuotationSkeleton />}
       {isBidsLoading && (
@@ -158,6 +149,22 @@ export default function ViewBidPage() {
             {quotation?.region?.split(",")[1]?.trim() ||
               quotation?.region ||
               "-"}
+          </div>
+        </div>
+        <div className="mb-3">
+          <label className="block text-xs text-gray-500 mb-1">
+            생년월일 / 나이 {/* Birthdate / Age */}
+          </label>
+          <div className="border rounded-lg px-3 py-2 bg-gray-50">
+            {quotation?.birthdate ? (
+              <>
+                {new Date(quotation.birthdate).toLocaleDateString("ko-KR")} (
+                {calculateAge(new Date(quotation.birthdate))}세){" "}
+                {/* years old */}
+              </>
+            ) : (
+              "-"
+            )}
           </div>
         </div>
         <div className="mb-3">
@@ -251,6 +258,17 @@ export default function ViewBidPage() {
           연락하기 {/* Contact */}
         </Button>
       </div>
+
+      <ConfirmModal
+        open={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="입찰 삭제 확인" // Confirm Bid Delete
+        description="정말로 이 입찰을 삭제하시겠습니까?" // Are you sure you want to delete this bid?
+        confirmLabel="삭제" // Delete
+        cancelLabel="취소" // Cancel
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }
