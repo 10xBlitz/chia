@@ -302,8 +302,7 @@ export default function ClinicSingleViewPage() {
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
               <span>
-                전화번호
-                {/* Phone number */}
+                전화번호 {/* Phone number */}
                 <Link
                   href={`tel:${clinic.contact_number}`}
                   className=" underline"
