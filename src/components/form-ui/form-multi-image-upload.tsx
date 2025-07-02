@@ -1,75 +1,54 @@
 /**
- * FormMultiImageUploadV3 Component Usage Instructions
- * ==================================================
+ * FormMultiImageUploadV3 - Multi-image upload for React Hook Form with status tracking ("old", "new", "updated", "deleted").
  *
- * This component provides a standardized multi-image upload interface that works with React Hook Form.
- * It handles both new file uploads and existing images from the database.
+ * - Supports both existing images (from DB) and new uploads.
+ * - Tracks image status for backend sync: "old" (existing), "new" (newly added), "updated" (replaced, includes oldUrl), "deleted" (marked for removal).
+ * - Allows drag-and-drop reordering, image preview, and removal.
+ * - Uses only shadcn/ui components and is accessible/mobile-friendly.
  *
- * EXPECTED DATA FORMAT:
- * The component expects the form field value to be an array of objects with:
- * {
- *   status: "old" | "new" | "deleted" | "updated", // Status of the image
- *   file: string | File, // Supabase URL string for existing images, File object for new uploads
- * }
+ * @template T - Form field values type (from React Hook Form)
+ * @param {Object} props - Component props
+ * @param {Control<T>} props.control - React Hook Form control object
+ * @param {FieldPath<T>} props.name - Field name in the form (should match schema)
+ * @param {string} [props.label] - Display label for the upload section (default: "사진 첨부 (선택)")
+ * @param {number} [props.maxImages=5] - Maximum number of images allowed
+ * @param {string} [props.formItemClassName] - Optional CSS class for the form item wrapper
+ * @param {string} [props.formLabelClassName] - Optional CSS class for the form label
+ * @param {boolean} [props.disabled] - Disable all controls
  *
- * SETUP INSTRUCTIONS:
+ * @returns {React.ReactElement} A form item with multi-image upload UI, image preview, drag-and-drop, and status tracking.
  *
- * 1. Form Schema (Zod):
- * ```typescript
+ * @example
+ * // 1. Add to your Zod schema:
  * const formSchema = z.object({
- *   images: z.array(
+ *   pictures: z.array(
  *     z.object({
  *       status: z.enum(["old", "new", "deleted", "updated"]),
  *       file: z.union([z.string().url(), z.instanceof(File)]),
+ *       oldUrl: z.string().url().optional(),
  *     })
- *   ).optional(),
+ *   )
  * });
- * ```
  *
- * 2. Form Default Values:
- * ```typescript
+ * // 2. Set up default values:
  * const form = useForm({
  *   defaultValues: {
- *     images: [
+ *     pictures: [
  *       { status: "old", file: "https://..." },
  *       { status: "new", file: new File([""], "filename.jpg") },
  *     ],
  *   },
  * });
- * ```
  *
- * 3. Component Usage:
- * ```tsx
+ * // 3. Use in your form:
  * <FormMultiImageUploadV3
  *   control={form.control}
- *   name="images"
+ *   name="pictures"
  *   label="사진 첨부"
  *   maxImages={5}
  * />
- * ```
  *
- * 4. Form Submission:
- * ```typescript
- * const onSubmit = (values) => {
- *   // values.images is already in the expected format
- *   // Handle file uploads and existing URLs based on status
- * };
- * ```
- *
- * FEATURES:
- * - Supports existing images (shows as "old" status)
- * - Supports new file uploads (shows as "new" status)
- * - Soft delete for existing images (marks as "deleted" but keeps in array)
- * - Hard delete for new images (removes from array)
- * - Image preview with remove buttons
- * - File validation and limits
- * - Toast notifications for errors
- *
- * IMAGE STATUS TRACKING:
- * - "old": Existing images from database
- * - "new": Newly uploaded files
- * - "deleted": Existing images marked for deletion
- * - "updated": Existing images updated with a new file
+ * // 4. On submit, values.pictures will be an array of { status, file, oldUrl? } objects for backend processing.
  */
 
 import { Control, FieldPath, FieldValues } from "react-hook-form";
@@ -95,6 +74,7 @@ import { Card } from "../ui/card";
 export type ImageFieldItem = {
   status: "old" | "new" | "deleted" | "updated";
   file: string | File; // string for existing (Supabase URL), File for new/updated
+  oldUrl?: string;
 };
 
 type FormImageUploadProps<T extends FieldValues> = {
@@ -128,6 +108,7 @@ type FormImageUploadProps<T extends FieldValues> = {
  *     z.object({
  *       status: z.enum(["old", "new", "deleted", "updated"]),
  *       file: z.union([z.string().url(), z.instanceof(File)]),
+ *       oldUrl: z.string().url().optional(),
  *     })
  *   )
  * });
@@ -150,7 +131,7 @@ type FormImageUploadProps<T extends FieldValues> = {
  *   maxImages={5}
  * />
  *
- * // 4. On submit, values.pictures will be an array of { status, file } objects.
+ * // 4. On submit, values.pictures will be an array of { status, file, oldUrl? } objects.
  */
 export default function FormMultiImageUpload<T extends FieldValues>({
   control,

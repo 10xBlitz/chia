@@ -447,7 +447,9 @@ export default function ClinicSingleViewPage() {
                   />
                 </div>
                 <div className="flex justify-between items-center">
-                  <div className="text-sm">{clinic.region || "no region"}</div>
+                  <div className="text-sm">
+                    {clinic.full_address || "no region"}
+                  </div>
                   <Button
                     size="sm"
                     variant="outline"
