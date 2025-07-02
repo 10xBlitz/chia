@@ -21,11 +21,20 @@ export const quotationSchema = z.object({
     )
     .optional(),
   images: z
-    .object({
-      files: z.array(z.any()), // or z.instanceof(File)
-      previews: z.array(z.string()),
-    })
+    .array(
+      z.object({
+        status: z.enum(["old", "new", "deleted", "updated"]),
+        file: z.union([z.string().url(), z.instanceof(File)]),
+        oldUrl: z.string().optional(),
+      })
+    )
     .optional(),
 });
+
+export type QuotationImageFieldItem = {
+  status: "old" | "new" | "deleted" | "updated";
+  file: string | File;
+  oldUrl?: string;
+};
 
 export type QuotationFormValues = z.infer<typeof quotationSchema>;

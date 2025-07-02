@@ -15,7 +15,7 @@ import FormGender from "@/components/form-ui/form-gender";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormAddress from "@/components/form-ui/form-address";
 import FormTextarea from "@/components/form-ui/form-textarea";
-import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
 import { SelectItem } from "@/components/ui/select";
 import {
   getSingleQuotation,
@@ -81,7 +81,10 @@ export default function EditQuotationPage() {
       residence: quotation?.residence || "",
       concern: quotation?.concern || "",
       images: Array.isArray(quotation?.image_url)
-        ? quotation.image_url.map((url: string) => ({ url, status: "old" }))
+        ? quotation.image_url.map((url: string) => ({
+            status: "old",
+            file: url,
+          }))
         : [],
     },
     values: quotation
@@ -96,7 +99,10 @@ export default function EditQuotationPage() {
           residence: quotation.residence || "",
           concern: quotation.concern || "",
           images: Array.isArray(quotation.image_url)
-            ? quotation.image_url.map((url: string) => ({ url, status: "old" }))
+            ? quotation.image_url.map((url: string) => ({
+                status: "old",
+                file: url,
+              }))
             : [],
         }
       : undefined,
@@ -115,7 +121,10 @@ export default function EditQuotationPage() {
         residence: quotation.residence || "",
         concern: quotation.concern || "",
         images: Array.isArray(quotation.image_url)
-          ? quotation.image_url.map((url: string) => ({ url, status: "old" }))
+          ? quotation.image_url.map((url: string) => ({
+              status: "old",
+              file: url,
+            }))
           : [],
       });
     }
@@ -125,6 +134,7 @@ export default function EditQuotationPage() {
   const mutation = useMutation({
     mutationFn: async (values: QuotationEditFormValues) => {
       if (!quotation) throw new Error("견적 정보를 불러올 수 없습니다."); // Cannot load quotation info
+      // Pass images as-is (v3 schema)
       await updateQuotation({
         quotation_id: quotation.id,
         treatment_id: values.treatmentId,
@@ -134,7 +144,7 @@ export default function EditQuotationPage() {
         birthdate: values.birthdate,
         residence: values.residence,
         concern: values.concern,
-        images: values.images,
+        images: values.images, // v3 schema: { status, file, oldUrl? }
         patient_id: quotation.patient_id,
         clinic_id: quotation.clinic_id,
       });
@@ -260,7 +270,7 @@ export default function EditQuotationPage() {
             placeholder="고민이나 요청사항을 입력하세요." // Please enter your concern or request
             maxLength={500}
           />
-          <FormMultiImageUpload
+          <FormMultiImageUploadV3
             control={form.control}
             name="images"
             maxImages={5}

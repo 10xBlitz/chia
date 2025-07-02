@@ -29,7 +29,7 @@ import FormGender from "@/components/form-ui/form-gender";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormAddress from "@/components/form-ui/form-address";
 import FormTextarea from "@/components/form-ui/form-textarea";
-import FormMultiImageUploadV2 from "@/components/form-ui/form-multi-image-upload-v2";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
 import { calculateAge } from "@/lib/utils";
 
 export default function CreateQuotationPage() {
@@ -65,10 +65,6 @@ export default function CreateQuotationPage() {
         return res.data || [];
       }
     },
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   const queryClient = useQueryClient();
@@ -88,12 +84,27 @@ export default function CreateQuotationPage() {
   const mutation = useMutation({
     mutationFn: async (values: QuotationFormValues) => {
       if (!user?.id) throw new Error("로그인이 필요합니다.");
+      // Convert images to the new array format for v3
+      const images = form.getValues("images") as Array<{
+        status: "old" | "new" | "deleted" | "updated";
+        file: string | File;
+      }>;
+      // Only pass File objects for 'new' and 'updated' images, in order
+      const files = Array.isArray(images)
+        ? images
+            .filter(
+              (img) =>
+                (img.status === "new" || img.status === "updated") &&
+                img.file instanceof File
+            )
+            .map((img) => img.file as File)
+        : [];
       return createQuotation({
         ...values,
         region: values.region,
         user_id: user.id,
         clinic_id,
-        images: form.getValues("images")?.files,
+        images: files,
         setUploadingImageIdx,
       });
     },
@@ -217,9 +228,9 @@ export default function CreateQuotationPage() {
             maxLength={QUOTATION_MAX_TEXT}
           />
           {/* Image upload */}
-          <FormMultiImageUploadV2
+          <FormMultiImageUploadV3
             control={form.control}
-            name="images" // for { images: { files: File[], previews: string[] } }
+            name="images"
             maxImages={QUOTATION_MAX_IMAGES}
           />
           <Button

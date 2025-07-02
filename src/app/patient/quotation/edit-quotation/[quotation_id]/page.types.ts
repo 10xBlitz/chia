@@ -10,9 +10,9 @@ export const quotationEditSchema = z.object({
   concern: z.string().max(500, "500자 이내로 입력하세요.").optional(), // Up to 500 chars
   images: z.array(
     z.object({
-      url: z.string(),
-      file: z.any().optional(),
-      status: z.enum(["old", "new", "deleted"]),
+      status: z.enum(["old", "new", "deleted", "updated"]),
+      file: z.union([z.string(), z.instanceof(File)]),
+      oldUrl: z.string().optional(),
     })
   ),
 });

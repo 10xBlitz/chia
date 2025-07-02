@@ -20,6 +20,13 @@ export type ClinicHour = {
   note?: string;
 };
 
+// Add a type for the image object with optional oldUrl for updated images
+export type ClinicImageFormValue = {
+  status: "old" | "new" | "deleted" | "updated";
+  file: string | File;
+  oldUrl?: string; // Only present for updated images
+};
+
 export const formSchema = z.object({
   clinic_name: z
     .string()
@@ -52,11 +59,14 @@ export const formSchema = z.object({
     .optional(),
   opening_date: z.date({ required_error: "개원일을 선택하세요." }), // Please select the opening date.
   pictures: z
-    .object({
-      files: z.array(z.instanceof(File)).optional(),
-      previews: z.array(z.string()).optional(),
-    })
-    .optional(), // For clinic images - object with files and previews arrays
+    .array(
+      z.object({
+        status: z.enum(["old", "new", "deleted", "updated"]),
+        file: z.union([z.string().url(), z.instanceof(File)]),
+        oldUrl: z.string().url().optional(), // Only present for updated images
+      })
+    )
+    .optional(), // For clinic images - array of objects with status and file
   treatments: z
     .array(
       z

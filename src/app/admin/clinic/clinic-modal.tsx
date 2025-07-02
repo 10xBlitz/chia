@@ -17,7 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ClinicTable } from "./columns";
-import { supabaseClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
@@ -51,7 +50,7 @@ import FormInput from "@/components/form-ui/form-input";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
 // import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
-import FormMultiImageUploadV2 from "@/components/form-ui/form-multi-image-upload-v2";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
 import {
   Select,
   SelectTrigger,
@@ -69,6 +68,7 @@ import {
   deleteClinicWorkingHours,
   insertClinicWorkingHours,
 } from "@/lib/supabase/services/working-hour.services";
+import type { ClinicImageFormValue } from "./clinic-modal.types";
 
 export const ClinicModal = ({
   data,
@@ -106,10 +106,10 @@ export const ClinicModal = ({
           opening_date: data.opening_date
             ? new Date(data.opening_date)
             : new Date(),
-          pictures: {
-            files: [],
-            previews: data.pictures || [],
-          },
+          pictures: (data.pictures || []).map((url: string) => ({
+            status: "old",
+            file: url,
+          })),
           treatments:
             data.clinic_treatment?.map((item) => ({
               treatment_id: item.treatment.id.toString(),
@@ -145,10 +145,7 @@ export const ClinicModal = ({
           full_address: "",
           detail_address: "",
           opening_date: new Date(),
-          pictures: {
-            files: [],
-            previews: [],
-          },
+          pictures: [],
           treatments: [],
           clinic_hours: [],
         },
@@ -180,21 +177,6 @@ export const ClinicModal = ({
   const mutation = useMutation({
     mutationKey: [data ? "update_clinic" : "add_clinic", data?.id],
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      // Convert the pictures object format to the expected format
-      const picturesValue = values.pictures || { files: [], previews: [] };
-      const newFiles = picturesValue.files || [];
-      const existingUrls =
-        picturesValue.previews?.filter(
-          (url: string) =>
-            !newFiles.some((file: File) => URL.createObjectURL(file) === url)
-        ) || [];
-
-      // Combine new files and existing URLs
-      values.pictures = {
-        files: newFiles,
-        previews: existingUrls,
-      };
-
       if (data) {
         return updateClinicWithImages(values, data!.id, setProgress);
       } else {
@@ -342,7 +324,7 @@ export const ClinicModal = ({
                   label="개원일" // Opening Date
                 />
                 {/* 병원 이미지 (Clinic Images) */}
-                <FormMultiImageUploadV2
+                <FormMultiImageUploadV3
                   control={form.control}
                   name="pictures"
                   label="병원 이미지" // Clinic Images
@@ -716,75 +698,69 @@ export const ClinicModal = ({
 };
 
 /**
- * Handles updating a clinic, including deleting old images, uploading new ones, and updating treatments and working hours.
+ * Handles updating a clinic, including deleting old images, uploading new ones, updating, and removing as per image status.
  */
 async function updateClinicWithImages(
   values: z.infer<typeof formSchema>,
   clinicId: string,
   setProgress?: (prog: string | null) => void
 ) {
-  // Get current clinic pictures from database
-  const { data: currentClinic } = await supabaseClient
-    .from("clinic")
-    .select("pictures")
-    .eq("id", clinicId)
-    .single();
+  const images = (values.pictures as ClinicImageFormValue[]) || [];
+  const clinicPictures: string[] = [];
 
-  const currentPictures = currentClinic?.pictures || [];
+  console.log("---->images", images);
 
-  // Handle pictures: convert { files, previews } to array
-  const newFiles = values.pictures?.files || [];
-  const remainingPreviews = values.pictures?.previews || [];
-
-  // Filter out data URLs - only work with actual Supabase URLs
-  const validCurrentPictures = currentPictures.filter(
-    (url: string) => url && !url.startsWith("data:")
-  );
-  const validRemainingPreviews = remainingPreviews.filter(
-    (url: string) => url && !url.startsWith("data:")
-  );
-
-  // Find deleted images by comparing current DB pictures with remaining previews
-  const deletedImages = validCurrentPictures.filter(
-    (currentUrl: string) => !validRemainingPreviews.includes(currentUrl)
-  );
-
-  // Delete removed images from storage
-  if (deletedImages.length > 0) {
-    setProgress?.("삭제된 이미지 제거 중...");
-    for (const deletedUrl of deletedImages) {
-      try {
-        await deleteFileFromSupabase(deletedUrl, {
-          bucket: CLINIC_IMAGE_BUCKET,
-        });
-      } catch (error) {
-        console.error("Failed to delete image:", deletedUrl, error);
+  for (const img of images) {
+    if (img.status === "deleted") {
+      // Remove from storage if needed
+      if (typeof img.file === "string") {
+        setProgress?.("삭제된 이미지 제거 중..."); // Removing deleted images...
+        try {
+          await deleteFileFromSupabase(img.file, {
+            bucket: CLINIC_IMAGE_BUCKET,
+          });
+        } catch (error) {
+          console.error("Failed to delete image:", img.file, error);
+        }
       }
+      continue; // Do not add to DB array
+    }
+
+    if (img.status === "old" && typeof img.file === "string") {
+      clinicPictures.push(img.file);
+      continue;
+    }
+
+    if (img.status === "new" && img.file instanceof File) {
+      setProgress?.("병원 이미지 업로드 중...");
+      const publicUrl = await uploadFileToSupabase(img.file, {
+        bucket: CLINIC_IMAGE_BUCKET,
+        allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+        maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+      });
+      clinicPictures.push(publicUrl);
+
+      continue;
+    }
+
+    if (img.status === "updated" && img.file instanceof File && img.oldUrl) {
+      setProgress?.("이미지 교체 중..."); //Replacing image...
+      // Delete old image
+      await deleteFileFromSupabase(img.oldUrl, {
+        bucket: CLINIC_IMAGE_BUCKET,
+      });
+
+      // Upload new image
+      const publicUrl = await uploadFileToSupabase(img.file, {
+        bucket: CLINIC_IMAGE_BUCKET,
+        allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+        maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+      });
+      clinicPictures.push(publicUrl);
+
+      continue;
     }
   }
-
-  // Upload new files
-  const uploadedUrls: string[] = [];
-  if (newFiles.length > 0) {
-    for (let i = 0; i < newFiles.length; i++) {
-      const file = newFiles[i];
-      setProgress?.(`병원 이미지 업로드 중: ${i + 1}/${newFiles.length}`);
-      try {
-        const publicUrl = await uploadFileToSupabase(file, {
-          bucket: CLINIC_IMAGE_BUCKET,
-          allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
-          maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
-        });
-        uploadedUrls.push(publicUrl);
-      } catch (error) {
-        console.error("Failed to upload image:", file.name, error);
-        throw error;
-      }
-    }
-  }
-
-  // Combine remaining valid previews (existing images) with newly uploaded images
-  const clinicPictures = [...validRemainingPreviews, ...uploadedUrls];
 
   setProgress?.(null);
 
@@ -802,11 +778,11 @@ async function updateClinicWithImages(
     opening_date: values.opening_date.toDateString(),
   };
 
-  setProgress?.("병원 업데이트 중...");
+  setProgress?.("병원 업데이트 중..."); // Updating clinic...
   await updateClinic(clinicId, clinicPayload, clinicPictures);
 
   // Save working hours
-  setProgress?.("진료시간 저장 중...");
+  setProgress?.("진료시간 저장 중..."); // Saving clinic working hours...
   if (values.clinic_hours && values.clinic_hours.length > 0) {
     const workingHours = values.clinic_hours.map((h) => ({
       day_of_week: h.day_of_week as Enums<"day_of_week">, // Cast to the correct type
@@ -821,51 +797,62 @@ async function updateClinicWithImages(
   }
 
   // Save treatments
-  setProgress?.("트리트먼트 저장 중...");
+  setProgress?.("트리트먼트 저장 중..."); // Saving treatments...
   await saveTreatmentsForClinic(values.treatments, clinicId);
 }
 
 /**
  * Handles adding a new clinic, uploading images, and saving treatments and working hours.
+ * Accepts the new image status array format.
  */
 async function addClinicWithImages(
   values: z.infer<typeof formSchema>,
   setProgress?: (prog: string | null) => void
 ) {
-  // Upload images
+  const images = (values.pictures as ClinicImageFormValue[]) || [];
   const clinicPictures: string[] = [];
 
-  // Handle pictures: convert { files, previews } to array
-  const picturesArray: (File | string)[] = [];
-  if (values.pictures?.files) {
-    picturesArray.push(...values.pictures.files);
-  }
-  if (values.pictures?.previews) {
-    // Only include actual URLs, not data URLs
-    const validPreviews = values.pictures.previews.filter(
-      (url: string) => url && !url.startsWith("data:")
-    );
-    picturesArray.push(...validPreviews);
-  }
-
-  if (picturesArray.length > 0) {
-    for (let i = 0; i < picturesArray.length; i++) {
-      const item = picturesArray[i];
-      if (item instanceof File) {
-        if (setProgress) setProgress("병원 이미지 업로드 중: " + (i + 1));
-        const publicUrl = await uploadFileToSupabase(item, {
+  for (const img of images) {
+    if (img.status === "deleted") {
+      // Do not add to DB array
+      continue;
+    }
+    if (img.status === "old" && typeof img.file === "string") {
+      clinicPictures.push(img.file);
+    } else if (img.status === "new" && img.file instanceof File) {
+      setProgress?.("병원 이미지 업로드 중...");
+      try {
+        const publicUrl = await uploadFileToSupabase(img.file, {
           bucket: CLINIC_IMAGE_BUCKET,
           allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
           maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
         });
         clinicPictures.push(publicUrl);
-      } else if (typeof item === "string") {
-        // Keep existing URLs
-        clinicPictures.push(item);
+      } catch (error) {
+        console.error("Failed to upload image:", img.file.name, error);
+        throw error;
+      }
+    } else if (
+      img.status === "updated" &&
+      img.file instanceof File &&
+      img.oldUrl
+    ) {
+      // For new clinics, treat updated as new (upload only)
+      setProgress?.("병원 이미지 업로드 중...");
+      try {
+        const publicUrl = await uploadFileToSupabase(img.file, {
+          bucket: CLINIC_IMAGE_BUCKET,
+          allowedMimeTypes: CLINIC_IMAGE_ALLOWED_MIME_TYPES,
+          maxSizeMB: CLINIC_IMAGE_MAX_FILE_SIZE_MB,
+        });
+        clinicPictures.push(publicUrl);
+      } catch (error) {
+        console.error("Failed to upload updated image:", img.file.name, error);
+        throw error;
       }
     }
   }
-  if (setProgress) setProgress(null);
+  setProgress?.(null);
 
   // Create clinic
   const clinicPayload = {
@@ -914,6 +901,7 @@ async function saveTreatmentsForClinic(
     } else if (t.action === "new" && t.treatment_id) {
       await insertClinicTreatment(clinicId, t.treatment_id);
     } else if ((t.action === "updated" || !t.action) && t.treatment_id) {
+      // Fix typo in updateClinicTreatment usage
       await updateClinicTreatment(clinicId, t.treatment_id);
     }
     // else: skip

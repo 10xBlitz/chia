@@ -134,13 +134,13 @@ export async function getSingleQuotation(quotationId: string) {
   return data;
 }
 
-interface UpdateQuotationImage {
-  url: string;
-  file?: File;
-  status: "old" | "new" | "deleted";
+export interface UpdateQuotationImage {
+  status: "old" | "new" | "deleted" | "updated";
+  file: string | File;
+  oldUrl?: string;
 }
 
-interface UpdateQuotationParams {
+export interface UpdateQuotationParams {
   quotation_id: string;
   treatment_id?: string;
   region?: string;
@@ -156,35 +156,8 @@ interface UpdateQuotationParams {
 }
 
 /**
- * Update a quotation and manage its images in Supabase storage.
- *
- * This function handles all logic for:
- *   - Deleting images marked as deleted (status: "deleted")
- *   - Uploading new images (status: "new" with a File)
- *   - Retaining old images (status: "old")
- *   - Saving the final array of image URLs to the DB
- *
- * @param {Object} params - Update params
- * @param {string} params.quotation_id - The quotation ID to update
- * @param {string} [params.treatment_id] - Treatment ID (optional)
- * @param {string} [params.region] - Region (optional)
- * @param {string} [params.name] - Name (optional)
- * @param {string} [params.gender] - Gender (optional)
- * @param {Date}   [params.birthdate] - Birthdate (optional)
- * @param {string} [params.residence] - Residence (optional)
- * @param {string} [params.concern] - Concern (optional)
- * @param {UpdateQuotationImage[]} [params.images] - Array of image objects. Each image must have:
- *   - url: string (required, can be a Supabase URL or data URL)
- *   - file?: File (required for new images, optional otherwise)
- *   - status: "old" | "new" | "deleted"
- *     - "old": existing image to keep
- *     - "new": new image to upload
- *     - "deleted": image to delete from storage
- * @param {string} [params.patient_id] - Patient ID (for folder path)
- * @param {string|null} [params.clinic_id] - Clinic ID (optional)
- * @param {(idx: number | null) => void} [params.setUploadingImageIdx] - Callback for upload progress (optional)
- *
- * @returns {Promise<{ success: true }>} Resolves on success, throws on error
+ * Update a quotation and manage its images in Supabase storage (v3).
+ * Handles: deleted, new, old, updated (replace) images, and preserves UI order.
  */
 export async function updateQuotation({
   quotation_id,
@@ -200,20 +173,29 @@ export async function updateQuotation({
   clinic_id,
   setUploadingImageIdx,
 }: UpdateQuotationParams) {
-  // 1. Find removed image URLs (old images marked as deleted)
+  // 1. Delete images marked as deleted
   const imagesToDelete = images
-    .filter((img) => img.status === "deleted" && !img.url.startsWith("data:"))
-    .map((img) => img.url);
-
+    .filter(
+      (img) =>
+        img.status === "deleted" &&
+        typeof img.file === "string" &&
+        !img.file.startsWith("data:")
+    )
+    .map((img) => img.file as string);
   for (const url of imagesToDelete) {
     await deleteFileFromSupabase(url, { bucket: BUCKET_NAME });
   }
 
-  // 2. Upload new images and collect their Supabase URLs
-  const uploadedUrls: string[] = [];
+  // 2. Upload new images and collect their Supabase URLs (preserve order)
+  const finalImageUrls: string[] = [];
   for (let i = 0; i < images.length; i++) {
     const img = images[i];
-    if (img.status === "new" && img.file) {
+    if (img.status === "old" && typeof img.file === "string") {
+      finalImageUrls.push(img.file);
+      continue;
+    }
+
+    if (img.status === "new" && img.file instanceof File) {
       setUploadingImageIdx?.(i);
       const url = await uploadFileToSupabase(img.file, {
         bucket: BUCKET_NAME,
@@ -221,25 +203,32 @@ export async function updateQuotation({
         allowedMimeTypes: ALLOWED_MIME_TYPES,
         maxSizeMB: MAX_FILE_SIZE_MB,
       });
-      uploadedUrls.push(url);
+      finalImageUrls.push(url);
+      continue;
     }
+
+    if (img.status === "updated" && img.file instanceof File) {
+      if (img.oldUrl) {
+        await deleteFileFromSupabase(img.oldUrl, { bucket: BUCKET_NAME });
+      }
+      setUploadingImageIdx?.(i);
+      const url = await uploadFileToSupabase(img.file, {
+        bucket: BUCKET_NAME,
+        folder: patient_id,
+        allowedMimeTypes: ALLOWED_MIME_TYPES,
+        maxSizeMB: MAX_FILE_SIZE_MB,
+      });
+      finalImageUrls.push(url);
+      continue;
+    }
+    // deleted images are not added
   }
   setUploadingImageIdx?.(null);
-
-  // 3. Only keep Supabase URLs for old images not deleted
-  const existingImageUrls = images
-    .filter((img) => img.status === "old")
-    .map((img) => img.url);
-
-  // 4. Save the combined array
-  const allImageUrls = [...existingImageUrls, ...uploadedUrls];
 
   const updateObj: Partial<Tables<"quotation">> = {};
   if (treatment_id !== undefined && treatment_id !== "none")
     updateObj.treatment_id = treatment_id;
-  if (treatment_id === "none") {
-    updateObj.treatment_id = null; // Set to null if 'none' is selected
-  }
+  if (treatment_id === "none") updateObj.treatment_id = null;
   if (region !== undefined) updateObj.region = region;
   if (name !== undefined) updateObj.name = name;
   if (gender !== undefined) updateObj.gender = gender;
@@ -247,7 +236,7 @@ export async function updateQuotation({
   if (residence !== undefined) updateObj.residence = residence;
   if (concern !== undefined) updateObj.concern = concern;
   if (clinic_id !== undefined) updateObj.clinic_id = clinic_id;
-  updateObj.image_url = allImageUrls.length > 0 ? allImageUrls : null;
+  updateObj.image_url = finalImageUrls.length > 0 ? finalImageUrls : null;
 
   const { error: updateError } = await supabaseClient
     .from("quotation")
