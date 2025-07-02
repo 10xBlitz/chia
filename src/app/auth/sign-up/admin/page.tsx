@@ -168,9 +168,7 @@ export default function AdminSignupPage() {
           onChange={(e) => setPw(e.target.value)}
           required
         />
-        <Button type="submit" className="btn-primary">
-          확인 {/* Confirm */}
-        </Button>
+        <Button type="submit">확인 {/* Confirm */}</Button>
         {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
       </form>
     );
@@ -311,7 +309,7 @@ export default function AdminSignupPage() {
             <Button
               disabled={currentStep <= 1}
               type="button"
-              className="w-[49%] btn-primary"
+              className="w-[49%]"
               onClick={prevStep}
             >
               이전 {/* Previous */}
@@ -320,7 +318,7 @@ export default function AdminSignupPage() {
             {currentStep < steps.length && (
               <Button
                 type="button"
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
                 onClick={async () => await nextStep()}
                 disabled={!isStepValid}
               >
@@ -332,7 +330,7 @@ export default function AdminSignupPage() {
               <Button
                 type="submit"
                 disabled={status === "pending"}
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
               >
                 {status === "pending" ? "회원가입 중..." : "관리자 회원가입"}{" "}
                 {/* Admin Sign Up */}

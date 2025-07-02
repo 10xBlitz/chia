@@ -277,7 +277,7 @@ export default function EditQuotationPage() {
           />
           <Button
             type="submit"
-            className="w-full btn-primary text-white"
+            className="w-full text-white"
             disabled={mutation.isPending || isQuotationLoading}
           >
             {mutation.isPending ? "수정 중..." : "수정하기"}{" "}

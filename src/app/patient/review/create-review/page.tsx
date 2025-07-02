@@ -141,7 +141,7 @@ export default function CreateReviewPage() {
                             field.value === t.id ? "secondary" : "outline"
                           }
                           className={`rounded-full px-4 py-1 text-sm ${
-                            field.value === t.id ? "btn-primary text-white" : ""
+                            field.value === t.id ? " text-white" : ""
                           }`}
                           onClick={() => field.onChange(t.id)}
                         >
@@ -176,7 +176,7 @@ export default function CreateReviewPage() {
           <div className="px-4 py-4">
             <Button
               type="submit"
-              className="w-full btn-primary text-white"
+              className="w-full text-white"
               disabled={mutation.status === "pending"}
             >
               {mutation.status === "pending" ? "작성중..." : "작성하기"}

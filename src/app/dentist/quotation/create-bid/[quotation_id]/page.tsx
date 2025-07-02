@@ -160,11 +160,7 @@ export default function CreateBidPage() {
             disabled={isDisabled}
           />
 
-          <Button
-            type="submit"
-            className="w-full btn-primary"
-            disabled={isDisabled}
-          >
+          <Button type="submit" className="w-full" disabled={isDisabled}>
             {existingBid
               ? "이미 답변이 등록되었습니다" // A bid has already been submitted.
               : insertBidMutation.status === "pending"

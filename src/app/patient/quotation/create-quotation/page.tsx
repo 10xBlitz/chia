@@ -235,7 +235,7 @@ export default function CreateQuotationPage() {
           />
           <Button
             type="submit"
-            className="w-full btn-primary mb-20 text-white"
+            className="w-full mb-20 text-white"
             disabled={mutation.status === "pending"}
           >
             {

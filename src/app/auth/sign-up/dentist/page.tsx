@@ -385,7 +385,7 @@ export default function DentistSignupPage() {
             <Button
               disabled={currentStep <= 1}
               type="button"
-              className="w-[49%] btn-primary"
+              className="w-[49%]"
               onClick={prevStep}
             >
               이전 {/* Previous */}
@@ -394,7 +394,7 @@ export default function DentistSignupPage() {
             {currentStep < steps.length && (
               <Button
                 type="button"
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
                 onClick={async () => await nextStep()}
                 disabled={!isStepValid}
               >
@@ -406,7 +406,7 @@ export default function DentistSignupPage() {
               <Button
                 type="submit"
                 disabled={status === "pending"}
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
               >
                 {status === "pending" ? "회원가입 중..." : "회원가입"}{" "}
                 {/* Sign Up */}

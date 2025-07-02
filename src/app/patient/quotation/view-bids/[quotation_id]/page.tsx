@@ -85,7 +85,7 @@ export default function BidsPage() {
                 }
               </span>
               <Button
-                className="rounded-md px-4 h-9 font-medium btn-primary bg-blue-500 text-white"
+                className="rounded-md px-4 h-9 font-medium bg-blue-500 text-white"
                 variant="outline"
                 onClick={(e) => e.stopPropagation()}
               >

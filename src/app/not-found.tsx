@@ -24,7 +24,7 @@ export default function NotFound() {
         {/* The page you requested does not exist or may have been moved. */}
         <Link
           href="/"
-          className="inline-block btn-primary px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium shadow hover:opacity-90 transition"
+          className="inline-block px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium shadow hover:opacity-90 transition"
         >
           홈으로 이동 {/* Go to Home */}
         </Link>

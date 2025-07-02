@@ -132,7 +132,7 @@ export function EditProfileModal({
               {/* Cancel */}
             </Button>
             <Button
-              className="btn-primary flex-1"
+              className=" flex-1"
               type="submit"
               disabled={mutation.isPending}
             >

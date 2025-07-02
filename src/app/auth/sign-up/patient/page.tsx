@@ -208,7 +208,7 @@ const SignupPage = () => {
             <Button
               disabled={currentStep <= 1}
               type="button"
-              className="w-[49%] btn-primary"
+              className="w-[49%]"
               onClick={prevStep}
             >
               이전 {/* Previous */}
@@ -217,7 +217,7 @@ const SignupPage = () => {
             {currentStep < steps.length && (
               <Button
                 type="button"
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
                 onClick={nextStep}
                 disabled={!isStepValid}
               >
@@ -229,7 +229,7 @@ const SignupPage = () => {
               <Button
                 type="submit"
                 disabled={status === "pending"}
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
               >
                 {status === "pending" ? "회원가입 중..." : "회원가입"}{" "}
                 {/* Sign Up */}

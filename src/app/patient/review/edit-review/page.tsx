@@ -200,7 +200,7 @@ export default function EditReviewPage() {
           <div className="px-4 mt-8 mb-4">
             <Button
               type="submit"
-              className="w-full btn-primary"
+              className="w-full"
               disabled={mutation.isPending}
             >
               {mutation.isPending ? "수정 중..." : "리뷰 수정하기"}

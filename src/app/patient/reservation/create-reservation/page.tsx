@@ -214,6 +214,7 @@ export default function CreateReservation() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="time"
@@ -398,11 +399,7 @@ export default function CreateReservation() {
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            className="h-[45px] mb-20 btn-primary"
-            disabled={loading}
-          >
+          <Button type="submit" className="h-[45px] mb-20" disabled={loading}>
             {loading ? "요청 중..." : "작성하기"}
             {/**loading ? Loading... : Write */}
           </Button>

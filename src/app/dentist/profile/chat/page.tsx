@@ -6,13 +6,14 @@ export default function DentistServiceInquiryUnavailable() {
     <main className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground px-4">
       <div className="flex flex-col items-center gap-6">
         <h1 className="text-2xl font-bold text-primary mb-2">
-          서비스 문의 기능 준비 중입니다 {/* Service Inquiry Feature Coming Soon */}
+          서비스 문의 기능 준비 중입니다{" "}
+          {/* Service Inquiry Feature Coming Soon */}
         </h1>
         <p className="text-muted-foreground mb-4 text-center max-w-md">
           치과의사를 위한 서비스 문의 기능은 아직 제공되지 않습니다.
           <br />
-          {/* Service inquiry for dentists is not yet available. */}
-          곧 만나보실 수 있도록 준비 중입니다!
+          {/* Service inquiry for dentists is not yet available. */}곧 만나보실
+          수 있도록 준비 중입니다!
           {/* We're working to bring this feature soon! */}
         </p>
         <Link

@@ -97,7 +97,7 @@ export default function ForgotPassword() {
 
                     <Button
                       type="submit"
-                      className="w-full h-[45px] btn-primary"
+                      className="w-full h-[45px]"
                       disabled={isLoading}
                     >
                       {isLoading ? "로딩중...." : "비밀번호 재설정 메일 보내기"}

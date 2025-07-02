@@ -206,7 +206,7 @@ export default function LoginForm() {
                     />
                     <Button
                       type="submit"
-                      className="w-full h-[45px] btn-primary"
+                      className="w-full h-[45px]"
                       disabled={isLoading}
                     >
                       {/* Login / Logging in... */}

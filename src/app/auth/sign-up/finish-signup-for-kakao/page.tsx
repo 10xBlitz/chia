@@ -220,7 +220,7 @@ const FinishKakaoSignupPage = () => {
             <Button
               disabled={currentStep === 1}
               type="button"
-              className="w-[49%] btn-primary"
+              className="w-[49%]"
               onClick={prevStep}
             >
               이전 {/* Previous */}
@@ -228,7 +228,7 @@ const FinishKakaoSignupPage = () => {
             {currentStep === 1 && (
               <Button
                 type="button"
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
                 onClick={nextStep}
                 disabled={!isStepValid}
               >
@@ -239,7 +239,7 @@ const FinishKakaoSignupPage = () => {
               <Button
                 type="submit"
                 disabled={status === "pending"}
-                className="w-[49%] btn-primary"
+                className="w-[49%]"
               >
                 {status === "pending" ? "회원가입 중..." : "회원가입"}{" "}
                 {/* Sign Up */}
