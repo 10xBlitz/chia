@@ -3,9 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
-import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { useTreatmentCarouselStore } from "@/stores/treatment-carousel-store";
+import { useRef } from "react";
 
 export default function TreatmentCategoryScroll({
   activeId,
@@ -14,119 +21,94 @@ export default function TreatmentCategoryScroll({
 }) {
   const treatmentQuery = useQuery({
     queryKey: ["treatments"],
-    queryFn: async () => await getPaginatedTreatments(1, 100),
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-    retry: 1,
+    queryFn: () => getPaginatedTreatments(1, 100),
   });
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const { setScrollSnap, scrollSnap } = useTreatmentCarouselStore();
+  const hasInitialized = useRef(false);
 
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+  const treatments = treatmentQuery.data?.data;
 
-    // Mouse event handlers for drag-to-scroll
-    const mouseDown = (e: MouseEvent) => {
-      setIsDragging(true);
-      setStartX(e.pageX - container.offsetLeft);
-      setScrollLeft(container.scrollLeft);
-      container.style.cursor = "grabbing";
-      container.style.userSelect = "none";
-    };
-
-    const mouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      const x = e.pageX - container.offsetLeft;
-      const dist = x - startX;
-      container.scrollLeft = scrollLeft - dist;
-    };
-
-    const mouseUp = () => {
-      setIsDragging(false);
-      container.style.cursor = "grab";
-      container.style.removeProperty("user-select");
-    };
-
-    const mouseLeave = () => {
-      if (isDragging) {
-        setIsDragging(false);
-        container.style.cursor = "grab";
-        container.style.removeProperty("user-select");
+  // When the api is set for the first time, scroll to the correct index and set up the event listener
+  const handleSetApi = (carouselApi: CarouselApi | undefined) => {
+    if (!carouselApi) return;
+    if (!hasInitialized.current) {
+      // Only scroll on first mount or re-render
+      let targetIndex = 0;
+      if (typeof scrollSnap === "number") {
+        targetIndex = scrollSnap;
       }
-    };
+      carouselApi.scrollTo(targetIndex, true);
+      hasInitialized.current = true;
+    }
 
-    container.addEventListener("mousedown", mouseDown);
-    container.addEventListener("mousemove", mouseMove);
-    container.addEventListener("mouseup", mouseUp);
-    container.addEventListener("mouseleave", mouseLeave);
-
-    return () => {
-      container.removeEventListener("mousedown", mouseDown);
-      container.removeEventListener("mousemove", mouseMove);
-      container.removeEventListener("mouseup", mouseUp);
-      container.removeEventListener("mouseleave", mouseLeave);
-    };
-  }, [isDragging, startX, scrollLeft]);
-
-  //sort here treatments by the activeId if there is an activeId
-  const sortedTreatments = treatmentQuery.data?.data?.sort((a, b) =>
-    a.id === activeId ? -1 : b.id === activeId ? 1 : 0
-  );
+    carouselApi.on("select", () => {
+      setScrollSnap(carouselApi.selectedScrollSnap());
+    });
+  };
 
   return (
-    <div
-      ref={scrollContainerRef}
-      style={{
-        scrollbarWidth: "none",
-        cursor: isDragging ? "grabbing" : "grab",
+    <Carousel
+      className="px-4 py-4 mt-2"
+      opts={{
+        dragFree: true,
+        loop: true,
       }}
-      className="flex space-x-4 px-4 py-4 overflow-x-scroll"
+      setApi={handleSetApi}
     >
-      {treatmentQuery.isLoading && <p>치료 항목을 불러오는 중...</p>}{" "}
-      {/* Loading treatments... */}
-      {treatmentQuery.error && (
-        // Error loading treatments: ...
-        <p>
-          치료 항목을 불러오는 중 오류가 발생했습니다:{" "}
-          {treatmentQuery.error.message}
-        </p>
-      )}
-      {treatmentQuery.data &&
-        sortedTreatments?.map((treatment) => (
-          <Link
-            href={`/clinics/${treatment.id}`}
-            key={treatment.id}
-            className={cn(
-              "flex flex-col items-center flex-shrink-0",
-              activeId === treatment.id && "text-blue-500 font-bold"
-            )} // Active treatment color
-            draggable={false}
-          >
-            <div
-              className="relative w-13 h-13 rounded-full overflow-hidden"
-              draggable={false}
-            >
-              {treatment.image_url ? (
-                <Image
+      <CarouselContent className="flex space-x-0">
+        {treatmentQuery.isLoading && (
+          <CarouselItem className="basis-24">
+            <p>치료 항목을 불러오는 중...</p> {/* Loading treatments... */}
+          </CarouselItem>
+        )}
+        {treatmentQuery.error && (
+          <CarouselItem className="basis-24">
+            <p>
+              치료 항목을 불러오는 중 오류가 발생했습니다:{" "}
+              {treatmentQuery.error.message}
+            </p>
+          </CarouselItem>
+        )}
+        {treatmentQuery.data &&
+          treatments?.map((treatment) => (
+            <CarouselItem key={treatment.id} className="basis-20 w-auto">
+              <Link
+                href={`/clinics/${treatment.id}`}
+                className={cn(
+                  "flex flex-col items-center flex-shrink-0",
+                  activeId === treatment.id && "text-blue-500 font-bold"
+                )} // Active treatment color
+                draggable={false}
+                onClick={(e) => e.stopPropagation()} // Prevent carousel from handling click
+              >
+                <div
+                  className={cn(
+                    "relative w-13 h-13 rounded-full overflow-hidden"
+                  )}
                   draggable={false}
-                  src={treatment.image_url}
-                  alt={treatment.treatment_name || "치료 항목"} // treatment
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <span className="text-xs text-gray-500">아이콘</span> /* Icon */
-              )}
-            </div>
-            <span className="text-xs mt-1 w-16 text-center ">
-              {treatment.treatment_name}
-            </span>
-          </Link>
-        ))}
-    </div>
+                >
+                  {treatment.image_url ? (
+                    <Image
+                      draggable={false}
+                      src={treatment.image_url}
+                      alt={treatment.treatment_name || "치료 항목"} // treatment
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-500">
+                      아이콘
+                    </span> /* Icon */
+                  )}
+                </div>
+                <span className="text-xs mt-1 w-16 text-center ">
+                  {treatment.treatment_name}
+                </span>
+              </Link>
+            </CarouselItem>
+          ))}
+      </CarouselContent>
+    </Carousel>
   );
 }
