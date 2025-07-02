@@ -50,7 +50,7 @@ import FormInput from "@/components/form-ui/form-input";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
 // import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
-import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload";
+import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
 import {
   Select,
   SelectTrigger,
@@ -324,11 +324,12 @@ export const ClinicModal = ({
                   label="개원일" // Opening Date
                 />
                 {/* 병원 이미지 (Clinic Images) */}
-                <FormMultiImageUploadV3
+                <FormMultiImageUpload
                   control={form.control}
                   name="pictures"
                   label="병원 이미지" // Clinic Images
                   maxImages={10}
+                  disabled={mutation.status === "pending"}
                   formLabelClassName={formLabelClassName}
                 />
               </div>
