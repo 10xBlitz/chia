@@ -42,7 +42,8 @@ export async function insertClinicWorkingHours(
   clinicId: string,
   hours: Array<{
     day_of_week: Enums<"day_of_week">;
-    time_open: string;
+    time_open_from: string;
+    time_open_to: string;
     note?: string;
   }>
 ) {
@@ -52,8 +53,8 @@ export async function insertClinicWorkingHours(
     hours.map((h) => ({
       clinic_id: clinicId,
       day_of_week: h.day_of_week,
-      time_open: h.time_open,
-      note: h.note || null,
+      time_open_from: h.time_open_from,
+      time_open_to: h.time_open_to,
     }))
   );
   if (error) throw error;

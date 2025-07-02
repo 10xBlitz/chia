@@ -27,6 +27,7 @@ import ClinicCardSkeleton from "@/components/loading-skeletons/clinic-card-skele
 import ClinicReviewCardSkeleton from "@/components/loading-skeletons/clinic-review-skeleton";
 import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { getClinic } from "@/lib/supabase/services/clinics.services";
+import { Database } from "@/lib/supabase/types";
 // import ZoomableImage from "@/components/zoomable-image";
 
 const TABS = [
@@ -44,6 +45,15 @@ export default function ClinicSingleViewPage() {
   const { clinic_id } = useParams<{ clinic_id: string }>();
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [workingHourToday, setWorkingHourToday] = useState<{
+    clinic_id: string;
+    created_at: string;
+    day_of_week: Database["public"]["Enums"]["day_of_week"];
+    id: string;
+    time_open_from: string;
+    time_open_to: string;
+    formattedTimeOpenNow: string;
+  }>();
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const queryclient = useQueryClient();
@@ -145,6 +155,12 @@ export default function ClinicSingleViewPage() {
       setFavoriteId(favoriteId);
     };
     checkFavorite();
+
+    if (clinic?.id) {
+      const wh = getWorkingHourToday(clinic?.working_hour);
+      setWorkingHourToday(wh);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, clinic?.id]);
 
   // Copy address to clipboard
@@ -279,25 +295,7 @@ export default function ClinicSingleViewPage() {
 
                   return todayKor;
                 })()}
-                ){" "}
-                {(() => {
-                  // Map JS day to Korean day string
-                  const days = [
-                    "일요일", // Sunday
-                    "월요일", // Monday
-                    "화요일", // Tuesday
-                    "수요일", // Wednesday
-                    "목요일", // Thursday
-                    "금요일", // Friday
-                    "토요일", // Saturday
-                  ];
-                  const todayIdx = new Date().getDay();
-                  const todayKor = days[todayIdx === 0 ? 0 : todayIdx]; // 0 is Sunday
-                  const wh =
-                    clinic.working_hour &&
-                    clinic.working_hour.find((w) => w.day_of_week === todayKor);
-                  return wh ? wh.time_open : "00:00 - 00:00";
-                })()}
+                ) {workingHourToday?.formattedTimeOpenNow}
                 {/* Clinic closes today */}
               </span>
             </div>
@@ -387,7 +385,13 @@ export default function ClinicSingleViewPage() {
                         clinic.working_hour.find(
                           (w) => w.day_of_week === todayKor
                         );
-                      return wh ? wh.time_open : "-";
+                      //convert working hour to korean
+
+                      return wh
+                        ? `${toKoreanTime(wh.time_open_from)} - ${toKoreanTime(
+                            wh.time_open_to
+                          )}`
+                        : "-";
                     })()}
                   </div>
                 </div>
@@ -396,34 +400,35 @@ export default function ClinicSingleViewPage() {
                     점심 시간 {/* Lunch time */}
                   </div>
                   <div className="text-base mt-1">
-                    {
-                      clinic.working_hour.find(
+                    {(() => {
+                      // If no lunch time, return empty string
+                      const lunchTime = clinic.working_hour.find(
                         (item) => item.day_of_week === "점심시간"
-                      )?.time_open
-                    }
+                      );
+                      return lunchTime
+                        ? `${toKoreanTime(
+                            lunchTime.time_open_from
+                          )} - ${toKoreanTime(lunchTime.time_open_to)}`
+                        : "";
+                    })()}
                   </div>
                   {/* Call for info */}
                 </div>
               </div>
               {/* All days section */}
               <div className="bg-gray-100 rounded-xl p-4">
-                {(clinic.working_hour && clinic.working_hour.length > 0
-                  ? clinic.working_hour
-                  : [
-                      { day_of_week: "월요일", time_open: "00:00 ~ 00:00" }, // Monday
-                      { day_of_week: "화요일", time_open: "00:00 ~ 00:00" }, // Tuesday
-                      { day_of_week: "수요일", time_open: "00:00 ~ 00:00" }, // Wednesday
-                      { day_of_week: "목요일", time_open: "00:00 ~ 00:00" }, // Thursday
-                      { day_of_week: "금요일", time_open: "00:00 ~ 00:00" }, // Friday
-                      { day_of_week: "토요일", time_open: "00:00 ~ 00:00" }, // Saturday
-                      { day_of_week: "일요일", time_open: "00:00 ~ 00:00" }, // Sunday
-                    ]
-                ).map((wh) => (
-                  <div key={wh.day_of_week} className="mb-4 last:mb-0">
-                    <div className="font-medium">{wh.day_of_week}</div>
-                    <div className="text-base">{wh.time_open || "-"}</div>
-                  </div>
-                ))}
+                {clinic.working_hour &&
+                  clinic.working_hour.length > 0 &&
+                  clinic.working_hour.map((wh) => (
+                    <div key={wh.day_of_week} className="mb-4 last:mb-0">
+                      <div className="font-medium">{wh.day_of_week}</div>
+                      <div className="text-base">
+                        {toKoreanTime(wh.time_open_from) +
+                          " - " +
+                          toKoreanTime(wh.time_open_to) || "-"}
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
             {/* 위치 (Location) */}
@@ -630,4 +635,81 @@ export default function ClinicSingleViewPage() {
       </div>
     </MobileLayout>
   );
+}
+
+// Convert time_open_from and time_open_to to Korean format (e.g., "09:00" -> "오전 9:00")
+const toKoreanTime = (time: string) => {
+  if (!time) return "";
+  const [hourStr, minute] = time.split(":");
+  let hour = Number(hourStr);
+  const isAM = hour < 12;
+  const period = isAM ? "오전" : "오후"; // AM/PM in Korean
+  if (!isAM && hour > 12) hour -= 12;
+  if (hour === 0) hour = 12;
+  return `${period} ${hour}:${minute}`;
+};
+
+function getWorkingHourToday(
+  workingHour: {
+    clinic_id: string;
+    created_at: string;
+    day_of_week: Database["public"]["Enums"]["day_of_week"];
+    id: string;
+    time_open_from: string;
+    time_open_to: string;
+  }[]
+) {
+  const days = [
+    "일요일", // Sunday
+    "월요일", // Monday
+    "화요일", // Tuesday
+    "수요일", // Wednesday
+    "목요일", // Thursday
+    "금요일", // Friday
+    "토요일", // Saturday
+  ] as const;
+  const todayIdx = new Date().getDay();
+  const todayKor = days[todayIdx === 0 ? 0 : todayIdx]; // 0 is Sunday
+  const wh = workingHour.find((w) => w.day_of_week === todayKor);
+
+  // Check if clinic is closed for today
+  if (!wh) {
+    return {
+      clinic_id: "",
+      created_at: "",
+      day_of_week: "일요일" as Database["public"]["Enums"]["day_of_week"],
+      id: "",
+      time_open_from: "",
+      time_open_to: "",
+      formattedTimeOpenNow: "영업종료", // Closed
+    };
+  }
+
+  // Check if current time is past closing time
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+  const [closeHour, closeMinute] = wh.time_open_to.split(":").map(Number);
+  const closeTimeInMinutes = closeHour * 60 + closeMinute;
+
+  const isClosed = currentTimeInMinutes >= closeTimeInMinutes;
+
+  const formattedOpenTime = toKoreanTime(wh.time_open_from);
+  const formattedCloseTime = toKoreanTime(wh.time_open_to);
+
+  console.log("---->wh", wh);
+
+  return {
+    clinic_id: wh.clinic_id,
+    created_at: wh.created_at,
+    day_of_week: wh.day_of_week,
+    id: wh.id,
+    time_open_from: formattedOpenTime,
+    time_open_to: formattedCloseTime,
+    formattedTimeOpenNow: isClosed
+      ? "영업종료"
+      : `${formattedOpenTime} - ${formattedCloseTime}`, // Show "영업종료" if closed
+  };
 }

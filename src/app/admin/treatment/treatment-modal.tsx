@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -41,6 +41,7 @@ export const TreatmentModal = ({
     data?.image_url || ""
   );
   const [progress, setProgress] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<z.infer<typeof treatmentModalFormSchema>>({
     resolver: zodResolver(treatmentModalFormSchema),
@@ -137,25 +138,32 @@ export const TreatmentModal = ({
             name="image_url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Image</FormLabel>
+                <FormLabel>이미지</FormLabel> {/* Image */}
                 <FormControl>
                   <div>
                     <input
                       type="file"
                       accept="image/*"
+                      id="treatment-image-upload"
+                      ref={fileInputRef}
+                      style={{ display: "none" }}
                       onChange={(e) => handleImageChange(e, field.onChange)}
-                      className="block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100"
                     />
+                    <div className="flex gap-3 items-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2"
+                      >
+                        이미지 선택 {/* Select Image */}
+                      </Button>
+                    </div>
                     {imagePreview && (
                       <div className="mt-2">
                         <Image
                           src={imagePreview}
-                          alt="Preview"
+                          alt="미리보기" // Preview
                           className="rounded object-cover"
                           width={120}
                           height={120}

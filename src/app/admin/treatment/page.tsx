@@ -47,13 +47,7 @@ export default function TreatmentsPage() {
         onClose={() => setOpenModal(false)}
         onSuccess={() =>
           queryClient.invalidateQueries({
-            queryKey: [
-              "treatments",
-              page,
-              limit,
-              filters.treatment_name,
-              filters.date_range,
-            ],
+            queryKey: ["treatments"],
           })
         }
       />

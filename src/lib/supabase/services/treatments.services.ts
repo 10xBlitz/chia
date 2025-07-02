@@ -216,4 +216,20 @@ export async function updateTreatment(
   return data;
 }
 
-// searchClinicTreatments removed. Use getPaginatedClinicTreatments with { treatment_name: searchTerm } for searching.
+/**
+ * Soft deletes a treatment by setting its status to 'deleted'.
+ * @param id - The treatment's ID.
+ * @returns The updated treatment data.
+ * @example
+ * await softDeleteTreatment("123");
+ */
+export async function softDeleteTreatment(id: string) {
+  const { data, error } = await supabaseClient
+    .from("treatment")
+    .update({ status: "deleted" })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}

@@ -158,17 +158,6 @@ export default function CreateReservation() {
     enabled: !!clinic_id && !!selectedDayOfWeek,
   });
 
-  // workingHours will be an array with 0 or 1 item for the selected day
-  const todayHours = workingHours?.[0];
-  const { openHour, closeHour } =
-    todayHours && todayHours.time_open
-      ? parseOpenClose(todayHours.time_open)
-      : { openHour: 0, closeHour: 23 };
-  const allowedHours = Array.from(
-    { length: closeHour - openHour + 1 },
-    (_, i) => i + openHour
-  );
-
   useEffect(() => {
     if (workingHours?.length === 0) {
       form.setError("time", {
@@ -182,6 +171,29 @@ export default function CreateReservation() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workingHours]);
+
+  // Build allowedTimes: all 10-min slots from all working hour ranges for the selected day
+  const allowedTimes = (workingHours || [])
+    .flatMap((wh) => {
+      const [fromHour, fromMinute] = wh.time_open_from.split(":").map(Number);
+      const [toHour, toMinute] = wh.time_open_to.split(":").map(Number);
+      const slots: string[] = [];
+      let hour = fromHour;
+      let minute = fromMinute;
+      while (hour < toHour || (hour === toHour && minute <= toMinute)) {
+        const h = hour.toString().padStart(2, "0");
+        const m = minute.toString().padStart(2, "0");
+        slots.push(`${h}:${m}`);
+        minute += 10;
+        if (minute >= 60) {
+          minute = 0;
+          hour += 1;
+        }
+      }
+      return slots;
+    })
+    .filter((v, i, arr) => arr.indexOf(v) === i) // remove duplicates
+    .sort();
 
   return (
     <div className="flex flex-col min-h-dvh">
@@ -222,10 +234,9 @@ export default function CreateReservation() {
                     <FormItem>
                       <FormControl>
                         <KoreanTimePicker
-                          disabled={workingHours?.length === 0}
                           time={field.value}
                           setSelected={(e) => field.onChange(e)}
-                          allowedHours={allowedHours}
+                          allowedTimes={allowedTimes}
                         />
                       </FormControl>
                       <FormMessage />
@@ -408,21 +419,4 @@ export default function CreateReservation() {
       <BottomNavigation forceActiveIndex={2} />
     </div>
   );
-}
-
-// Parse open/close from time_open string (e.g., "09:00AM - 06:00PM ")
-function parseOpenClose(timeOpen: string) {
-  // Expects format: "09:00AM - 06:00PM "
-  const [open, close] = timeOpen.split("-").map((s) => s.trim());
-  // Convert to 24-hour
-  const parse = (t: string) => {
-    const match = t.match(/(\d{2}):(\d{2})(AM|PM)/i) || [];
-    const hour = match[1];
-    const ampm = match[3];
-    let h = parseInt(hour, 10);
-    if (ampm?.toUpperCase() === "PM" && h !== 12) h += 12;
-    if (ampm?.toUpperCase() === "AM" && h === 12) h = 0;
-    return h;
-  };
-  return { openHour: parse(open), closeHour: parse(close) };
 }

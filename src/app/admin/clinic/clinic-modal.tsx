@@ -51,13 +51,6 @@ import FormContactNumber from "@/components/form-ui/form-contact-number";
 // import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 
 import FormTextarea from "@/components/form-ui/form-textarea";
 import { Enums, TablesUpdate } from "@/lib/supabase/types";
@@ -69,6 +62,7 @@ import {
   insertClinicWorkingHours,
 } from "@/lib/supabase/services/working-hour.services";
 import type { ClinicImageFormValue } from "./clinic-modal.types";
+import { KoreanTimePicker } from "@/components/time-picker";
 
 export const ClinicModal = ({
   data,
@@ -125,14 +119,36 @@ export const ClinicModal = ({
               ? (
                   (data as Record<string, unknown>)["working_hour"] as Array<{
                     day_of_week: string;
-                    time_open: string;
+                    time_open_from: string;
+                    time_open_to: string;
                     note?: string;
                   }>
-                ).map((h) => ({
-                  day_of_week: h.day_of_week,
-                  time_open: h.time_open,
-                  note: h.note || "",
-                }))
+                ).reduce(
+                  (acc, h) => {
+                    // Group working hours by time range
+                    const timeKey = `${h.time_open_from}-${h.time_open_to}`;
+                    const existing = acc.find(
+                      (item) =>
+                        `${item.time_open_from}-${item.time_open_to}` ===
+                        timeKey
+                    );
+                    if (existing) {
+                      existing.selected_days.push(h.day_of_week);
+                    } else {
+                      acc.push({
+                        selected_days: [h.day_of_week],
+                        time_open_from: h.time_open_from,
+                        time_open_to: h.time_open_to,
+                      });
+                    }
+                    return acc;
+                  },
+                  [] as Array<{
+                    selected_days: string[];
+                    time_open_from: string;
+                    time_open_to: string;
+                  }>
+                )
               : [],
         }
       : {
@@ -594,11 +610,50 @@ export const ClinicModal = ({
                       {/* No clinic hours added yet. Click the plus icon to add a clinic hour. */}
                     </p>
                   )}
+                  {/* Show summary of assigned days */}
+                  {clinicHourFields.length > 0 && (
+                    <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm font-medium text-blue-800 mb-2">
+                        설정된 요일 현황 {/* Day Assignment Status */}
+                      </p>
+                      <div className="text-xs text-blue-700">
+                        {(() => {
+                          const allAssignedDays =
+                            form
+                              .getValues("clinic_hours")
+                              ?.flatMap((h) => h.selected_days || []) || [];
+                          const uniqueAssignedDays = [
+                            ...new Set(allAssignedDays),
+                          ];
+                          const unassignedDays = DAYS_OF_WEEK.filter(
+                            (day) => !uniqueAssignedDays.includes(day)
+                          );
+
+                          return (
+                            <div className="space-y-1">
+                              {uniqueAssignedDays.length > 0 && (
+                                <p>
+                                  <span className="font-medium">설정됨:</span>{" "}
+                                  {uniqueAssignedDays.join(", ")}
+                                </p>
+                              )}
+                              {unassignedDays.length > 0 && (
+                                <p>
+                                  <span className="font-medium">미설정:</span>{" "}
+                                  {unassignedDays.join(", ")}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
                   {clinicHourFields.map((item, index) => {
                     return (
                       <section
                         key={item.id + index}
-                        className="relative grid grid-cols-2 gap-3 items-stretch w-full border rounded-md p-4 mb-2"
+                        className="relative grid grid-cols-1 gap-3 items-stretch w-full border rounded-md p-4 mb-2"
                       >
                         {/* 오른쪽 상단 삭제 버튼 (Delete button at top right) */}
                         <Button
@@ -609,64 +664,134 @@ export const ClinicModal = ({
                         >
                           <Trash2Icon className="h-4 w-4" />
                         </Button>
-                        {/* 요일 선택 (Day of Week Select with custom option) */}
-                        <section className=" w-full flex flex-col gap-2">
-                          <FormField
-                            control={form.control}
-                            name={`clinic_hours.${index}.day_of_week`}
-                            disabled={mutation.status === "pending"}
-                            render={({ field }) => (
+
+                        {/* 요일 선택 (Day of Week Checkboxes) */}
+                        <FormField
+                          control={form.control}
+                          name={`clinic_hours.${index}.selected_days`}
+                          disabled={mutation.status === "pending"}
+                          render={({ field }) => {
+                            // Get current form values to calculate disabled days in real-time
+                            const currentFormValues =
+                              form.getValues("clinic_hours") || [];
+                            const allSelectedDays = currentFormValues
+                              .filter((_, idx) => idx !== index)
+                              .flatMap((hours) => hours.selected_days || []);
+
+                            return (
                               <FormItem className="flex flex-col">
                                 <FormLabel className="text-[16px] font-pretendard-600">
-                                  요일
-                                </FormLabel>{" "}
-                                {/* Day */}
-                                <Select
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                >
-                                  <SelectTrigger className="w-full min-h-[45px]">
-                                    <SelectValue placeholder="요일을 선택하거나 직접 입력하세요" />{" "}
-                                    {/* Select day or custom */}
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {DAYS_OF_WEEK.map((d) => (
-                                      <SelectItem
-                                        key={d}
-                                        value={d}
-                                        className="cursor-pointer"
+                                  요일 선택 {/* Select Days */}
+                                </FormLabel>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {DAYS_OF_WEEK.map((day) => {
+                                    const isDisabled =
+                                      allSelectedDays.includes(day);
+                                    const isChecked =
+                                      field.value?.includes(day) || false;
+
+                                    return (
+                                      <label
+                                        key={day}
+                                        className={`flex items-center space-x-2 p-2 border rounded cursor-pointer transition-colors ${
+                                          isDisabled && !isChecked
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                                            : isChecked
+                                            ? "bg-blue-50 border-blue-300"
+                                            : "hover:bg-gray-50 border-gray-300"
+                                        }`}
                                       >
-                                        {d}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                        <input
+                                          type="checkbox"
+                                          disabled={isDisabled && !isChecked}
+                                          checked={isChecked}
+                                          onChange={(e) => {
+                                            const currentValue =
+                                              field.value || [];
+                                            let newValue;
+                                            if (e.target.checked) {
+                                              newValue = [...currentValue, day];
+                                            } else {
+                                              newValue = currentValue.filter(
+                                                (d) => d !== day
+                                              );
+                                            }
+                                            field.onChange(newValue);
+
+                                            // Trigger re-render of all clinic hour fields to update disabled states
+                                            // This ensures other working hour entries immediately see the updated availability
+                                            setTimeout(() => {
+                                              form.trigger("clinic_hours");
+                                            }, 0);
+                                          }}
+                                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm">{day}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                                <FormMessage />
+                                {/* Show a helpful message if no days are selected */}
+                                {(!field.value || field.value.length === 0) && (
+                                  <p className="text-xs text-amber-600 mt-1">
+                                    최소 하나의 요일을 선택해주세요.{" "}
+                                    {/* Please select at least one day. */}
+                                  </p>
+                                )}
+                                {/* Show selected days count */}
+                                {field.value && field.value.length > 0 && (
+                                  <p className="text-xs text-green-600 mt-1">
+                                    선택된 요일: {field.value.length}개{" "}
+                                    {/* Selected days: {count} */}
+                                  </p>
+                                )}
+                              </FormItem>
+                            );
+                          }}
+                        />
+
+                        {/* 진료 시간 (Operating Hours) */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <FormField
+                            control={form.control}
+                            name={`clinic_hours.${index}.time_open_from`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  진료 시작 시간 {/* Clinic Start Time */}
+                                </FormLabel>
+                                <FormControl>
+                                  <KoreanTimePicker
+                                    disabled={mutation.status === "pending"}
+                                    time={field.value}
+                                    setSelected={(e) => field.onChange(e)}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-
-                          {/* 시간 (Time) */}
-                          <FormInput
+                          <FormField
                             control={form.control}
-                            name={`clinic_hours.${index}.time_open`}
-                            label="진료 시간" // Clinic Hours
-                            placeholder="예: 09:00 - 18:00" // e.g. 09:00 - 18:00
-                            type="text"
-                            disabled={mutation.status === "pending"}
+                            name={`clinic_hours.${index}.time_open_to`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  진료 종료 시간 {/* Clinic End Time */}
+                                </FormLabel>
+                                <FormControl>
+                                  <KoreanTimePicker
+                                    disabled={mutation.status === "pending"}
+                                    time={field.value}
+                                    setSelected={(e) => field.onChange(e)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </section>
-
-                        {/* 비고 (Note) */}
-                        <FormTextarea
-                          formItemClassName="row-span-2 flex flex-col"
-                          inputClassName="flex-1"
-                          control={form.control}
-                          name={`clinic_hours.${index}.note`}
-                          label="비고" // Note
-                          disabled={mutation.status === "pending"}
-                          placeholder="예: 점심시간 없음" // e.g. No lunch break
-                        />
+                        </div>
                       </section>
                     );
                   })}
@@ -676,9 +801,9 @@ export const ClinicModal = ({
                     disabled={mutation.status === "pending"}
                     onClick={() =>
                       appendClinicHour({
-                        day_of_week: "",
-                        time_open: "",
-                        note: "",
+                        selected_days: [],
+                        time_open_from: "",
+                        time_open_to: "",
                       })
                     }
                   >
@@ -785,11 +910,13 @@ async function updateClinicWithImages(
   // Save working hours
   setProgress?.("진료시간 저장 중..."); // Saving clinic working hours...
   if (values.clinic_hours && values.clinic_hours.length > 0) {
-    const workingHours = values.clinic_hours.map((h) => ({
-      day_of_week: h.day_of_week as Enums<"day_of_week">, // Cast to the correct type
-      time_open: h.time_open,
-      note: h.note,
-    }));
+    const workingHours = values.clinic_hours.flatMap((h) =>
+      h.selected_days.map((day) => ({
+        day_of_week: day as Enums<"day_of_week">, // Cast to the correct type
+        time_open_from: h.time_open_from,
+        time_open_to: h.time_open_to,
+      }))
+    );
 
     await deleteClinicWorkingHours(clinicId);
     await insertClinicWorkingHours(clinicId, workingHours);
@@ -863,11 +990,13 @@ async function addClinicWithImages(
 
   // Save working hours
   if (values.clinic_hours && values.clinic_hours.length > 0) {
-    const workingHours = values.clinic_hours.map((h) => ({
-      day_of_week: h.day_of_week as Enums<"day_of_week">, // Cast to the correct type
-      time_open: h.time_open,
-      note: h.note,
-    }));
+    const workingHours = values.clinic_hours.flatMap((h) =>
+      h.selected_days.map((day) => ({
+        day_of_week: day as Enums<"day_of_week">, // Cast to the correct type
+        time_open_from: h.time_open_from,
+        time_open_to: h.time_open_to,
+      }))
+    );
     await insertClinicWorkingHours(newClinicId, workingHours);
   }
 

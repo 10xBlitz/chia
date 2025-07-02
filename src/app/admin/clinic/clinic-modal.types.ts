@@ -15,9 +15,9 @@ export const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
 
 // Add ClinicHour type for typing
 export type ClinicHour = {
-  day_of_week: string;
-  time_open: string;
-  note?: string;
+  selected_days: string[];
+  time_open_from: string;
+  time_open_to: string;
 };
 
 // Add a type for the image object with optional oldUrl for updated images
@@ -113,15 +113,17 @@ export const formSchema = z.object({
   clinic_hours: z
     .array(
       z.object({
-        day_of_week: z
+        selected_days: z
+          .array(z.string())
+          .min(1, "최소 하나의 요일을 선택해주세요."), // Please select at least one day.
+        time_open_from: z
           .string()
-          .min(1, "요일을 입력하세요.") // Please enter the day of week.
-          .max(20, "요일은 20자 이내여야 합니다."), // Day of week must be 20 characters or less.
-        time_open: z
-          .string()
-          .min(1, "진료 시간을 입력하세요.") // Please enter the clinic hours.
+          .min(1, "진료 시작 시간을 입력하세요.") // Please enter the clinic start time.
           .max(50, "진료 시간은 50자 이내여야 합니다."), // Clinic hours must be 50 characters or less.
-        note: z.string().max(100, "비고는 100자 이내여야 합니다.").optional(), // Note must be 100 characters or less.
+        time_open_to: z
+          .string()
+          .min(1, "진료 종료 시간을 입력하세요.") // Please enter the clinic end time.
+          .max(50, "진료 시간은 50자 이내여야 합니다."), // Clinic hours must be 50 characters or less.
       })
     )
     .optional(),

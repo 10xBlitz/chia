@@ -12,8 +12,11 @@ import { useState } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { TreatmentModal } from "./treatment-modal";
 import { TreatmentTable } from "./columns";
-import { supabaseClient } from "@/lib/supabase/client";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import {
+  removeTreatmentImage,
+  softDeleteTreatment,
+} from "@/lib/supabase/services/treatments.services";
 interface CellActionProps {
   data: TreatmentTable;
 }
@@ -28,11 +31,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   // Use Tanstack mutation for delete
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabaseClient
-        .from("treatment")
-        .update({ status: "deleted" })
-        .eq("id", data.id);
-      if (error) throw error;
+      await softDeleteTreatment(data.id as string);
+      if (data.image_url) await removeTreatmentImage(data.image_url);
     },
     onSuccess: () => {
       setShowDeleteModal(false);

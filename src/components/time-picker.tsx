@@ -22,6 +22,7 @@ type KoreanTimePickerProps = {
   disabled?: boolean;
   className?: string;
   allowedHours?: number[]; // Only show these hours if provided
+  allowedTimes?: string[]; // Only allow these exact times (e.g., ["09:00", "09:30"])
 };
 
 export function KoreanTimePicker({
@@ -30,6 +31,7 @@ export function KoreanTimePicker({
   disabled,
   className,
   allowedHours,
+  allowedTimes,
 }: KoreanTimePickerProps) {
   const [hour, setHour] = useState<number | null>(null);
   const [minute, setMinute] = useState<number | null>(null);
@@ -54,8 +56,33 @@ export function KoreanTimePicker({
     }
   }, [hour, minute, setSelected]);
 
-  const hours = allowedHours ?? Array.from({ length: 24 }, (_, i) => i);
-  const minutes = Array.from({ length: 60 }, (_, i) => i);
+  // If allowedTimes is provided, filter hours/minutes accordingly
+  let hours: number[];
+  let minutes: number[];
+  if (allowedTimes && allowedTimes.length > 0) {
+    // Extract unique hours and minutes from allowedTimes
+    const hourSet = new Set<number>();
+    const minuteSet = new Set<number>();
+    allowedTimes.forEach((t) => {
+      const [h, m] = t.split(":").map(Number);
+      hourSet.add(h);
+      minuteSet.add(m);
+    });
+    hours = Array.from(hourSet).sort((a, b) => a - b);
+    // If an hour is selected, only show minutes for that hour
+    if (hour !== null) {
+      minutes = allowedTimes
+        .filter((t) => Number(t.split(":")[0]) === hour)
+        .map((t) => Number(t.split(":")[1]))
+        .filter((v, i, arr) => arr.indexOf(v) === i)
+        .sort((a, b) => a - b);
+    } else {
+      minutes = Array.from(minuteSet).sort((a, b) => a - b);
+    }
+  } else {
+    hours = allowedHours ?? Array.from({ length: 24 }, (_, i) => i);
+    minutes = Array.from({ length: 60 }, (_, i) => i);
+  }
 
   return (
     <div className="flex gap-2">
@@ -80,6 +107,14 @@ export function KoreanTimePicker({
                   onSelect={() => {
                     setHour(h);
                     setOpenHour(false);
+                    // If allowedTimes, auto-select the first valid minute for this hour
+                    if (allowedTimes && allowedTimes.length > 0) {
+                      const validMinutes = allowedTimes
+                        .filter((t) => Number(t.split(":")[0]) === h)
+                        .map((t) => Number(t.split(":")[1]))
+                        .sort((a, b) => a - b);
+                      if (validMinutes.length > 0) setMinute(validMinutes[0]);
+                    }
                   }}
                 >
                   {h}
@@ -89,7 +124,7 @@ export function KoreanTimePicker({
           </Command>
         </PopoverContent>
       </Popover>
-
+      <span className="text-2xl translate-y-1">:</span>
       {/* Minute Picker */}
       <Popover open={openMinute} onOpenChange={setOpenMinute}>
         <PopoverTrigger asChild>
@@ -105,17 +140,26 @@ export function KoreanTimePicker({
           <Command>
             <CommandInput placeholder="분 검색..." />
             <CommandList>
-              {minutes.map((m) => (
-                <CommandItem
-                  key={m}
-                  onSelect={() => {
-                    setMinute(m);
-                    setOpenMinute(false);
-                  }}
-                >
-                  {m.toString().padStart(2, "0")}
-                </CommandItem>
-              ))}
+              {minutes.map((m) => {
+                // If allowedTimes, only show minutes that combine with selected hour to a valid time
+                if (allowedTimes && allowedTimes.length > 0 && hour !== null) {
+                  const timeStr = `${hour.toString().padStart(2, "0")}:${m
+                    .toString()
+                    .padStart(2, "0")}`;
+                  if (!allowedTimes.includes(timeStr)) return null;
+                }
+                return (
+                  <CommandItem
+                    key={m}
+                    onSelect={() => {
+                      setMinute(m);
+                      setOpenMinute(false);
+                    }}
+                  >
+                    {m.toString().padStart(2, "0")}
+                  </CommandItem>
+                );
+              })}
             </CommandList>
           </Command>
         </PopoverContent>

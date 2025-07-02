@@ -708,24 +708,24 @@ export type Database = {
           created_at: string
           day_of_week: Database["public"]["Enums"]["day_of_week"]
           id: string
-          note: string | null
-          time_open: string
+          time_open_from: string
+          time_open_to: string
         }
         Insert: {
           clinic_id: string
           created_at?: string
           day_of_week: Database["public"]["Enums"]["day_of_week"]
           id?: string
-          note?: string | null
-          time_open: string
+          time_open_from?: string
+          time_open_to?: string
         }
         Update: {
           clinic_id?: string
           created_at?: string
           day_of_week?: Database["public"]["Enums"]["day_of_week"]
           id?: string
-          note?: string | null
-          time_open?: string
+          time_open_from?: string
+          time_open_to?: string
         }
         Relationships: [
           {
