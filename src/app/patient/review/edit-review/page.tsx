@@ -14,17 +14,14 @@ import {
   fetchReviewById,
   updateReview,
 } from "@/lib/supabase/services/reviews.services";
-import {
-  deleteFileFromSupabase,
-  uploadFileToSupabase,
-} from "@/lib/supabase/services/upload-file.services";
+
 import FormTextarea from "@/components/form-ui/form-textarea";
 import { SelectItem } from "@/components/ui/select";
 import { Form } from "@/components/ui/form";
 import FormSelect from "@/components/form-ui/form-select";
 import FormStarRating from "@/components/form-ui/form-star-rating";
-import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
-import { useEffect } from "react";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
+import EditReviewSkeleton from "./edit-review-skeleton";
 
 // New type for image field
 
@@ -39,9 +36,9 @@ const reviewSchema = z.object({
     .max(MAX_TEXT, `최대 ${MAX_TEXT}자까지 입력할 수 있습니다.`),
   images: z.array(
     z.object({
-      url: z.string(),
-      file: z.any().optional(),
-      status: z.enum(["old", "new", "deleted"]),
+      status: z.enum(["old", "new", "deleted", "updated"]),
+      file: z.union([z.string(), z.instanceof(File)]),
+      oldUrl: z.string().optional(),
     })
   ),
 });
@@ -64,16 +61,12 @@ export default function EditReviewPage() {
   const searchParams = useSearchParams();
   const reviewId = searchParams.get("review_id") || "";
   const user = useUserStore((state) => state.user);
-  const user_id = user?.id || "";
   const queryClient = useQueryClient();
 
   // Fetch review data
   const { data: reviewData, isLoading: reviewLoading } = useQuery({
     queryKey: ["review", reviewId],
-    queryFn: async () => {
-      if (!reviewId) return null;
-      return fetchReviewById(reviewId);
-    },
+    queryFn: () => fetchReviewById(reviewId),
     enabled: !!reviewId,
   });
 
@@ -82,98 +75,54 @@ export default function EditReviewPage() {
   const { data: treatmentsData } = useQuery({
     queryKey: ["clinic-treatments", clinic_id],
     queryFn: async () => {
-      if (!clinic_id) return [];
       const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
-      return res.data || [];
+      return res.data;
     },
     enabled: !!clinic_id && !!reviewData,
   });
 
   // Initialize form with fetched review data
+
+  console.log("Fetched review data:", reviewData);
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
-    defaultValues: {
-      clinic_treatment_id: undefined,
-      rating: 4,
-      review: "",
-      images: [],
-    },
     values: reviewData
       ? {
-          clinic_treatment_id: reviewData.clinic_treatment_id,
+          clinic_treatment_id: reviewData.clinic_treatment_id || "",
           rating: reviewData.rating || 4,
           review: reviewData.review || "",
           images: Array.isArray(reviewData.images)
-            ? reviewData.images.map((url: string) => ({ url, status: "old" }))
+            ? reviewData.images.map((url: string) => ({
+                status: "old",
+                file: url,
+              }))
             : [],
         }
-      : undefined,
+      : {
+          clinic_treatment_id: "",
+          rating: 4,
+          review: "",
+          images: [],
+        },
   });
-
-  useEffect(() => {
-    if (reviewData) {
-      form.reset({
-        clinic_treatment_id: reviewData.clinic_treatment_id,
-        rating: reviewData.rating || 4,
-        review: reviewData.review || "",
-        images: Array.isArray(reviewData.images)
-          ? reviewData.images.map((url: string) => ({ url, status: "old" }))
-          : [],
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reviewData]);
 
   const mutation = useMutation({
     mutationFn: async (values: ReviewFormValues) => {
-      if (!user_id) throw new Error("로그인이 필요합니다."); // Login required
+      if (!user?.id) throw new Error("로그인이 필요합니다."); // Login required
       if (!reviewData) throw new Error("리뷰 정보를 불러올 수 없습니다."); // Review not loaded
 
-      // 1. Find removed image URLs (old images marked as deleted)
-      const removedUrls = values.images
-        .filter(
-          (img) => img.status === "deleted" && !img.url.startsWith("data:")
-        )
-        .map((img) => img.url);
-      for (const url of removedUrls) {
-        try {
-          await deleteFileFromSupabase(url, { bucket: "review-images" });
-        } catch (err) {
-          console.error("Failed to delete image from storage", err);
-        }
-      }
-
-      // 2. Upload new images and collect their Supabase URLs
-      const uploadedUrls: string[] = [];
-      for (const img of values.images) {
-        if (img.status === "new" && img.file) {
-          const url = await uploadFileToSupabase(img.file, {
-            bucket: "review-images",
-            folder: user_id,
-            allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
-            maxSizeMB: 10,
-          });
-          uploadedUrls.push(url);
-        }
-      }
-
-      // 3. Only keep Supabase URLs for old images not deleted
-      const supabaseUrls = values.images
-        .filter((img) => img.status === "old")
-        .map((img) => img.url);
-
-      // 4. Save the combined array
+      // 3. Save the combined array
       return updateReview({
         review_id: reviewId,
         rating: values.rating,
         review: values.review,
         clinic_treatment_id: values.clinic_treatment_id,
-        images: [...supabaseUrls, ...uploadedUrls],
+        images: values.images,
       });
     },
     onSuccess: () => {
       toast.success("리뷰가 수정되었습니다."); // Review updated successfully.
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ["review", user?.id] });
       router.back();
     },
     onError: (err) => {
@@ -190,8 +139,7 @@ export default function EditReviewPage() {
     return (
       <>
         <HeaderWithBackButton title="리뷰 수정" /> {/* Edit Review */}
-        <div className="p-4 text-center text-gray-400">로딩중...</div>{" "}
-        {/* Loading... */}
+        <EditReviewSkeleton />
       </>
     );
   }
@@ -222,7 +170,7 @@ export default function EditReviewPage() {
           </div>
           {/* Image upload */}
           <div className="px-4 mt-6">
-            <FormMultiImageUpload
+            <FormMultiImageUploadV3
               control={form.control}
               name="images"
               label="사진 첨부 (선택)" // Image upload (optional)

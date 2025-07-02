@@ -1,6 +1,10 @@
 import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { v4 as uuidv4 } from "uuid";
+import {
+  deleteFileFromSupabase,
+  uploadFileToSupabase,
+} from "@/lib/supabase/services/upload-file.services";
 
 const BUCKET_NAME = "review-images";
 const MAX_FILE_SIZE_MB = 50;
@@ -226,16 +230,64 @@ export async function updateReview({
   rating: number;
   review?: string;
   clinic_treatment_id?: string;
-  images?: string[];
+  images?: {
+    status: "old" | "new" | "deleted" | "updated";
+    file: string | File;
+    oldUrl?: string;
+  }[];
 }) {
-  // No upload logic needed, just update the images array in the DB
+  // 1. Upload/update/delete images and collect their Supabase URLs (preserve order)
+  const finalImageUrls: string[] = [];
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i];
+    if (img.status === "old" && typeof img.file === "string") {
+      finalImageUrls.push(img.file);
+      continue;
+    }
+
+    if (img.status === "new" && img.file instanceof File) {
+      const url = await uploadFileToSupabase(img.file, {
+        bucket: BUCKET_NAME,
+        folder: review_id,
+        allowedMimeTypes: ALLOWED_MIME_TYPES,
+        maxSizeMB: MAX_FILE_SIZE_MB,
+      });
+      finalImageUrls.push(url);
+      continue;
+    }
+
+    if (img.status === "updated" && img.file instanceof File) {
+      if (img.oldUrl) {
+        await deleteFileFromSupabase(img.oldUrl, { bucket: BUCKET_NAME });
+      }
+      const url = await uploadFileToSupabase(img.file, {
+        bucket: BUCKET_NAME,
+        folder: review_id,
+        allowedMimeTypes: ALLOWED_MIME_TYPES,
+        maxSizeMB: MAX_FILE_SIZE_MB,
+      });
+      finalImageUrls.push(url);
+      continue;
+    }
+
+    if (
+      img.status === "deleted" &&
+      typeof img.file === "string" &&
+      !img.file.startsWith("data:")
+    ) {
+      await deleteFileFromSupabase(img.file, { bucket: BUCKET_NAME });
+      continue;
+    }
+  }
+
+  // 3. Save the combined array
   const { error: updateError } = await supabaseClient
     .from("review")
     .update({
       rating,
       review,
       clinic_treatment_id,
-      images,
+      images: finalImageUrls,
     })
     .eq("id", review_id);
   if (updateError) {
