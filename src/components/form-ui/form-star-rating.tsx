@@ -7,26 +7,33 @@ import {
   FormControl,
   FormMessage,
 } from "../ui/form";
+import React from "react";
 
 /**
  * FormStarRating - A reusable star rating field for React Hook Form.
  *
  * @example
- * <FormStarRating control={form.control} name="rating" label="평점" />
- * // <FormStarRating control={form.control} name="rating" label="Rating" />
+ * <FormStarRating control={form.control} name="rating" label="평점" max={5} />
+ * <FormStarRating control={form.control} name="rating" label="Rating" max={10} icon={{ filled: <Star ... />, empty: <Star ... /> }} />
  *
  * @param control - The react-hook-form control object
  * @param name - The field name (string)
  * @param label - The label for the rating (string)
+ * @param max - The maximum rating value (number, default 5)
+ * @param icon - Optional: { filled: ReactNode, empty: ReactNode } for custom icons
  */
 export default function FormStarRating<T extends FieldValues>({
   control,
   name,
   label,
+  max = 5,
+  icon,
 }: {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
+  max?: number;
+  icon?: { filled: React.ReactNode; empty: React.ReactNode };
 }) {
   // 별점 선택 컴포넌트 (Star rating component)
   return (
@@ -46,7 +53,7 @@ export default function FormStarRating<T extends FieldValues>({
             <FormLabel>{label}</FormLabel>
             <FormControl>
               <div className="flex items-center gap-1 mt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {Array.from({ length: max }, (_, i) => i + 1).map((star) => (
                   <button
                     key={star}
                     type="button"
@@ -56,7 +63,18 @@ export default function FormStarRating<T extends FieldValues>({
                       star <= value ? "text-yellow-400" : "text-gray-300"
                     }
                   >
-                    <Star size={28} fill={star <= value ? "#facc15" : "none"} />
+                    {icon ? (
+                      star <= value ? (
+                        icon.filled
+                      ) : (
+                        icon.empty
+                      )
+                    ) : (
+                      <Star
+                        size={28}
+                        fill={star <= value ? "#facc15" : "none"}
+                      />
+                    )}
                   </button>
                 ))}
               </div>

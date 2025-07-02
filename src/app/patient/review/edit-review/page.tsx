@@ -20,7 +20,7 @@ import { SelectItem } from "@/components/ui/select";
 import { Form } from "@/components/ui/form";
 import FormSelect from "@/components/form-ui/form-select";
 import FormStarRating from "@/components/form-ui/form-star-rating";
-import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload";
 import EditReviewSkeleton from "./edit-review-skeleton";
 
 // New type for image field

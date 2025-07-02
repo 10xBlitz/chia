@@ -50,7 +50,7 @@ import FormInput from "@/components/form-ui/form-input";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
 // import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
-import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload";
 import {
   Select,
   SelectTrigger,

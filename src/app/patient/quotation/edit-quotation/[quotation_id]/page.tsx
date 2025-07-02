@@ -15,7 +15,7 @@ import FormGender from "@/components/form-ui/form-gender";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormAddress from "@/components/form-ui/form-address";
 import FormTextarea from "@/components/form-ui/form-textarea";
-import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload-v3";
+import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload";
 import { SelectItem } from "@/components/ui/select";
 import {
   getSingleQuotation,

@@ -1,6 +1,5 @@
 import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
-import { v4 as uuidv4 } from "uuid";
 import {
   deleteFileFromSupabase,
   uploadFileToSupabase,
@@ -104,79 +103,65 @@ export async function getPaginatedReviews(
   };
 }
 
-export type CreateReviewParams = {
-  rating: number;
-  review?: string;
-  clinic_treatment_id: string;
-  user_id: string;
-  images?: File[];
-};
-
 export async function createReview({
   rating,
   review,
   clinic_treatment_id,
   user_id,
   images = [],
-}: CreateReviewParams) {
-  const uploadedImageUrls: string[] = [];
-  console.log("createReview", {
-    rating,
-    review,
-    clinic_treatment_id,
-    user_id,
-    images: images.map((img) => img.name),
-  });
-
-  for (const file of images) {
-    // Validate file type
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`);
+}: {
+  rating: number;
+  review?: string;
+  clinic_treatment_id: string;
+  user_id: string;
+  images?: {
+    status: "old" | "new" | "deleted" | "updated";
+    file: string | File;
+    oldUrl?: string;
+  }[];
+}) {
+  const finalImageUrls: string[] = [];
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i];
+    if (img.status === "old" && typeof img.file === "string") {
+      finalImageUrls.push(img.file);
+      continue;
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      throw new Error(`이미지 크기는 ${MAX_FILE_SIZE_MB}MB 이하만 허용됩니다.`);
-    }
-
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${uuidv4()}.${fileExt}`;
-    const filePath = `${user_id}/${fileName}`;
-
-    const { error: uploadError } = await supabaseClient.storage
-      .from(BUCKET_NAME)
-      .upload(filePath, file, {
-        contentType: file.type,
-        upsert: true,
+    if (img.status === "new" && img.file instanceof File) {
+      const url = await uploadFileToSupabase(img.file, {
+        bucket: BUCKET_NAME,
+        folder: user_id,
+        allowedMimeTypes: ALLOWED_MIME_TYPES,
+        maxSizeMB: MAX_FILE_SIZE_MB,
       });
-
-    if (uploadError) {
-      throw new Error(`이미지 업로드 실패: ${uploadError.message}`);
+      finalImageUrls.push(url);
+      continue;
     }
 
-    const { data: publicUrlData } = supabaseClient.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
-
-    if (!publicUrlData.publicUrl) {
-      throw new Error("이미지 URL 생성 실패");
+    if (img.status === "updated" && img.file instanceof File) {
+      // No delete needed for create
+      const url = await uploadFileToSupabase(img.file, {
+        bucket: BUCKET_NAME,
+        folder: user_id,
+        allowedMimeTypes: ALLOWED_MIME_TYPES,
+        maxSizeMB: MAX_FILE_SIZE_MB,
+      });
+      finalImageUrls.push(url);
+      continue;
     }
-
-    uploadedImageUrls.push(publicUrlData.publicUrl);
+    // deleted images are not added
   }
-
   const { error: insertError } = await supabaseClient.from("review").insert({
     rating,
     review,
     clinic_treatment_id: clinic_treatment_id,
-    images: uploadedImageUrls,
+    images: finalImageUrls,
     patient_id: user_id,
   });
-
   if (insertError) {
     throw new Error(`리뷰 등록 실패: ${insertError.message}`);
   }
-
   return { success: true };
 }
 
