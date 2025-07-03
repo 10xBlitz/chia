@@ -166,14 +166,14 @@ export default function ClinicSingleViewPage() {
       setIsFavorite(isFavorite);
       setFavoriteId(favoriteId);
     };
+
     checkFavorite();
 
     if (clinic?.id) {
       const wh = getWorkingHourToday(clinic?.working_hour);
       setWorkingHourToday(wh);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, clinic?.id]);
+  }, [user?.id, clinic?.id, clinic?.working_hour]);
 
   // Copy address to clipboard
   const handleCopyAddress = () => {

@@ -650,6 +650,18 @@ export const ClinicModal = ({
                     </div>
                   )}
                   {clinicHourFields.map((item, index) => {
+                    // --- Add validation: from < to ---
+                    // const from = form.watch(
+                    //   `clinic_hours.${index}.time_open_from`
+                    // );
+                    // const to = form.watch(`clinic_hours.${index}.time_open_to`);
+                    // let isTimeInvalid = false;
+                    // if (from && to) {
+                    //   const [fromH, fromM] = from.split(":").map(Number);
+                    //   const [toH, toM] = to.split(":").map(Number);
+                    //   isTimeInvalid =
+                    //     fromH > toH || (fromH === toH && fromM >= toM);
+                    // }
                     return (
                       <section
                         key={item.id + index}
@@ -717,12 +729,7 @@ export const ClinicModal = ({
                                               );
                                             }
                                             field.onChange(newValue);
-
-                                            // Trigger re-render of all clinic hour fields to update disabled states
-                                            // This ensures other working hour entries immediately see the updated availability
-                                            setTimeout(() => {
-                                              form.trigger("clinic_hours");
-                                            }, 0);
+                                            form.trigger("clinic_hours"); // Re-validate on day change for UI update
                                           }}
                                           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                         />
@@ -792,6 +799,12 @@ export const ClinicModal = ({
                             )}
                           />
                         </div>
+                        {false && (
+                          <p className="text-xs text-red-600 mt-2">
+                            시작 시간은 종료 시간보다 빨라야 합니다.{" "}
+                            {/* Start time must be before end time. */}
+                          </p>
+                        )}
                       </section>
                     );
                   })}

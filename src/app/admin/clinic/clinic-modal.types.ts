@@ -1,6 +1,12 @@
 import { Enums } from "@/lib/supabase/types";
 import { z } from "zod";
 
+// Utility function to convert time string (HH:mm) to minutes for comparison
+export const timeStringToMinutes = (timeString: string): number => {
+  const [hours, minutes] = timeString.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
 // 요일을 한글로, 영어 주석 추가 (Days of week in Korean, with English comments)
 export const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
   "월요일", // Monday
@@ -112,19 +118,39 @@ export const formSchema = z.object({
     ),
   clinic_hours: z
     .array(
-      z.object({
-        selected_days: z
-          .array(z.string())
-          .min(1, "최소 하나의 요일을 선택해주세요."), // Please select at least one day.
-        time_open_from: z
-          .string()
-          .min(1, "진료 시작 시간을 입력하세요.") // Please enter the clinic start time.
-          .max(50, "진료 시간은 50자 이내여야 합니다."), // Clinic hours must be 50 characters or less.
-        time_open_to: z
-          .string()
-          .min(1, "진료 종료 시간을 입력하세요.") // Please enter the clinic end time.
-          .max(50, "진료 시간은 50자 이내여야 합니다."), // Clinic hours must be 50 characters or less.
-      })
+      z
+        .object({
+          selected_days: z
+            .array(z.string())
+            .min(1, "최소 하나의 요일을 선택해주세요."), // Please select at least one day.
+          time_open_from: z
+            .string()
+            .min(1, "진료 시작 시간을 입력하세요.") // Please enter the clinic start time.
+            .max(50, "진료 시간은 50자 이내여야 합니다."), // Clinic hours must be 50 characters or less.
+          time_open_to: z
+            .string()
+            .min(1, "진료 종료 시간을 입력하세요.") // Please enter the clinic end time.
+            .max(50, "진료 시간은 50자 이내여야 합니다."), // Clinic hours must be 50 characters or less.
+        })
+        .refine(
+          (hour) => {
+            // Individual hour validation: from time should be less than to time
+            const fromTime = hour.time_open_from;
+            const toTime = hour.time_open_to;
+
+            if (!fromTime || !toTime) return true; // Let required validation handle empty fields
+
+            // Convert time strings to minutes for comparison
+            const fromMinutes = timeStringToMinutes(fromTime);
+            const toMinutes = timeStringToMinutes(toTime);
+
+            return fromMinutes < toMinutes;
+          },
+          {
+            message: "진료 시작 시간은 종료 시간보다 빨라야 합니다.", // Start time must be earlier than end time.
+            path: ["time_open_from"], // Show error on the from field
+          }
+        )
     )
     .optional(),
 });
