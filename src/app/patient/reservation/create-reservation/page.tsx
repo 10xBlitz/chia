@@ -97,7 +97,7 @@ export default function CreateReservation() {
   const form = useForm<ReservationFormValues>({
     resolver: zodResolver(reservationSchema),
     defaultValues: {
-      date: new Date(),
+      date: undefined,
       time: "",
       clinicTreatment: "",
       consultationType: "",
@@ -173,27 +173,36 @@ export default function CreateReservation() {
   }, [workingHours]);
 
   // Build allowedTimes: all 10-min slots from all working hour ranges for the selected day
-  const allowedTimes = (workingHours || [])
-    .flatMap((wh) => {
-      const [fromHour, fromMinute] = wh.time_open_from.split(":").map(Number);
-      const [toHour, toMinute] = wh.time_open_to.split(":").map(Number);
-      const slots: string[] = [];
-      let hour = fromHour;
-      let minute = fromMinute;
-      while (hour < toHour || (hour === toHour && minute <= toMinute)) {
-        const h = hour.toString().padStart(2, "0");
-        const m = minute.toString().padStart(2, "0");
-        slots.push(`${h}:${m}`);
-        minute += 10;
-        if (minute >= 60) {
-          minute = 0;
-          hour += 1;
+  const [allowedTimes, setAllowedTimes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!workingHours) {
+      setAllowedTimes([]);
+      return;
+    }
+    const slots = (workingHours || [])
+      .flatMap((wh) => {
+        const [fromHour, fromMinute] = wh.time_open_from.split(":").map(Number);
+        const [toHour, toMinute] = wh.time_open_to.split(":").map(Number);
+        const slots: string[] = [];
+        let hour = fromHour;
+        let minute = fromMinute;
+        while (hour < toHour || (hour === toHour && minute <= toMinute)) {
+          const h = hour.toString().padStart(2, "0");
+          const m = minute.toString().padStart(2, "0");
+          slots.push(`${h}:${m}`);
+          minute += 10;
+          if (minute >= 60) {
+            minute = 0;
+            hour += 1;
+          }
         }
-      }
-      return slots;
-    })
-    .filter((v, i, arr) => arr.indexOf(v) === i) // remove duplicates
-    .sort();
+        return slots;
+      })
+      .filter((v, i, arr) => arr.indexOf(v) === i) // remove duplicates
+      .sort();
+    setAllowedTimes(slots);
+  }, [workingHours]);
 
   return (
     <div className="flex flex-col min-h-dvh">

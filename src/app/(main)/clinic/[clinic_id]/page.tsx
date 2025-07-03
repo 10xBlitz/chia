@@ -198,8 +198,6 @@ export default function ClinicSingleViewPage() {
     );
   }
 
-  console.log("----->222222clinic", clinic);
-
   if (clinicError) {
     return (
       <MobileLayout>
