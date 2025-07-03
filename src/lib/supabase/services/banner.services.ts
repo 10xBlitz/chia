@@ -10,11 +10,20 @@ export type BannerFilter = Partial<Tables<"banner">> & {
 
 export async function getPaginatedBanners(
   page = 1,
-  limit = 1000,
+  limit = 500,
   filters: BannerFilter = {},
   orderBy: keyof Tables<"banner"> = "created_at",
   orderDirection: "asc" | "desc" = "desc"
 ) {
+  if (limit > 100) {
+    throw Error("Limit exceeds 100");
+  }
+  if (limit < 1) {
+    throw Error("Limit must be a positive number");
+  }
+  if (page < 1) {
+    throw Error("Page must be a positive number");
+  }
   const offset = (page - 1) * limit;
   let query = supabaseClient
     .from("banner")

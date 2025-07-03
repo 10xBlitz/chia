@@ -7,17 +7,18 @@ export async function getPaginatedBids(
   limit = 10,
   filters: Partial<Tables<"bid">> & {
     date_range?: { from?: string; to?: string };
-  }
+  } = {},
+  orderBy: keyof Tables<"bid"> = "created_at",
+  orderDirection: "asc" | "desc" = "desc"
 ) {
-  // Refresh the session if expired
-  const { error: sessionError } = await supabaseClient.auth.getSession();
-  if (sessionError) throw sessionError;
-
   if (limit > 100) {
     throw Error("Limit exceeds 100");
   }
   if (limit < 1) {
     throw Error("Limit must be a positive number");
+  }
+  if (page < 1) {
+    throw Error("Page must be a positive number");
   }
 
   const offset = (page - 1) * limit;
@@ -25,20 +26,41 @@ export async function getPaginatedBids(
   let query = supabaseClient
     .from("bid")
     .select("*, clinic_treatment(*, clinic(*))", { count: "exact" })
-    .order("created_at", { ascending: false })
+    .order(orderBy, { ascending: orderDirection === "asc" })
     .range(offset, offset + limit - 1);
 
   // Date range filter
-  if (filters.date_range?.from && filters.date_range?.to) {
+  if (filters.date_range?.from) {
     query = query.gte("created_at", startOfDay(filters.date_range.from));
+  }
+  if (filters.date_range?.to) {
     query = query.lte("created_at", endOfDay(filters.date_range.to));
   }
 
-  if (filters.quotation_id) {
-    query = query.eq("quotation_id", filters.quotation_id);
+  // Dynamically add filters for all bid columns
+  const bidColumns: (keyof Tables<"bid">)[] = [
+    "id",
+    "clinic_treatment_id",
+    "quotation_id",
+    "expected_price_min",
+    "expected_price_max",
+    "recommend_quick_visit",
+    "status",
+  ];
+  for (const key of bidColumns) {
+    const value = filters[key];
+    if (value !== undefined && value !== null && value !== "") {
+      query = query.eq(key as string, value);
+    }
   }
 
-  // Add more filters here as needed
+  // Add more dynamic filters if needed (e.g., partial match for explanation)
+  if (filters.additional_explanation) {
+    query = query.ilike(
+      "additional_explanation",
+      `%${filters.additional_explanation}%`
+    );
+  }
 
   const { data, error, count } = await query;
 
@@ -55,18 +77,10 @@ export async function getPaginatedBids(
   };
 }
 
-// Separate insert function for bid
 export async function insertBid(values: TablesInsert<"bid">) {
   const { error: insertError, data } = await supabaseClient
     .from("bid")
-    .insert({
-      quotation_id: values.quotation_id,
-      clinic_treatment_id: values.clinic_treatment_id,
-      expected_price_min: values.expected_price_min,
-      expected_price_max: values.expected_price_max,
-      additional_explanation: values.additional_explanation || null,
-      recommend_quick_visit: values.recommend_quick_visit,
-    })
+    .insert(values)
     .select()
     .single();
 
