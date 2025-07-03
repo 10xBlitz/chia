@@ -137,9 +137,7 @@ export default function CreateReviewPage() {
                         <Button
                           key={t.id}
                           type="button"
-                          variant={
-                            field.value === t.id ? "secondary" : "outline"
-                          }
+                          variant={field.value === t.id ? "default" : "outline"}
                           className={`rounded-full px-4 py-1 text-sm ${
                             field.value === t.id ? " text-white" : ""
                           }`}
