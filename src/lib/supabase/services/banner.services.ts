@@ -78,6 +78,7 @@ export async function getPaginatedBanners(
   });
 
   const { data, error, count } = await query;
+  console.log("---->fetched banners", data);
   if (error) throw error;
   const totalPages = count ? Math.ceil(count / limit) : 1;
   return {

@@ -17,7 +17,7 @@ import {
   dentistStep3Schema,
   DentistSignupFormType,
 } from "./schema";
-import { getClinicDepartments } from "@/lib/supabase/services/clinic-departments.services";
+import { getPaginatedClinicDepartments } from "@/lib/supabase/services/clinic-departments.services";
 import FormInput from "@/components/form-ui/form-input";
 import FormSelect from "@/components/form-ui/form-select";
 import FormMultiSelect from "@/components/form-ui/form-select-multi";
@@ -75,7 +75,7 @@ export default function DentistSignupPage() {
   const { data: departments } = useQuery({
     queryKey: ["departments"],
     queryFn: async () => {
-      const result = await getClinicDepartments(1, 1000, {});
+      const result = await getPaginatedClinicDepartments(1, 1000, {});
       return result.data || [];
     },
   });

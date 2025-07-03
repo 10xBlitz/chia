@@ -10,21 +10,8 @@ interface Filters {
   };
 }
 
-// CREATE
-export async function createClinicDepartment(data: {
-  department_name: string;
-}) {
-  const { data: result, error } = await supabaseClient
-    .from("clinic_department")
-    .insert([data])
-    .select()
-    .single();
-  if (error) throw error;
-  return result;
-}
-
 // READ (with pagination, filters, ordering)
-export async function getClinicDepartments(
+export async function getPaginatedClinicDepartments(
   page = 1,
   limit = 10,
   filters: Filters = {},
@@ -35,6 +22,7 @@ export async function getClinicDepartments(
 ) {
   if (limit > 1000) throw Error("limit exceeds 1000");
   if (limit < 1) throw Error("limit must be a positive number");
+  if (page < 1) throw Error("page must be a positive number");
 
   const offset = (page - 1) * limit;
 
@@ -67,8 +55,6 @@ export async function getClinicDepartments(
 
   const totalPages = count ? Math.ceil(count / limit) : 1;
 
-  console.log("---->data: ", data);
-
   return {
     data,
     totalItems: count,
@@ -78,7 +64,18 @@ export async function getClinicDepartments(
   };
 }
 
-// UPDATE
+export async function createClinicDepartment(data: {
+  department_name: string;
+}) {
+  const { data: result, error } = await supabaseClient
+    .from("clinic_department")
+    .insert([data])
+    .select()
+    .single();
+  if (error) throw error;
+  return result;
+}
+
 export async function updateClinicDepartment(
   id: string,
   department_name: string
@@ -93,7 +90,6 @@ export async function updateClinicDepartment(
   return data;
 }
 
-// DELETE
 export async function deleteClinicDepartment(id: string) {
   const { error } = await supabaseClient
     .from("clinic_department")
@@ -103,7 +99,6 @@ export async function deleteClinicDepartment(id: string) {
   return { success: true };
 }
 
-// CREATE: Insert a new record into the dentist_clinic_department table
 export async function insertDentistClinicDepartment(data: {
   dentist_id: string;
   clinic_department_id: string;
