@@ -183,6 +183,8 @@ export default function ClinicSingleViewPage() {
     }
   };
 
+  console.log("------>11111");
+
   // Show loading skeleton if loading or no clinic data
   if (isClinicLoading || !clinic) {
     return (
@@ -195,6 +197,8 @@ export default function ClinicSingleViewPage() {
       </MobileLayout>
     );
   }
+
+  console.log("----->222222clinic", clinic);
 
   if (clinicError) {
     return (
@@ -217,6 +221,8 @@ export default function ClinicSingleViewPage() {
       </MobileLayout>
     );
   }
+
+  console.log("------->333333clinic", clinic);
 
   return (
     <MobileLayout className="!px-0 relative">

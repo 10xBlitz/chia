@@ -52,7 +52,6 @@ export default function TreatmentCategoryScroll({
       className="px-4 py-4 mt-2"
       opts={{
         dragFree: true,
-        loop: true,
       }}
       setApi={handleSetApi}
     >
