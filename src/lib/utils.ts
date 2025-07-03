@@ -118,3 +118,15 @@ export function extractRegionFromAddress(address: string): string {
   const parts = address.split(" ");
   return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : address;
 }
+
+/**
+ * Ensures a URL starts with http:// or https://.
+ * If not, prepends https:// (for external links).
+ * @param url - The input URL string
+ * @returns The URL with protocol
+ */
+export function ensureHttpProtocol(url?: string): string {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}

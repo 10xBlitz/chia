@@ -28,6 +28,7 @@ import ClinicReviewCardSkeleton from "@/components/loading-skeletons/clinic-revi
 import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { getClinic } from "@/lib/supabase/services/clinics.services";
 import { Database } from "@/lib/supabase/types";
+import { ensureHttpProtocol } from "@/lib/utils";
 // import ZoomableImage from "@/components/zoomable-image";
 
 const TABS = [
@@ -307,12 +308,12 @@ export default function ClinicSingleViewPage() {
                   href={`tel:${clinic.contact_number}`}
                   className=" underline"
                 >
-                  {clinic.contact_number}
+                  {formatKoreanPhoneNumber(clinic.contact_number)}
                 </Link>
               </span>
             </div>
             <Link
-              href={clinic.link || "#"}
+              href={ensureHttpProtocol(clinic.link || "")}
               target="_blank"
               className="flex items-center gap-2 text-ellipsis"
             >
@@ -320,7 +321,7 @@ export default function ClinicSingleViewPage() {
               <span>
                 유튜브 {/* YouTube */}
                 <span className="underline cursor-pointer text-ellipsis ">
-                  {clinic.link?.split("/watch")[0]}
+                  {clinic.link}
                 </span>
               </span>
             </Link>
@@ -711,4 +712,34 @@ function getWorkingHourToday(
       ? "영업종료"
       : `${formattedOpenTime} - ${formattedCloseTime}`, // Show "영업종료" if closed
   };
+}
+
+// Format a phone number to Korean style (handles 010-0000-0000, +8210-0000-0000, 02-0000-0000, 02-000-0000)
+//AI generated code. But seems fine, so far no errors when testing manually
+function formatKoreanPhoneNumber(phone: string = ""): string {
+  if (!phone) return "";
+  // Remove all non-digit characters except leading +
+  let digits = phone.trim();
+  if (digits.startsWith("+82")) {
+    // Convert +82XX... to 0XX...
+    digits = "0" + digits.slice(3);
+  }
+  digits = digits.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("010")) {
+    // Mobile: 010-1234-5678
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  } else if (digits.length === 10 && digits.startsWith("010")) {
+    // Old mobile: 010-123-4567 (rare)
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  } else if (digits.length === 10 && digits.startsWith("02")) {
+    // Seoul: 02-1234-5678
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+  } else if (digits.length === 9 && digits.startsWith("02")) {
+    // Seoul: 02-123-4567
+    return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
+  } else if (digits.length === 10) {
+    // Other area codes: 031-123-4567
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  return phone; // fallback
 }
