@@ -28,7 +28,7 @@ export default function CreateBidPage() {
   const user = useUserStore((selector) => selector.user);
   const queryClient = useQueryClient();
 
-  const { data: treatments } = useQuery({
+  const { data: treatments, isLoading: treatmentLoading } = useQuery({
     queryKey: ["clinic_treatments", user?.clinic_id],
     queryFn: async () => {
       const result = await getPaginatedClinicTreatments(
@@ -105,20 +105,28 @@ export default function CreateBidPage() {
           onSubmit={form.handleSubmit((e) => insertBidMutation.mutate(e))}
           className="max-w-md mx-auto p-4 space-y-6"
         >
-          {treatments && treatments?.length > 0 && (
-            <FormSelect
-              control={form.control}
-              disabled={isDisabled}
-              name="treatmentId"
-              label="추천 시술" // Recommended Treatment
-              placeholder="시술을 선택하세요" // Please select a treatment
-            >
-              {treatments.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.treatment.treatment_name} {/* Treatment Name */}
-                </SelectItem>
-              ))}
-            </FormSelect>
+          {treatmentLoading ? (
+            <div className="flex items-center justify-center h-12">
+              <p className="text-gray-500">시술 정보를 불러오는 중...</p>
+              {/* Loading treatment information... */}
+            </div>
+          ) : (
+            treatments &&
+            treatments?.length > 0 && (
+              <FormSelect
+                control={form.control}
+                disabled={isDisabled}
+                name="treatmentId"
+                label="추천 시술" // Recommended Treatment
+                placeholder="시술을 선택하세요" // Please select a treatment
+              >
+                {treatments.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t?.treatment?.treatment_name} {/* Treatment Name */}
+                  </SelectItem>
+                ))}
+              </FormSelect>
+            )
           )}
 
           {/* Price Range Input - Professional UI */}
