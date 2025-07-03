@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import BookmarkButton from "./bookmark";
 import { Enums } from "@/lib/supabase/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface ClinicCardProps {
   total_reviews: number;
@@ -39,6 +40,7 @@ export default function ClinicCard(props: ClinicCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const checkFavorite = async () => {
@@ -65,6 +67,10 @@ export default function ClinicCard(props: ClinicCardProps) {
       if (data) {
         setIsFavorite(true);
         setFavoriteId(data);
+        queryClient.invalidateQueries({
+          queryKey: ["favorite-clinics"],
+          type: "all",
+        });
       }
     }
   };

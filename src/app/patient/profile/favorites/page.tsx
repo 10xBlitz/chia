@@ -81,7 +81,7 @@ export default function FavoriteClinicsPage() {
           </div>
         </div>
       </header>
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col mb-12">
         {isLoading &&
           Array.from({ length: 3 }).map((_, index) => (
             <ClinicCardSkeleton key={index} />
@@ -91,7 +91,7 @@ export default function FavoriteClinicsPage() {
           <div className="flex flex-col gap-6">
             {data.map((fav) => (
               <div key={fav.id} className="relative">
-                <ClinicCard {...fav} showBookmark={false} />
+                <ClinicCard {...fav} id={fav.clinic_id} showBookmark={false} />
                 <Button
                   className="absolute top-6 w-10 h-10 right-6 z-10 p-1 text-white "
                   variant={"ghost"}
