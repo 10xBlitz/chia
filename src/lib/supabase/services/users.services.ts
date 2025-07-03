@@ -300,7 +300,6 @@ export async function registerDentist({
       const treatmentInserts = newTreatments.map((treatment) => ({
         clinic_id: clinic_id,
         treatment_id: treatment,
-        price: 0,
       }));
       const { error: treatmentError } = await supabaseClient
         .from("clinic_treatment")
