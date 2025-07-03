@@ -38,6 +38,17 @@ const TABS = [
   { key: "reviews", label: "리뷰" }, // Reviews
 ];
 
+//used to map the days in the database
+const days = [
+  "일요일", // Sunday
+  "월요일", // Monday
+  "화요일", // Tuesday
+  "수요일", // Wednesday
+  "목요일", // Thursday
+  "금요일", // Friday
+  "토요일", // Saturday
+] as const;
+
 const PAGE_SIZE = 10;
 
 // Change prop signature to accept all clinic fields as top-level props
@@ -417,18 +428,27 @@ export default function ClinicSingleViewPage() {
               </div>
               {/* All days section */}
               <div className="bg-gray-100 rounded-xl p-4">
-                {clinic.working_hour &&
-                  clinic.working_hour.length > 0 &&
-                  clinic.working_hour.map((wh) => (
-                    <div key={wh.day_of_week} className="mb-4 last:mb-0">
-                      <div className="font-medium">{wh.day_of_week}</div>
+                {days.map((day) => {
+                  const wh = clinic.working_hour?.find(
+                    (w) => w.day_of_week === day
+                  );
+
+                  if (wh === undefined) {
+                    return <span key={day}></span>;
+                  }
+                  return (
+                    <div key={day} className="mb-4 last:mb-0">
+                      <div className="font-medium">{day}</div>
                       <div className="text-base">
-                        {toKoreanTime(wh.time_open_from) +
-                          " - " +
-                          toKoreanTime(wh.time_open_to) || "-"}
+                        {wh
+                          ? `${toKoreanTime(
+                              wh.time_open_from
+                            )} - ${toKoreanTime(wh.time_open_to)}`
+                          : "-"}
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
             </div>
             {/* 위치 (Location) */}
@@ -659,15 +679,6 @@ function getWorkingHourToday(
     time_open_to: string;
   }[]
 ) {
-  const days = [
-    "일요일", // Sunday
-    "월요일", // Monday
-    "화요일", // Tuesday
-    "수요일", // Wednesday
-    "목요일", // Thursday
-    "금요일", // Friday
-    "토요일", // Saturday
-  ] as const;
   const todayIdx = new Date().getDay();
   const todayKor = days[todayIdx === 0 ? 0 : todayIdx]; // 0 is Sunday
   const wh = workingHour.find((w) => w.day_of_week === todayKor);
