@@ -7,18 +7,17 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import { useEffect, useState, useRef } from "react";
 import ImageSkeleton from "./loading-skeletons/image-skeleton";
 import { useRouter } from "next/navigation";
+import { getPaginatedBanners } from "@/lib/supabase/services/banner.services";
 
 export default function MainBannerCarousel() {
   // Fetch banners with type "main"
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["banners", "main"],
-    queryFn: async () => await getPaginatedBanners(1, 10, { type: "main" }),
-    structuralSharing: false,
+    queryFn: () => getPaginatedBanners(1, 100, { banner_type: "main" }),
   });
 
   const [api, setApi] = useState<CarouselApi>();

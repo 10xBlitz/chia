@@ -10,22 +10,45 @@ export type BannerFilter = Partial<Tables<"banner">> & {
 
 export async function getPaginatedBanners(
   page = 1,
-  limit = 10,
-  filters: BannerFilter = {}
+  limit = 1000,
+  filters: BannerFilter = {},
+  orderBy: keyof Tables<"banner"> = "created_at",
+  orderDirection: "asc" | "desc" = "desc"
 ) {
   const offset = (page - 1) * limit;
   let query = supabaseClient
     .from("banner")
     .select("*", { count: "exact" })
-    .order("created_at", { ascending: false })
+    .order(orderBy, { ascending: orderDirection === "asc" })
     .range(offset, offset + limit - 1);
 
-  if (filters.banner_type) {
-    query = query.eq("banner_type", filters.banner_type);
+  // Dynamically add filters for all banner columns
+  const bannerColumns: (keyof Tables<"banner">)[] = [
+    "id",
+    "clinic_id",
+    "banner_type",
+    "created_at",
+    "image",
+    "title",
+  ];
+
+  for (const key of bannerColumns) {
+    const value = filters[key];
+    if (value !== undefined && value !== null && value !== "") {
+      if (typeof value === "string" && value.includes("%")) {
+        query = query.ilike(key as string, value);
+      } else {
+        query = query.eq(key as string, value);
+      }
+    }
   }
-  if (filters.title) {
+
+  // Special handling for title (partial match)
+  if (filters.title && !filters.title.includes("%")) {
     query = query.ilike("title", `%${filters.title}%`);
   }
+
+  // Date range filters
   if (filters.startDate) {
     query = query.gte(
       "created_at",
@@ -41,6 +64,8 @@ export async function getPaginatedBanners(
     limit,
     filters,
     offset,
+    orderBy,
+    orderDirection,
   });
 
   const { data, error, count } = await query;

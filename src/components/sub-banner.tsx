@@ -8,16 +8,14 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
-import { getPaginatedBanners } from "@/lib/supabase/services/banners.services";
 import ImageSkeleton from "./loading-skeletons/image-skeleton";
+import { getPaginatedBanners } from "@/lib/supabase/services/banner.services";
 
 export default function SubBannerCarousel() {
   // Fetch banners with type "sub"
   const { data, isLoading, error } = useQuery({
     queryKey: ["banners", "sub"],
-    queryFn: async () => await getPaginatedBanners(1, 10, { type: "sub" }),
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
-    retry: 1,
+    queryFn: () => getPaginatedBanners(1, 100, { banner_type: "sub" }),
   });
 
   const banners = data?.data || [];
