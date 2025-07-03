@@ -2,16 +2,28 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useUserStore } from "@/providers/user-store-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import toast from "react-hot-toast";
 import HeaderWithBackButton from "@/components/header-with-back-button";
-import FormSelect from "@/components/form-ui/form-select";
 import FormInput from "@/components/form-ui/form-input";
 import FormTextarea from "@/components/form-ui/form-textarea";
 import FormCheckbox from "@/components/form-ui/form-checkbox";
@@ -20,6 +32,7 @@ import {
   getClinicBidOnQuotation,
   insertBid,
 } from "@/lib/supabase/services/bids.services";
+import { cn } from "@/lib/utils";
 
 export default function CreateBidPage() {
   const router = useRouter();
@@ -113,19 +126,39 @@ export default function CreateBidPage() {
           ) : (
             treatments &&
             treatments?.length > 0 && (
-              <FormSelect
+              <FormField
                 control={form.control}
-                disabled={isDisabled}
                 name="treatmentId"
-                label="추천 시술" // Recommended Treatment
-                placeholder="시술을 선택하세요" // Please select a treatment
-              >
-                {treatments.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t?.treatment?.treatment_name} {/* Treatment Name */}
-                  </SelectItem>
-                ))}
-              </FormSelect>
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      className={cn("text-[16px] font-pretendard-600")}
+                    >
+                      추천 시술 {/* Recommended Treatment */}
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full min-h-[45px]">
+                          <SelectValue placeholder="여기에서 치료를 선택하세요" />{" "}
+                          {/** Select treatment here */}
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {treatments.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.treatment.treatment_name}{" "}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )
           )}
 
