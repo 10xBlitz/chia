@@ -64,10 +64,10 @@ export default function DentistSignupPage() {
 
   // Fetch treatments
   const { data: treatments } = useQuery({
-    queryKey: ["treatments"],
+    queryKey: ["treatments", "register-dentist"],
     queryFn: async () => {
       const result = await getPaginatedTreatments(1, 1000, {});
-      return result.data;
+      return result.data || [];
     },
   });
 
@@ -197,6 +197,8 @@ export default function DentistSignupPage() {
     }),
   };
 
+  console.log("---->treatments: ", treatments);
+
   return (
     <MobileLayout className="flex flex-col min-h-dvh overflow-x-hidden">
       <HeaderWithBackButton title="아래 정보를 입력해주세요." />
@@ -318,26 +320,26 @@ export default function DentistSignupPage() {
                     </SelectItem>
                   ))}
                 </FormSelect>
-                {treatments && Array.isArray(treatments) && (
-                  <FormMultiSelect
-                    control={form.control}
-                    name="treatments"
-                    label="치료" // Treatment
-                    placeholder="여기에서 치료를 선택하세요" // Select treatments here
-                    options={treatments?.map((item) => ({
-                      label: item.treatment_name,
-                      value: item.id,
-                    }))}
-                    loading={!treatments}
-                    onChange={(selected) => {
-                      form.setValue(
-                        "treatments",
-                        selected.map((item) => item.value),
-                        { shouldValidate: true }
-                      );
-                    }}
-                  />
-                )}
+
+                <FormMultiSelect
+                  control={form.control}
+                  name="treatments"
+                  label="치료" // Treatment
+                  placeholder="여기에서 치료를 선택하세요" // Select treatments here
+                  options={treatments?.map((item) => ({
+                    label: item.treatment_name,
+                    value: item.id,
+                  }))}
+                  loading={!treatments}
+                  onChange={(selected) => {
+                    form.setValue(
+                      "treatments",
+                      selected.map((item) => item.value),
+                      { shouldValidate: true }
+                    );
+                  }}
+                />
+
                 <FormMultiSelect
                   control={form.control}
                   name="departments"

@@ -396,3 +396,19 @@ export async function registerKakaoUser(
   if (insertError) throw insertError;
   return { data: userData };
 }
+
+/**
+ * Get admin users for patient-to-admin chat
+ * Patients can use this to see available admins for customer service
+ */
+export async function getAdminUsers() {
+  const { data, error } = await supabaseClient
+    .from("user")
+    .select("id, full_name, role")
+    .eq("role", "admin")
+    .eq("login_status", "active")
+    .order("full_name");
+
+  if (error) throw error;
+  return data;
+}

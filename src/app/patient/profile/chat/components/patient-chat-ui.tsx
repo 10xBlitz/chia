@@ -6,6 +6,8 @@ import { insertMessage } from "@/lib/supabase/services/messages.services";
 import { Input } from "@/components/ui/input";
 import { FetchedMessage } from "@/lib/supabase/services/messages.services";
 import { updateRoom } from "@/lib/supabase/services/room.services";
+import { useChatRoomStore } from "@/stores/chat-room-store";
+import { useUserStore } from "@/providers/user-store-provider";
 
 interface PatientChatUIProps {
   roomId: string;
@@ -18,6 +20,11 @@ export function PatientChatUI({ roomId, currentUserId }: PatientChatUIProps) {
     []
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recipient = useChatRoomStore((s) => s.recipient);
+  const setRecipient = useChatRoomStore((s) => s.setRecipient);
+  const loggedInUserName = useUserStore(
+    (s) => s.user?.full_name || "Unknown User"
+  );
 
   // Infinite messages query
   const { data, isLoading, isFetching, fetchNextPage, hasNextPage } =
@@ -43,7 +50,7 @@ export function PatientChatUI({ roomId, currentUserId }: PatientChatUIProps) {
   // Scroll to bottom on new messages or room change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, currentUserId, recipient?.name, setRecipient]);
 
   // Realtime: listen for new messages in this room
   useMessagesRealtime(roomId, async (msg) => {
@@ -86,7 +93,7 @@ export function PatientChatUI({ roomId, currentUserId }: PatientChatUIProps) {
                 isRealtime: true,
                 user: {
                   id: currentUserId,
-                  name: "나", // "Me" in Korean, or use your user's display name if available
+                  name: loggedInUserName || "Me", // "Me" in Korean, or use your user's display name if available
                 },
               },
             ]
