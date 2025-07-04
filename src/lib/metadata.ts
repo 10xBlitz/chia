@@ -31,6 +31,7 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     description,
     icons: {
       icon: "https://chia-azure.vercel.app/images/chia-logo.svg",
+      apple: "/images/chia-logo.png",
     },
     openGraph: {
       title: fullTitle,
@@ -53,6 +54,25 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
       title: fullTitle,
       description,
       images: [image],
+    },
+    // iOS PWA specific metadata
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: title || DEFAULT_TITLE,
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    other: {
+      // PWA theme
+      "mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "default",
+      "apple-mobile-web-app-title": title || DEFAULT_TITLE,
+      // Theme color
+      "theme-color": "#2563eb",
+      "msapplication-TileColor": "#2563eb",
     },
   };
 }
