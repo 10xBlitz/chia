@@ -29,7 +29,7 @@ export default function PatientProfilePage() {
       <MyMenuPage
         actions={quickActions}
         editProfileLink="/patient/profile/edit-profile"
-        serviceInquiryLink="/patient/profile/chat-v2"
+        serviceInquiryLink="/patient/profile/chat"
         termsOfServiceLink="/patient/profile/terms-of-service"
       />
       <BottomNavigation />

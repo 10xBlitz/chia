@@ -5,6 +5,7 @@ import { useMessagesRealtime } from "../hooks/use-messages-realtime";
 import { insertMessage } from "@/lib/supabase/services/messages.services";
 import { Input } from "@/components/ui/input";
 import { FetchedMessage } from "@/lib/supabase/services/messages.services";
+import { updateRoom } from "@/lib/supabase/services/room.services";
 
 interface PatientChatUIProps {
   roomId: string;
@@ -19,7 +20,7 @@ export function PatientChatUI({ roomId, currentUserId }: PatientChatUIProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Infinite messages query
-  const { data, isLoading, isFetching, fetchNextPage, hasNextPage, refetch } =
+  const { data, isLoading, isFetching, fetchNextPage, hasNextPage } =
     usePatientMessages(roomId);
 
   // Flatten and reverse for chat order (latest at bottom)
@@ -45,25 +46,52 @@ export function PatientChatUI({ roomId, currentUserId }: PatientChatUIProps) {
   }, [messages]);
 
   // Realtime: listen for new messages in this room
-  useMessagesRealtime(roomId, (msg) => {
+  useMessagesRealtime(roomId, async (msg) => {
     setRealtimeMessages((prev) =>
       prev.some((m) => m.id === msg.id)
         ? prev
-        : [...prev, { ...msg, isRealtime: true }]
+        : [
+            ...prev,
+            {
+              ...msg,
+              isRealtime: true,
+            },
+          ]
     );
-    refetch();
+    // refetch();
+
+    //update the last_patient_read_at timestamp
+    await updateRoom(roomId, {
+      last_user_read_at: msg.created_at,
+    });
   });
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !roomId) return;
-    await insertMessage({
+    const newMsg = await insertMessage({
       chat_room_id: roomId,
       content: input,
       sender_id: currentUserId,
     });
     setInput("");
-    refetch();
+    if (newMsg) {
+      setRealtimeMessages((prev) =>
+        prev.some((m) => m.id === newMsg.id)
+          ? prev
+          : [
+              ...prev,
+              {
+                ...newMsg,
+                isRealtime: true,
+                user: {
+                  id: currentUserId,
+                  name: "나", // "Me" in Korean, or use your user's display name if available
+                },
+              },
+            ]
+      );
+    }
     // scrollToBottom will be triggered by useEffect on messages.length
   };
 

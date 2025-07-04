@@ -13,10 +13,10 @@ import {
   fetchUnreadMessageCountOfRoom,
   fetchLatestMessageOfRoom,
 } from "@/lib/supabase/services/messages.services";
+import { Tables } from "@/lib/supabase/types";
 
 interface PatientChatSidebarProps {
-  selectedRoomId: string | null;
-  setSelectedRoomId: (id: string) => void;
+  setRoom: (room: Tables<"chat_room">) => void;
 }
 
 const CHAT_CATEGORIES = [
@@ -28,9 +28,7 @@ const CHAT_CATEGORIES = [
   { key: "etc", label: "기타" }, // Other
 ];
 
-export function PatientChatSidebar({
-  setSelectedRoomId,
-}: PatientChatSidebarProps) {
+export function PatientChatSidebar({ setRoom }: PatientChatSidebarProps) {
   const userId = useUserStore((s) => s.user?.id || "");
   const [loadingCategory, setLoadingCategory] = useState<string | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
@@ -71,10 +69,10 @@ export function PatientChatSidebar({
       } catch (e) {
         console.error("Error updating last_user_read_at:", e);
       }
-      setSelectedRoomId(room.id);
+      setRoom(room);
       setLoadingCategory(null);
     },
-    [userId, setSelectedRoomId]
+    [userId, setRoom]
   );
 
   // On mount, fetch unread counts for all categories/rooms

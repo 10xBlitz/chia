@@ -6,17 +6,14 @@ import { PatientChatUI } from "./components/patient-chat-ui";
 
 export default function PatientChatPage() {
   const userId = useUserStore((s) => s.user?.id || "");
-  const selectedRoomId = useChatRoomStore((s) => s.selectedRoomId);
-  const setSelectedRoomId = useChatRoomStore((s) => s.setSelectedRoomId);
+  const selectedRoomId = useChatRoomStore((s) => s.room?.id);
+  const setSelectedRoom = useChatRoomStore((s) => s.setRoom);
 
   return (
     <div className="h-[calc(100vh-64px)] bg-gray-50">
       {/* Only sidebar if no room selected */}
       {!selectedRoomId && (
-        <PatientChatSidebar
-          selectedRoomId={null}
-          setSelectedRoomId={setSelectedRoomId}
-        />
+        <PatientChatSidebar setRoom={(id) => setSelectedRoom(id)} />
       )}
       {/* Only chat UI if room selected */}
       {selectedRoomId && (
@@ -24,7 +21,7 @@ export default function PatientChatPage() {
           <div className="h-14 flex items-center px-2 border-b bg-white">
             <button
               className="mr-2 px-2 py-1 rounded hover:bg-gray-100"
-              onClick={() => setSelectedRoomId(null)}
+              onClick={() => setSelectedRoom(null)}
               aria-label="뒤로가기" // Back
             >
               &larr;

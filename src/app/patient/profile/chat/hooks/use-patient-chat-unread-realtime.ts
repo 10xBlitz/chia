@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { fetchUnreadMessageCountOfRoom } from "@/lib/supabase/services/messages.services";
 import { fetchRooms } from "@/lib/supabase/services/room.services";
 
 /**
@@ -45,20 +44,15 @@ export function usePatientChatUnreadRealtime(
           },
           async (payload: any) => {
             const msg = payload.new;
-            console.log("--->new message payload:", msg);
             if (msg && msg.chat_room_id) {
-              // Use last_user_read_at from the room as the reference
-              const lastRead = roomLastRead[msg.chat_room_id] || "";
-              const count = await fetchUnreadMessageCountOfRoom(
-                userId,
-                msg.chat_room_id,
-                lastRead
-              );
+              // Increment unread count locally for this room
               if (isMounted) {
+                const roomCategory = rooms.find(
+                  (r) => r.id === msg.chat_room_id
+                )?.category as string; //we are sure category exists
                 setUnreadCounts((prev) => ({
                   ...prev,
-                  [rooms.find((item) => item.id === msg.chat_room_id)
-                    ?.category as string]: count,
+                  [roomCategory]: (prev[roomCategory] || 0) + 1,
                 }));
               }
             }
@@ -67,6 +61,8 @@ export function usePatientChatUnreadRealtime(
         .subscribe();
     })();
     return () => {
+      console.log("----> Unsubscribing from patient chat unread realtime");
+      if (!isMounted) return;
       isMounted = false;
       if (supabase && channel) supabase.removeChannel(channel);
     };

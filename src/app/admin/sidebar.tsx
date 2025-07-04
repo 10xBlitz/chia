@@ -72,7 +72,7 @@ const items = [
   },
   {
     title: "고객센터", // Customer Service
-    url: "/admin/customer-service-v2",
+    url: "/admin/customer-service",
     icon: MessageCircle,
   },
   {
