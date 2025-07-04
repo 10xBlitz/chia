@@ -381,7 +381,7 @@ export default function ClinicSingleViewPage() {
                     오늘
                     {/* Today */}
                   </div>
-                  <div className="text-base mt-1">
+                  <div className="mt-1 text-sm ">
                     {(() => {
                       // Map JS day to Korean day string
                       const days = [
@@ -414,19 +414,50 @@ export default function ClinicSingleViewPage() {
                   <div className="font-medium">
                     점심 시간 {/* Lunch time */}
                   </div>
-                  <div className="text-base mt-1">
-                    {(() => {
-                      // If no lunch time, return empty string
-                      const lunchTime = clinic.working_hour.find(
-                        (item) => item.day_of_week === "점심시간"
+                  {(() => {
+                    const weekendLunchBreak = clinic.working_hour.find(
+                      (item) => item.day_of_week === "주말 점심시간"
+                    );
+                    const weekdayLunchBreak = clinic.working_hour.find(
+                      (item) => item.day_of_week === "평일 점심시간"
+                    );
+
+                    const hasAnyLunchBreak =
+                      (weekdayLunchBreak &&
+                        weekdayLunchBreak.time_open_from &&
+                        weekdayLunchBreak.time_open_to) ||
+                      (weekendLunchBreak &&
+                        weekendLunchBreak.time_open_from &&
+                        weekendLunchBreak.time_open_to);
+
+                    if (!hasAnyLunchBreak) {
+                      return (
+                        <div className="text-sm text-gray-500 mt-1">
+                          점심시간 없음 {/* No lunch break */}
+                        </div>
                       );
-                      return lunchTime
-                        ? `${toKoreanTime(
-                            lunchTime.time_open_from
-                          )} - ${toKoreanTime(lunchTime.time_open_to)}`
-                        : "";
-                    })()}
-                  </div>
+                    }
+
+                    return (
+                      <div className="space-y-1 mt-1">
+                        {weekdayLunchBreak &&
+                          weekdayLunchBreak.time_open_from &&
+                          weekdayLunchBreak.time_open_to && (
+                            <div className="text-sm text-gray-800 font-medium">
+                              (주중) {toKoreanTime(weekdayLunchBreak.time_open_from)} - {toKoreanTime(weekdayLunchBreak.time_open_to)}
+                            </div>
+                          )}
+                        {weekendLunchBreak &&
+                          weekendLunchBreak.time_open_from &&
+                          weekendLunchBreak.time_open_to && (
+                            <div className="text-sm text-gray-800 font-medium">
+                              (주말) {toKoreanTime(weekendLunchBreak.time_open_from)} - {toKoreanTime(weekendLunchBreak.time_open_to)}
+                            </div>
+                          )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Call for info */}
                 </div>
               </div>

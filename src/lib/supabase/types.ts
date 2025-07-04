@@ -790,7 +790,8 @@ export type Database = {
         | "목요일"
         | "금요일"
         | "토요일"
-        | "점심시간"
+        | "평일 점심시간"
+        | "주말 점심시간"
       login_status: "active" | "inactive"
       record_status: "deleted" | "active"
       user_role: "patient" | "dentist" | "admin" | "dentist employee"
@@ -918,7 +919,8 @@ export const Constants = {
         "목요일",
         "금요일",
         "토요일",
-        "점심시간",
+        "평일 점심시간",
+        "주말 점심시간",
       ],
       login_status: ["active", "inactive"],
       record_status: ["deleted", "active"],

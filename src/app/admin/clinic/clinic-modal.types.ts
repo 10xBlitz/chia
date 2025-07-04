@@ -16,7 +16,8 @@ export const DAYS_OF_WEEK: Enums<"day_of_week">[] = [
   "금요일", // Friday
   "토요일", // Saturday
   "일요일", // Sunday
-  "점심시간", // Lunch Break
+  "평일 점심시간", // Weekday Lunch Break
+  "주말 점심시간", // Weekend Lunch Break
 ];
 
 // Add ClinicHour type for typing
