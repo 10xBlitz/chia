@@ -97,6 +97,9 @@ export default function CreateBidPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bid", quotationId] });
+      queryClient.invalidateQueries({ queryKey: ["quotations"] });
+      queryClient.invalidateQueries({ queryKey: ["quotation"] });
+
       router.back();
     },
     onError: (error) => {
