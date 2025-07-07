@@ -28,6 +28,22 @@ export const metadata: Metadata = {
     siteName: "치아 (Chia)",
     locale: "ko_KR",
     type: "website",
+    images: [
+      {
+        url: "https://chia.ai.kr/opengraph-image.png", // Absolute, public OG image URL
+        width: 1200,
+        height: 630,
+        alt: "치아 로고", // Chia logo
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "치아 - 치과 플랫폼",
+    description:
+      "치아는 전국 치과 정보, 리뷰, 예약을 제공하는 치과 플랫폼입니다.",
+    images: ["https://chia.ai.kr/opengraph-image.png"],
   },
 };
 
