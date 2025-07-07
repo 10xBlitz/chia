@@ -30,8 +30,8 @@ export function generateMetadata(options: MetadataOptions = {}): Metadata {
     title: fullTitle,
     description,
     icons: {
-      icon: "https://chia-azure.vercel.app/images/chia-logo.svg",
-      apple: "/images/chia-logo.png",
+      icon: "/icons/favicon.ico",
+      apple: "/icons/chia-app-icon.png",
     },
     openGraph: {
       title: fullTitle,

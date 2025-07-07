@@ -52,7 +52,7 @@ import { KoreanTimePicker } from "@/components/time-picker";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import BottomNavigation from "@/components/bottom-navigation";
 import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
-import { getDisabledWeekdaysForClinic } from "@/lib/supabase/services/get-disabled-weekdays-for-clinic";
+import { getDisabledWeekdaysForClinic } from "@/lib/supabase/services/clinics.services";
 
 // Zod schema for validation
 const reservationSchema = z.object({

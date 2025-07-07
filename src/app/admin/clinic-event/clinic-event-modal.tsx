@@ -125,6 +125,13 @@ export const ClinicEventModal = ({
           },
           (prog) => setProgress(prog)
         );
+        // Send push notification to all users after event creation
+        // await sendNotificationToAllUsers({
+        //   title: `새로운 이벤트가 등록되었습니다: ${values.title}`,
+        //   // "A new event has been registered: {title}"
+        //   body: values.description || "새로운 병원 이벤트가 등록되었습니다.",
+        //   // "A new hospital event has been registered."
+        // });
       }
     },
     onSuccess: () => {
