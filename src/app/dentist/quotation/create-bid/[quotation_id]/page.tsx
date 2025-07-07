@@ -42,7 +42,7 @@ export default function CreateBidPage() {
   const queryClient = useQueryClient();
 
   const { data: treatments, isLoading: treatmentLoading } = useQuery({
-    queryKey: ["clinic_treatments", user?.clinic_id],
+    queryKey: ["create-bid", "clinic_treatments", user?.clinic_id],
     queryFn: async () => {
       const result = await getPaginatedClinicTreatments(
         user?.clinic_id as string,
