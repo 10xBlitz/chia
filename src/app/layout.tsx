@@ -20,31 +20,6 @@ export const metadata: Metadata = {
   title: "치아 - 치과 플랫폼", // 치과 플랫폼 (Dental Clinic Platform)
   description:
     "치아는 전국 치과 정보, 리뷰, 예약을 제공하는 치과 플랫폼입니다.", // Dental clinic platform for clinics, reviews, and reservations
-  metadataBase: new URL("https://chia.ai.kr"),
-  openGraph: {
-    title: "치아 - 치과 플랫폼", // Dental Clinic Platform
-    description:
-      "치아는 전국 치과 정보, 리뷰, 예약을 제공하는 치과 플랫폼입니다.", // Dental clinic platform for clinics, reviews, and reservations
-    siteName: "치아 (Chia)",
-    locale: "ko_KR",
-    type: "website",
-    images: [
-      {
-        url: "https://chia.ai.kr/opengraph-image.png", // Absolute, public OG image URL
-        width: 1200,
-        height: 630,
-        alt: "치아 로고", // Chia logo
-        type: "image/png",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "치아 - 치과 플랫폼",
-    description:
-      "치아는 전국 치과 정보, 리뷰, 예약을 제공하는 치과 플랫폼입니다.",
-    images: ["https://chia.ai.kr/opengraph-image.png"],
-  },
 };
 
 export default function RootLayout({
@@ -54,6 +29,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <meta property="og:title" content="치아 - 치과 플랫폼"></meta>
+        <meta property="og:site_name" content="치아 (Chia)"></meta>
+        <meta
+          property="og:description"
+          content="치아는 전국 치과 정보, 리뷰, 예약을 제공하는 치과 플랫폼입니다."
+        ></meta>
+        <meta property="og:image:type" content="image/png"></meta>
+        <meta property="og:image:width" content="512"></meta>
+        <meta property="og:image:height" content="512"></meta>
+        <meta
+          property="og:image"
+          content="https://chia.ai.kr/opengraph-image.png?0c51ac7c50ba1aca"
+        ></meta>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
