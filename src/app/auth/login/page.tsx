@@ -69,6 +69,34 @@ const PatientHomePage = () => {
         카카오로 시작하기 {/** Get started with Kakao */}
       </Button>
 
+      {/* Google Login Button */}
+      <Button
+        className="bg-white border border-gray-300 hover:bg-gray-100 h-[44px] mt-3 w-full text-black text-[14px] pt-[10px] pr-[16px] pb-[10px] pl-[16px] rounded-[6px] flex items-center justify-center gap-2"
+        style={{
+          fontSize: "14px",
+          fontFamily: "Pretendard, sans-serif",
+          lineHeight: "150%",
+          letterSpacing: "-2.5%",
+          fontWeight: 600,
+        }}
+        onClick={async () => {
+          await supabaseClient.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: `${window.location.origin}/auth/v1/callback`,
+            },
+          });
+        }}
+      >
+        <Image
+          src={"/icons/google.svg"}
+          width={20}
+          height={20}
+          alt="Google icon"
+        />
+        구글로 시작하기 {/** Get started with Google */}
+      </Button>
+
       <div
         className="flex text-[#767676] gap-3 text-[14px] underline flex-col w-full items-center justify-center mt-8"
         style={{

@@ -101,11 +101,17 @@ export default function MainBannerCarousel() {
             >
               <div className="relative h-[200px]">
                 <Image
-                  src={banner.image}
+                  src={banner.image || "/images/fallback-image.png"}
                   alt={banner.title || "Banner Image"}
                   fill
                   className="object-cover "
                   priority={index === 0}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== window.location.origin + "/images/fallback-image.png") {
+                      target.src = "/images/fallback-image.png";
+                    }
+                  }}
                 />
               </div>
             </CarouselItem>
