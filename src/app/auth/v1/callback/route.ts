@@ -26,21 +26,21 @@ export async function GET(request: Request) {
         // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
 
         return NextResponse.redirect(
-          `${origin}${next}/auth/sign-up/finish-signup-for-kakao`
+          `${origin}${next}/auth/sign-up/finish-signup-oAuth`
         );
       } else if (forwardedHost) {
         console.log(
           "----> forwardedHost detected, redirecting to it with next path"
         );
         return NextResponse.redirect(
-          `https://${forwardedHost}${next}/auth/sign-up/finish-signup-for-kakao`
+          `https://${forwardedHost}${next}/auth/sign-up/finish-signup-oAuth`
         );
       } else {
         console.log(
           "----> no forwardedHost, redirecting to origin with next path"
         );
         return NextResponse.redirect(
-          `${origin}${next}/auth/sign-up/finish-signup-for-kakao`
+          `${origin}${next}/auth/sign-up/finish-signup-oAuth`
         );
       }
     }

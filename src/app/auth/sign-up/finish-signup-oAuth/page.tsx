@@ -37,7 +37,7 @@ const steps = [
   { label: "검토" }, // Review
 ];
 
-const FinishKakaoSignupPage = () => {
+const FinishOAuthSignup = () => {
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore((state) => state.updateUser);
   const [currentStep, setCurrentStep] = useState(1); // Step 1: Form, Step 2: Review
@@ -348,4 +348,4 @@ function KakaoStep2({
   );
 }
 
-export default FinishKakaoSignupPage;
+export default FinishOAuthSignup;
