@@ -110,6 +110,9 @@ const PatientHomePage = () => {
         onClick={async () => {
           await supabaseClient.auth.signInWithOAuth({
             provider: "apple",
+            options: {
+              redirectTo: `${window.location.origin}/auth/v1/callback`,
+            },
           });
         }}
       >
