@@ -1,0 +1,110 @@
+Chia App – User Guide (English & Korean)
+
+==============================
+
+[환자용 (For Patients)]
+
+1. 회원가입 및 로그인 (Sign Up & Login)
+- 앱을 실행합니다. (Open the app.)
+- 시작 화면에서 회원가입 또는 로그인을 선택합니다. (On the start screen, select Sign Up or Login.)
+- 이메일, 카카오, 구글, 또는 애플 계정 중 원하는 방법을 선택해 인증을 진행합니다. (Choose your preferred method: Email, Kakao, Google, or Apple, and complete authentication.)
+- 회원정보를 입력하고 가입을 완료합니다. (Enter your information and complete registration.)
+
+2. 홈 화면 (Home Screen)
+- 로그인 후 홈 화면이 표시됩니다. (After login, the home screen appears.)
+- 상단 배너에서 주요 소식, 이벤트, 공지사항을 확인할 수 있습니다. (Check top banners for news, events, and announcements.)
+- 추천 치과 목록을 스크롤하여 탐색할 수 있습니다. (Scroll through the featured clinics list.)
+
+3. 치과 검색 및 탐색 (Clinic Search & Explore)
+- 하단 또는 상단의 검색 아이콘을 탭합니다. (Tap the search icon at the top or bottom.)
+- 검색창에 치과 이름, 위치, 진료과목을 입력해 원하는 치과를 찾습니다. (Enter clinic name, location, or specialty to search.)
+- 지도 보기로 전환해 주변 치과를 한눈에 확인할 수 있습니다. (Switch to map view to see nearby clinics.)
+- 검색 결과에서 치과를 선택합니다. (Select a clinic from the results.)
+
+4. 치과 상세 페이지 (Clinic Details)
+- 치과의 상세 정보, 진료 서비스, 의료진, 위치, 운영시간, 연락처, 사진, 리뷰를 확인할 수 있습니다. (View clinic details, services, staff, location, hours, contact, photos, and reviews.)
+- 즐겨찾기(북마크) 아이콘을 눌러 치과를 저장할 수 있습니다. (Tap the bookmark icon to save the clinic.)
+
+5. 예약 기능 (Appointment Booking)
+- 치과 상세 페이지에서 '예약하기' 버튼을 누릅니다. (On the clinic page, tap 'Book Appointment'.)
+- 날짜와 시간을 선택하고, 필요한 정보를 입력합니다. (Select date and time, and enter required info.)
+- 예약을 제출하면 확인 메시지가 표시됩니다. (Submit the booking and check the confirmation message.)
+- 마이페이지에서 예약 내역을 확인하거나 취소할 수 있습니다. (View or cancel your appointments in My Page.)
+
+6. 리뷰 작성 및 확인 (Write & View Reviews)
+- 진료를 받은 치과 상세 페이지에서 '리뷰 작성' 버튼을 누릅니다. (On the clinic page, tap 'Write Review' after your visit.)
+- 별점과 후기를 입력하고 등록합니다. (Enter your rating and review, then submit.)
+- 다른 사용자의 리뷰도 함께 확인할 수 있습니다. (Read reviews from other users.)
+
+7. 마이페이지 (My Page / Profile)
+- 하단 메뉴에서 '마이페이지'를 선택합니다. (Tap 'My Page' in the bottom menu.)
+- 개인정보, 연락처, 비밀번호, 프로필 사진을 확인/수정할 수 있습니다. (View/edit your info, contact, password, and profile photo.)
+- 나의 예약, 즐겨찾기, 리뷰 내역을 확인할 수 있습니다. (Check your appointments, bookmarks, and review history.)
+
+8. 알림 및 메시지 (Notifications & Messages)
+- 상단 알림 아이콘을 눌러 예약 알림, 치과 메시지, 시스템 공지사항을 확인합니다. (Tap the notification icon to view appointment alerts, clinic messages, and system notices.)
+
+9. 결제 및 환불 (Payment & Refund)
+- 예약/상담/이벤트 결제 시 결제하기 버튼을 눌러 결제 과정을 진행합니다. (Tap the payment button to proceed with payment for reservations, consultations, or events.)
+- 결제 내역 및 환불 정책은 마이페이지 또는 결제 화면에서 확인할 수 있습니다. (Check payment/refund details in My Page or payment screen.)
+
+10. 고객센터 및 문의 (Customer Service & Support)
+- 마이페이지 또는 설정에서 '고객센터'를 선택합니다. (Go to 'Customer Service' from My Page or Settings.)
+- 자주 묻는 질문(FAQ), 1:1 문의, 공지사항을 확인할 수 있습니다. (Access FAQ, 1:1 inquiries, and announcements.)
+- 문의사항이 있으면 1:1 문의를 통해 직접 질문할 수 있습니다. (Submit questions via 1:1 inquiry.)
+
+---
+
+[치과의사용 (For Dentists)]
+
+1. 로그인 (Login)
+- 치과의사 계정으로 로그인합니다. (Log in with your dentist account.)
+
+2. 홈/예약 관리 (Home/Reservation Management)
+- 예약 내역을 확인하고, 환자 예약을 승인/거절/관리할 수 있습니다. (View, approve, reject, or manage patient reservations.)
+
+3. 환자 상담 및 메시지 (Patient Consultation & Messages)
+- 환자와의 상담 요청을 확인하고, 메시지로 소통할 수 있습니다. (Check consultation requests and communicate via messages.)
+
+4. 리뷰 관리 (Review Management)
+- 환자가 남긴 리뷰를 확인하고, 필요시 답글을 남길 수 있습니다. (View patient reviews and reply if needed.)
+
+5. 프로필 및 정보 관리 (Profile & Info Management)
+- 내 프로필, 진료 정보, 근무 시간 등을 수정할 수 있습니다. (Edit your profile, treatment info, and working hours.)
+
+---
+
+[관리자용 (For Admins)]
+
+1. 관리자 계정으로 로그인합니다. (Log in with your admin account.)
+
+2. 치과 관리 (Clinic Management)
+- 치과 정보, 진료과목, 의료진, 운영시간, 위치, 사진 등을 추가/수정/삭제할 수 있습니다. (Add/edit/delete clinic info, departments, staff, hours, location, and photos.)
+
+3. 예약 관리 (Reservation Management)
+- 전체 환자 예약 내역을 확인하고, 예약 상태를 관리할 수 있습니다. (View and manage all patient reservations.)
+
+4. 리뷰 관리 (Review Management)
+- 전체 리뷰를 확인하고, 부적절한 리뷰를 삭제할 수 있습니다. (View all reviews and delete inappropriate ones.)
+
+5. 배너/이벤트 관리 (Banner/Event Management)
+- 앱에 표시될 배너와 병원 이벤트를 추가/수정/삭제할 수 있습니다. (Add/edit/delete banners and clinic events for the app.)
+
+6. 사용자/환자 관리 (User/Patient Management)
+- 사용자(환자, 치과의사) 정보를 확인, 수정, 삭제할 수 있습니다. (View, edit, or delete user (patient, dentist) info.)
+
+7. 고객센터/공지사항 관리 (Customer Service/Notice Management)
+- 고객 문의, 1:1 문의, 공지사항을 관리할 수 있습니다. (Manage customer inquiries, 1:1 inquiries, and announcements.)
+
+---
+
+※ 모든 주요 기능은 모바일 환경에 최적화되어 있으며, 접근성과 사용성을 고려해 설계되었습니다.
+(All major features are optimized for mobile, with accessibility and usability in mind.)
+
+문제가 발생하거나 도움이 필요하면 앱 내 고객센터 또는 이메일로 문의해 주세요.
+(If you need help or encounter issues, contact support via the app or by email.)
+
+---
+
+최신 정보와 자세한 사용법은 앱 내 공지사항 또는 공식 웹사이트를 참고하세요.
+(For the latest info and detailed instructions, see in-app notices or the official website.)
