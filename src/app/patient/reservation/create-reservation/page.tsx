@@ -39,12 +39,11 @@ import {
 
 import { format } from "date-fns";
 import { cn, getKoreanDayOfWeek } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useUserStore } from "@/providers/user-store-provider";
 import { PhoneInput } from "@/components/phone-input";
-import { supabaseClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { KoreanDatePicker } from "@/components/korean-date-picker-single";
@@ -53,6 +52,8 @@ import HeaderWithBackButton from "@/components/header-with-back-button";
 import BottomNavigation from "@/components/bottom-navigation";
 import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
 import { getDisabledWeekdaysForClinic } from "@/lib/supabase/services/clinics.services";
+import { sendSolapiSMS } from "@/lib/send-sms";
+import { insertReservation } from "@/lib/supabase/services/reservations.services";
 
 // Zod schema for validation
 const reservationSchema = z.object({
@@ -65,13 +66,15 @@ const reservationSchema = z.object({
 
 type ReservationFormValues = z.infer<typeof reservationSchema>;
 
-// Add WorkingHour type for type safety
-
 export default function CreateReservation() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const user = useUserStore((state) => state.user);
   const clinic_id = searchParams.get("clinic_id");
+
   if (!clinic_id) {
+    toast.error("클리닉 ID가 없습니다. 다시 시도해주세요."); // No clinic ID. Please try again.
     router.push("/patient/home");
   }
 
@@ -92,8 +95,6 @@ export default function CreateReservation() {
     enabled: !!clinic_id,
   });
 
-  const user = useUserStore((state) => state.user);
-
   const form = useForm<ReservationFormValues>({
     resolver: zodResolver(reservationSchema),
     defaultValues: {
@@ -105,32 +106,54 @@ export default function CreateReservation() {
     },
   });
 
-  const [loading, setLoading] = useState(false);
-
-  async function onSubmit(values: ReservationFormValues) {
-    if (!user?.id) return;
-    setLoading(true);
-    const { error } = await supabaseClient.from("reservation").insert([
-      {
+  // Reservation mutation
+  const reservationMutation = useMutation({
+    mutationFn: async (values: ReservationFormValues) => {
+      if (!user?.id) throw new Error("User ID is required");
+      await insertReservation({
         reservation_date: format(values.date, "yyyy-MM-dd"),
         reservation_time: values.time,
         consultation_type: values.consultationType,
         contact_number: values.contact,
         patient_id: user.id,
         clinic_treatment_id: values.clinicTreatment,
-      },
-    ]);
-    setLoading(false);
+      });
+      return values;
+    },
+    onSuccess: async () => {
+      const to = "+639816284484"; // Replace with the recipient's phone number
+      const userName = user?.full_name || user?.email || "Unknown";
+      // LMS full message (commented out, for reference)
+      // const lmsText = `치아 플랫폼 예약 알림\n\n예약자: ${userName}\n연락처: ${userContact}\n날짜: ${reservationDateStr}\n시간: ${values.time}\n시술: ${treatmentName}\n상담유형: ${values.consultationType}\n요청시각: ${requestDateStr}`; // 요청시각: Request sent time
+      // SMS short message: just notify new reservation and username
+      const smsText = `치아 플랫폼 예약 알림: ${userName}님이 예약을 생성했습니다.`; // Chia platform reservation alert: {userName} made a reservation.
+      const smsResult = await sendSolapiSMS({ to, text: smsText, type: "SMS" });
 
-    console.log("Reservation created:", values);
+      //display toast success message even though sms is not sent
+      toast.success("예약 요청이 완료되었습니다"); // Reservation request completed
 
-    if (error) {
-      console.error("Error creating reservation:", error);
-      toast.error("예약 요청에 실패했습니다.");
-    } else {
-      toast.success("예약 요청이 완료되었습니다.");
+      if (!smsResult.ok) {
+        console.log(
+          "-------->ERROR: 예약 요청이 완료되었습니다. (SMS 전송 실패)"
+        );
+        console.log(`------>ERROR: 메시지 전송 실패: ${smsResult.error}`);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["reservations", user?.id] });
       router.back();
-    }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(
+        "예약 요청에 실패했습니다." + // Reservation request failed
+          (error?.message ? `: ${error.message}` : "")
+      );
+    },
+  });
+
+  async function onSubmit(values: ReservationFormValues) {
+    if (!user?.id) return;
+    reservationMutation.mutate(values);
   }
 
   const reservationDate = form.watch("date");
@@ -419,8 +442,14 @@ export default function CreateReservation() {
               />
             </div>
           </div>
-          <Button type="submit" className="h-[45px] mb-20" disabled={loading}>
-            {loading ? "요청 중..." : "작성하기"}
+          <Button
+            type="submit"
+            className="h-[45px] mb-20"
+            disabled={reservationMutation.status === "pending"}
+          >
+            {reservationMutation.status === "pending"
+              ? "요청 중..."
+              : "작성하기"}
             {/**loading ? Loading... : Write */}
           </Button>
         </form>

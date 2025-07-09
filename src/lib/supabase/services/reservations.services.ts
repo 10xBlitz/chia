@@ -2,29 +2,6 @@ import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { Tables } from "../types";
 
-// Helper to fetch reservations for the current user
-// async function fetchReservations(userId: string) {
-//   const { data, error } = await supabaseClient
-//     .from("reservation")
-//     .select(
-//       `
-//       *,
-//       clinic_treatment(
-//         *,
-//         clinic(clinic_name),
-//         treatment(treatment_name)
-//       ),
-//       payment(*)
-//     `
-//     )
-//     .eq("patient_id", userId)
-//     .order("reservation_date", { ascending: false })
-//     .order("reservation_time", { ascending: false });
-
-//   if (error) throw new Error(error.message);
-//   return data;
-// }
-
 export async function getPaginatedReservations(
   page = 1,
   limit = 10,
@@ -99,4 +76,23 @@ export async function getPaginatedReservations(
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
   };
+}
+
+export async function insertReservation(reservation: {
+  reservation_date: string;
+  reservation_time: string;
+  consultation_type: string;
+  contact_number: string;
+  patient_id: string;
+  clinic_treatment_id: string;
+}) {
+  const { data, error } = await supabaseClient
+    .from("reservation")
+    .insert([reservation])
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
 }
