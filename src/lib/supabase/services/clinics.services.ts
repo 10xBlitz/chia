@@ -229,7 +229,7 @@ export async function getClinic(clinic_id: string) {
     .select(
       `
         *,
-        user:notification_recipient_user_id (contact_number),
+        user:notification_recipient_user_id (full_name, contact_number),
         working_hour(*),
         clinic_treatment (
           id,
@@ -373,4 +373,53 @@ export async function updateClinicNotificationRecipient(
     .eq("id", clinicId);
 
   if (error) throw error;
+}
+
+/**
+ * Get clinics with notification recipients for SMS sending
+ * @param region - The region to match
+ * @param treatmentId - Optional treatment ID to match
+ * @returns Array of clinics with notification recipient contact info
+ */
+export async function getClinicsForNotification(
+  region: string,
+  treatmentId?: string
+) {
+  let query = supabaseClient
+    .from("clinic")
+    .select(
+      `
+      id,
+      clinic_name,
+      region,
+      notification_recipient_user_id,
+      notification_recipient:notification_recipient_user_id(
+        id,
+        full_name,
+        contact_number
+      ),
+      clinic_treatment (
+        treatment_id,
+        treatment (
+          id,
+          treatment_name
+        )
+      )
+    `
+    )
+    .eq("region", region)
+    .eq("status", "active")
+    .not("notification_recipient_user_id", "is", null);
+
+  // If treatmentId is provided, filter by clinics that offer this treatment
+  if (treatmentId) {
+    query = query
+      .eq("clinic_treatment.treatment_id", treatmentId)
+      .eq("clinic_treatment.status", "active");
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return data || [];
 }

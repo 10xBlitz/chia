@@ -31,6 +31,11 @@ import FormAddress from "@/components/form-ui/form-address";
 import FormTextarea from "@/components/form-ui/form-textarea";
 import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload";
 import { calculateAge } from "@/lib/utils";
+import { sendSolapiSMS } from "@/lib/send-sms";
+import {
+  getClinic,
+  getClinicsForNotification,
+} from "@/lib/supabase/services/clinics.services";
 
 export default function CreateQuotationPage() {
   const router = useRouter();
@@ -65,6 +70,12 @@ export default function CreateQuotationPage() {
         return res.data || [];
       }
     },
+  });
+
+  const { data: clinic, error: clinicError } = useQuery({
+    queryKey: ["clinic-detail", clinic_id],
+    queryFn: async () => await getClinic(clinic_id as string),
+    enabled: !!clinic_id,
   });
 
   const queryClient = useQueryClient();
@@ -108,10 +119,74 @@ export default function CreateQuotationPage() {
         setUploadingImageIdx,
       });
     },
-    onSuccess: () => {
+    onSuccess: async (data, variables) => {
       setUploadingImageIdx(null); // reset after upload
       toast.success("견적 요청이 등록되었습니다.");
-      queryClient.invalidateQueries();
+
+      const customerName = user?.full_name || user?.email || "Customer";
+      const quotationRegion =
+        variables.region.split(",")[1]?.trim() || variables.region;
+      const treatmentId = variables.treatment_id;
+
+      if (clinic_id && clinic) {
+        // Private quotation - send SMS to specific clinic
+        const to = clinic?.user?.contact_number as string;
+        const dentistName = clinic?.user?.full_name || "Dentist";
+        const smsText = `안녕하세요, #${dentistName}님.\n\n#${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
+        const smsResult = await sendSolapiSMS({ to, text: smsText });
+
+        if (!smsResult.ok) {
+          console.log("-------->ERROR: SMS 전송 실패 (private quotation)");
+          console.log(`------>ERROR: 메시지 전송 실패: ${smsResult.error}`);
+        }
+      } else {
+        // Public quotation - send SMS to all matching clinics
+        try {
+          const matchingClinics = await getClinicsForNotification(
+            quotationRegion,
+            treatmentId
+          );
+
+          console.log(
+            `Found ${matchingClinics.length} matching clinics for region: ${quotationRegion}, treatment: ${treatmentId}`
+          );
+
+          // Send SMS to all matching clinics
+          const smsPromises = matchingClinics.map(async (matchingClinic) => {
+            const to = matchingClinic.notification_recipient?.contact_number;
+            const dentistName =
+              matchingClinic.notification_recipient?.full_name ||
+              matchingClinic.clinic_name ||
+              "Dentist";
+
+            if (to) {
+              const smsText = `안녕하세요, #${dentistName}님.\n\n#${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
+              return sendSolapiSMS({ to, text: smsText });
+            }
+            return { ok: false, error: "No contact number" };
+          });
+
+          const smsResults = await Promise.allSettled(smsPromises);
+          const failedSMS = smsResults.filter(
+            (result) =>
+              result.status === "rejected" ||
+              (result.status === "fulfilled" && !result.value.ok)
+          );
+
+          if (failedSMS.length > 0) {
+            console.log(
+              `-------->ERROR: ${failedSMS.length} SMS 전송 실패 (public quotation)`
+            );
+          }
+        } catch (error) {
+          console.log("-------->ERROR: 클리닉 조회 또는 SMS 전송 실패:", error);
+        }
+      }
+
+      //display toast success message even though sms is not sent
+      toast.success("견적 요청이 완료되었습니다"); // Quotation request completed
+
+      queryClient.invalidateQueries({ queryKey: ["quotations", user?.id] });
       router.back();
     },
     onError: (err) => {
@@ -133,6 +208,17 @@ export default function CreateQuotationPage() {
       <div className="flex items-center justify-center h-screen">
         <p className="text-gray-500">사용자 정보를 불러오는 중...</p>
         {/* Loading user information... */}
+      </div>
+    );
+  }
+
+  if (clinicError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-red-500">
+          치과 정보를 불러오는 중 오류가 발생했습니다.
+        </p>
+        {/* Error loading clinic information */}
       </div>
     );
   }

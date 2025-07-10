@@ -131,12 +131,12 @@ export default function CreateReservation() {
     },
     onSuccess: async () => {
       const to = clinic?.user?.contact_number as string; // Replace with the recipient's phone number
-      const userName = user?.full_name || user?.email || "Unknown";
-      // LMS full message (commented out, for reference)
-      // const lmsText = `치아 플랫폼 예약 알림\n\n예약자: ${userName}\n연락처: ${userContact}\n날짜: ${reservationDateStr}\n시간: ${values.time}\n시술: ${treatmentName}\n상담유형: ${values.consultationType}\n요청시각: ${requestDateStr}`; // 요청시각: Request sent time
-      // SMS short message: just notify new reservation and username
-      const smsText = `치아 플랫폼 예약 알림: ${userName}님이 예약을 생성했습니다.`; // Chia platform reservation alert: {userName} made a reservation.
-      const smsResult = await sendSolapiSMS({ to, text: smsText, type: "SMS" });
+
+      // Compose SMS text in English for the dentist
+      const dentistName = clinic?.user?.full_name || "Dentist";
+      const customerName = user?.full_name || user?.email || "Customer";
+      const smsText = `안녕하세요, #${dentistName}님.\n\n#${customerName}님이 예약을 생성했습니다.`; // Hello, #{dentistName}. #{customerName} has requested a reservation.
+      const smsResult = await sendSolapiSMS({ to, text: smsText });
 
       //display toast success message even though sms is not sent
       toast.success("예약 요청이 완료되었습니다"); // Reservation request completed
