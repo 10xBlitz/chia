@@ -33,7 +33,7 @@ export default function ViewBidPage() {
   return (
     <div className="flex flex-col">
       <HeaderWithBackButton
-        title={`${quotation?.name} 님이 제출한 견적이에요.`}
+        title={`${quotation?.name} 님이 요청한 견적이에요.`}
       />{" "}
       {/**This is the quote submitted by 00. */}
       {/* Public Quotation */}
@@ -63,9 +63,9 @@ export default function ViewBidPage() {
           <div className="border rounded-lg px-3 py-2 bg-gray-50">
             {quotation?.birthdate ? (
               <>
-                {new Date(quotation.birthdate).toLocaleDateString("ko-KR")} 
-                {" "}
-                ({calculateAge(new Date(quotation.birthdate))}세) {/* years old */}
+                {new Date(quotation.birthdate).toLocaleDateString("ko-KR")} (
+                {calculateAge(new Date(quotation.birthdate))}세){" "}
+                {/* years old */}
               </>
             ) : (
               "-"

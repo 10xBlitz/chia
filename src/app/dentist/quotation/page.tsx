@@ -83,8 +83,8 @@ export default function ViewQuotationPage() {
               >
                 {
                   q.bid.length > 0
-                    ? "단변완료" /* Short-term completion */
-                    : "단변하기" /* Shorten */
+                    ? "답변완료" // "Response Completed"
+                    : "답변하기" // "Reply"
                 }
               </button>
             </div>
