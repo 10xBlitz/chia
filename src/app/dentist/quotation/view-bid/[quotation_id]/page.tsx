@@ -33,7 +33,7 @@ export default function ViewBidPage() {
   return (
     <div className="flex flex-col">
       <HeaderWithBackButton
-        title={`${quotation?.name} 님이 요청한 견적이에요.`}
+        title={`${quotation?.name}님이 요청한 견적이에요.`}
       />{" "}
       {/**This is the quote submitted by 00. */}
       {/* Public Quotation */}
