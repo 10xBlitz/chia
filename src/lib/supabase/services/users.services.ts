@@ -2,8 +2,7 @@ import { supabaseClient } from "../client";
 import { startOfDay } from "date-fns";
 import { Tables } from "../types";
 
-interface Filters {
-  full_name?: string | null;
+interface Filters extends Partial<Tables<"user">> {
   category?: "patient" | "dentist" | "admin" | "dentist employee";
   date_range?: {
     from?: string;
@@ -40,6 +39,14 @@ export async function getPaginatedUsers(
   // Filters
   if (filters.full_name) {
     query = query.ilike("full_name", `%${filters.full_name}%`);
+  }
+
+  if (filters.category) {
+    query = query.eq("role", filters.category);
+  }
+
+  if (filters.clinic_id) {
+    query = query.eq("clinic_id", filters.clinic_id);
   }
 
   if (filters.category) {

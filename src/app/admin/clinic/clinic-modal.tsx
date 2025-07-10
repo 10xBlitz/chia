@@ -28,7 +28,7 @@ import {
   ComboboxInput,
   ComboboxItem,
 } from "@/components/ui/combobox";
-import { useQuery as useTanstackQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
 import {
   CLINIC_IMAGE_ALLOWED_MIME_TYPES,
@@ -47,7 +47,6 @@ import {
   uploadFileToSupabase,
 } from "@/lib/supabase/services/upload-file.services";
 import FormInput from "@/components/form-ui/form-input";
-import FormContactNumber from "@/components/form-ui/form-contact-number";
 // import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormMultiImageUpload from "@/components/form-ui/form-multi-image-upload";
@@ -63,6 +62,8 @@ import {
 } from "@/lib/supabase/services/working-hour.services";
 import type { ClinicImageFormValue } from "./clinic-modal.types";
 import { KoreanTimePicker } from "@/components/time-picker";
+// import FormDentistsDropdown from "@/components/form-ui/form-dentists-dropdown";
+import FormContactNumber from "@/components/form-ui/form-contact-number";
 
 export const ClinicModal = ({
   data,
@@ -79,11 +80,10 @@ export const ClinicModal = ({
   const [progress, setProgress] = useState<string | null>(null);
 
   // Fetch all treatments from DB for the select dropdown
-  const { data: allTreatments, isLoading: treatmentsLoading } =
-    useTanstackQuery({
-      queryKey: ["all_treatments"],
-      queryFn: async () => await getPaginatedTreatments(1, 1000),
-    });
+  const { data: allTreatments, isLoading: treatmentsLoading } = useQuery({
+    queryKey: ["all_treatments"],
+    queryFn: async () => await getPaginatedTreatments(1, 1000),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -303,6 +303,15 @@ export const ClinicModal = ({
                     "!min-h-[40px] !max-h-[40px] sm:!min-h-[45px]"
                   }
                 />
+
+                {/* <FormDentistsDropdown
+                control={form.control}
+                name="contact_number"
+                label="연락처" // Contact Number
+                placeholder="연락처를 선택하세요." // Please select a contact number
+                formLabelClassName={formLabelClassName}
+                clinicId={data?.id || ""}
+              /> */}
                 <AddressSearch
                   id="address"
                   defaultValue={form.getValues("full_address")}

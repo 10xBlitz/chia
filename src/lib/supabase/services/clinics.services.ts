@@ -43,7 +43,6 @@ export async function getPaginatedClinics(
         *,
         treatment!inner (*)
       )
-   
     `,
       { count: "exact" }
     )
@@ -230,6 +229,7 @@ export async function getClinic(clinic_id: string) {
     .select(
       `
         *,
+        user:notification_recipient_user_id (contact_number),
         working_hour(*),
         clinic_treatment (
           id,
@@ -311,4 +311,66 @@ export async function getDisabledWeekdaysForClinic(
   return allWeekdays
     .map((day, idx) => (openDays.has(day) ? null : idx))
     .filter((v) => v !== null) as number[];
+}
+
+/**
+ * Get dentists associated with a clinic
+ * @param clinicId - The clinic ID
+ * @returns Array of dentists with basic info
+ */
+export async function getDentistsByClinic(clinicId: string) {
+  const { data, error } = await supabaseClient
+    .from("user")
+    .select("id, full_name, contact_number")
+    .eq("clinic_id", clinicId)
+    .eq("role", "dentist")
+    .eq("login_status", "active")
+    .order("full_name", { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+/**
+ * Get clinic with notification recipient info
+ * @param clinicId - The clinic ID
+ * @returns Clinic with notification recipient user info
+ */
+export async function getClinicNotificationRecipient(clinicId: string) {
+  const { data, error } = await supabaseClient
+    .from("clinic")
+    .select(
+      `
+      id,
+      clinic_name,
+      notification_recipient_user_id,
+      notification_recipient:notification_recipient_user_id(
+        id,
+        full_name
+      )
+    `
+    )
+    .eq("id", clinicId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Update clinic notification recipient
+ * @param clinicId - The clinic ID
+ * @param userId - The user ID to set as notification recipient (or null to remove)
+ */
+export async function updateClinicNotificationRecipient(
+  clinicId: string,
+  userId: string | null
+) {
+  console.log("---->updating: ", { userId, clinicId });
+  const { error } = await supabaseClient
+    .from("clinic")
+    .update({ notification_recipient_user_id: userId })
+    .eq("id", clinicId);
+
+  if (error) throw error;
 }

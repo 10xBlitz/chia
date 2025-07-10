@@ -179,7 +179,7 @@ export const useUserStore = <T,>(selector: (store: UserStore) => T): T => {
 async function fetchUserProfile(userId: string) {
   const { data, error } = await supabaseClient
     .from("user")
-    .select("*, clinic(*)")
+    .select("*, clinic!clinic_id(*)")
     .eq("id", userId)
     .maybeSingle();
   if (error && error.code !== "PGRST116") {

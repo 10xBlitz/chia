@@ -32,6 +32,7 @@ export interface ClinicCardProps {
   className?: string;
   status: Enums<"record_status">;
   showBookmark?: boolean;
+  notification_recipient_user_id?: string | null;
 }
 
 export default function ClinicCard(props: ClinicCardProps) {

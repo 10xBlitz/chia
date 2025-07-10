@@ -51,7 +51,10 @@ import { KoreanTimePicker } from "@/components/time-picker";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import BottomNavigation from "@/components/bottom-navigation";
 import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
-import { getDisabledWeekdaysForClinic } from "@/lib/supabase/services/clinics.services";
+import {
+  getClinic,
+  getDisabledWeekdaysForClinic,
+} from "@/lib/supabase/services/clinics.services";
 import { sendSolapiSMS } from "@/lib/send-sms";
 import { insertReservation } from "@/lib/supabase/services/reservations.services";
 
@@ -95,6 +98,12 @@ export default function CreateReservation() {
     enabled: !!clinic_id,
   });
 
+  const { data: clinic, error: clinicError } = useQuery({
+    queryKey: ["clinic-detail", clinic_id],
+    queryFn: () => getClinic(clinic_id as string),
+    enabled: !!clinic_id,
+  });
+
   const form = useForm<ReservationFormValues>({
     resolver: zodResolver(reservationSchema),
     defaultValues: {
@@ -121,7 +130,7 @@ export default function CreateReservation() {
       return values;
     },
     onSuccess: async () => {
-      const to = "+639816284484"; // Replace with the recipient's phone number
+      const to = clinic?.user?.contact_number as string; // Replace with the recipient's phone number
       const userName = user?.full_name || user?.email || "Unknown";
       // LMS full message (commented out, for reference)
       // const lmsText = `치아 플랫폼 예약 알림\n\n예약자: ${userName}\n연락처: ${userContact}\n날짜: ${reservationDateStr}\n시간: ${values.time}\n시술: ${treatmentName}\n상담유형: ${values.consultationType}\n요청시각: ${requestDateStr}`; // 요청시각: Request sent time
@@ -226,6 +235,20 @@ export default function CreateReservation() {
       .sort();
     setAllowedTimes(slots);
   }, [workingHours]);
+
+  if (clinicError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h2 className="text-lg font-semibold text-red-600">
+          클리닉 정보를 불러오는 데 실패했습니다.{" "}
+          {/* Failed to load clinic information. */}
+        </h2>
+        <Button className="mt-4" onClick={() => router.push("/patient/home")}>
+          홈으로 돌아가기 {/* Go back to home */}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-dvh">
