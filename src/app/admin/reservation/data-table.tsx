@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
                 id="date"
                 variant={"outline"}
                 className={cn(
-                  "justify-start text-left font-normal h-[40] sm:h-[45px]",
+                  "justify-start text-left font-normal h-[45px] sm:h-[45px]",
                   !dates && "text-muted-foreground",
                   filterTextSize
                 )}

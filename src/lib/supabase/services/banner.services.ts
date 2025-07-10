@@ -39,6 +39,7 @@ export async function getPaginatedBanners(
     "created_at",
     "image",
     "title",
+    "url",
   ];
 
   for (const key of bannerColumns) {

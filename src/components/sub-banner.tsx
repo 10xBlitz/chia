@@ -77,7 +77,22 @@ export default function SubBannerCarousel() {
           )}
           {banners.map((banner, idx: number) => (
             <CarouselItem key={idx}>
-              <div className="relative bg-[#d6d5d0] rounded-2xl h-[120px] w-full overflow-hidden">
+              <div
+                className="relative bg-[#d6d5d0] rounded-2xl h-[120px] w-full overflow-hidden cursor-pointer"
+                onClick={() => {
+                  if (banner.url) {
+                    window.open(banner.url, "_blank", "noopener,noreferrer");
+                  }
+                }}
+                role={banner.url ? "button" : undefined}
+                tabIndex={banner.url ? 0 : undefined}
+                aria-label={banner.url ? `배너 이동: ${banner.url}` : undefined} // Banner link
+                onKeyDown={(e) => {
+                  if (banner.url && (e.key === "Enter" || e.key === " ")) {
+                    window.open(banner.url, "_blank", "noopener,noreferrer");
+                  }
+                }}
+              >
                 <Image
                   src={banner.image}
                   alt={banner.title || "Banner Image"}

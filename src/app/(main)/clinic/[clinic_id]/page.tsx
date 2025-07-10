@@ -178,7 +178,9 @@ export default function ClinicSingleViewPage() {
   // Copy address to clipboard
   const handleCopyAddress = () => {
     if (clinic?.region) {
-      navigator.clipboard.writeText(String(clinic.full_address));
+      navigator.clipboard.writeText(
+        String(clinic.full_address + " " + clinic.detail_address)
+      );
       toast.success("주소가 클립보드에 복사되었습니다."); // Address copied to clipboard
     }
   };
@@ -289,7 +291,7 @@ export default function ClinicSingleViewPage() {
           <div className="flex flex-col gap-2 text-gray-700 text-[15px]">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-black" />
-              <span>{clinic.full_address || "no location"}</span>
+              <span>{clinic.full_address + " " + clinic.detail_address}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
@@ -444,14 +446,18 @@ export default function ClinicSingleViewPage() {
                           weekdayLunchBreak.time_open_from &&
                           weekdayLunchBreak.time_open_to && (
                             <div className="text-sm text-gray-800 font-medium">
-                              (주중) {toKoreanTime(weekdayLunchBreak.time_open_from)} - {toKoreanTime(weekdayLunchBreak.time_open_to)}
+                              (주중){" "}
+                              {toKoreanTime(weekdayLunchBreak.time_open_from)} -{" "}
+                              {toKoreanTime(weekdayLunchBreak.time_open_to)}
                             </div>
                           )}
                         {weekendLunchBreak &&
                           weekendLunchBreak.time_open_from &&
                           weekendLunchBreak.time_open_to && (
                             <div className="text-sm text-gray-800 font-medium">
-                              (주말) {toKoreanTime(weekendLunchBreak.time_open_from)} - {toKoreanTime(weekendLunchBreak.time_open_to)}
+                              (주말){" "}
+                              {toKoreanTime(weekendLunchBreak.time_open_from)} -{" "}
+                              {toKoreanTime(weekendLunchBreak.time_open_to)}
                             </div>
                           )}
                       </div>

@@ -22,6 +22,7 @@ export type Database = {
           id: string
           image: string
           title: string | null
+          url: string | null
         }
         Insert: {
           banner_type: Database["public"]["Enums"]["banner_type"]
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           image: string
           title?: string | null
+          url?: string | null
         }
         Update: {
           banner_type?: Database["public"]["Enums"]["banner_type"]
@@ -38,6 +40,7 @@ export type Database = {
           id?: string
           image?: string
           title?: string | null
+          url?: string | null
         }
         Relationships: [
           {

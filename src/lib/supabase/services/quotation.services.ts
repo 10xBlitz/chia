@@ -80,19 +80,47 @@ export async function getPaginatedQuotations(
   limit = 10,
   filters: Partial<Tables<"quotation">> & {
     date_range?: { from?: string; to?: string };
-  }
+  },
+  sort?: string
 ) {
   if (limit > 1000) throw Error("limit exceeds 1000");
   if (limit < 1) throw Error("limit must be a positive number");
 
   const offset = (page - 1) * limit;
 
+  // Parse sort param (e.g. "created_at:desc")
+  let sortField = "created_at";
+  let sortDir: boolean = false; // false = desc, true = asc
+  if (sort) {
+    const [field, dir] = sort.split(":");
+    if (field) sortField = field;
+    if (dir) sortDir = dir === "asc";
+  }
+
   let query = supabaseClient
     .from("quotation")
-    .select("*, treatment(*), bid(*)", { count: "exact" })
-    .order("created_at", { ascending: false })
+    .select("*, treatment(*), bid(*), clinic(clinic_name)", {
+      count: "exact",
+    })
+    .order(sortField, { ascending: sortDir })
     .range(offset, offset + limit - 1);
 
+  // Filter by name
+  if (filters.name) {
+    query = query.ilike("name", `%${filters.name}%`);
+  }
+
+  // Filter by status
+  if (filters.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  // Filter by region
+  if (filters.region) {
+    query = query.ilike("region", `%${filters.region}%`);
+  }
+
+  // Filter by patient_id
   if (filters.patient_id) {
     query = query.eq("patient_id", filters.patient_id);
   }
@@ -103,11 +131,14 @@ export async function getPaginatedQuotations(
       "created_at",
       startOfDay(filters.date_range.from).toISOString()
     );
-    query = query.lte("created_at", endOfDay(filters.date_range.to));
+    query = query.lte(
+      "created_at",
+      endOfDay(filters.date_range.to).toISOString()
+    );
   }
 
   const { data, error, count } = await query;
-  console.log("getPaginatedClinics", data, count);
+  console.log("getPaginatedQuotations", data, count);
 
   if (error) throw error;
 

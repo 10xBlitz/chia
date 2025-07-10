@@ -29,6 +29,7 @@ import {
   Users,
   Zap,
   Image,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -64,6 +65,11 @@ const items = [
     title: "예약 관리", // Reservation Management
     url: "/admin/reservation",
     icon: Calendar,
+  },
+  {
+    title: "견적 요청 관리", // Quotation Management
+    url: "/admin/quotation",
+    icon: FileText,
   },
   {
     title: "리뷰 관리", // Review Management

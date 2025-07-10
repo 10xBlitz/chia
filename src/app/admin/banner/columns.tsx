@@ -40,6 +40,24 @@ export const columns: ColumnDef<BannerTable>[] = [
     },
   },
   {
+    accessorKey: "url",
+    header: "URL", // URL
+    cell: ({ row }) => {
+      return row.original.url ? (
+        <a
+          href={row.original.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline max-w-[200px] truncate block"
+        >
+          {row.original.url}
+        </a>
+      ) : (
+        <span className="text-gray-400">-</span>
+      );
+    },
+  },
+  {
     accessorKey: "created_at",
     header: "생성일", // Created At
     cell: ({ row }) => (

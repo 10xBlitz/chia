@@ -39,6 +39,7 @@ const bannerFormSchema = z.object({
   title: z.string().optional(),
   image: z.string(),
   clinic_id: z.string().min(1, "병원을 선택해주세요"), // Please select a hospital
+  url: z.string().optional(), // URL field for sub banners
 });
 
 type BannerFormValues = z.infer<typeof bannerFormSchema>;
@@ -152,18 +153,23 @@ export function BannerModal({
           title: data.title || "",
           image: data.image || "",
           clinic_id: data.clinic_id || "",
+          url: data.url || "",
         }
       : {
           banner_type: "main",
           title: "",
           image: "",
           clinic_id: "",
+          url: "",
         },
   });
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Watch banner_type to conditionally show URL field
+  const bannerType = form.watch("banner_type");
 
   // Fetch clinics for dropdown (first 100, sorted by name)
   const { data: clinicsPage, isLoading: clinicsLoading } = useQuery({
@@ -204,12 +210,14 @@ export function BannerModal({
           ...values,
           image: imageUrl,
           clinic_id: values.clinic_id,
+          url: values.url || null, // Handle URL field
         });
       } else {
         await insertBanner({
           ...values,
           image: imageUrl,
           clinic_id: values.clinic_id,
+          url: values.url || null, // Handle URL field
         });
       }
     },
@@ -299,6 +307,17 @@ export function BannerModal({
             label="제목" // Title
             placeholder="제목을 입력하세요" // Enter title
           />
+
+          {/* URL field - only show for sub banners */}
+          {bannerType === "sub" && (
+            <FormInput
+              control={form.control}
+              name="url"
+              label="URL" // URL
+              placeholder="https://example.com" // URL placeholder
+            />
+          )}
+
           <BannerImageUpload
             control={form.control}
             name="image"
