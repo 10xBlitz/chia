@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, lastDayOfMonth } from "date-fns";
 import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
@@ -18,6 +18,9 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { ReservationDotCalendar } from "@/components/ui/reservation-dot-calendar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { updateReservation } from "@/lib/supabase/services/reservations.services";
+import { sendSolapiSMS } from "@/lib/send-sms";
+import { Tables } from "@/lib/supabase/types";
 
 const YEARS = Array.from(
   { length: 300 },
@@ -38,6 +41,20 @@ const MONTHS = [
   "12월",
 ];
 
+// Reservation type with user for mutation
+interface ReservationWithUser extends Tables<"reservation"> {
+  user: {
+    full_name: string;
+    contact_number: string;
+    birthdate: string;
+  };
+  clinic_treatment?: {
+    treatment?: {
+      treatment_name?: string;
+    };
+  };
+}
+
 export default function DentistReservationPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [displayMonth, setDisplayMonth] = useState<Date>(new Date());
@@ -45,6 +62,7 @@ export default function DentistReservationPage() {
     string | null
   >(null);
   const user = useUserStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setDisplayMonth(selectedDate);
@@ -82,7 +100,25 @@ export default function DentistReservationPage() {
     enabled: !!user?.clinic_id && !!displayMonth,
   });
 
-  console.log(reservationDays);
+  // Accept reservation mutation
+  const acceptReservationMutation = useMutation({
+    mutationFn: async (reservation: ReservationWithUser) => {
+      // 1. Update reservation status
+      console.log("--->updating reservation", reservation);
+      await updateReservation(reservation.id, { status: "accepted" });
+      // 2. Send SMS to patient
+      const smsText = `안녕하세요 ${reservation.user.full_name}님,\n\n${
+        user?.clinic?.clinic_name || "치과"
+      }에서 예약확정했습니다.`;
+      await sendSolapiSMS({
+        to: reservation.user.contact_number,
+        text: smsText,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reservations"] });
+    },
+  });
 
   // Navigation handlers
   const handlePrevMonth = () => {
@@ -208,9 +244,19 @@ export default function DentistReservationPage() {
                 </span>
               </div>
               <Checkbox
-                checked={selectedReservationId === r.id}
-                onCheckedChange={() => setSelectedReservationId(r.id)}
+                checked={
+                  selectedReservationId === r.id || r.status === "accepted"
+                }
+                onCheckedChange={() => {
+                  setSelectedReservationId(r.id);
+                  if (r.status !== "accepted") {
+                    acceptReservationMutation.mutate(r);
+                  }
+                }}
                 className="bg-gray-100 w-5 h-5"
+                disabled={
+                  acceptReservationMutation.isPending || r.status === "accepted"
+                }
               />
             </div>
           ))}

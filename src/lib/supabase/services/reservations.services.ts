@@ -1,6 +1,6 @@
 import { startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
-import { Tables } from "../types";
+import { Tables, TablesUpdate } from "../types";
 
 export async function getPaginatedReservations(
   page = 1,
@@ -94,5 +94,20 @@ export async function insertReservation(reservation: {
 
   if (error) throw error;
 
+  return data;
+}
+
+export async function updateReservation(
+  reservationId: string,
+  updates: TablesUpdate<"reservation">
+) {
+  const { data, error } = await supabaseClient
+    .from("reservation")
+    .update(updates)
+    .eq("id", reservationId)
+    .select()
+    .single();
+
+  if (error) throw error;
   return data;
 }

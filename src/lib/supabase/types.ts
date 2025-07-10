@@ -551,7 +551,7 @@ export type Database = {
           patient_id: string
           reservation_date: string
           reservation_time: string
-          status: string
+          status: Database["public"]["Enums"]["reservation_status"]
         }
         Insert: {
           clinic_treatment_id: string
@@ -562,7 +562,7 @@ export type Database = {
           patient_id: string
           reservation_date: string
           reservation_time: string
-          status?: string
+          status?: Database["public"]["Enums"]["reservation_status"]
         }
         Update: {
           clinic_treatment_id?: string
@@ -573,7 +573,7 @@ export type Database = {
           patient_id?: string
           reservation_date?: string
           reservation_time?: string
-          status?: string
+          status?: Database["public"]["Enums"]["reservation_status"]
         }
         Relationships: [
           {
@@ -810,6 +810,7 @@ export type Database = {
         | "주말 점심시간"
       login_status: "active" | "inactive"
       record_status: "deleted" | "active"
+      reservation_status: "pending" | "accepted" | "rejected"
       user_role: "patient" | "dentist" | "admin" | "dentist employee"
     }
     CompositeTypes: {
@@ -952,6 +953,7 @@ export const Constants = {
       ],
       login_status: ["active", "inactive"],
       record_status: ["deleted", "active"],
+      reservation_status: ["pending", "accepted", "rejected"],
       user_role: ["patient", "dentist", "admin", "dentist employee"],
     },
   },
