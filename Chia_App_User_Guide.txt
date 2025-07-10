@@ -98,11 +98,47 @@ Chia App – User Guide (English & Korean)
 
 ---
 
-※ 모든 주요 기능은 모바일 환경에 최적화되어 있으며, 접근성과 사용성을 고려해 설계되었습니다.
-(All major features are optimized for mobile, with accessibility and usability in mind.)
+[로그인 안내 (Login Instructions)]
 
-문제가 발생하거나 도움이 필요하면 앱 내 고객센터 또는 이메일로 문의해 주세요.
-(If you need help or encounter issues, contact support via the app or by email.)
+1. 환자용 (For Patients)
+
+- 앱을 실행합니다. (Open the app.)
+- 시작 화면에서 '로그인'을 선택합니다. (On the start screen, select 'Login'.)
+- 아래 중 원하는 방법을 선택해 로그인합니다: (Choose one of the following methods to log in:)
+  - 카카오 계정으로 로그인 (Login with your own Kakao account)
+  - 구글 계정으로 로그인 (Login with your own Google account)
+  - 애플 계정으로 로그인 (Login with your own Apple account)
+  - 이메일로 로그인 (Login with your email)
+    - 테스트 계정 정보: (Test account credentials:)
+      - 이메일 (Email): patient@email.com
+      - 비밀번호 (Password): password
+- 각 방법에 따라 안내에 따라 인증을 완료합니다. (Follow the instructions for each method to complete authentication.)
+
+2. 관리자용 (For Admins)
+
+- 앱을 실행합니다. (Open the app.)
+- 시작 화면에서 '로그인'을 선택합니다. (On the start screen, select 'Login'.)
+- 이메일/비밀번호 입력란에 아래 정보를 입력합니다: (Enter the following credentials:)
+  - 이메일 (Email): admin@email.com
+  - 비밀번호 (Password): password
+- '로그인' 버튼을 눌러 관리자 계정으로 로그인합니다. (Tap 'Login' to sign in as admin.)
+
+3. 치과의사용 (For Dentists)
+
+- 앱을 실행합니다. (Open the app.)
+- 시작 화면에서 '로그인'을 선택합니다. (On the start screen, select 'Login'.)
+- 이메일/비밀번호 입력란에 아래 정보를 입력합니다: (Enter the following credentials:)
+  - 이메일 (Email): business+dentist@10xblitz.com
+  - 비밀번호 (Password): asdfasdf
+- '로그인' 버튼을 눌러 치과의사 계정으로 로그인합니다. (Tap 'Login' to sign in as dentist.)
+
+---
+
+※ 모든 로그인 방법은 안전하게 암호화되어 있으며, 계정 정보는 외부에 노출되지 않습니다.
+(All login methods are securely encrypted, and your account information is never exposed.)
+
+문제가 발생하면 고객센터로 문의해 주세요.
+(If you have any issues, please contact customer support.)
 
 ---
 

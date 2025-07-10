@@ -279,7 +279,6 @@ function KakaoStep1({
         name="name"
         label="이름" // Name
         placeholder="이름을 입력해주세요" // Please enter your name
-        disabled
       />
       {/* 이메일 (Email) - readonly */}
       <FormInput
