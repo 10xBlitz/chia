@@ -291,7 +291,9 @@ export default function ClinicSingleViewPage() {
           <div className="flex flex-col gap-2 text-gray-700 text-[15px]">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-black" />
-              <span>{clinic.full_address + " " + clinic.detail_address}</span>
+              <span className="break-words whitespace-pre-line">
+                {clinic.full_address + " " + clinic.detail_address}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
@@ -513,8 +515,8 @@ export default function ClinicSingleViewPage() {
                   />
                 </div>
                 <div className="flex justify-between items-center">
-                  <div className="text-sm">
-                    {clinic.full_address || "no region"}
+                  <div className="text-sm break-words whitespace-pre-line">
+                    {clinic.full_address + " " + clinic.detail_address}
                   </div>
                   <Button
                     size="sm"
