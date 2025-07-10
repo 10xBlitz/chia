@@ -115,6 +115,7 @@ export default function ClinicsPage() {
                   "eq",
                   params.treatment_id
                 );
+                q = q.filter("status", "eq", "active");
                 q.not("clinic_treatment", "is", null);
                 q.order("clinic_name", { ascending: true });
 

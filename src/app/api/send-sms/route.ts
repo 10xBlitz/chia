@@ -39,7 +39,6 @@ export async function POST(req: NextRequest) {
     });
     const result = await res.json();
     return NextResponse.json({ ok: res.ok, result }, { status: res.status });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     console.error("---->error sending sms message: ", error);
     return NextResponse.json(

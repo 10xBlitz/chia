@@ -187,6 +187,7 @@ export default function MainPage() {
                 if (addressFilter) {
                   q = q.eq("region", addressFilter);
                 }
+                q = q.filter("status", "eq", "active");
                 q = q.range(3, 1000);
                 q.order("id", { ascending: true });
                 return q;
