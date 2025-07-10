@@ -32,7 +32,7 @@ const DefaultNoResults = () => (
 
 const DefaultEndMessage = () => (
   <div className="text-center text-muted-foreground py-4 text-sm">
-    당신은 끝에 도달했습니다.
+    {/* 당신은 끝에 도달했습니다. */}
     {/* You have reached the end. */}
   </div>
 );

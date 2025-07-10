@@ -104,9 +104,6 @@ export function DataTable<TData, TValue>({
     dates = undefined;
   }
 
-  // Debounce the name input
-  const debouncedName = useDebounce(name, 500);
-
   // Define state for filters and update URL accordingly
   const [nameFilter, setNameFilter] = React.useState(name);
   const [statusFilter, setStatusFilter] = React.useState(status);
@@ -115,7 +112,37 @@ export function DataTable<TData, TValue>({
     dates
   );
 
-  // Update URL when filters change
+  // Debounce the name input
+  const debouncedName = useDebounce(nameFilter, 300);
+
+  // Only reset page to 1 if a filter or limit changes
+  const updateParam = React.useCallback(
+    (key: string, value: string, options?: { resetPage?: boolean }) => {
+      const params = new URLSearchParams(searchParam.toString());
+      params.set(key, value);
+      if (options?.resetPage) {
+        params.set("page", "1");
+      }
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [searchParam, router]
+  );
+
+  // Debounce nameFilter and update param, resetting page
+  React.useEffect(() => {
+    const current = searchParam.get("name") || "";
+    if (debouncedName !== current) {
+      updateParam("name", debouncedName, { resetPage: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedName]);
+
+  // Sync nameFilter with URL param on mount or when URL param changes (for back/forward navigation)
+  React.useEffect(() => {
+    setNameFilter(name);
+  }, [name]);
+
+  // Update URL when filters change (debounced for name)
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedName) params.set("name", debouncedName);
@@ -145,6 +172,11 @@ export function DataTable<TData, TValue>({
     limitParam,
     router,
   ]);
+
+  // Sync filter state with URL params when they change
+  React.useEffect(() => {
+    setNameFilter(name);
+  }, [name]);
 
   // Update URL when sorting changes
   //   React.useEffect(() => {
