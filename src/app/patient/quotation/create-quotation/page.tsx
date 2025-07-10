@@ -250,7 +250,7 @@ export default function CreateQuotationPage() {
               onCheckedChange={(e) => {
                 if (e && user) {
                   form.setValue("name", user.full_name || "");
-                  form.setValue("gender", user.gender || "male");
+                  form.setValue("gender", user.gender);
                   form.setValue("birthdate", new Date(user.birthdate || ""));
                   form.setValue("residence", user.residence);
                   form.setValue("region", user.residence || "");

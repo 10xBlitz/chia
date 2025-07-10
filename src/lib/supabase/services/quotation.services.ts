@@ -144,6 +144,8 @@ export async function getPaginatedQuotations(
 
   const totalPages = count ? Math.ceil(count / limit) : 1;
 
+  console.log("---->data", data);
+
   return {
     data,
     totalItems: count,
