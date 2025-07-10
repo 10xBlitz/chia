@@ -81,11 +81,11 @@ export default function MainPage() {
 
   return (
     <>
-      <header className="pb-3 flex justify-between items-center px-4">
+      <header className="pb-3 flex justify-between items-center px-5">
         <Image
-          src={"/images/chia-logo.svg"}
-          height={54}
-          width={76}
+          src={"/images/chia-logo.png"}
+          height={84}
+          width={106}
           alt="logo"
         />
         {user?.id && user.role ? (

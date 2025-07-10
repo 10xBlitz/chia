@@ -15,16 +15,15 @@ const PatientHomePage = () => {
     });
   };
   return (
-    <MobileLayout className="min-h-dvh flex flex-col  ">
-      <div className="flex flex-col gap-10">
-        <div className="flex items-center">
-          <Image
-            src={"/images/chia-logo.svg"}
-            width={74}
-            height={34}
-            alt="Chia Logo"
-          />
-        </div>
+    <MobileLayout className="min-h-dvh flex flex-col">
+      <header className="flex flex-col gap-10">
+        <Image
+          src={"/images/chia-logo.png"}
+          height={84}
+          width={106}
+          alt="logo"
+          className="-ml-[7px]"
+        />
         <span
           style={{
             fontSize: "24px",
@@ -37,7 +36,7 @@ const PatientHomePage = () => {
           치아로 접수하고 <br />
           대기 없이 진료 받으세요!
         </span>
-      </div>
+      </header>
 
       <div className="w-full  relative flex items-center justify-center">
         <Image
