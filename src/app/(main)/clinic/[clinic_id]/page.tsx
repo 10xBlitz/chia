@@ -57,6 +57,7 @@ export default function ClinicSingleViewPage() {
   const { clinic_id } = useParams<{ clinic_id: string }>();
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [workingHourToday, setWorkingHourToday] = useState<{
     clinic_id: string;
     created_at: string;
@@ -156,6 +157,16 @@ export default function ClinicSingleViewPage() {
     }
   };
 
+  // Copy address to clipboard
+  const handleCopyAddress = () => {
+    if (clinic?.region) {
+      navigator.clipboard.writeText(
+        String(clinic.full_address + " " + clinic.detail_address)
+      );
+      toast.success("주소가 클립보드에 복사되었습니다."); // Address copied to clipboard
+    }
+  };
+
   useEffect(() => {
     const checkFavorite = async () => {
       if (!user?.id || !clinic?.id) return;
@@ -175,17 +186,13 @@ export default function ClinicSingleViewPage() {
     }
   }, [user?.id, clinic?.id, clinic?.working_hour]);
 
-  // Copy address to clipboard
-  const handleCopyAddress = () => {
-    if (clinic?.region) {
-      navigator.clipboard.writeText(
-        String(clinic.full_address + " " + clinic.detail_address)
-      );
-      toast.success("주소가 클립보드에 복사되었습니다."); // Address copied to clipboard
+  useEffect(() => {
+    if (user?.id && user.work_place && user.role) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
-  };
-
-  console.log("------>11111");
+  }, [user?.id, user?.work_place, user?.role]);
 
   // Show loading skeleton if loading or no clinic data
   if (isClinicLoading || !clinic) {
@@ -230,7 +237,7 @@ export default function ClinicSingleViewPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-2 bg-white z-20">
           <BackButton link="/" />
-          {user?.id && (
+          {isLoggedIn && (
             <BookmarkButton
               isActive={isFavorite}
               className=""
@@ -694,7 +701,7 @@ export default function ClinicSingleViewPage() {
             </Button>
           </div>
         </div>
-        {user?.id && <BottomNavigation forceActiveIndex={0} />}
+        {isLoggedIn && <BottomNavigation forceActiveIndex={0} />}
       </div>
     </MobileLayout>
   );

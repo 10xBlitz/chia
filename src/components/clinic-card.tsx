@@ -45,16 +45,16 @@ export default function ClinicCard(props: ClinicCardProps) {
 
   useEffect(() => {
     const checkFavorite = async () => {
-      if (!user?.id) return;
+      if (!user?.id && !user?.work_place) return;
       const { isFavorite, favoriteId } = await checkIfClinicIsFavorite(
-        user.id,
+        user.id as string,
         props.id
       );
       setIsFavorite(isFavorite);
       setFavoriteId(favoriteId);
     };
     checkFavorite();
-  }, [props.id, user?.id]);
+  }, [props.id, user?.id, user?.work_place]);
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,9 +81,11 @@ export default function ClinicCard(props: ClinicCardProps) {
     e.preventDefault();
     if (!props.id) return;
 
+    const isLoggedIn = user?.id && user?.role && user.work_place;
+
     const { error } = await supabaseClient
       .from("clinic_view")
-      .insert({ clinic_id: props.id, patient_id: user?.id || null });
+      .insert({ clinic_id: props.id, patient_id: isLoggedIn ? user.id : null });
 
     if (error) {
       console.error("Error logging clinic view:", error);
@@ -115,7 +117,7 @@ export default function ClinicCard(props: ClinicCardProps) {
             className="object-cover"
           />
         )}
-        {user?.id && user.role && showBookmark && (
+        {user?.id && user.role && user.work_place && showBookmark && (
           // <CornerBookmarkButton
           //   isActive={isFavorite}
           //   onClick={(e) => {

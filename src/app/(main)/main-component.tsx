@@ -24,9 +24,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { UserIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function MainPage() {
   const searchParams = useSearchParams();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   let filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "근무지"
   const user = useUserStore((state) => state.user);
   const router = useRouter();
@@ -69,15 +71,29 @@ export default function MainPage() {
   };
 
   let userLink = "";
-  if (user?.role === "admin") {
+  if (user?.role === "admin" && isLoggedIn) {
     userLink = "/admin";
-  } else if (user?.role === "patient") {
+  } else if (user?.role === "patient" && isLoggedIn) {
     userLink = "/patient/profile";
-  } else if (user?.role === "dentist") {
+  } else if (user?.role === "dentist" && isLoggedIn) {
     userLink = "/dentist";
   } else {
     userLink = "/auth/login"; // Default to login if no role matches
   }
+
+  useEffect(() => {
+    // Check if user is logged in
+    if (
+      user?.id &&
+      user.role &&
+      user.login_status === "active" &&
+      user.work_place
+    ) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [user?.id, user?.role, user?.work_place, user?.login_status]);
 
   return (
     <>
@@ -88,7 +104,7 @@ export default function MainPage() {
           width={106}
           alt="logo"
         />
-        {user?.id && user.role ? (
+        {isLoggedIn ? (
           <Link href={userLink}>
             <UserIcon className="min-w-7 min-h-7" />
           </Link>
@@ -105,7 +121,7 @@ export default function MainPage() {
         <TreatmentCategoryScroll />
         {/* Sorting options */}
         <div className="flex justify-end items-center px-6 py-2">
-          {user?.id && user.role && (
+          {isLoggedIn && (
             <Select value={filterOption} onValueChange={handleSortOptionChange}>
               <SelectTrigger className="w-[100px] text-sm">
                 <SelectValue />
@@ -203,10 +219,10 @@ export default function MainPage() {
           )}
         </div>
       </main>
-      {user?.id && user.role === "patient" && <BottomNavigation />}
+      {isLoggedIn && <BottomNavigation />}
       <Footer />
       {/* Spacer to prevent footer overlap on mobile */}
-      {user?.id && <div className="h-14"></div>}
+      {isLoggedIn && <div className="h-14"></div>}
     </>
   );
 }

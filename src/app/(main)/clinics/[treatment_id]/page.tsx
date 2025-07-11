@@ -19,31 +19,54 @@ import MobileLayout from "@/components/layout/mobile-layout";
 import BottomNavigation from "@/components/bottom-navigation";
 import { Button } from "@/components/ui/button";
 import BackButton from "@/components/back-button";
+import { useEffect, useState } from "react";
 
 export default function ClinicsPage() {
   const searchParams = useSearchParams();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const params = useParams<{ treatment_id: string }>();
   const filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "모두" "All"
   const user = useUserStore((state) => state.user);
   const router = useRouter();
 
+  let userLink = "";
+  if (user?.role === "admin" && isLoggedIn) {
+    userLink = "/admin";
+  } else if (user?.role === "patient" && isLoggedIn) {
+    userLink = "/patient/profile";
+  } else if (user?.role === "dentist" && isLoggedIn) {
+    userLink = "/dentist";
+  } else {
+    userLink = "/auth/login"; // Default to login if no role matches
+  }
+
   const handleSortOptionChange = (option: string) => {
     router.push(`?searchByAddress=${option}`, { scroll: false });
   };
+
+  useEffect(() => {
+    if (user?.id && user?.role && user?.work_place) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
 
   return (
     <MobileLayout className="!px-0">
       <div className="flex flex-col">
         <header className="pb-3 flex justify-between items-center px-4">
           <BackButton link="/" />
-          {user?.id && user.role ? (
+          {isLoggedIn ? (
             <Link href="/patient/profile">
               <UserIcon className="min-w-7 min-h-7" />
             </Link>
           ) : (
-            <Button className="bg-white text-black border-1 hover:bg-black/20">
-              로그인 {/**Login */}
-            </Button>
+            <Link href={userLink}>
+              <Button className="bg-white text-black border-1 hover:bg-black/20">
+                로그인 {/**Login */}
+              </Button>
+            </Link>
           )}
         </header>
 
@@ -52,7 +75,7 @@ export default function ClinicsPage() {
 
           {/* Sorting options */}
           <div className="flex justify-end items-center px-8 py-2">
-            {user?.id && user.role && (
+            {isLoggedIn && (
               <Select
                 value={filterOption}
                 onValueChange={handleSortOptionChange}
@@ -131,7 +154,7 @@ export default function ClinicsPage() {
             />
           </div>
         </main>
-        {user?.id && user.role && <BottomNavigation />}
+        {isLoggedIn && <BottomNavigation />}
       </div>
     </MobileLayout>
   );
