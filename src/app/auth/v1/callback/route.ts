@@ -16,6 +16,21 @@ export async function GET(request: Request) {
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+
+    //check if users login status is "active"
+    const { data: userData } = await supabase
+      .from("user")
+      .select("login_status")
+      .eq("id", userId || "")
+      .maybeSingle();
+
+    if (userData && userData.login_status !== "active") {
+      console.log("User login status is not active, redirecting to error page");
+      return NextResponse.redirect(`${origin}/auth/deleted-account-page`);
+    }
+
     if (!error) {
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";
