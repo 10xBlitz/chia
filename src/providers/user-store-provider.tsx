@@ -48,14 +48,14 @@ declare global {
   }
 }
 
-// Attach to window for injected JS in WebView
-if (typeof window !== "undefined") {
-  window.createClient = createClient;
-}
-
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const storeRef = useRef<UserStoreApi | null>(null);
   const [isStoreInitialized, setIsStoreInitialized] = useState(false);
+
+  // Attach to window for injected JS in WebView
+  if (typeof window !== "undefined") {
+    window.createClient = createClient;
+  }
 
   // Extend the Window type to include createClient
 
