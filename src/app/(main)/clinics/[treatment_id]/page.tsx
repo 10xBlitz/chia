@@ -45,12 +45,17 @@ export default function ClinicsPage() {
   };
 
   useEffect(() => {
-    if (user?.id && user?.role && user?.work_place) {
+    if (
+      user?.id &&
+      user?.role &&
+      user?.work_place &&
+      user.login_status === "active"
+    ) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-  }, []);
+  }, [user?.id, user?.role, user?.work_place, user?.login_status]);
 
   return (
     <MobileLayout className="!px-0">

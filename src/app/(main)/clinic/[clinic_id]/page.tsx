@@ -187,12 +187,17 @@ export default function ClinicSingleViewPage() {
   }, [user?.id, clinic?.id, clinic?.working_hour]);
 
   useEffect(() => {
-    if (user?.id && user.work_place && user.role) {
+    if (
+      user?.id &&
+      user.work_place &&
+      user.role &&
+      user.login_status === "active"
+    ) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-  }, [user?.id, user?.work_place, user?.role]);
+  }, [user?.id, user?.work_place, user?.role, user?.login_status]);
 
   // Show loading skeleton if loading or no clinic data
   if (isClinicLoading || !clinic) {
