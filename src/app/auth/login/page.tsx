@@ -17,13 +17,15 @@ const PatientHomePage = () => {
   return (
     <MobileLayout className="min-h-dvh flex flex-col">
       <header className="flex flex-col gap-10">
-        <Image
-          src={"/images/chia-logo.png"}
-          height={84}
-          width={106}
-          alt="logo"
-          className="-ml-[7px]"
-        />
+        <Link href="/">
+          <Image
+            src={"/images/chia-logo.png"}
+            height={84}
+            width={106}
+            alt="logo"
+            className="-ml-[7px]"
+          />
+        </Link>
         <span
           style={{
             fontSize: "24px",
