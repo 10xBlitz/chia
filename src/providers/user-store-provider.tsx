@@ -16,7 +16,7 @@ import {
   createUserStore,
   type UserState,
 } from "@/stores/user-store"; // Ensure UserState is exported
-import { supabaseClient } from "@/lib/supabase/client";
+import { createClient, supabaseClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/types";
 
 export type UserStoreApi = ReturnType<typeof createUserStore>;
@@ -42,9 +42,22 @@ const defaultUserState = {
   login_status: "inactive" as Tables<"user">["login_status"], // Default to inactive
 };
 
+declare global {
+  interface Window {
+    createClient?: typeof createClient;
+  }
+}
+
+// Attach to window for injected JS in WebView
+if (typeof window !== "undefined") {
+  window.createClient = createClient;
+}
+
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const storeRef = useRef<UserStoreApi | null>(null);
   const [isStoreInitialized, setIsStoreInitialized] = useState(false);
+
+  // Extend the Window type to include createClient
 
   useEffect(() => {
     let mounted = true;
