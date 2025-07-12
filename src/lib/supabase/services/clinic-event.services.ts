@@ -2,8 +2,8 @@ import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { TablesInsert } from "../types";
 import {
-  deleteFileFromSupabase,
-  uploadFileToSupabase,
+    deleteFileFromSupabase,
+    uploadFileToSupabase,
 } from "./upload-file.services";
 
 const CLINIC_EVENT_TREATMENTS = "clinic-event-images";
@@ -45,8 +45,9 @@ export async function getPaginatedClinicEvents(
 
     let query = supabaseClient
       .from("event")
-      .select("*, clinic_treatment(clinic(*)) ", { count: "exact" })
+      .select("*, clinic_treatment!inner(clinic!inner(*)) ", { count: "exact" })
       .neq("status", "deleted")
+      .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show events from active clinics
       .order("created_at", { ascending: true })
       .range(offset, offset + limit - 1);
 
