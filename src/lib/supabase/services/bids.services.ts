@@ -26,6 +26,7 @@ export async function getPaginatedBids(
   let query = supabaseClient
     .from("bid")
     .select("*, clinic_treatment(*, clinic(*))", { count: "exact" })
+    .filter("clinic_treatment.clinic.status", "neq", "deleted")
     .order(orderBy, { ascending: orderDirection === "asc" })
     .range(offset, offset + limit - 1);
 
@@ -96,6 +97,7 @@ export async function getSingleBid(bidId: string) {
   const { data, error } = await supabaseClient
     .from("bid")
     .select("*, clinic_treatment(*, clinic(*), treatment(*))")
+    .filter("clinic_treatment.clinic.status", "neq", "deleted")
     .eq("id", bidId)
     .single();
 
@@ -111,6 +113,7 @@ export async function getClinicBidOnQuotation(
   const { data: bid, error: bidError } = await supabaseClient
     .from("bid")
     .select("*, clinic_treatment(*)")
+    .filter("clinic_treatment.clinic.status", "neq", "deleted")
     .eq("quotation_id", quotationId)
     .eq("clinic_treatment.clinic_id", clinicId)
     .single();
