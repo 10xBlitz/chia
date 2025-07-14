@@ -30,7 +30,7 @@ export default function PatientProfilePage() {
         actions={quickActions}
         editProfileLink="/patient/profile/edit-profile"
         serviceInquiryLink="/patient/profile/chat"
-        termsOfServiceLink="/patient/profile/terms-of-service"
+        termsOfServiceLink="/terms-of-service"
       />
       <BottomNavigation />
     </>

@@ -1,13 +1,14 @@
 "use client";
 
 import HeaderWithBackButton from "@/components/header-with-back-button";
+import MobileLayout from "@/components/layout/mobile-layout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState } from "react";
 
 export default function TermsOfServicePage() {
   const [tab, setTab] = useState<"terms" | "payment">("terms");
   return (
-    <>
+    <MobileLayout>
       <HeaderWithBackButton title="이용약관" /> {/* Terms of Service */}
       <div className="p-4">
         <Tabs
@@ -143,6 +144,6 @@ export default function TermsOfServicePage() {
           </TabsContent>
         </Tabs>
       </div>
-    </>
+    </MobileLayout>
   );
 }

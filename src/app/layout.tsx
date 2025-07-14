@@ -5,6 +5,7 @@ import { UserStoreProvider } from "@/providers/user-store-provider";
 import CustomQueryClientProvider from "@/providers/query-client-provider";
 import { ToasterProvider } from "@/providers/toast-provider";
 import { Metadata } from "next";
+import MobileScriptListener from "@/components/mobile-script-listener";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({
           content="https://chia.ai.kr/opengraph-image.png?0c51ac7c50ba1aca"
         ></meta>
       </head>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -52,6 +54,8 @@ export default function RootLayout({
           <ToasterProvider />
         </CustomQueryClientProvider>
       </body>
+
+      <MobileScriptListener />
     </html>
   );
 }
