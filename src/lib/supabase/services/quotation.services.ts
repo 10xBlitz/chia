@@ -1,10 +1,10 @@
 import { supabaseClient } from "@/lib/supabase/client";
-import { Tables } from "../types";
-import { endOfDay, startOfDay } from "date-fns";
 import {
-  uploadFileToSupabase,
   deleteFileFromSupabase,
+  uploadFileToSupabase,
 } from "@/lib/supabase/services/upload-file.services";
+import { endOfDay, startOfDay } from "date-fns";
+import { Tables } from "../types";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_MB = 10;
@@ -99,9 +99,10 @@ export async function getPaginatedQuotations(
 
   let query = supabaseClient
     .from("quotation")
-    .select("*, treatment(*), bid(*), clinic(clinic_name)", {
+    .select("*, treatment(*), bid(*), clinic(clinic_name, status)", {
       count: "exact",
     })
+    .filter("clinic.status", "neq", "deleted") // Only show quotations from active clinics
     .order(sortField, { ascending: sortDir })
     .range(offset, offset + limit - 1);
 

@@ -27,15 +27,16 @@ export async function getPaginatedReservations(
         work_place, 
         contact_number
        ),
-      clinic_treatment(
+      clinic_treatment!inner(
         *,
         treatment(*),
-        clinic(*)
+        clinic!inner(*)
       ),
       payment(*)
     `,
       { count: "exact" }
     ) // dot-less select implies INNER JOIN
+    .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reservations from active clinics
     .order("reservation_date", { ascending: false })
     .range(offset, offset + limit - 1);
 

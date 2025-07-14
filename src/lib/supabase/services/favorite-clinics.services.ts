@@ -23,8 +23,8 @@ export async function getPaginatedFavoriteClinics(
   // Query clinics (no clinic_treatment)
   let favoriteClinicsQuery = supabaseClient
     .from("favorite_clinic")
-    .select("*, clinic(*)", { count: "exact" })
-
+    .select("*, clinic!inner(*)", { count: "exact" })
+    .filter("clinic.status", "neq", "deleted")
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 

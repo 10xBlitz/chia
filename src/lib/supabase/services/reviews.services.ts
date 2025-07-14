@@ -1,9 +1,9 @@
-import { endOfDay, startOfDay } from "date-fns";
-import { supabaseClient } from "../client";
 import {
   deleteFileFromSupabase,
   uploadFileToSupabase,
 } from "@/lib/supabase/services/upload-file.services";
+import { endOfDay, startOfDay } from "date-fns";
+import { supabaseClient } from "../client";
 
 const BUCKET_NAME = "review-images";
 const MAX_FILE_SIZE_MB = 50;
@@ -43,18 +43,19 @@ export async function getPaginatedReviews(
           work_place, 
           contact_number
         ),
-        clinic_treatment(
+        clinic_treatment!inner(
           id,
           treatment(
             treatment_name
           ),
-          clinic(
+          clinic!inner(
             clinic_name
           )
         )
     `,
       { count: "exact" }
     ) // dot-less select implies INNER JOIN
+    .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reviews from active clinics
     .order("created_at", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -178,8 +179,9 @@ export async function fetchClinicReviews({
   // Single query: join review -> clinic_treatment, filter by clinic_id
   const { data: reviews, error } = await supabaseClient
     .from("review")
-    .select("*, user:patient_id(*), clinic_treatment!inner(id, clinic_id)")
+    .select("*, user:patient_id(*), clinic_treatment!inner(id, clinic_id, clinic!inner(status))")
     .eq("clinic_treatment.clinic_id", clinic_id)
+    .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reviews from active clinics
     .order("created_at", { ascending: false })
     .range(pageParam * pageSize, pageParam * pageSize + pageSize - 1);
 

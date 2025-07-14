@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { CellAction } from "./cell-actions";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import { CellAction } from "./cell-actions";
 
 export type ReservationTable = {
   id: string;
@@ -41,7 +41,15 @@ export const columns: ColumnDef<ReservationTable>[] = [
     header: "나이", // Age
     cell: ({ row }) => {
       const birthdate = new Date(row.original.patient.birthdate);
-      const age = new Date().getFullYear() - birthdate.getFullYear();
+      const today = new Date();
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const monthDiff = today.getMonth() - birthdate.getMonth();
+      
+      // If birthday hasn't occurred this year yet, subtract 1
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+        age--;
+      }
+      
       return <div>{age}</div>;
     },
   },

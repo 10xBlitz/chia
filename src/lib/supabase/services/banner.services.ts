@@ -27,7 +27,8 @@ export async function getPaginatedBanners(
   const offset = (page - 1) * limit;
   let query = supabaseClient
     .from("banner")
-    .select("*", { count: "exact" })
+    .select("*, clinic!inner(*)", { count: "exact" })
+    .filter("clinic.status", "neq", "deleted") // Only show banners from active clinics
     .order(orderBy, { ascending: orderDirection === "asc" })
     .range(offset, offset + limit - 1);
 
