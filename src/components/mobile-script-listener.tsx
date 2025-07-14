@@ -1,5 +1,6 @@
 "use client";
 
+import { supabaseClient } from "@/lib/supabase/client";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -16,16 +17,11 @@ export default function MobileScriptListener() {
 
         if (!data || data.type !== "GOOGLE_ID_TOKEN" || !data.idToken) return;
 
-        if (typeof window.createClient !== "function") return;
-
-        const supabase = window.createClient();
-
-        if (!supabase?.auth?.signInWithIdToken) return;
-
-        const { data: session, error } = await supabase.auth.signInWithIdToken({
-          provider: "google",
-          token: data.idToken,
-        });
+        const { data: session, error } =
+          await supabaseClient.auth.signInWithIdToken({
+            provider: "google",
+            token: data.idToken,
+          });
 
         if (error) {
           toast.error("구글 인증에 실패했습니다. 다시 시도해 주세요."); // Google authentication failed. Please try again.
