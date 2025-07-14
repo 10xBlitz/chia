@@ -60,7 +60,7 @@ const actions = [
 
 const editProfileLink = "/dentist/profile";
 const serviceInquiryLink = "/dentist/profile/chat";
-const termsOfServiceLink = "/dentist/profile/terms-of-service";
+const termsOfServiceLink = "/terms-of-service";
 
 // Schema for notification recipient form
 const notificationSchema = z.object({
