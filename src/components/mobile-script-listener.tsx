@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 export default function MobileScriptListener() {
   useEffect(() => {
@@ -27,23 +28,23 @@ export default function MobileScriptListener() {
         });
 
         if (error) {
-          alert("Supabase authentication error: " + JSON.stringify(error));
+          toast.error("구글 인증에 실패했습니다. 다시 시도해 주세요."); // Google authentication failed. Please try again.
           return;
         }
 
         if (!session) {
-          alert("No error but no session returned");
+          toast.error("인증 세션을 가져올 수 없습니다. 다시 시도해 주세요."); // Could not retrieve session. Please try again.
           return;
         }
 
-        const currentSession = await supabase.auth.getSession();
-        alert("Current session: " + JSON.stringify(currentSession));
+        toast.success("구글 인증이 완료되었습니다!"); // Google authentication successful!
 
         setTimeout(() => {
           window.location.replace("/auth/sign-up/finish-signup-oAuth");
         }, 500);
       } catch (authError) {
         console.error("Authentication error:", authError);
+        toast.error("알 수 없는 인증 오류가 발생했습니다."); // An unknown authentication error occurred.
       }
     };
 
