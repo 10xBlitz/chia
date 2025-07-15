@@ -179,7 +179,9 @@ export async function fetchClinicReviews({
   // Single query: join review -> clinic_treatment, filter by clinic_id
   const { data: reviews, error } = await supabaseClient
     .from("review")
-    .select("*, user:patient_id(*), clinic_treatment!inner(id, clinic_id, clinic!inner(status))")
+    .select(
+      "*, user:patient_id(*), clinic_treatment!inner(id, clinic_id, clinic!inner(status))"
+    )
     .eq("clinic_treatment.clinic_id", clinic_id)
     .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reviews from active clinics
     .order("created_at", { ascending: false })
@@ -284,7 +286,7 @@ export async function updateReview({
 }
 
 /**
- * Delete a review by ID
+ * Delete a review by ID and remove its images from Supabase Storage
  * @param review_id - The review's id (string)
  * @returns {Promise<{ success: boolean }>} Success object
  * @throws Error if deletion fails
@@ -295,10 +297,32 @@ export async function updateReview({
 export async function deleteReview(
   review_id: string
 ): Promise<{ success: boolean }> {
+  // 1. Fetch the review to get its images
+  const { data: review, error: fetchError } = await supabaseClient
+    .from("review")
+    .select("images, patient_id")
+    .eq("id", review_id)
+    .single();
+  if (fetchError)
+    throw new Error(fetchError.message || "리뷰 조회에 실패했습니다.");
+
+  // 2. Delete the review record
   const { error } = await supabaseClient
     .from("review")
     .delete()
     .eq("id", review_id);
   if (error) throw new Error(error.message || "리뷰 삭제에 실패했습니다."); // Failed to delete review
+
+  // 3. Delete all images from Supabase Storage (ignore errors for missing files)
+  if (Array.isArray(review?.images) && review.images.length > 0) {
+    for (const imageUrl of review.images) {
+      try {
+        await deleteFileFromSupabase(imageUrl, { bucket: BUCKET_NAME });
+      } catch (err) {
+        // Ignore individual image delete errors, but log for debugging
+        console.warn("Failed to delete review image:", imageUrl, err);
+      }
+    }
+  }
   return { success: true };
 }

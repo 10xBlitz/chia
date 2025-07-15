@@ -52,6 +52,7 @@ export async function uploadFileToSupabase(
     .upload(filePath, file, {
       contentType: file.type,
       upsert: true,
+      cacheControl: "31536000", // 1 year cache
     });
 
   if (uploadError) {

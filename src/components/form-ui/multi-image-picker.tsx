@@ -70,6 +70,7 @@ export default function MultiImagePicker({
       .from(bucket)
       .upload(filePath, file, {
         upsert: true,
+        cacheControl: "31536000", // 1 year cache
       });
     if (error) {
       toast.error("이미지 업로드에 실패했습니다."); // Failed to upload image.
