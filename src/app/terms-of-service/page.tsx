@@ -158,15 +158,25 @@ export default function TermsOfServicePage() {
                     <strong>앱 이름:</strong> 치아 (Chia)
                   </p>
                   <p>
-                    <strong>개발회사:</strong> 10xBlitz
+                    <strong>상호명:</strong> 비씨디 (BCD)
                   </p>
                   <p>
-                    <strong>연락처:</strong> contact@10xblitz.com
+                    <strong>대표자명:</strong> 홍준기 (Junki Hong)
                   </p>
                   <p>
-                    <strong>주소:</strong> 대한민국 서울특별시
+                    <strong>사업자등록번호:</strong> 235-04-01772
                   </p>
-                  {/* App Name: Chia / Developer: 10xBlitz / Contact: contact@10xblitz.com / Address: Seoul, South Korea */}
+                  <p>
+                    <strong>사업장 주소:</strong> 경기도 화성시 향남읍
+                    상신하길로 66, 제지1층 제비01호(드림시티)
+                  </p>
+                  <p>
+                    <strong>유선번호:</strong> 010 3757 1495
+                  </p>
+                  <p>
+                    <strong>통신판매업 신고번호:</strong> 2025 - 화성향남 0101
+                  </p>
+                  {/* App Name: Chia / Company: BCD / CEO: Junki Hong / Business Registration: 235-04-01772 / Address: Gyeonggi-do Hwaseong-si / Phone: 010 3757 1495 / E-commerce Registration: 2025 - 화성향남 0101 */}
                 </div>
               </div>
               <h2 className="font-semibold mt-6 mb-3">
@@ -174,9 +184,9 @@ export default function TermsOfServicePage() {
               </h2>{" "}
               {/* Article 1. Purpose of Personal Information Processing */}
               <p className="mb-4">
-                ①치아(Chia) 앱 및 10xBlitz는 개인정보를 다음의 목적을 위해
+                ①치아(Chia) 앱 및 비씨디(BCD)는 개인정보를 다음의 목적을 위해
                 처리합니다.
-                {/* Chia app and 10xBlitz process personal information for the following purposes. */}
+                {/* Chia app and BCD process personal information for the following purposes. */}
                 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 사용되지
                 않으며, 이용 목적이 변경되는 경우에는 「개인정보 보호법」
                 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할
@@ -188,10 +198,10 @@ export default function TermsOfServicePage() {
               </h2>{" "}
               {/* Article 2. Personal Information Processing and Retention Period */}
               <p className="mb-2">
-                치아(Chia) 앱 및 10xBlitz는 법령에 따른 개인정보 보유․이용기간
-                또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보
-                보유․이용기간 내에서 개인정보를 처리․보유합니다.
-                {/* Chia app and 10xBlitz process and retain personal information within the personal information retention and use period prescribed by law or consented to when collecting personal information from data subjects. */}
+                치아(Chia) 앱 및 비씨디(BCD)는 법령에 따른 개인정보
+                보유․이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은
+                개인정보 보유․이용기간 내에서 개인정보를 처리․보유합니다.
+                {/* Chia app and BCD process and retain personal information within the personal information retention and use period prescribed by law or consented to when collecting personal information from data subjects. */}
               </p>
               <ul className="list-disc pl-5 mb-4">
                 <li>
@@ -212,18 +222,18 @@ export default function TermsOfServicePage() {
               </h2>{" "}
               {/* Article 3. Outsourcing of Personal Information Processing */}
               <p className="mb-4">
-                ① 치아(Chia) 앱 및 10xBlitz는 원활한 개인정보 업무처리를 위하여
-                다음과 같이 개인정보 처리업무를 위탁하지 않습니다.
-                {/* Chia app and 10xBlitz do not outsource personal information processing tasks for smooth personal information business processing. */}
+                ① 치아(Chia) 앱 및 비씨디(BCD)는 원활한 개인정보 업무처리를
+                위하여 다음과 같이 개인정보 처리업무를 위탁하지 않습니다.
+                {/* Chia app and BCD do not outsource personal information processing tasks for smooth personal information business processing. */}
               </p>
               <h2 className="font-semibold mt-6 mb-3">
                 제 4조. 처리하는 개인정보의 항목
               </h2>{" "}
               {/* Article 4. Items of Personal Information Processed */}
               <p className="mb-2">
-                치아(Chia) 앱 및 10xBlitz는 다음의 개인정보 항목을 처리하고
+                치아(Chia) 앱 및 비씨디(BCD)는 다음의 개인정보 항목을 처리하고
                 있습니다.
-                {/* Chia app and 10xBlitz process the following personal information items. */}
+                {/* Chia app and BCD process the following personal information items. */}
               </p>
               <div className="mb-4">
                 <p className="font-medium mb-2">
@@ -250,12 +260,12 @@ export default function TermsOfServicePage() {
               </h2>{" "}
               {/* Article 5. Destruction of Personal Information */}
               <p className="mb-3">
-                ① 치아(Chia) 앱 및 10xBlitz는 개인정보 보유기간의 경과, 처리목적
-                달성 등 개인정보가 불필요하게 되었을 때에는 지체없이 해당
-                개인정보를 파기합니다. 다만, 본 방침 제2조 내용에 따라 동의자에
-                한해 연장되거나 다른 법령에 따라 보존이 필요한 경우 파기되지
-                않을 수 있습니다.
-                {/* Chia app and 10xBlitz destroy personal information without delay when it becomes unnecessary due to expiration of retention period or achievement of processing purpose. However, it may not be destroyed if extended for consenters according to Article 2 or if preservation is required by other laws. */}
+                ① 치아(Chia) 앱 및 비씨디(BCD)는 개인정보 보유기간의 경과,
+                처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체없이
+                해당 개인정보를 파기합니다. 다만, 본 방침 제2조 내용에 따라
+                동의자에 한해 연장되거나 다른 법령에 따라 보존이 필요한 경우
+                파기되지 않을 수 있습니다.
+                {/* Chia app and BCD destroy personal information without delay when it becomes unnecessary due to expiration of retention period or achievement of processing purpose. However, it may not be destroyed if extended for consenters according to Article 2 or if preservation is required by other laws. */}
               </p>
               <p className="mb-2">
                 ② 개인정보 파기의 절차 및 방법은 다음과 같습니다.{" "}
@@ -266,10 +276,10 @@ export default function TermsOfServicePage() {
                   가. 파기절차 {/* Destruction Procedure */}
                 </p>
                 <p className="mb-2 pl-4">
-                  치아(Chia) 앱 및 10xBlitz는 불필요한 개인정보 및
+                  치아(Chia) 앱 및 비씨디(BCD)는 불필요한 개인정보 및
                   개인정보파일은 개인정보책임자의 책임하에 내부방침 절차에 따라
                   다음과 같이 처리하고 있습니다.
-                  {/* Chia app and 10xBlitz process unnecessary personal information and personal information files as follows according to internal policy procedures under the responsibility of the personal information manager. */}
+                  {/* Chia app and BCD process unnecessary personal information and personal information files as follows according to internal policy procedures under the responsibility of the personal information manager. */}
                 </p>
                 <div className="pl-4">
                   <p className="mb-1">
@@ -316,10 +326,10 @@ export default function TermsOfServicePage() {
               </h2>{" "}
               {/* Article 6. Measures to Ensure Security of Personal Information */}
               <p className="mb-3">
-                치아(Chia) 앱 및 10xBlitz는 「개인정보 보호법 제29조」에 따라
+                치아(Chia) 앱 및 비씨디(BCD)는 「개인정보 보호법 제29조」에 따라
                 다음과 같이 안전성 확보를 위해 다음과 같은 조치를 취하고
                 있습니다.
-                {/* Chia app and 10xBlitz take the following measures to ensure security in accordance with Article 29 of the Personal Information Protection Act. */}
+                {/* Chia app and BCD take the following measures to ensure security in accordance with Article 29 of the Personal Information Protection Act. */}
               </p>
               <div className="space-y-4">
                 <div>
