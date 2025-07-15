@@ -114,6 +114,7 @@ function ClinicReviewCard(props: ClinicReviewCardProps) {
                   width={128}
                   height={128}
                   className="object-cover w-full h-full"
+                  loading="lazy"
                 />
               </div>
             ))}

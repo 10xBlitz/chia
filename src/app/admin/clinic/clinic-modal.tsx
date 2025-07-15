@@ -503,6 +503,7 @@ export const ClinicModal = ({
                                                   alt={treatment_name}
                                                   width={24}
                                                   height={24}
+                                                  loading="lazy"
                                                   className="rounded object-cover"
                                                 />
                                               )}

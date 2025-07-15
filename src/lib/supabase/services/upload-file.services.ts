@@ -1,7 +1,8 @@
 import { supabaseClient } from "../client";
+import imageCompression from "browser-image-compression";
 
 const DEFAULT_BUCKET = "public";
-const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_MB = 50;
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -9,6 +10,13 @@ const ALLOWED_MIME_TYPES = [
   "application/pdf",
   // add more as needed
 ];
+
+const compressOptions = {
+  maxSizeMB: 10,
+  maxWidthOrHeight: 1080,
+  useWebWorker: true,
+  fileType: "image/webp",
+};
 
 /**
  * Upload a single file to Supabase Storage.
@@ -42,14 +50,20 @@ export async function uploadFileToSupabase(
     throw new Error(`파일 크기는 ${maxSizeMB}MB를 초과할 수 없습니다.`); // "File size exceeds limit."
   }
 
+  const compressedFile = await imageCompression(file, compressOptions);
+
   const fileExt = file.name.split(".").pop();
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
   const filePath = folder ? `${folder}/${fileName}` : fileName;
 
-  console.log("-----> uploadingfile to supabase:", { bucket, filePath, file });
+  console.log("-----> uploadingfile to supabase:", {
+    bucket,
+    filePath,
+    compressedFile,
+  });
   const { error: uploadError } = await supabaseClient.storage
     .from(bucket)
-    .upload(filePath, file, {
+    .upload(filePath, compressedFile, {
       contentType: file.type,
       upsert: true,
       cacheControl: "31536000", // 1 year cache

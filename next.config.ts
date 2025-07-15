@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
-    unoptimized: true,
+    loader: "custom",
+    loaderFile: "./src/lib/next/image-loader.ts",
     remotePatterns: [
       {
         protocol: "https",
