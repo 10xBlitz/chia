@@ -29,6 +29,11 @@ Chia App – User Guide (English First, Korean Below)
       - Email: patient@email.com
       - Password: password
 
+Photo 1.1  How to login with patient account
+
+Photo 1.2 How to login with patient account
+
+
 2. Home Screen
 - After login, the home screen appears.
 - Check top banners for news, events, and announcements.
@@ -78,6 +83,12 @@ Chia App – User Guide (English First, Korean Below)
   - Password: asdfasdf
 - Tap 'Login' to sign in as dentist.
 
+Photo 2.1 How to login with dentist account
+
+
+Photo 2.2 How to login with dentist account
+
+
 2. Home/Reservation Management
 - View, approve, reject, or manage patient reservations.
 
@@ -100,6 +111,11 @@ Chia App – User Guide (English First, Korean Below)
   - Password: password
 - Tap 'Login' to sign in as admin.
 
+Photo 3.1 How to login with admin account
+
+Photo 3.2 How to login with admin account
+
+
 2. Clinic Management
 - Add/edit/delete clinic info, departments, staff, hours, location, and photos.
 
@@ -117,5 +133,7 @@ Chia App – User Guide (English First, Korean Below)
 
 7. Customer Service/Notice Management
 - Manage customer inquiries, 1:1 inquiries, and announcements.
+
+
 
 
