@@ -1,27 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -30,6 +9,27 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import {
   Popover,
@@ -37,26 +37,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { format } from "date-fns";
-import { cn, getKoreanDayOfWeek } from "@/lib/utils";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
-import { useDebounce } from "@/hooks/use-debounce";
-import { useUserStore } from "@/providers/user-store-provider";
-import { PhoneInput } from "@/components/phone-input";
-import toast from "react-hot-toast";
-import { Checkbox } from "@/components/ui/checkbox";
-import { KoreanDatePicker } from "@/components/korean-date-picker-single";
-import { KoreanTimePicker } from "@/components/time-picker";
-import HeaderWithBackButton from "@/components/header-with-back-button";
 import BottomNavigation from "@/components/bottom-navigation";
-import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
+import HeaderWithBackButton from "@/components/header-with-back-button";
+import { KoreanDatePicker } from "@/components/korean-date-picker-single";
+import { PhoneInput } from "@/components/phone-input";
+import { KoreanTimePicker } from "@/components/time-picker";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useDebounce } from "@/hooks/use-debounce";
+import { sendSolapiSMS } from "@/lib/send-sms";
 import {
   getClinic,
   getDisabledWeekdaysForClinic,
 } from "@/lib/supabase/services/clinics.services";
-import { sendSolapiSMS } from "@/lib/send-sms";
 import { insertReservation } from "@/lib/supabase/services/reservations.services";
+import { getPaginatedClinicTreatments } from "@/lib/supabase/services/treatments.services";
+import { fetchClinicWorkingHours } from "@/lib/supabase/services/working-hour.services";
+import { cn, getKoreanDayOfWeek } from "@/lib/utils";
+import { useUserStore } from "@/providers/user-store-provider";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 // Zod schema for validation
 const reservationSchema = z.object({
@@ -456,7 +456,7 @@ export default function CreateReservation() {
                         htmlFor="terms"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        내 정보 입력 {/* Enter your information */}
+                        내 정보 입력 {/* Enter my information */}
                       </label>
                     </div>
                     <FormMessage />
