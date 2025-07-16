@@ -3,10 +3,24 @@
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function TermsOfServicePage() {
   const [tab, setTab] = useState<"terms" | "payment" | "privacy">("terms");
+  const searchParams = useSearchParams();
+
+  // Auto-select tab based on URL param (?tab=terms|payment|privacy)
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (
+      tabParam === "terms" ||
+      tabParam === "payment" ||
+      tabParam === "privacy"
+    ) {
+      setTab(tabParam);
+    }
+  }, [searchParams]);
   return (
     <MobileLayout>
       <HeaderWithBackButton title="이용약관" /> {/* Terms of Service */}
