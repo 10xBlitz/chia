@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { EditIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
-import { setUserDeleted } from "@/lib/supabase/services/users.services";
+import { softDeleteUser } from "@/lib/supabase/services/users.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
@@ -29,7 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   // Mutation for deleting user
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await setUserDeleted(data.id);
+      await softDeleteUser(data.id);
     },
     onSuccess: () => {
       toast.success("사용자가 삭제되었습니다."); // User deleted

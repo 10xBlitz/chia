@@ -65,67 +65,6 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const handleViewBids = () => {
     setShowBidsModal(true);
   };
-  //   const queryClient = useQueryClient();
-
-  //   const deleteMutation = useMutation({
-  //     mutationFn: async (id: string) => {
-  //       const { error } = await supabaseClient
-  //         .from("quotation")
-  //         .update({ status: "deleted" })
-  //         .eq("id", id);
-
-  //       if (error) throw error;
-  //     },
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({ queryKey: ["quotations"] });
-  //       toast.success("견적 요청이 삭제되었습니다."); // Quotation request deleted
-  //     },
-  //     onError: (error) => {
-  //       toast.error("삭제 중 오류가 발생했습니다."); // Error occurred while deleting
-  //       console.error("Delete error:", error);
-  //     },
-  //   });
-
-  //   const restoreMutation = useMutation({
-  //     mutationFn: async (id: string) => {
-  //       const { error } = await supabaseClient
-  //         .from("quotation")
-  //         .update({ status: "active" })
-  //         .eq("id", id);
-
-  //       if (error) throw error;
-  //     },
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({ queryKey: ["quotations"] });
-  //       toast.success("견적 요청이 복원되었습니다."); // Quotation request restored
-  //     },
-  //     onError: (error) => {
-  //       toast.error("복원 중 오류가 발생했습니다."); // Error occurred while restoring
-  //       console.error("Restore error:", error);
-  //     },
-  //   });
-
-  //   const handleDelete = () => {
-  //     if (confirm("정말로 이 견적 요청을 삭제하시겠습니까?")) {
-  //       // Are you sure you want to delete this quotation request?
-  //       deleteMutation.mutate(data.id);
-  //     }
-  //   };
-
-  //   const handleRestore = () => {
-  //     if (confirm("이 견적 요청을 복원하시겠습니까?")) {
-  //       // Do you want to restore this quotation request?
-  //       restoreMutation.mutate(data.id);
-  //     }
-  //   };
-
-  //   const handleView = () => {
-  //     // TODO: Implement view details modal or navigation
-  //     console.log("View quotation details:", data);
-  //     toast.success("상세 보기 기능은 준비 중입니다."); // Detail view feature is in preparation
-  //   };
-
-  //   const isDeleted = data.status === "deleted";
 
   return (
     <>
@@ -141,9 +80,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <EyeIcon className="h-4 w-4 mr-2" />
             상세 보기  View Details 
           </DropdownMenuItem> */}
-          <DropdownMenuItem onClick={handleViewBids}>
+          <DropdownMenuItem className="cursor-pointer" onClick={handleViewBids}>
             <FileTextIcon className="h-4 w-4 mr-2" />
-            견적서 보기 ({bids?.length || 0}개) {/* View Bids */}
+            견적서 보기 ({data.bid?.length || 0}개) {/* View Bids */}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

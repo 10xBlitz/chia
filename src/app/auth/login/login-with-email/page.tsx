@@ -92,6 +92,8 @@ export default function LoginForm() {
     setIsLoading(false);
   };
 
+  //this is responsible for redirecting the user after login
+  //it also checks user active status and clinic status
   useEffect(() => {
     (async () => {
       const role = userState?.role;
@@ -124,8 +126,6 @@ export default function LoginForm() {
         router.push("/dentist");
       }
     })();
-
-    // README: unsure about the router in deps, if there re-render issues, remove it
   }, [
     userState?.id,
     userState?.role,
@@ -138,7 +138,7 @@ export default function LoginForm() {
     <MobileLayout className="min-h-dvh">
       <div className="w-full max-w-sm">
         <BackButton />
-        <div className={"flex flex-col gap-6"}>
+        <div className="flex flex-col gap-6">
           <Card className="shadow-none border-none">
             <CardHeader>
               <CardTitle className="text-2xl">{title}</CardTitle>

@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { CellAction } from "./cell-actions";
+import { Tables } from "@/lib/supabase/types";
 
 export type QuotationTable = {
   id: string;
@@ -18,6 +19,7 @@ export type QuotationTable = {
   clinic_id: string | null;
   created_at: string;
   status: string;
+  bid: Tables<"bid">[] | null;
   treatment?: {
     treatment_name: string;
   } | null;

@@ -319,7 +319,7 @@ export async function registerDentist({
   return result.data;
 }
 
-export async function setUserDeleted(userId: string) {
+export async function softDeleteUser(userId: string) {
   // Set the user's status to deleted
   const { error } = await supabaseClient
     .from("user")
