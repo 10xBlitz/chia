@@ -5,12 +5,13 @@ import HeaderWithBackButton from "@/components/header-with-back-button";
 import ClinicReviewCardSkeleton from "@/components/loading-skeletons/clinic-review-skeleton";
 import { getPaginatedReviews } from "@/lib/supabase/services/reviews.services";
 import { useUserStore } from "@/providers/user-store-provider";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 
 const MAX_REVIEWS_PER_PAGE = 3; // Maximum reviews per page
 export default function ViewReviewsPage() {
   const user = useUserStore((state) => state.user);
+  const queryclient = useQueryClient();
 
   // Infinite query for paginated reviews
   const {
@@ -63,6 +64,12 @@ export default function ViewReviewsPage() {
           rating={review.rating}
           created_at={review.created_at}
           review={review.review || ""}
+          hasEditDeleteButtons={true}
+          deleteSuccessCallback={() =>
+            queryclient.invalidateQueries({
+              queryKey: ["clinic-reviews"],
+            })
+          }
         />
       ))}
 
