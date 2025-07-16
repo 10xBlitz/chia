@@ -456,7 +456,7 @@ export default function CreateReservation() {
                         htmlFor="terms"
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        내 연락처를 사용하세요 {/* Use my contact number */}
+                        내 정보 입력 {/* Enter your information */}
                       </label>
                     </div>
                     <FormMessage />

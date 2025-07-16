@@ -9,7 +9,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import React from "react";
 
 const MAX_REVIEWS_PER_PAGE = 3; // Maximum reviews per page
-function ViewReviewsPage() {
+export default function ViewReviewsPage() {
   const user = useUserStore((state) => state.user);
 
   // Infinite query for paginated reviews
@@ -82,5 +82,3 @@ function ViewReviewsPage() {
     </>
   );
 }
-
-export default ViewReviewsPage;

@@ -622,7 +622,6 @@ export default function ClinicSingleViewPage() {
                   {...review}
                   key={review.id}
                   hasEditDeleteButtons={user?.id === review.userId}
-                  onclick={() => router.push(`/patient/review`)}
                   deleteSuccessCallback={() =>
                     queryclient.invalidateQueries({
                       queryKey: ["clinic-reviews", clinic_id],
