@@ -268,7 +268,7 @@ export default function CreateQuotationPage() {
             />
 
             <FormLabel className="mb-0">
-              내 정보 입력 {/* Enter my information */}
+              내 정보 입력 {/* Fill in for myself */}
             </FormLabel>
           </div>
           <FormAddress
