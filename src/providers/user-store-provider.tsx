@@ -46,11 +46,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const storeRef = useRef<UserStoreApi | null>(null);
   const [isStoreInitialized, setIsStoreInitialized] = useState(false);
 
-  // Extend the Window type to include createClient
-
   useEffect(() => {
-    // Attach to window for injected JS in WebView
-
     let mounted = true;
 
     const initializeStore = async () => {
@@ -240,9 +236,10 @@ async function fetchProfileAndUpdateStore(
 ) {
   try {
     const profile = await fetchUserProfile(userId);
+
     updateUserStoreWithProfile(store, profile, userId, userEmail);
   } catch (e) {
-    console.error("Unexpected error in fetchProfileAndUpdateStore:", e);
+    console.log("Unexpected error in fetchProfileAndUpdateStore:", e);
     updateUserStoreWithProfile(store, null, userId, userEmail);
   }
 }

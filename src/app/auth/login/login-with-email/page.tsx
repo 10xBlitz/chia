@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import FormInput from "@/components/form-ui/form-input";
-import { createClient, supabaseClient } from "@/lib/supabase/client";
+import { supabaseClient } from "@/lib/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -43,8 +43,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to control password visibility
   const router = useRouter();
-  const userRole = useUserStore((state) => state.user?.role);
-  const loginStatus = useUserStore((state) => state.user?.login_status);
+  const userState = useUserStore((state) => state.user);
 
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "이메일로 로그인"; // Default to 'Login With Email' if not specified
@@ -68,8 +67,6 @@ export default function LoginForm() {
     forgotPasswordRedirect = "/admin";
   }
 
-  const client = createClient();
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -81,50 +78,61 @@ export default function LoginForm() {
   const handleLogin = async (data: LoginFormValues) => {
     setIsLoading(true);
 
-    try {
-      const { error } = await client.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-      if (error) throw error;
-    } catch (error: unknown) {
-      if (
-        error instanceof Error &&
-        error.message === "Invalid login credentials"
-      ) {
-        toast.error(
-          "이메일 또는 비밀번호가 잘못되었습니다. 다시 시도해주세요."
-        );
-        return;
-      }
-      toast.error(
-        error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다"
-      );
-    } finally {
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (error?.message === "Invalid login credentials") {
+      toast.error("이메일 또는 비밀번호가 잘못되었습니다. 다시 시도해주세요."); // Your email or password is incorrect. Please try again.
       setIsLoading(false);
+      return;
     }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    console.log("----> user role: ", userRole);
-    console.log("----> login status: ", loginStatus);
-    if (userRole && loginStatus === "active") {
-      if (userRole === "admin") {
+    (async () => {
+      const role = userState?.role;
+      const loginStatus = userState?.login_status;
+      const clinicStatus = userState?.clinic?.status;
+
+      if (!role) return;
+
+      if (clinicStatus === "deleted") {
+        toast.error(
+          "귀하의 클리닉이 관리자에 의해 삭제되었습니다. 지원팀에 문의하세요."
+        ); //"Your clinic has been deleted by admin. Please contact support"
+        await supabaseClient.auth.signOut(); // Sign out if the clinic is deleted
+        return;
+      }
+
+      if (loginStatus === "inactive") {
+        toast.error("계정이 비활성화되었습니다. 관리자에게 문의하세요."); // Your account is inactive. Please contact the admin.
+        await supabaseClient.auth.signOut(); // Sign out if the account is inactive
+        return;
+      }
+
+      if (role === "admin") {
         router.push("/admin");
-      } else if (userRole === "patient") {
+      }
+      if (role === "patient") {
         router.push("/");
-      } else if (userRole === "dentist") {
+      }
+      if (role === "dentist") {
         router.push("/dentist");
       }
-    }
-
-    if (userRole && loginStatus === "inactive") {
-      toast.error("계정이 비활성화되었습니다. 관리자에게 문의해주세요."); // "Your account has been deactivated. Please contact the administrator."
-      (async () => await supabaseClient.auth.signOut())();
-    }
+    })();
 
     // README: unsure about the router in deps, if there re-render issues, remove it
-  }, [userRole, router, loginStatus]);
+  }, [
+    userState?.id,
+    userState?.role,
+    userState?.login_status,
+    userState?.clinic?.status,
+    router,
+  ]);
 
   return (
     <MobileLayout className="min-h-dvh">

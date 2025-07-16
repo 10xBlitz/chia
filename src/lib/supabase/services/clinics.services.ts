@@ -258,37 +258,11 @@ export async function getClinic(clinic_id: string) {
  * that marks the clinic as inactive or deleted without removing the data
  */
 export async function softDeleteClinic(clinicId: string) {
-  // Option 1: If there's a status field, set it to 'deleted' or 'inactive'
-  // Option 2: If there's no status field, we could add a custom field
-  // For now, let's try to update with a status approach
-
   const { error } = await supabaseClient
     .from("clinic")
     .update({
-      // Assuming we add a status field or use an existing one
-      // This might need to be adjusted based on the actual schema
       status: "deleted",
     })
-    .eq("id", clinicId);
-
-  if (error) {
-    // If status field doesn't exist, we'll fall back to hard delete
-    // but ideally the database should be modified to support soft delete
-    console.warn("Soft delete failed, status field might not exist:", error);
-    throw new Error(
-      "소프트 삭제를 지원하지 않습니다. 데이터베이스 스키마를 확인하세요."
-    ); // Soft delete not supported. Please check database schema.
-  }
-}
-
-/**
- * Hard delete a clinic (permanent deletion)
- * Use this only when soft delete is not available
- */
-export async function hardDeleteClinic(clinicId: string) {
-  const { error } = await supabaseClient
-    .from("clinic")
-    .delete()
     .eq("id", clinicId);
 
   if (error) throw error;
