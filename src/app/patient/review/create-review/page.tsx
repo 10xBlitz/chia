@@ -91,10 +91,7 @@ export default function CreateReviewPage() {
     onSuccess: () => {
       toast.success("리뷰가 등록되었습니다."); // Review has been successfully registered.
 
-      //this is for the user review page to refresh the reviews
-      queryClient.invalidateQueries({ queryKey: ["reviews", user?.id] });
-
-      //this is for the home page clinic view to refresh the reviews
+      //for the home page clinic-reviews and patient review page
       queryClient.invalidateQueries({
         queryKey: ["clinic-reviews"],
       });

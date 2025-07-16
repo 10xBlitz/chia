@@ -29,8 +29,8 @@ function ClinicReviewCard(props: ClinicReviewCardProps) {
     setShowDeleteModal(false);
     try {
       await deleteReview(props.id);
-      toast.success("리뷰가 삭제되었습니다."); // Review deleted
       props.deleteSuccessCallback?.();
+      toast.success("리뷰가 삭제되었습니다."); // Review deleted
     } catch (err) {
       toast.error((err as Error)?.message || "리뷰 삭제에 실패했습니다."); // Failed to delete review
     }

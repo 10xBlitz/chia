@@ -16,9 +16,14 @@ import {
 } from "@/lib/supabase/services/reviews.services";
 
 import FormTextarea from "@/components/form-ui/form-textarea";
-import { SelectItem } from "@/components/ui/select";
-import { Form } from "@/components/ui/form";
-import FormSelect from "@/components/form-ui/form-select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import FormStarRating from "@/components/form-ui/form-star-rating";
 import FormMultiImageUploadV3 from "@/components/form-ui/form-multi-image-upload";
 import EditReviewSkeleton from "./edit-review-skeleton";
@@ -43,18 +48,7 @@ const reviewSchema = z.object({
   ),
 });
 
-/**
- * Type for review form values
- */
 export type ReviewFormValues = z.infer<typeof reviewSchema>;
-
-// Type for clinic_treatment with nested treatment
-interface ClinicTreatment {
-  id: string;
-  treatment: {
-    treatment_name: string;
-  };
-}
 
 export default function EditReviewPage() {
   const router = useRouter();
@@ -72,7 +66,11 @@ export default function EditReviewPage() {
 
   // Fetch clinic treatments
   const clinic_id = reviewData?.clinic_treatment?.clinic_id || "";
-  const { data: treatmentsData } = useQuery({
+  const {
+    data: treatmentsData,
+    isLoading: treatmentsLoading,
+    isError: treatmentsError,
+  } = useQuery({
     queryKey: ["clinic-treatments", clinic_id],
     queryFn: async () => {
       const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
@@ -122,7 +120,10 @@ export default function EditReviewPage() {
     },
     onSuccess: () => {
       toast.success("리뷰가 수정되었습니다."); // Review updated successfully.
-      queryClient.invalidateQueries({ queryKey: ["review", user?.id] });
+
+      //for the home page clinic-reviews and patient review page
+      queryClient.invalidateQueries({ queryKey: ["clinic-reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["review", reviewId] });
       router.back();
     },
     onError: (err) => {
@@ -151,22 +152,48 @@ export default function EditReviewPage() {
         <form className="flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
           {/* Treatment selection */}
           <div className="px-4">
-            {!treatmentsData ? (
-              <div> 로딩 트리트먼트{/**loading treatmnents */}</div>
-            ) : (
-              <FormSelect
-                control={form.control}
-                name="clinic_treatment_id"
-                label="시술" // Treatment
-                placeholder="시술을 선택해주세요" // Please select a treatment
-              >
-                {(treatmentsData || []).map((t: ClinicTreatment) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.treatment?.treatment_name || ""}
-                  </SelectItem>
-                ))}
-              </FormSelect>
-            )}
+            {/* Treatment chips */}
+            <FormField
+              control={form.control}
+              name="clinic_treatment_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>시술</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2 flex-wrap">
+                      {treatmentsLoading && (
+                        <span className="text-gray-400 text-sm">
+                          로딩중... {/** Loading... */}
+                        </span>
+                      )}
+                      {treatmentsError && (
+                        <span className="text-red-400 text-sm">
+                          시술 정보를 불러올 수 없습니다.{" "}
+                          {/** Unable to retrieve procedure information.  */}
+                        </span>
+                      )}
+                      {treatmentsData &&
+                        treatmentsData.map((t) => (
+                          <Button
+                            key={t.id}
+                            type="button"
+                            variant={
+                              field.value === t.id ? "default" : "outline"
+                            }
+                            className={`rounded-full px-4 py-1 text-sm ${
+                              field.value === t.id ? " text-white" : ""
+                            }`}
+                            onClick={() => field.onChange(t.id)}
+                          >
+                            {t.treatment?.treatment_name || "시술"}
+                          </Button>
+                        ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           {/* Image upload */}
           <div className="px-4 mt-6">

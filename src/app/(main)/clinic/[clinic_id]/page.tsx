@@ -622,11 +622,6 @@ export default function ClinicSingleViewPage() {
                   {...review}
                   key={review.id}
                   hasEditDeleteButtons={user?.id === review.userId}
-                  deleteSuccessCallback={() =>
-                    queryclient.invalidateQueries({
-                      queryKey: ["clinic-reviews", clinic_id],
-                    })
-                  }
                 />
               ))}
               {hasNextPage && (

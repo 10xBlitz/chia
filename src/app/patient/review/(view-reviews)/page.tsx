@@ -21,7 +21,7 @@ export default function ViewReviewsPage() {
     error,
     isLoading,
   } = useInfiniteQuery({
-    queryKey: ["reviews", user?.id],
+    queryKey: ["clinic-reviews", user?.id],
     queryFn: async ({ pageParam = 1 }) =>
       getPaginatedReviews(pageParam, MAX_REVIEWS_PER_PAGE, {
         patient_id: user?.id,
