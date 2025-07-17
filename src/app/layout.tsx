@@ -42,7 +42,7 @@ export default function RootLayout({
         <meta property="og:image:height" content="512"></meta>
         <meta
           property="og:image"
-          content="https://chia.ai.kr/opengraph-image.png?0c51ac7c50ba1aca"
+          content="https://chia.ai.kr/images/opengraph-image.png"
         ></meta>
       </head>
 
