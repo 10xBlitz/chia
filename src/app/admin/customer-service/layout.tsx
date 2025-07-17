@@ -13,14 +13,14 @@ export default function CustomerServiceLayout({
   const pathname = usePathname();
   // Map route to page title (Korean with English comments)
   const pageTitles: Record<string, string> = {
-    "/admin/user": "유저 관리", // User Management
-    "/admin/clinic": "병원 관리", // Clinic Management
-    "/admin/clinic-event": "병원 이벤트", // Clinic Event
-    "/admin/treatment": "진료 항목", // Treatments
-    "/admin/reservation": "예약 관리", // Reservation Management
-    "/admin/review": "리뷰 관리", // Review Management
+    "/admin/main/user": "유저 관리", // User Management
+    "/admin/main/clinic": "병원 관리", // Clinic Management
+    "/admin/main/clinic-event": "병원 이벤트", // Clinic Event
+    "/admin/main/treatment": "진료 항목", // Treatments
+    "/admin/main/reservation": "예약 관리", // Reservation Management
+    "/admin/main/review": "리뷰 관리", // Review Management
     "/admin/customer-service": "고객센터", // Customer Service
-    "/admin/settings": "설정", // Settings
+    "/admin/main/settings": "설정", // Settings
   };
   const currentTitle = pageTitles[pathname] || "관리자"; // Admin (default)
 
