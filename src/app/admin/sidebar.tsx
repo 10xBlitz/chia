@@ -37,43 +37,43 @@ import { usePathname } from "next/navigation";
 const items = [
   {
     title: "유저 관리", // User Management
-    url: "/admin/user",
+    url: "/admin/main/user",
     icon: Users,
   },
   {
     title: "병원 관리", // Clinic Management
-    url: "/admin/clinic",
+    url: "/admin/main/clinic",
     icon: Hospital,
   },
   {
     title: "병원 이벤트", // Clinic Event
-    url: "/admin/clinic-event",
+    url: "/admin/main/clinic-event",
     icon: Zap,
   },
   {
     title: "진료 항목", // Treatments
-    url: "/admin/treatment",
+    url: "/admin/main/treatment",
     icon: Stethoscope,
   },
   {
     title: "배너 관리", // Banner Management
-    url: "/admin/banner",
+    url: "/admin/main/banner",
     icon: Image,
   },
 
   {
     title: "예약 관리", // Reservation Management
-    url: "/admin/reservation",
+    url: "/admin/main/reservation",
     icon: Calendar,
   },
   {
     title: "견적 요청 관리", // Quotation Management
-    url: "/admin/quotation",
+    url: "/admin/main/quotation",
     icon: FileText,
   },
   {
     title: "리뷰 관리", // Review Management
-    url: "/admin/review",
+    url: "/admin/main/review",
     icon: Star,
   },
   {
@@ -83,7 +83,7 @@ const items = [
   },
   {
     title: "설정", // Settings
-    url: "/admin/settings",
+    url: "/admin/main/settings",
     icon: Settings,
   },
 ];

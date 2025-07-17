@@ -70,3 +70,5 @@ begin
     from result;
 end;
 $$ language plpgsql security definer;
+
+

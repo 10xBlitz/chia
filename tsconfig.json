@@ -27,7 +27,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/admin/user/edit-basic-info-modal"
+    "src/app/admin/main/user/edit-basic-info-modal"
   ],
   "exclude": ["node_modules"]
 }
