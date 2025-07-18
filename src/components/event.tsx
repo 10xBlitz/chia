@@ -100,7 +100,8 @@ export default function EventCarousel() {
 
   if (isLoading) return <p>Loading events...</p>;
   if (error) return <p>Error loading events: {error.message}</p>;
-  if (!events || events.length === 0) return <p>No events available</p>;
+  // // 이벤트가 없습니다 (No events available)
+  // if (!events || events.length === 0) return <p>이벤트가 없습니다</p>;
 
   return (
     <div className="p-4">
