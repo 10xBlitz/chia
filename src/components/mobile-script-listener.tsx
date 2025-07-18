@@ -9,8 +9,6 @@ export default function MobileScriptListener() {
     // Listen for messages from the WebView
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleMessage = async (event: any) => {
-      console.log("WebView received message:", event.data);
-
       try {
         const data =
           typeof event.data === "string" ? JSON.parse(event.data) : event.data;

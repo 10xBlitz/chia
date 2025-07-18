@@ -88,7 +88,7 @@ const DentistHome = () => {
     defaultValues: async () => {
       const d = await getClinicNotificationRecipient(user?.clinic_id as string);
       return {
-        dentistId: d.notification_recipient_user_id || "",
+        dentistId: d?.notification_recipient_user_id || "",
       };
     },
   });

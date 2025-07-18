@@ -32,6 +32,10 @@ import { useEffect, useState } from "react";
 import MobileLayout from "@/components/layout/mobile-layout";
 import { format } from "date-fns";
 import { Tables } from "@/lib/supabase/types";
+import {
+  getClinicNotificationRecipient,
+  updateClinicNotificationRecipient,
+} from "@/lib/supabase/services/clinics.services";
 
 const steps = [
   { label: "계정" }, // Account
@@ -129,11 +133,29 @@ export default function DentistSignupPage() {
 
   const { mutate, status } = useMutation({
     mutationFn: async (data: DentistSignupFormType) => {
-      await registerDentist({
+      const registeredDentist = await registerDentist({
         ...data,
         birthdate: data.birthdate.toISOString(),
       });
+
+      // Check if clinic has notification recipient, if not, set this dentist as the recipient
+      const clinicNotificationRecipient = await getClinicNotificationRecipient(
+        data.clinic_id
+      );
+
+      if (!clinicNotificationRecipient) {
+        console.log(
+          "----> No notification recipient found for clinic, setting dentist as recipient"
+        );
+        console.log({ clinic_id: data.clinic_id, registeredDentist });
+        // Clinic has no notification recipient, set this dentist as the recipient
+        await updateClinicNotificationRecipient(
+          data.clinic_id,
+          registeredDentist.id
+        );
+      }
     },
+
     onSuccess: () => {
       toast.success("회원가입이 완료되었습니다!"); // Sign up completed successfully
       router.push("/dentist");

@@ -318,14 +318,14 @@ export async function getClinicNotificationRecipient(clinicId: string) {
       id,
       clinic_name,
       notification_recipient_user_id,
-      notification_recipient:notification_recipient_user_id(
+      notification_recipient:notification_recipient_user_id!inner(
         id,
         full_name
       )
     `
     )
     .eq("id", clinicId)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data;
