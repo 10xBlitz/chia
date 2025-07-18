@@ -132,7 +132,7 @@ export default function CreateQuotationPage() {
         // Private quotation - send SMS to specific clinic
         const to = clinic?.user?.contact_number as string;
         const dentistName = clinic?.user?.full_name || "Dentist";
-        const smsText = `안녕하세요, #${dentistName}님.\n\n#${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
+        const smsText = `안녕하세요, ${dentistName}님.\n\n#${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
         const smsResult = await sendSolapiSMS({ to, text: smsText });
 
         if (!smsResult.ok) {
@@ -142,10 +142,7 @@ export default function CreateQuotationPage() {
       } else {
         // Public quotation - send SMS to all matching clinics
         try {
-          const matchingClinics = await getClinicsForNotification(
-            quotationRegion,
-            treatmentId
-          );
+          const matchingClinics = await getClinicsForNotification(treatmentId);
 
           console.log(
             `Found ${matchingClinics.length} matching clinics for region: ${quotationRegion}, treatment: ${treatmentId}`

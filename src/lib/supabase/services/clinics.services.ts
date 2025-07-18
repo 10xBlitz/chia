@@ -355,10 +355,7 @@ export async function updateClinicNotificationRecipient(
  * @param treatmentId - Optional treatment ID to match
  * @returns Array of clinics with notification recipient contact info
  */
-export async function getClinicsForNotification(
-  region: string,
-  treatmentId?: string
-) {
+export async function getClinicsForNotification(treatmentId?: string) {
   let query = supabaseClient
     .from("clinic")
     .select(
@@ -381,7 +378,6 @@ export async function getClinicsForNotification(
       )
     `
     )
-    .eq("region", region)
     .eq("status", "active")
     .not("notification_recipient_user_id", "is", null);
 

@@ -130,12 +130,12 @@ export default function CreateReservation() {
       return values;
     },
     onSuccess: async () => {
-      const to = clinic?.user?.contact_number as string; // Replace with the recipient's phone number
+      const to = clinic?.user?.contact_number as string;
 
       // Compose SMS text in English for the dentist
       const dentistName = clinic?.user?.full_name || "Dentist";
       const customerName = user?.full_name || user?.email || "Customer";
-      const smsText = `안녕하세요, #${dentistName}님.\n\n#${customerName}님이 예약을 생성했습니다.`; // Hello, #{dentistName}. #{customerName} has requested a reservation.
+      const smsText = `안녕하세요, ${dentistName}님.\n\n#${customerName}님이 예약을 생성했습니다.`; // Hello, #{dentistName}. #{customerName} has requested a reservation.
       const smsResult = await sendSolapiSMS({ to, text: smsText });
 
       //display toast success message even though sms is not sent

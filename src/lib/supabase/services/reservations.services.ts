@@ -112,3 +112,15 @@ export async function updateReservation(
   if (error) throw error;
   return data;
 }
+
+export async function deleteReservation(reservationId: string) {
+  const { data, error } = await supabaseClient
+    .from("reservation")
+    .delete()
+    .eq("id", reservationId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
