@@ -8,12 +8,55 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ReservationListSkeleton } from "@/components/loading-skeletons/reservation-skeleton";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
+import { ReservationDetailModal } from "@/components/modals/reservation-detail-modal";
+import { useState } from "react";
 
 // Constants
 const PAGE_SIZE = 10; // Number of reservations per page
 
+// Reservation type for the modal
+interface ReservationWithDetails {
+  id: string;
+  reservation_date: string;
+  reservation_time: string;
+  status: string;
+  clinic_treatment?: {
+    treatment?: {
+      treatment_name?: string;
+    };
+    clinic?: {
+      clinic_name?: string;
+    };
+  };
+  payment?: unknown[];
+}
+
 export default function ReservationListPage() {
   const userId = useUserStore((selector) => selector.user?.id);
+  const user = useUserStore((selector) => selector.user);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] =
+    useState<ReservationWithDetails | null>(null);
+
+  // Convert patient reservation to the format expected by the modal
+  const convertReservationForModal = (reservation: ReservationWithDetails) => {
+    return {
+      ...reservation,
+      // Add required fields that might be missing
+      clinic_treatment_id: "",
+      consultation_type: "general" as const,
+      contact_number: user?.contact_number || "",
+      dentist_id: "",
+      patient_id: userId || "",
+      notes: "",
+      status: reservation.status as "pending" | "accepted" | "rejected",
+      user: {
+        full_name: user?.full_name || "",
+        contact_number: user?.contact_number || "",
+        birthdate: user?.birthdate || new Date().toISOString(),
+      },
+    };
+  };
 
   // Infinite Query for reservations
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -62,7 +105,10 @@ export default function ReservationListPage() {
               key={r.id}
               className="flex items-center w-full py-1 text-base cursor-pointer"
               style={{ minHeight: 48 }}
-              // onClick={() => router.push(`/patient/reservation/${r.id}`)}
+              onClick={() => {
+                setSelectedReservation(r);
+                setDetailModalOpen(true);
+              }}
             >
               <span className="font-bold text-black text-left whitespace-nowrap mr-4 min-w-[48px]">
                 {r.reservation_time?.slice(0, 5) || "--:--"}
@@ -85,7 +131,8 @@ export default function ReservationListPage() {
                   className="rounded-md px-4 h-8 text-sm font-medium border border-gray-200 bg-gray-50 text-gray-500"
                   variant="default"
                   tabIndex={-1}
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent the modal from opening
                     router.push(
                       `/patient/payment/reservation?reservation_id=${
                         r.id
@@ -98,8 +145,8 @@ export default function ReservationListPage() {
                       }&clinic_name=${
                         r.clinic_treatment?.clinic?.clinic_name || ""
                       }&total_amount=${0}`
-                    )
-                  }
+                    );
+                  }}
                 >
                   결제하기 {/* Pay */}
                 </Button>
@@ -121,6 +168,21 @@ export default function ReservationListPage() {
           </button>
         </div>
       )}
+
+      {/* Reservation Detail Modal */}
+      <ReservationDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setSelectedReservation(null);
+        }}
+        reservation={
+          selectedReservation
+            ? convertReservationForModal(selectedReservation)
+            : null
+        }
+        // No onConfirm prop - patients shouldn't confirm reservations
+      />
 
       {!accessedFromProfile && <BottomNavigation />}
     </>
