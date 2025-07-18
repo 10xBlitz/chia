@@ -20,6 +20,7 @@ interface ReservationWithDetails {
   reservation_date: string;
   reservation_time: string;
   status: string;
+  consultation_type?: string;
   clinic_treatment?: {
     treatment?: {
       treatment_name?: string;
@@ -44,7 +45,7 @@ export default function ReservationListPage() {
       ...reservation,
       // Add required fields that might be missing
       clinic_treatment_id: "",
-      consultation_type: "general" as const,
+      consultation_type: reservation.consultation_type || "general",
       contact_number: user?.contact_number || "",
       dentist_id: "",
       patient_id: userId || "",

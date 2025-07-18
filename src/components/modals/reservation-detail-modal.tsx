@@ -58,7 +58,7 @@ export function ReservationDetailModal({
             </button>
           </DialogClose>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -67,44 +67,70 @@ export function ReservationDetailModal({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">나이</p>
-              <p className="text-base">{calculateAge(new Date(reservation.user.birthdate))}세</p>
+              <p className="text-base">
+                {calculateAge(new Date(reservation.user.birthdate))}세
+              </p>
             </div>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-gray-500">연락처</p>
             <p className="text-base">{reservation.user.contact_number}</p>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500">예약 날짜</p>
-              <p className="text-base">{format(new Date(reservation.reservation_date), "yyyy년 MM월 dd일")}</p>
+              <p className="text-base">
+                {format(
+                  new Date(reservation.reservation_date),
+                  "yyyy년 MM월 dd일"
+                )}
+              </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">예약 시간</p>
-              <p className="text-base">{format(new Date(`${reservation.reservation_date}T${reservation.reservation_time}`), "HH:mm")}</p>
+              <p className="text-base">
+                {format(
+                  new Date(
+                    `${reservation.reservation_date}T${reservation.reservation_time}`
+                  ),
+                  "HH:mm"
+                )}
+              </p>
             </div>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-gray-500">치료 항목</p>
-            <p className="text-base">{reservation.clinic_treatment?.treatment?.treatment_name || "정보 없음"}</p>
+            <p className="text-base">
+              {reservation.clinic_treatment?.treatment?.treatment_name ||
+                "정보 없음"}
+            </p>
           </div>
-          
+
+          <div>
+            <p className="text-sm font-medium text-gray-500">상담 유형 </p>
+            <p className="text-base">
+              {reservation?.consultation_type || "정보 없음"}
+            </p>
+          </div>
+
           <div>
             <p className="text-sm font-medium text-gray-500">예약 상태</p>
             <p className="text-base">
-              <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                reservation.status === "accepted" 
-                  ? "bg-green-100 text-green-800" 
-                  : "bg-yellow-100 text-yellow-800"
-              }`}>
+              <span
+                className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                  reservation.status === "accepted"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
                 {reservation.status === "accepted" ? "확정됨" : "대기중"}
               </span>
             </p>
           </div>
-          
+
           {reservation.notes && (
             <div>
               <p className="text-sm font-medium text-gray-500">메모</p>
@@ -112,13 +138,13 @@ export function ReservationDetailModal({
             </div>
           )}
         </div>
-        
+
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
             닫기
           </Button>
           {reservation.status !== "accepted" && onConfirm && (
-            <Button 
+            <Button
               onClick={() => {
                 onConfirm(reservation);
                 onClose();
