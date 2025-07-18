@@ -21,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { updateReservation } from "@/lib/supabase/services/reservations.services";
 import { sendSolapiSMS } from "@/lib/send-sms";
 import { Tables } from "@/lib/supabase/types";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 const YEARS = Array.from(
   { length: 300 },
@@ -61,6 +62,9 @@ export default function DentistReservationPage() {
   const [selectedReservationId, setSelectedReservationId] = useState<
     string | null
   >(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [reservationToConfirm, setReservationToConfirm] =
+    useState<ReservationWithUser | null>(null);
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
 
@@ -106,7 +110,8 @@ export default function DentistReservationPage() {
       // 1. Update reservation status
       await updateReservation(reservation.id, { status: "accepted" });
       // 2. Send SMS to patient
-      const smsText = `안녕하세요 ${reservation.user.full_name}님,\n\n${user?.clinic?.clinic_name}에서 예약확정했습니다.`; // Hello ${reservation.user.full_name}, your reservation has been confirmed by ${ user?.clinic?.clinic_name || "the clinic"}.
+      const smsText = `안녕하세요 ${reservation.user.full_name}님,\n\n${user?.clinic?.clinic_name}에서 예약확정했습니다.`;
+      // Hello ${reservation.user.full_name}, your reservation has been confirmed by ${ user?.clinic?.clinic_name || "the clinic"}.
       await sendSolapiSMS({
         to: reservation.user.contact_number,
         text: smsText,
@@ -114,6 +119,8 @@ export default function DentistReservationPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
+      setConfirmModalOpen(false);
+      setReservationToConfirm(null);
     },
   });
 
@@ -245,9 +252,10 @@ export default function DentistReservationPage() {
                   selectedReservationId === r.id || r.status === "accepted"
                 }
                 onCheckedChange={() => {
-                  setSelectedReservationId(r.id);
                   if (r.status !== "accepted") {
-                    acceptReservationMutation.mutate(r);
+                    setSelectedReservationId(r.id);
+                    setReservationToConfirm(r);
+                    setConfirmModalOpen(true);
                   }
                 }}
                 className="bg-gray-100 w-5 h-5"
@@ -259,6 +267,28 @@ export default function DentistReservationPage() {
           ))}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        open={confirmModalOpen}
+        onConfirm={() => {
+          if (reservationToConfirm) {
+            acceptReservationMutation.mutate(reservationToConfirm);
+          }
+        }}
+        onCancel={() => {
+          setConfirmModalOpen(false);
+          setReservationToConfirm(null);
+          setSelectedReservationId(null);
+        }}
+        title="예약 확정"
+        description={`${reservationToConfirm?.user.full_name}님의 예약을 확정하시겠습니까?\n확정 시 환자에게 SMS가 발송됩니다.`}
+        confirmLabel="확정"
+        cancelLabel="취소"
+        confirmButtonClassName="bg-blue-600 text-white hover:bg-blue-700"
+        cancelButtonClassName="bg-gray-200 text-gray-800 hover:bg-gray-300"
+        loading={acceptReservationMutation.isPending}
+      />
     </>
   );
 }

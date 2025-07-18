@@ -21,6 +21,8 @@ interface ConfirmModalProps {
   description: string;
   confirmLabel?: string; // Button label for confirm (default: 삭제)
   cancelLabel?: string; // Button label for cancel (default: 취소)
+  confirmButtonClassName?: string; // Optional className for confirm button
+  cancelButtonClassName?: string; // Optional className for cancel button
   loading?: boolean;
   className?: string; // Optional className for additional styling
 }
@@ -32,6 +34,8 @@ export function ConfirmModal({
   title,
   description,
   confirmLabel = "삭제", // Delete
+  confirmButtonClassName = "bg-red-600 text-white hover:bg-red-700",
+  cancelButtonClassName = "bg-gray-200 text-gray-800 hover:bg-gray-300",
   cancelLabel = "취소", // Cancel
   loading = false,
   className,
@@ -55,7 +59,10 @@ export function ConfirmModal({
         <DialogFooter className="mt-4">
           <Button
             type="button"
-            className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
+            className={cn(
+              "px-4 py-2 rounded font-semibold",
+              confirmButtonClassName
+            )}
             onClick={(e) => {
               e.stopPropagation();
               onConfirm();
@@ -67,7 +74,10 @@ export function ConfirmModal({
           <DialogClose asChild>
             <Button
               type="button"
-              className="px-4 py-2 rounded bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300"
+              className={cn(
+                "px-4 py-2 rounded font-semibold",
+                cancelButtonClassName
+              )}
               onClick={(e) => {
                 e.stopPropagation();
                 onCancel();
