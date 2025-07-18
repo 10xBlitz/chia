@@ -136,6 +136,13 @@ export default function CreateReviewPage() {
                         {/** Unable to retrieve procedure information.  */}
                       </span>
                     )}
+
+                    {treatmentsData && treatmentsData.length === 0 && (
+                      <span className="text-gray-400 text-sm">
+                        이 병원에는 이용 가능한 치료가 없습니다..{" "}
+                        {/** This clinic has no treatment available. */}
+                      </span>
+                    )}
                     {treatmentsData &&
                       treatmentsData.map((t) => (
                         <Button

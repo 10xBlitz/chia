@@ -86,9 +86,10 @@ export async function getPaginatedClinicTreatments(
 
   let query = supabaseClient
     .from("clinic_treatment")
-    .select("*, treatment(*)", { count: "exact" })
+    .select("*, treatment!inner(*)", { count: "exact" })
     .eq("clinic_id", clinic_id)
     .eq("status", "active") // Assuming you want to include only active treatments
+    .eq("treatment.status", "active") // Assuming you want to include only active treatments
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
