@@ -29,6 +29,7 @@ export function ReservationDotCalendar({
       selected={selected}
       onSelect={(d) => d && onSelect(d)}
       style={{ minWidth: "100%" }}
+      hideNavigation
       className={className + " sm:w-full sm:min-w-full"}
       classNames={{
         months: "flex flex-col gap-2",
