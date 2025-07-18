@@ -282,8 +282,10 @@ export default function DentistReservationPage() {
           setSelectedReservationId(null);
         }}
         title="예약 확정"
-        description={`${reservationToConfirm?.user.full_name}님의 예약을 확정하시겠습니까?\n확정 시 환자에게 SMS가 발송됩니다.`}
+        description={`${reservationToConfirm?.user.full_name}님의 예약을 확정하시겠습니까?`}
+        secondDecription="확정 시 환자에게 SMS가 발송됩니다."
         confirmLabel="확정"
+        confirmLoadingLabel="확정 중..."
         cancelLabel="취소"
         confirmButtonClassName="bg-blue-600 text-white hover:bg-blue-700"
         cancelButtonClassName="bg-gray-200 text-gray-800 hover:bg-gray-300"

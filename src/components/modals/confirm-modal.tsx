@@ -19,7 +19,9 @@ interface ConfirmModalProps {
   onCancel: () => void;
   title: string;
   description: string;
+  secondDecription?: string; // Optional second description line
   confirmLabel?: string; // Button label for confirm (default: 삭제)
+  confirmLoadingLabel?: string; // Optional loading label for confirm button
   cancelLabel?: string; // Button label for cancel (default: 취소)
   confirmButtonClassName?: string; // Optional className for confirm button
   cancelButtonClassName?: string; // Optional className for cancel button
@@ -34,11 +36,13 @@ export function ConfirmModal({
   title,
   description,
   confirmLabel = "삭제", // Delete
+  confirmLoadingLabel = "삭제 중...", // Deleting...
   confirmButtonClassName = "bg-red-600 text-white hover:bg-red-700",
   cancelButtonClassName = "bg-gray-200 text-gray-800 hover:bg-gray-300",
   cancelLabel = "취소", // Cancel
   loading = false,
   className,
+  secondDecription,
 }: ConfirmModalProps) {
   return (
     <Dialog
@@ -54,6 +58,12 @@ export function ConfirmModal({
           </DialogTitle>
           <DialogDescription className="font-pretendard-500 text-sm">
             {description}
+            {secondDecription && (
+              <>
+                <br />
+                {secondDecription}
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-4">
@@ -69,7 +79,8 @@ export function ConfirmModal({
             }}
             disabled={loading}
           >
-            {loading ? "삭제 중..." : confirmLabel} {/* Deleting... / Delete */}
+            {loading ? confirmLoadingLabel : confirmLabel}{" "}
+            {/* Deleting... / Delete */}
           </Button>
           <DialogClose asChild>
             <Button
