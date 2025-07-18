@@ -12,7 +12,7 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 const compressOptions = {
-  maxSizeMB: 10,
+  maxSizeMB: 2,
   maxWidthOrHeight: 1080,
   useWebWorker: true,
   fileType: "image/webp",
