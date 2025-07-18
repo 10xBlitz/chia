@@ -350,10 +350,14 @@ export async function updateClinicNotificationRecipient(
 }
 
 /**
- * Get clinics with notification recipients for SMS sending
- * @param region - The region to match
- * @param treatmentId - Optional treatment ID to match
- * @returns Array of clinics with notification recipient contact info
+ * Returns a list of active clinics with notification recipients for SMS sending.
+ *
+ * - If `treatmentId` is provided, only clinics that offer the specified treatment and have an active clinic_treatment are included.
+ * - Clinics must have a notification recipient user set (not null).
+ * - Each clinic includes basic info, region, notification recipient (id, full_name, contact_number), and clinic_treatment/treatment info.
+ *
+ * @param treatmentId Optional treatment ID to filter clinics that offer this treatment.
+ * @returns Array of clinics with notification recipient contact info and treatment info.
  */
 export async function getClinicsForNotification(treatmentId?: string) {
   let query = supabaseClient
@@ -369,7 +373,7 @@ export async function getClinicsForNotification(treatmentId?: string) {
         full_name,
         contact_number
       ),
-      clinic_treatment (
+      clinic_treatment!inner(
         treatment_id,
         treatment (
           id,
@@ -381,7 +385,7 @@ export async function getClinicsForNotification(treatmentId?: string) {
     .eq("status", "active")
     .not("notification_recipient_user_id", "is", null);
 
-  // If treatmentId is provided, filter by clinics that offer this treatment
+  // If treatmentId is provided, filter by clinics that offer this treatment (query-level only)
   if (treatmentId) {
     query = query
       .eq("clinic_treatment.treatment_id", treatmentId)
@@ -390,6 +394,5 @@ export async function getClinicsForNotification(treatmentId?: string) {
 
   const { data, error } = await query;
   if (error) throw error;
-
   return data || [];
 }

@@ -32,6 +32,8 @@ import {
   getClinicBidOnQuotation,
   insertBid,
 } from "@/lib/supabase/services/bids.services";
+import { getSingleQuotationWithPatient } from "@/lib/supabase/services/quotation.services";
+import { sendSolapiSMS } from "@/lib/send-sms";
 import { cn } from "@/lib/utils";
 
 export default function CreateBidPage() {
@@ -62,6 +64,13 @@ export default function CreateBidPage() {
     queryFn: () =>
       getClinicBidOnQuotation(quotationId, user?.clinic_id as string),
     enabled: !!user?.clinic_id && !!quotationId,
+  });
+
+  // Fetch quotation with patient information for SMS
+  const { data: quotationWithPatient } = useQuery({
+    queryKey: ["quotation_with_patient", quotationId],
+    queryFn: () => getSingleQuotationWithPatient(quotationId),
+    enabled: !!quotationId,
   });
 
   const form = useForm<FormValues>({
@@ -95,10 +104,31 @@ export default function CreateBidPage() {
         ),
         recommend_quick_visit: values.recommendQuickVisit,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["bid", quotationId] });
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
       queryClient.invalidateQueries({ queryKey: ["quotation"] });
+
+      // Send SMS notification to patient
+      if (
+        quotationWithPatient?.patient?.contact_number &&
+        user?.clinic?.clinic_name
+      ) {
+        try {
+          const smsText = `안녕하세요 ${quotationWithPatient.patient.full_name}님, ${user.clinic.clinic_name}님이 귀하의 견적에 대한 답변을 보냈습니다.`;
+          //`Hello ${quotationWithPatient.patient.full_name}, ${user.clinic.clinic_name} has responded to your quote.`
+
+          await sendSolapiSMS({
+            to: quotationWithPatient.patient.contact_number,
+            text: smsText,
+          });
+        } catch (error) {
+          console.log(
+            "-------->ERROR: SMS 전송 실패 (bid notification):",
+            error
+          );
+        }
+      }
 
       router.back();
     },

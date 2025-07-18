@@ -104,12 +104,9 @@ export default function DentistReservationPage() {
   const acceptReservationMutation = useMutation({
     mutationFn: async (reservation: ReservationWithUser) => {
       // 1. Update reservation status
-      console.log("--->updating reservation", reservation);
       await updateReservation(reservation.id, { status: "accepted" });
       // 2. Send SMS to patient
-      const smsText = `안녕하세요 ${reservation.user.full_name}님,\n\n${
-        user?.clinic?.clinic_name || "치과"
-      }에서 예약확정했습니다.`;
+      const smsText = `안녕하세요 ${reservation.user.full_name}님,\n\n${user?.clinic?.clinic_name}에서 예약확정했습니다.`; // Hello ${reservation.user.full_name}, your reservation has been confirmed by ${ user?.clinic?.clinic_name || "the clinic"}.
       await sendSolapiSMS({
         to: reservation.user.contact_number,
         text: smsText,

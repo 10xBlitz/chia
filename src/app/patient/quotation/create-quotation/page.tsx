@@ -119,20 +119,19 @@ export default function CreateQuotationPage() {
         setUploadingImageIdx,
       });
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (_, variables) => {
       setUploadingImageIdx(null); // reset after upload
       toast.success("견적 요청이 등록되었습니다.");
 
       const customerName = user?.full_name || user?.email || "Customer";
-      const quotationRegion =
-        variables.region.split(",")[1]?.trim() || variables.region;
+
       const treatmentId = variables.treatment_id;
 
       if (clinic_id && clinic) {
         // Private quotation - send SMS to specific clinic
         const to = clinic?.user?.contact_number as string;
         const dentistName = clinic?.user?.full_name || "Dentist";
-        const smsText = `안녕하세요, ${dentistName}님.\n\n#${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
+        const smsText = `안녕하세요, ${dentistName}님.\n\n${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
         const smsResult = await sendSolapiSMS({ to, text: smsText });
 
         if (!smsResult.ok) {
@@ -141,11 +140,14 @@ export default function CreateQuotationPage() {
         }
       } else {
         // Public quotation - send SMS to all matching clinics
+        // if there is treatment id, fetch clinics that match the treatment
+        // if there is not treatment id, fetch all clinics
+        // this is done on the getClinicsForNotification function
         try {
           const matchingClinics = await getClinicsForNotification(treatmentId);
 
           console.log(
-            `Found ${matchingClinics.length} matching clinics for region: ${quotationRegion}, treatment: ${treatmentId}`
+            `Found ${matchingClinics.length} matching clinics for treatment: ${treatmentId}`
           );
 
           // Send SMS to all matching clinics
@@ -157,7 +159,7 @@ export default function CreateQuotationPage() {
               "Dentist";
 
             if (to) {
-              const smsText = `안녕하세요, #${dentistName}님.\n\n#${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
+              const smsText = `안녕하세요, ${dentistName}님.\n\n${customerName}님이 견적을 요청하셨습니다.`; // Hello, #{dentistName}. #{customerName} has requested a quotation.
               return sendSolapiSMS({ to, text: smsText });
             }
             return { ok: false, error: "No contact number" };

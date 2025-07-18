@@ -168,6 +168,20 @@ export async function getSingleQuotation(quotationId: string) {
   return data;
 }
 
+export async function getSingleQuotationWithPatient(quotationId: string) {
+  const { data, error } = await supabaseClient
+    .from("quotation")
+    .select(
+      "*, treatment(*), clinic(clinic_name), patient:user!patient_id(full_name, contact_number)"
+    )
+    .eq("id", quotationId)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return data;
+}
+
 export interface UpdateQuotationImage {
   status: "old" | "new" | "deleted" | "updated";
   file: string | File;
