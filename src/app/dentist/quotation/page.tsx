@@ -112,19 +112,19 @@ async function fetchQuotations(
     .limit(100);
 
   // Properly quote region if it contains a comma
-  const quotedRegion = region.includes(",") ? `"${region}"` : region;
+  // const quotedRegion = region.includes(",") ? `"${region}"` : region;
 
   // treatment_id.in.(...) should not have quotes around each id
   const treatmentsList = treatments.join(",");
 
   // This filter retrieves all quotations that are either:
   //    Private to the clinic, OR
-  //    Public and no treatment, then match region, OR
-  //    Public with treatment and match clinic region and matching any of the clinic’s treatments.
+  //    Public and no treatment, OR
+  //    Public with treatment and matching any of the clinic’s treatments.
   const filter = [
     `clinic_id.eq.${clinic_id}`,
-    `and(clinic_id.is.null,treatment_id.is.null,region.eq.${quotedRegion})`,
-    `and(clinic_id.is.null,region.eq.${quotedRegion},treatment_id.in.(${treatmentsList}))`,
+    `and(clinic_id.is.null,treatment_id.is.null)`,
+    `and(clinic_id.is.null,treatment_id.in.(${treatmentsList}))`,
   ].join(",");
 
   console.log("---->filter: ", filter);
