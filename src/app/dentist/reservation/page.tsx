@@ -22,6 +22,7 @@ import { updateReservation } from "@/lib/supabase/services/reservations.services
 import { sendSolapiSMS } from "@/lib/send-sms";
 import { Tables } from "@/lib/supabase/types";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { ReservationDetailModal } from "@/components/modals/reservation-detail-modal";
 
 const YEARS = Array.from(
   { length: 300 },
@@ -54,6 +55,7 @@ interface ReservationWithUser extends Tables<"reservation"> {
       treatment_name?: string;
     };
   };
+  notes?: string;
 }
 
 export default function DentistReservationPage() {
@@ -64,6 +66,9 @@ export default function DentistReservationPage() {
   >(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [reservationToConfirm, setReservationToConfirm] =
+    useState<ReservationWithUser | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [reservationDetail, setReservationDetail] =
     useState<ReservationWithUser | null>(null);
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
@@ -234,7 +239,13 @@ export default function DentistReservationPage() {
               key={r.id}
               className="flex items-center mt-8 justify-between w-full py-2"
             >
-              <div className="flex flex-1">
+              <div
+                className="flex flex-1 cursor-pointer"
+                onClick={() => {
+                  setReservationDetail(r);
+                  setDetailModalOpen(true);
+                }}
+              >
                 <span className="font-bold text-sm w-[50px] text-left">
                   {format(
                     new Date(`${r.reservation_date}T${r.reservation_time}`),
@@ -290,6 +301,21 @@ export default function DentistReservationPage() {
         confirmButtonClassName="bg-blue-600 text-white hover:bg-blue-700"
         cancelButtonClassName="bg-gray-200 text-gray-800 hover:bg-gray-300"
         loading={acceptReservationMutation.isPending}
+      />
+
+      {/* Reservation Detail Modal */}
+      <ReservationDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setReservationDetail(null);
+        }}
+        reservation={reservationDetail}
+        onConfirm={(reservation) => {
+          setReservationToConfirm(reservation);
+          setConfirmModalOpen(true);
+          setDetailModalOpen(false);
+        }}
       />
     </>
   );

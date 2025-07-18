@@ -18,7 +18,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   title: string;
-  description: string;
+  description: React.ReactNode;
   secondDecription?: string; // Optional second description line
   confirmLabel?: string; // Button label for confirm (default: 삭제)
   confirmLoadingLabel?: string; // Optional loading label for confirm button
