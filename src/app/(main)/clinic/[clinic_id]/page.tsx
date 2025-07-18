@@ -29,6 +29,7 @@ import { fetchClinicReviews } from "@/lib/supabase/services/reviews.services";
 import { getClinic } from "@/lib/supabase/services/clinics.services";
 import { Database } from "@/lib/supabase/types";
 import { ensureHttpProtocol } from "@/lib/utils";
+import ZoomableImage from "@/components/zoomable-image";
 // import ZoomableImage from "@/components/zoomable-image";
 
 const TABS = [
@@ -583,14 +584,14 @@ export default function ClinicSingleViewPage() {
                   key={idx}
                   className="aspect-square relative rounded-lg overflow-hidden"
                 >
-                  <Image
+                  {/* <Image
                     src={pic}
                     alt={`clinic-photo-${idx}`}
                     fill
                     className="object-cover"
-                  />
+                  /> */}
 
-                  {/* <ZoomableImage src={pic} alt={`clinic-photo-${idx}`} /> */}
+                  <ZoomableImage src={pic} alt={`clinic-photo-${idx}`} />
                 </div>
               ))}
             </div>
