@@ -200,7 +200,6 @@ export default function DentistSignupPage() {
   };
 
   const checkEmail = async (email: string) => {
-    console.log("--->checkEmail: ", email);
     const res = await fetch("/api/check-email", {
       method: "POST",
       body: JSON.stringify({ email }),
@@ -208,12 +207,10 @@ export default function DentistSignupPage() {
     });
     const { exists } = await res.json();
 
-    console.log("--->checkEmail response: ", exists);
     return exists;
   };
 
   const nextStep = async () => {
-    console.log("--->next step clicked, currentStep: ", currentStep);
     //validate if email is existing already in database when in step 1
     if (currentStep === 1) {
       const isRegistered = await checkEmail(form.getValues("email"));
@@ -248,8 +245,6 @@ export default function DentistSignupPage() {
       opacity: 0,
     }),
   };
-
-  console.log("---->treatments: ", treatments);
 
   return (
     <MobileLayout className="flex flex-col min-h-dvh overflow-x-hidden">

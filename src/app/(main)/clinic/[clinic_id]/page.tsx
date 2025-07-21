@@ -235,8 +235,6 @@ export default function ClinicSingleViewPage() {
     );
   }
 
-  console.log("------->333333clinic", clinic);
-
   return (
     <MobileLayout className="!px-0 relative">
       <div className="flex flex-col !px-0 relative">
@@ -764,8 +762,6 @@ function getWorkingHourToday(
 
   const formattedOpenTime = toKoreanTime(wh.time_open_from);
   const formattedCloseTime = toKoreanTime(wh.time_open_to);
-
-  console.log("---->wh", wh);
 
   return {
     clinic_id: wh.clinic_id,
