@@ -231,7 +231,7 @@ export async function getClinic(clinic_id: string) {
         *,
         user:notification_recipient_user_id (full_name, contact_number),
         working_hour(*),
-        clinic_treatment!inner(
+        clinic_treatment(
           id,
           treatment!inner(
             id,
