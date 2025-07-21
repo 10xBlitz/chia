@@ -33,8 +33,6 @@ export default function ViewQuotationPage() {
       treatments.length > 0,
   });
 
-  console.log("---->quotations: ", quotations);
-
   return (
     <>
       <HeaderWithBackButton title="견적 목록" />
@@ -127,12 +125,9 @@ async function fetchQuotations(
     `and(clinic_id.is.null,treatment_id.in.(${treatmentsList}))`,
   ].join(",");
 
-  console.log("---->filter: ", filter);
   query = query.or(filter);
 
   const { data, error } = await query;
-
-  console.log("---->data: ", data);
 
   if (error) throw new Error(error.message);
   return data;

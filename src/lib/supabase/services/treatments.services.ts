@@ -142,7 +142,6 @@ export async function insertTreatment(
   let imageUrl: string | undefined = undefined;
   if (treatment.image_url && treatment.image_url instanceof File) {
     progress?.("이미지 업로드 중..."); // "Uploading image..."
-    console.log("-----> uploading file to supabase from insert treatment");
     imageUrl = await uploadFileToSupabase(treatment.image_url, {
       bucket: IMAGE_BUCKET,
       allowedMimeTypes: ALLOWED_MIME_TYPES,

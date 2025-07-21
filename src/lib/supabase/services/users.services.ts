@@ -17,8 +17,6 @@ export async function getPaginatedUsers(
   sort: string = "created_at",
   order: string = "desc"
 ) {
-  console.log("---->getPaginatedUsers", { page, limit, filters, sort, order });
-
   if (limit > 1000) {
     throw Error("limit exceeds 1000");
   }
@@ -263,14 +261,12 @@ export async function registerDentist({
     password,
     role: "dentist",
   });
-  console.log("---->registerDentist result: ", result);
 
   //do a loop here to insert the dentist's departments
   const dentistId = result.data.id;
 
   // Insert departments
   if (departments.length > 0) {
-    console.log("--->inserting departments");
     const departmentInserts = departments.map((department) => ({
       dentist_id: dentistId,
       clinic_department_id: department,
@@ -284,8 +280,6 @@ export async function registerDentist({
   //do a loop here to add the treatments inside the clinic_treatment table if it is not there yet
   //make sure to check if the treatment already exists for this clinic
   if (treatments.length > 0) {
-    console.log("--->inserting treatments");
-
     // 1. Get existing treatments for this clinic
     const { data: existingTreatments, error: fetchError } = await supabaseClient
       .from("clinic_treatment")

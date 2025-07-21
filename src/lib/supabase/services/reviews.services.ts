@@ -89,7 +89,6 @@ export async function getPaginatedReviews(
   }
 
   const { data, error, count } = await query;
-  console.log("paginatedREviews", data, count, filters);
 
   if (error) throw error;
 

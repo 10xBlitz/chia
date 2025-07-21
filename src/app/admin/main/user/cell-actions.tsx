@@ -39,7 +39,6 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       });
     },
     onError: (err) => {
-      console.log("Error deleting user:", err);
       toast.error("삭제에 실패했습니다. " + err.message); // Failed to delete
       setConfirmOpen(false);
     },

@@ -56,11 +56,6 @@ export async function uploadFileToSupabase(
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
   const filePath = folder ? `${folder}/${fileName}` : fileName;
 
-  console.log("-----> uploadingfile to supabase:", {
-    bucket,
-    filePath,
-    compressedFile,
-  });
   const { error: uploadError } = await supabaseClient.storage
     .from(bucket)
     .upload(filePath, compressedFile, {
@@ -74,7 +69,6 @@ export async function uploadFileToSupabase(
     throw new Error(`파일 업로드 실패: ${uploadError.message}`);
   }
 
-  console.log("-----> getting public URL for file");
   const { data: publicUrlData } = supabaseClient.storage
     .from(bucket)
     .getPublicUrl(filePath);

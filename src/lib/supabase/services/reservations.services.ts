@@ -64,7 +64,6 @@ export async function getPaginatedReservations(
   }
 
   const { data, error, count } = await query;
-  console.log("getPaginatedClinics", data, count, filters);
 
   if (error) throw error;
 

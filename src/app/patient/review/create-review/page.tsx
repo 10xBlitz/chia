@@ -104,7 +104,6 @@ export default function CreateReviewPage() {
   });
 
   const onSubmit = (values: ReviewFormValues) => {
-    console.log("Submitting review:", values);
     mutation.mutate(values);
   };
 

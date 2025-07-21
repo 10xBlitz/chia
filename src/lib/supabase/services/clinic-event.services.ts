@@ -2,8 +2,8 @@ import { endOfDay, startOfDay } from "date-fns";
 import { supabaseClient } from "../client";
 import { TablesInsert } from "../types";
 import {
-    deleteFileFromSupabase,
-    uploadFileToSupabase,
+  deleteFileFromSupabase,
+  uploadFileToSupabase,
 } from "./upload-file.services";
 
 const CLINIC_EVENT_TREATMENTS = "clinic-event-images";
@@ -36,13 +36,6 @@ export async function getPaginatedClinicEvents(
 
     const offset = (page - 1) * limit;
 
-    console.log("----> Getting clinic events with filters:", {
-      page,
-      limit,
-      offset,
-      filters,
-    });
-
     let query = supabaseClient
       .from("event")
       .select("*, clinic_treatment!inner(clinic!inner(*)) ", { count: "exact" })
@@ -50,8 +43,6 @@ export async function getPaginatedClinicEvents(
       .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show events from active clinics
       .order("created_at", { ascending: true })
       .range(offset, offset + limit - 1);
-
-    console.log("----> Initial query:", query.toString());
 
     // Filters
     if (filters.clinic_name) {
@@ -108,7 +99,6 @@ export async function insertClinicEvent(
 
   if (event.image instanceof File) {
     progress("이미지 업로드 중..."); // "Uploading image..."
-    console.log("----> uploading image from insertclinic event");
     imageUrl = await uploadFileToSupabase(event.image, {
       bucket: CLINIC_EVENT_TREATMENTS,
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,

@@ -73,7 +73,6 @@ export default function FormMultiSelect<T extends FieldValues>({
   loading,
   onChange,
 }: FormMultiSelectProps<T>) {
-  console.log("----->options:", options);
   return (
     <FormField
       control={control}

@@ -104,9 +104,7 @@ export function PatientChatSidebar({ setRoom }: PatientChatSidebarProps) {
     fetchInitialUnreadCounts();
   }, [userId]);
 
-  useEffect(() => {
-    console.log("---->unreadCounts:", unreadCounts);
-  }, [unreadCounts]);
+  useEffect(() => {}, [unreadCounts]);
 
   return (
     <aside className="w-full h-full  bg-white flex flex-col">

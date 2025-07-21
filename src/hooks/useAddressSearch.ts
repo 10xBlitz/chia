@@ -131,7 +131,6 @@ export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
       addressToValidate.toLowerCase().includes("gyeonggi");
 
     const isValid = isSeoul || isGyeonggi;
-    console.log("Address validation:", addressToValidate, isValid);
     setIsValidLocation(isValid);
     return isValid;
   }, []);
@@ -168,8 +167,6 @@ export const useAddressSearch = (props: UseAddressSearchProps = {}) => {
       region: string | null
     ) => {
       if (fullAddress !== addressRef.current) {
-        console.log("Updating address:", fullAddress);
-
         // Validate immediately
         if (fullAddress && fullAddress.trim() !== "") {
           // const isJeju =

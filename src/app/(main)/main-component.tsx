@@ -33,8 +33,6 @@ export default function MainPage() {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
 
-  console.log("---->user data", user);
-
   // Fetch clinics data with React Query
   const { data: clinicsData = [], isLoading } = useQuery({
     queryKey: ["clinics", filterOption],
@@ -49,7 +47,6 @@ export default function MainPage() {
         filterOption = ""; // Reset to empty for "모두" or other cases
       }
 
-      console.log("---->filterOption: ", filterOption);
       const result = await getPaginatedClinicsWthReviews(1, 3, {
         region: filterOption,
       });

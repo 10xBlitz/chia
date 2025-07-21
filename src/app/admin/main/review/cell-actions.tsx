@@ -41,7 +41,6 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
   });
 
-  console.log(data);
   return (
     <>
       <ConfirmModal

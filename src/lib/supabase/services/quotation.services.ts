@@ -139,13 +139,10 @@ export async function getPaginatedQuotations(
   }
 
   const { data, error, count } = await query;
-  console.log("getPaginatedQuotations", data, count);
 
   if (error) throw error;
 
   const totalPages = count ? Math.ceil(count / limit) : 1;
-
-  console.log("---->data", data);
 
   return {
     data,

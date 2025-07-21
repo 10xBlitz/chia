@@ -72,12 +72,8 @@ export function ChatSidebar({ patientId }: ChatSidebarProps) {
       });
       // If the admin is currently viewing this room, update last_admin_read_at in the DB
       if (currentRoomId === roomId) {
-        console.log("---->currentroomId", currentRoomId);
-        console.log("->>>>>", roomId, messageCreatedAt);
         mutateRoom(roomId, messageCreatedAt);
       }
-      console.log("---->currentroomId", currentRoomId);
-      console.log("->>>>>", roomId, messageCreatedAt);
       return;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

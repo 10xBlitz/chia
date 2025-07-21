@@ -234,8 +234,6 @@ export function ChatUI({ roomId, currentUserId }: ChatUIProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  console.log("----> has next page:", hasNextPage);
-
   // 메시지 상태 표시 함수 (Message status indicator function)
   const renderMessageStatus = (status?: ChatMessage["status"]) => {
     if (!status || status === "sent") {

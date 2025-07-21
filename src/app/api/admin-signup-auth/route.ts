@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const { password } = await req.json();
   const adminPassword = process.env.ADMIN_SIGNUP_PASSWORD;
-  console.log("----> adminPassword: ", adminPassword);
-  console.log("----> password: ", password);
   if (!adminPassword) {
     return NextResponse.json(
       { error: "Server misconfiguration" },

@@ -81,7 +81,6 @@ export default function EditReviewPage() {
 
   // Initialize form with fetched review data
 
-  console.log("Fetched review data:", reviewData);
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     values: reviewData

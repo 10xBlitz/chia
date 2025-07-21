@@ -56,7 +56,6 @@ export default function CreateQuotationPage() {
       if (clinic_id) {
         //fetch treatments for specific clinic (private quotation)
         const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
-        console.log("---->fetched treatments:", res.data);
         const formattedTreatments = res.data?.map((t) => ({
           id: t.treatment_id,
           treatment_name: t.treatment?.treatment_name,
@@ -145,10 +144,6 @@ export default function CreateQuotationPage() {
         // this is done on the getClinicsForNotification function
         try {
           const matchingClinics = await getClinicsForNotification(treatmentId);
-
-          console.log(
-            `Found ${matchingClinics.length} matching clinics for treatment: ${treatmentId}`
-          );
 
           // Send SMS to all matching clinics
           const smsPromises = matchingClinics.map(async (matchingClinic) => {
@@ -253,7 +248,6 @@ export default function CreateQuotationPage() {
                   form.setValue("birthdate", new Date(user.birthdate || ""));
                   form.setValue("residence", user.residence);
                   form.setValue("region", user.residence || "");
-                  console.log("---->form:", form.getValues());
                 }
 
                 if (!e) {

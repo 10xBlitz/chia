@@ -79,8 +79,6 @@ export async function getPaginatedFavoriteClinics(
     region: item.clinic.region,
   }));
 
-  console.log("---->clinics", favoriteClinics);
-
   // For each clinic, get all clinic_treatment ids, then get total reviews and average reviews per treatment
   const clinicIds = clinics.map((clinic) => clinic.id);
 

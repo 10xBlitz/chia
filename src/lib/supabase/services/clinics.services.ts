@@ -65,7 +65,6 @@ export async function getPaginatedClinics(
   }
 
   const { data, error, count } = await query;
-  console.log("getPaginatedClinics", data, count);
 
   if (error) throw error;
 
@@ -342,7 +341,6 @@ export async function updateClinicNotificationRecipient(
   clinicId: string,
   userId: string | null
 ) {
-  console.log("---->updating: ", { userId, clinicId });
   const { error } = await supabaseClient
     .from("clinic")
     .update({ notification_recipient_user_id: userId })

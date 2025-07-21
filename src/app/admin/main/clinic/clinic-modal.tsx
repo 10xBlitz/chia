@@ -214,7 +214,6 @@ export const ClinicModal = ({
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setLoading(true);
-    console.log("---->clinic modal onSubmit: ", values);
     mutation.mutate(values);
   };
 
@@ -229,12 +228,7 @@ export const ClinicModal = ({
     if (realIndex === -1) return;
 
     const treatment = form.getValues(`treatments.${realIndex}`);
-    console.log(
-      "---->confirmRemoveTreatment: ",
-      treatment,
-      "realIndex:",
-      realIndex
-    );
+
     if (treatment.action === "old") {
       // Existing treatment: mark as deleted
       update(realIndex, { ...treatment, action: "deleted" });
@@ -316,11 +310,6 @@ export const ClinicModal = ({
                   id="address"
                   defaultValue={form.getValues("full_address")}
                   onAddressSelect={(fullAddress, city, region) => {
-                    console.log("---->clinic modal: address: ", {
-                      fullAddress,
-                      city,
-                      region,
-                    });
                     form.setValue("region", region);
                     form.setValue("city", city);
                     form.setValue("full_address", fullAddress);
@@ -856,8 +845,6 @@ async function updateClinicWithImages(
 ) {
   const images = (values.pictures as ClinicImageFormValue[]) || [];
   const clinicPictures: string[] = [];
-
-  console.log("---->images", images);
 
   for (const img of images) {
     if (img.status === "deleted") {

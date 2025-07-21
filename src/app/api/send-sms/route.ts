@@ -5,7 +5,6 @@ export async function POST(req: NextRequest) {
   try {
     const { to, text, type } = await req.json();
 
-    console.log({ to, text, type });
     if (!to || !text) {
       return NextResponse.json(
         { ok: false, message: "Missing parameters" },

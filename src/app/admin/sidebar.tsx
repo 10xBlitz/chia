@@ -90,7 +90,6 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  console.log("-=--->pathname:", pathname);
   return (
     <Sidebar>
       {/* Sidebar Header */}

@@ -47,7 +47,6 @@ export async function fetchRooms(
     return [];
   }
 
-  console.log("---->Fetched chat rooms:", data);
   // Ensure data is an array
 
   return data;
@@ -88,7 +87,6 @@ export async function updateRoom(
 export async function updateLastAdminReadAt(roomId: string, date?: string) {
   const now = date || new Date().toISOString();
 
-  console.log("--->Updating last_admin_read_at for room:", roomId, "to", now);
   const { error } = await supabaseClient
     .from("chat_room")
     .update({ last_admin_read_at: now })

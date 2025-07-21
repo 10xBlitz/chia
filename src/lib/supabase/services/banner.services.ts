@@ -70,17 +70,7 @@ export async function getPaginatedBanners(
     query = query.lte("created_at", endOfDay(filters.endDate).toDateString());
   }
 
-  console.log("Querying banners with filters:", {
-    page,
-    limit,
-    filters,
-    offset,
-    orderBy,
-    orderDirection,
-  });
-
   const { data, error, count } = await query;
-  console.log("---->fetched banners", data);
   if (error) throw error;
   const totalPages = count ? Math.ceil(count / limit) : 1;
   return {

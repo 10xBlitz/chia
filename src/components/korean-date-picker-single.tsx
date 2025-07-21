@@ -88,8 +88,6 @@ export function KoreanDatePicker({
     setDisplayMonth(newDate);
   }
 
-  console.log("--->value", value);
-
   return (
     <Popover open={open} modal={true} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
