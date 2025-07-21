@@ -25,6 +25,8 @@ import { useEffect, useState } from "react";
 import MobileLayout from "@/components/layout/mobile-layout";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
+import { useUserStore } from "@/providers/user-store-provider";
+import { supabaseClient } from "@/lib/supabase/client";
 
 const steps = [
   { label: "계정" }, // Account
@@ -34,6 +36,7 @@ const steps = [
 
 export default function AdminSignupPage() {
   const router = useRouter();
+  const updateUser = useUserStore((state) => state.updateUser);
 
   // --- Admin password gate state ---
   const [isAuthed, setIsAuthed] = useState(false);
@@ -89,11 +92,39 @@ export default function AdminSignupPage() {
 
   const { mutate, status } = useMutation({
     mutationFn: async (data: AdminSignupFormType) => {
-      await registerAdmin({
+      const registeredAdmin = await registerAdmin({
         ...data,
         birthdate: data.birthdate.toISOString(),
         adminPassword: pw, // Pass the admin password for backend validation
       });
+
+      // Fetch updated user profile
+      const { data: updatedProfile } = await supabaseClient
+        .from("user")
+        .select("*, clinic!clinic_id(*)")
+        .eq("id", registeredAdmin.id)
+        .single();
+
+      if (updatedProfile) {
+        // Update user store with complete profile
+        updateUser({
+          id: updatedProfile.id,
+          email: data.email,
+          full_name: updatedProfile.full_name,
+          gender: updatedProfile.gender,
+          birthdate: updatedProfile.birthdate,
+          contact_number: updatedProfile.contact_number,
+          residence: updatedProfile.residence,
+          work_place: updatedProfile.work_place,
+          role: updatedProfile.role,
+          created_at: updatedProfile.created_at,
+          clinic_id: updatedProfile.clinic_id,
+          clinic: updatedProfile.clinic,
+          login_status: updatedProfile.login_status,
+        });
+      }
+
+      return registeredAdmin;
     },
     onSuccess: () => {
       toast.success("관리자 회원가입이 완료되었습니다!"); // Admin sign up completed successfully

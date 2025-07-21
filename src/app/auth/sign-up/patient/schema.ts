@@ -8,9 +8,7 @@ export const step1Schema = z.object({
   password: z
     .string()
     .min(6, { message: "비밀번호는 최소 6자 이상이어야 합니다." }), // Password must be at least 6 characters.
-  confirmPassword: z
-    .string()
-    .min(6, { message: "비밀번호는 최소 6자 이상이어야 합니다." }), // Password must be at least 6 characters.
+  confirmPassword: z.string(),
 });
 
 export const step2Schema = z.object({

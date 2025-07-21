@@ -119,8 +119,9 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
             console.warn("onAuthStateChange: storeRef not initialized yet.");
             return;
           }
+
           if (event === "SIGNED_IN" && session?.user) {
-            console.log("->>> user signed in:", session.user);
+            //NOTE: This is not triggered when the user signs up, only when sign-in
             await fetchProfileAndUpdateStore(
               storeRef.current,
               session.user.id,

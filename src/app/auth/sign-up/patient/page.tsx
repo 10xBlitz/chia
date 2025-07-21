@@ -18,6 +18,7 @@ import { registerUser } from "@/lib/supabase/services/users.services";
 import MobileLayout from "@/components/layout/mobile-layout";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { useUserStore } from "@/providers/user-store-provider";
+import { supabaseClient } from "@/lib/supabase/client";
 
 const steps = [
   { label: "계정" }, // Account
@@ -38,6 +39,7 @@ const SignupPage = () => {
   >(null);
 
   const user = useUserStore((state) => state.user);
+  const updateUser = useUserStore((state) => state.updateUser);
 
   const form = useForm<z.infer<typeof fullSchema>>({
     resolver: zodResolver(fullSchema),
@@ -57,18 +59,24 @@ const SignupPage = () => {
   const watchedValues = form.watch();
 
   useEffect(() => {
+    let stepIsValid = true;
+
     const validate = async () => {
       const result = currentSchema.safeParse(watchedValues);
-      setIsStepValid(result.success);
+      stepIsValid = result.success;
     };
 
     if (currentStep === 1) {
       if (watchedValues.password !== watchedValues.confirmPassword) {
         setConfirmPasswordError("비밀번호가 일치하지 않습니다."); // Passwords do not match
+        stepIsValid = false;
       } else {
         setConfirmPasswordError(null);
+        stepIsValid = true;
       }
     }
+
+    setIsStepValid(stepIsValid);
 
     validate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,7 +86,7 @@ const SignupPage = () => {
   const { mutate, status } = useMutation({
     mutationFn: async (data: z.infer<typeof fullSchema>) => {
       // Map form data to registerUser input
-      return registerUser({
+      const registeredUser = await registerUser({
         ...data,
         birthdate: data.birthdate.toISOString(),
         role: "patient",
@@ -86,6 +94,34 @@ const SignupPage = () => {
         clinic_id: null,
         work_place: data.workplace,
       });
+
+      // Fetch updated user profile
+      const { data: updatedProfile } = await supabaseClient
+        .from("user")
+        .select("*, clinic!clinic_id(*)")
+        .eq("id", registeredUser.data.id)
+        .single();
+
+      if (updatedProfile) {
+        // Update user store with complete profile
+        updateUser({
+          id: updatedProfile.id,
+          email: data.email,
+          full_name: updatedProfile.full_name,
+          gender: updatedProfile.gender,
+          birthdate: updatedProfile.birthdate,
+          contact_number: updatedProfile.contact_number,
+          residence: updatedProfile.residence,
+          work_place: updatedProfile.work_place,
+          role: updatedProfile.role,
+          created_at: updatedProfile.created_at,
+          clinic_id: updatedProfile.clinic_id,
+          clinic: updatedProfile.clinic,
+          login_status: updatedProfile.login_status,
+        });
+      }
+
+      return registeredUser;
     },
     onSuccess: () => {
       toast.success("회원가입이 완료되었습니다!"); // Sign up completed successfully

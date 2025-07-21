@@ -150,7 +150,6 @@ export default function ClinicsPage() {
                 return q;
               }}
               renderItem={(item) => {
-                console.log("--->item: ", item);
                 /* eslint-disable @typescript-eslint/no-explicit-any */
                 return (
                   <ClinicCard {...(item as unknown as any)} key={item.id} />
