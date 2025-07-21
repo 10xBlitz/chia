@@ -156,8 +156,6 @@ export default function DentistReservationPage() {
     });
   };
 
-  console.log("--->selected date outside", selectedDate.getDate());
-
   return (
     <>
       <HeaderWithBackButton
@@ -348,7 +346,5 @@ async function fetchReservations(
     .order("reservation_time", { ascending: true })
     .limit(100);
 
-  console.log("--->fetched reservations", data);
-  console.log("---->selecetd dated", dateStr);
   return data ? (Array.isArray(data) ? data : [data]) : [];
 }
