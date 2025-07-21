@@ -144,11 +144,6 @@ export default function DentistSignupPage() {
       );
 
       if (!clinicNotificationRecipient) {
-        console.log(
-          "----> No notification recipient found for clinic, setting dentist as recipient"
-        );
-        console.log({ clinic_id: data.clinic_id, registeredDentist });
-        // Clinic has no notification recipient, set this dentist as the recipient
         await updateClinicNotificationRecipient(
           data.clinic_id,
           registeredDentist.id

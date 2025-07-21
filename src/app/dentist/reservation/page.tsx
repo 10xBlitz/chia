@@ -79,14 +79,25 @@ export default function DentistReservationPage() {
 
   // Query for reservations
   const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
-    queryKey: ["reservations", user?.clinic_id, selectedDate],
+    queryKey: [
+      "reservations",
+      user?.clinic_id,
+      selectedDate.getDay(),
+      selectedDate.getMonth(),
+      selectedDate.getFullYear(),
+    ],
     queryFn: () => fetchReservations(user?.clinic_id, selectedDate),
     enabled: !!user?.clinic_id,
   });
 
   // Collect all reservation dates in the current month for dot marking
   const { data: reservationDays = [] } = useQuery({
-    queryKey: ["reservation-days", user?.clinic_id, displayMonth],
+    queryKey: [
+      "reservation-days",
+      user?.clinic_id,
+      displayMonth.getMonth(),
+      displayMonth.getFullYear(),
+    ],
     queryFn: async () => {
       if (!user?.clinic_id) return [];
       const year = format(displayMonth, "yyyy");

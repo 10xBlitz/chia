@@ -16,10 +16,14 @@ import {
   QuotationIcon,
 } from "@/components/icons";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  skipToken,
+} from "@tanstack/react-query";
 import {
   getDentistsByClinic,
-  getClinicNotificationRecipient,
   updateClinicNotificationRecipient,
 } from "@/lib/supabase/services/clinics.services";
 import {
@@ -75,21 +79,27 @@ const DentistHome = () => {
   const queryClient = useQueryClient();
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
 
+  // Extract clinic_id to prevent query key changes when user object updates
+  const clinicId = user?.clinic_id;
+
   // Query to get dentists in the same clinic
   const { data: dentists = [] } = useQuery({
-    queryKey: ["clinic-dentists", user?.clinic_id],
-    queryFn: () => getDentistsByClinic(user?.clinic_id as string),
-    enabled: !!user?.clinic_id,
+    queryKey: ["clinic-dentists", clinicId],
+    queryFn: clinicId
+      ? () => getDentistsByClinic(clinicId)
+      : skipToken,
+    enabled: !!clinicId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // React Hook Form setup
   const form = useForm<NotificationFormValues>({
     resolver: zodResolver(notificationSchema),
-    defaultValues: async () => {
-      const d = await getClinicNotificationRecipient(user?.clinic_id as string);
-      return {
-        dentistId: d?.notification_recipient_user_id || "",
-      };
+    values: {
+      dentistId:
+        dentists.find(
+          (d) => d.id === user?.clinic?.notification_recipient_user_id
+        )?.id || "",
     },
   });
 
@@ -254,6 +264,7 @@ const DentistHome = () => {
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
+                          defaultValue={field.value}
                           disabled={updateRecipientMutation.isPending}
                         >
                           <SelectTrigger className="border rounded-md w-full">

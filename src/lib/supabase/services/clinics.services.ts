@@ -295,7 +295,9 @@ export async function getDisabledWeekdaysForClinic(
 export async function getDentistsByClinic(clinicId: string) {
   const { data, error } = await supabaseClient
     .from("user")
-    .select("id, full_name, contact_number")
+    .select(
+      "id, full_name, contact_number, clinic!inner(notification_recipient_user_id)"
+    )
     .eq("clinic_id", clinicId)
     .eq("role", "dentist")
     .eq("login_status", "active")
