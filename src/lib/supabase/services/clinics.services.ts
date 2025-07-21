@@ -47,6 +47,7 @@ export async function getPaginatedClinics(
       { count: "exact" }
     )
     .filter("clinic_treatment.status", "not.eq", "deleted")
+    .eq("clinic_treatment.treatment.status", "active") // Only show active clinics
     .filter("status", "not.eq", "deleted") // Only show active clinics
     .order("clinic_name", { ascending: true })
     .range(offset, offset + limit - 1);

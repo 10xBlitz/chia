@@ -17,6 +17,7 @@ import {
   removeTreatmentImage,
   softDeleteTreatment,
 } from "@/lib/supabase/services/treatments.services";
+import toast from "react-hot-toast";
 interface CellActionProps {
   data: TreatmentTable;
 }
@@ -39,8 +40,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       queryClient.invalidateQueries({
         queryKey: ["treatments"],
       });
+      toast.success("시술이 성공적으로 삭제되었습니다."); // Treatment deleted successfully
     },
     onError: () => {
+      toast.error("시술 삭제에 실패했습니다."); // Failed to delete treatment
       setShowDeleteModal(false);
     },
   });

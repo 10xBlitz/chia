@@ -5,7 +5,7 @@ export const dentistStep1Schema = z.object({
   full_name: z.string().min(1, "이름을 입력해주세요."), // Name
   email: z.string().email("유효한 이메일을 입력해주세요."), // Email
   password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다."), // Password
-  confirmPassword: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다."), // Confirm Password
+  confirmPassword: z.string(), // Confirm Password
 });
 
 // Step 2: Personal Info (added patient fields)

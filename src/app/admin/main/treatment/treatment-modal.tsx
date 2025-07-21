@@ -14,7 +14,7 @@ import { Modal } from "@/components/ui/modal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import {
   insertTreatment,
@@ -42,6 +42,7 @@ export const TreatmentModal = ({
   );
   const [progress, setProgress] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof treatmentModalFormSchema>>({
     resolver: zodResolver(treatmentModalFormSchema),
@@ -77,12 +78,15 @@ export const TreatmentModal = ({
       }
     },
     onSuccess: () => {
-      toast.success(data ? "Treatment updated" : "Treatment created");
+      toast.success(data ? "치료가 생성되었습니다." : "치료 업데이트됨.");
+      queryClient.invalidateQueries({ queryKey: ["treatments"] });
+      queryClient.invalidateQueries({ queryKey: ["all_treatments"] });
+
       onSuccess();
       onClose();
     },
     onError: (error) => {
-      toast.error(error.message || "Something went wrong.");
+      toast.error(error.message || "문제가 발생했습니다.");
       setProgress(null);
     },
   });

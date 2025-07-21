@@ -248,6 +248,40 @@ export async function registerDentist({
   residence: string;
   work_place: string;
 }) {
+  //check first if the clinic is active
+  const { data: clinicData, error: clinicError } = await supabaseClient
+    .from("clinic")
+    .select("id, status")
+    .eq("id", clinic_id)
+    .single();
+
+  if (clinicError) throw clinicError;
+  if (!clinicData || clinicData.status !== "active") {
+    throw new Error("선택하신 병원이 삭제되었습니다.", {
+      cause: "deleted-clinic",
+    });
+    //The clinic you selected has been deleted
+  }
+
+  //check all the treatments are not deleted
+  const { data: deletedTreatments, error: deletedTreatmentsError } =
+    await supabaseClient
+      .from("treatment")
+      .select("id, status, treatment_name")
+      .in("id", treatments)
+      .eq("status", "deleted");
+
+  if (deletedTreatmentsError) throw deletedTreatmentsError;
+  if (deletedTreatments.length > 0) {
+    throw new Error(
+      `선택하신 치료 중 일부가 삭제되었습니다: ${deletedTreatments
+        .map((t) => t.treatment_name)
+        .join(", ")}`,
+      { cause: "deleted-treatments" }
+    );
+    //Some of the treatments you selected have been deleted
+  }
+
   const result = await registerUser({
     birthdate:
       typeof birthdate === "string" ? birthdate : birthdate.toISOString(),

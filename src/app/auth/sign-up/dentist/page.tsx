@@ -52,9 +52,6 @@ export default function DentistSignupPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
-  const [confirmPasswordError, setConfirmPasswordError] = useState<
-    string | null
-  >(null);
 
   // Fetch hospitals
   const { data: hospitals } = useQuery({
@@ -117,18 +114,22 @@ export default function DentistSignupPage() {
       : dentistStep3Schema;
 
   useEffect(() => {
+    let stepIsValid = true;
+
     const validate = async () => {
       const result = currentSchema.safeParse(watchedValues);
-      setIsStepValid(result.success);
+      stepIsValid = result.success;
     };
 
     if (currentStep === 1) {
       if (watchedValues.password !== watchedValues.confirmPassword) {
-        setConfirmPasswordError("비밀번호가 일치하지 않습니다."); // Passwords do not match
+        stepIsValid = false;
       } else {
-        setConfirmPasswordError(null);
+        stepIsValid = true;
       }
     }
+
+    setIsStepValid(stepIsValid);
 
     validate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,6 +193,22 @@ export default function DentistSignupPage() {
     },
     onError: (error) => {
       toast.error(error?.message || "회원가입에 실패했습니다."); //Failed to register.
+
+      if (error.cause === "deleted-clinic") {
+        // refetch clinics
+        toast.success("클리닉 재수집."); // Refetch clinics
+        queryClient.invalidateQueries({ queryKey: ["hospitals"] });
+        form.setValue("clinic_id", "");
+        prevStep();
+      }
+
+      if (error.cause === "deleted-treatments") {
+        // refetch treatments
+        toast.success("치료 재수집."); // Refetch treatments
+        form.setValue("treatments", []);
+        queryClient.invalidateQueries({ queryKey: ["treatments"] });
+        prevStep();
+      }
     },
   });
 
@@ -296,11 +313,11 @@ export default function DentistSignupPage() {
                   type="password"
                   placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
                 />
-                {confirmPasswordError && (
+                {/* {confirmPasswordError && (
                   <span className="text-red-500 -mt-6 ml-1">
                     {confirmPasswordError}
                   </span>
-                )}
+                )} */}
               </motion.div>
             )}
 
