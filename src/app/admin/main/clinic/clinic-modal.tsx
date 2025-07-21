@@ -202,13 +202,18 @@ export const ClinicModal = ({
     onSuccess: () => {
       form.reset();
       setLoading(false);
-      toast.success(data ? "Clinic updated" : "Clinic created");
+      toast.success(
+        data
+          ? "클리닉이 성공적으로 업데이트되었습니다."
+          : "클리닉이 성공적으로 생성되었습니다."
+      );
+      // "Clinic successfully updated." / "Clinic successfully created."
       onSuccess();
       onClose();
     },
     onError: (error) => {
       setLoading(false);
-      toast.error(error.message || "Something went wrong.");
+      toast.error(error.message || "뭔가 잘못됐어요.");
     },
   });
 
