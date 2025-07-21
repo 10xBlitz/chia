@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase/client";
 import { updateLoginStatus } from "@/lib/supabase/services/users.services";
 import toast from "react-hot-toast";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ReservationsIcon,
   ReviewIcon,
@@ -79,17 +79,14 @@ const DentistHome = () => {
   const queryClient = useQueryClient();
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
 
-  // Extract clinic_id to prevent query key changes when user object updates
-  const clinicId = user?.clinic_id;
+  // Memoize clinic_id to prevent query key changes when user object updates
+  const clinicId = useMemo(() => user?.clinic_id, [user?.clinic_id]);
 
   // Query to get dentists in the same clinic
   const { data: dentists = [] } = useQuery({
     queryKey: ["clinic-dentists", clinicId],
-    queryFn: clinicId
-      ? () => getDentistsByClinic(clinicId)
-      : skipToken,
+    queryFn: clinicId ? () => getDentistsByClinic(clinicId) : skipToken,
     enabled: !!clinicId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // React Hook Form setup
@@ -110,7 +107,7 @@ const DentistHome = () => {
     onSuccess: () => {
       toast.success("알림 수신자가 업데이트되었습니다."); // Notification recipient updated
       queryClient.invalidateQueries({
-        queryKey: ["clinic-notification-recipient", user?.clinic_id],
+        queryKey: ["clinic-dentists", clinicId],
       });
     },
     onError: (error) => {

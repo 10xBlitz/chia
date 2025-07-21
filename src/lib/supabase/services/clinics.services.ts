@@ -296,7 +296,7 @@ export async function getDentistsByClinic(clinicId: string) {
   const { data, error } = await supabaseClient
     .from("user")
     .select(
-      "id, full_name, contact_number, clinic!inner(notification_recipient_user_id)"
+      "id, full_name, contact_number, clinic:clinic_id!inner(notification_recipient_user_id)"
     )
     .eq("clinic_id", clinicId)
     .eq("role", "dentist")

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { SelectItem } from "@/components/ui/select";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import toast from "react-hot-toast";
@@ -36,6 +36,7 @@ import {
   getClinicNotificationRecipient,
   updateClinicNotificationRecipient,
 } from "@/lib/supabase/services/clinics.services";
+import { useUserStore } from "@/providers/user-store-provider";
 
 const steps = [
   { label: "계정" }, // Account
@@ -46,6 +47,8 @@ const steps = [
 
 export default function DentistSignupPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const updateUser = useUserStore((state) => state.updateUser);
   const [currentStep, setCurrentStep] = useState(1);
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
@@ -148,7 +151,39 @@ export default function DentistSignupPage() {
           data.clinic_id,
           registeredDentist.id
         );
+
+        queryClient.invalidateQueries({
+          queryKey: ["clinic-dentists", data.clinic_id],
+        });
       }
+
+      // Fetch updated user profile with clinic info
+      const { data: updatedProfile } = await supabaseClient
+        .from("user")
+        .select("*, clinic!clinic_id(*)")
+        .eq("id", registeredDentist.id)
+        .single();
+
+      if (updatedProfile) {
+        // Update user store with complete profile including clinic info
+        updateUser({
+          id: updatedProfile.id,
+          email: data.email,
+          full_name: updatedProfile.full_name,
+          gender: updatedProfile.gender,
+          birthdate: updatedProfile.birthdate,
+          contact_number: updatedProfile.contact_number,
+          residence: updatedProfile.residence,
+          work_place: updatedProfile.work_place,
+          role: updatedProfile.role,
+          created_at: updatedProfile.created_at,
+          clinic_id: updatedProfile.clinic_id,
+          clinic: updatedProfile.clinic,
+          login_status: updatedProfile.login_status,
+        });
+      }
+
+      return registeredDentist;
     },
 
     onSuccess: () => {

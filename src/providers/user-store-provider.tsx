@@ -120,6 +120,7 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
             return;
           }
           if (event === "SIGNED_IN" && session?.user) {
+            console.log("->>> user signed in:", session.user);
             await fetchProfileAndUpdateStore(
               storeRef.current,
               session.user.id,
