@@ -82,7 +82,7 @@ export default function DentistReservationPage() {
     queryKey: [
       "reservations",
       user?.clinic_id,
-      selectedDate.getDay(),
+      selectedDate.getDate(),
       selectedDate.getMonth(),
       selectedDate.getFullYear(),
     ],
@@ -104,7 +104,7 @@ export default function DentistReservationPage() {
       const lastDay = format(lastDayOfMonth(displayMonth), "dd");
       const { data } = await supabaseClient
         .from("reservation")
-        .select("reservation_date, clinic_treatment(*)")
+        .select("reservation_date, clinic_treatment!inner(*)")
         .eq("clinic_treatment.clinic_id", user.clinic_id)
         .gte("reservation_date", `${year}-${format(displayMonth, "MM")}-01`)
         .lte(
@@ -155,6 +155,8 @@ export default function DentistReservationPage() {
       return newDate;
     });
   };
+
+  console.log("--->selected date outside", selectedDate.getDate());
 
   return (
     <>
@@ -340,10 +342,13 @@ async function fetchReservations(
   const dateStr = format(selectedDate, "yyyy-MM-dd");
   const { data } = await supabaseClient
     .from("reservation")
-    .select("*, clinic_treatment(*, treatment(*)), user!patient_id(*)")
+    .select("*, clinic_treatment!inner(*, treatment(*)), user!patient_id(*)")
     .eq("reservation_date", dateStr)
     .eq("clinic_treatment.clinic_id", clinicId)
     .order("reservation_time", { ascending: true })
     .limit(100);
+
+  console.log("--->fetched reservations", data);
+  console.log("---->selecetd dated", dateStr);
   return data ? (Array.isArray(data) ? data : [data]) : [];
 }
