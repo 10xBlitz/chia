@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-actions";
+import { calculateAge } from "@/lib/utils";
 
 // import { CellAction } from "./cell-actions";
 
@@ -34,8 +35,7 @@ export const columns: ColumnDef<ReviewTable>[] = [
     header: "나이", // Age
     cell: ({ row }) => {
       const birthdate = new Date(row.original.patient.birthdate);
-      const age = new Date().getFullYear() - birthdate.getFullYear();
-      return <div>{age}</div>;
+      return <div>{calculateAge(birthdate)}</div>;
     },
   },
   {

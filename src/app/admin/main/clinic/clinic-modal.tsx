@@ -308,6 +308,7 @@ export const ClinicModal = ({
               /> */}
                 <AddressSearch
                   id="address"
+                  readOnly={true}
                   defaultValue={form.getValues("full_address")}
                   onAddressSelect={(fullAddress, city, region) => {
                     form.setValue("region", region);
@@ -321,6 +322,24 @@ export const ClinicModal = ({
                     form.formState.dirtyFields.region ? "border-red-500" : ""
                   }`}
                 />
+
+                <div>
+                  {form.formState.errors.region && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.region.message}
+                    </p>
+                  )}
+                  {form.formState.errors.full_address && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.full_address.message}
+                    </p>
+                  )}
+                  {form.formState.errors.city && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.city.message}
+                    </p>
+                  )}
+                </div>
 
                 <FormInput
                   control={form.control}
@@ -823,7 +842,12 @@ export const ClinicModal = ({
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
+                onClick={() => console.log(form.formState.errors)}
+              >
                 {data ? "변경 사항 저장" : "병원 추가"} {progress}
                 {/* Save Changes / Add Clinic */}
               </Button>

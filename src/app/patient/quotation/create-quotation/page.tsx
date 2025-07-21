@@ -234,7 +234,7 @@ export default function CreateQuotationPage() {
             {treatmentsData &&
               treatmentsData?.map((t) => (
                 <SelectItem key={t.id} value={t.id}>
-                  {t.treatment_name || "시술" /* Treatment */}
+                  {t.treatment_name}
                 </SelectItem>
               ))}
           </FormSelect>

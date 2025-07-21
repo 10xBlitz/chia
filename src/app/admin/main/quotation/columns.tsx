@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { CellAction } from "./cell-actions";
 import { Tables } from "@/lib/supabase/types";
+import { calculateAge } from "@/lib/utils";
 
 export type QuotationTable = {
   id: string;
@@ -41,8 +42,7 @@ export const columns: ColumnDef<QuotationTable>[] = [
     header: "나이", // Age
     cell: ({ row }) => {
       const birthdate = new Date(row.original.birthdate);
-      const age = new Date().getFullYear() - birthdate.getFullYear();
-      return <div>{age}</div>;
+      return <div>{calculateAge(birthdate)}</div>;
     },
   },
   {
