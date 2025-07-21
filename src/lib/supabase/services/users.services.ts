@@ -283,8 +283,9 @@ export async function registerDentist({
   }
 
   const result = await registerUser({
-    birthdate:
-      typeof birthdate === "string" ? birthdate : birthdate.toISOString(),
+    birthdate: typeof birthdate === "string" 
+      ? birthdate 
+      : birthdate.toDateString(),
     clinic_id,
     contact_number,
     full_name,

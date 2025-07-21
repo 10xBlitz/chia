@@ -139,7 +139,7 @@ export default function DentistSignupPage() {
     mutationFn: async (data: DentistSignupFormType) => {
       const registeredDentist = await registerDentist({
         ...data,
-        birthdate: data.birthdate.toISOString(),
+        birthdate: data.birthdate,
       });
 
       // Check if clinic has notification recipient, if not, set this dentist as the recipient

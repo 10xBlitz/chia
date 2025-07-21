@@ -47,9 +47,6 @@ export default function AdminSignupPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
-  const [confirmPasswordError, setConfirmPasswordError] = useState<
-    string | null
-  >(null);
 
   const form = useForm<AdminSignupFormType>({
     resolver: zodResolver(AdminSignupFormSchema),
@@ -73,18 +70,22 @@ export default function AdminSignupPage() {
   const currentSchema = currentStep === 1 ? adminStep1Schema : adminStep2Schema;
 
   useEffect(() => {
+    let stepIsValid = true;
+
     const validate = async () => {
       const result = currentSchema.safeParse(watchedValues);
-      setIsStepValid(result.success);
+      stepIsValid = result.success;
     };
 
     if (currentStep === 1) {
       if (watchedValues.password !== watchedValues.confirmPassword) {
-        setConfirmPasswordError("비밀번호가 일치하지 않습니다."); // Passwords do not match
+        stepIsValid = false;
       } else {
-        setConfirmPasswordError(null);
+        stepIsValid = true;
       }
     }
+
+    setIsStepValid(stepIsValid);
 
     validate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,7 +95,7 @@ export default function AdminSignupPage() {
     mutationFn: async (data: AdminSignupFormType) => {
       const registeredAdmin = await registerAdmin({
         ...data,
-        birthdate: data.birthdate.toISOString(),
+        birthdate: data.birthdate.toDateString(),
         adminPassword: pw, // Pass the admin password for backend validation
       });
 
@@ -271,11 +272,11 @@ export default function AdminSignupPage() {
                   type="password"
                   placeholder="비밀번호 (최소 6자리 이상 입력)." //Password (enter at least 6 characters)
                 />
-                {confirmPasswordError && (
+                {/* {confirmPasswordError && (
                   <span className="text-red-500 -mt-6 ml-1">
                     {confirmPasswordError}
                   </span>
-                )}
+                )} */}
               </motion.div>
             )}
 

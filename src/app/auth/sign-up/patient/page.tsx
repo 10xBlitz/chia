@@ -88,7 +88,7 @@ const SignupPage = () => {
       // Map form data to registerUser input
       const registeredUser = await registerUser({
         ...data,
-        birthdate: data.birthdate.toISOString(),
+        birthdate: data.birthdate.toDateString(),
         role: "patient",
         full_name: data.name,
         clinic_id: null,

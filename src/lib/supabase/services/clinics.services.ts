@@ -231,9 +231,9 @@ export async function getClinic(clinic_id: string) {
         *,
         user:notification_recipient_user_id (full_name, contact_number),
         working_hour(*),
-        clinic_treatment (
+        clinic_treatment!inner(
           id,
-          treatment (
+          treatment!inner(
             id,
             treatment_name,
             image_url
@@ -244,6 +244,7 @@ export async function getClinic(clinic_id: string) {
     .eq("id", clinic_id)
     .filter("status", "not.eq", "deleted") // Only get active clinics
     .filter("clinic_treatment.status", "not.eq", "deleted")
+    .eq("clinic_treatment.treatment.status", "active") // Only show active treatments
     .single();
   console.log("---->error", error);
   if (error) throw error;
