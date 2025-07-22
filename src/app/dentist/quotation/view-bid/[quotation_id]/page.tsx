@@ -198,7 +198,7 @@ async function fetchBid(
     .select("*, clinic_treatment(*, clinic(*), treatment(*)), quotation(*)")
     .eq("quotation_id", quotationId)
     .eq("clinic_treatment.clinic_id", clinicId)
-    .single();
+    .maybeSingle();
 
   if (error) throw new Error(error.message);
   return data;

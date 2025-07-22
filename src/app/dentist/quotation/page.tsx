@@ -35,7 +35,7 @@ export default function ViewQuotationPage() {
         pageParam
       ),
     getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < 10) return undefined; // No more pages if less than page size
+      if (lastPage.length < ITEMS_PER_PAGE) return undefined; // No more pages if less than page size
       return allPages.length + 1;
     },
     initialPageParam: 1,
@@ -133,6 +133,9 @@ export default function ViewQuotationPage() {
   );
 }
 
+// Configuration for pagination
+const ITEMS_PER_PAGE = 10;
+
 // Helper to fetch quotations for the current clinic, region, or clinic's treatments
 async function fetchQuotations(
   clinic_id: string | null | undefined,
@@ -143,12 +146,15 @@ async function fetchQuotations(
   if (!clinic_id || !region || treatments?.length === 0 || !treatments)
     return [];
 
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+  const endIndex = page * ITEMS_PER_PAGE - 1;
+
   let query = supabaseClient
     .from("quotation")
     .select("*, treatment(*), bid(*)")
     .order("created_at", { ascending: false })
     .eq("status", "active")
-    .range((page - 1) * 10, page * 10 - 1); // Pagination with 10 items per page
+    .range(startIndex, endIndex);
 
   // Properly quote region if it contains a comma
   // const quotedRegion = region.includes(",") ? `"${region}"` : region;
