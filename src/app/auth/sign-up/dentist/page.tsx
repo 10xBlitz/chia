@@ -152,11 +152,11 @@ export default function DentistSignupPage() {
           data.clinic_id,
           registeredDentist.id
         );
-
-        queryClient.invalidateQueries({
-          queryKey: ["clinic-dentists", data.clinic_id],
-        });
       }
+
+      queryClient.invalidateQueries({
+        queryKey: ["clinic-dentists", data.clinic_id],
+      });
 
       // Fetch updated user profile with clinic info
       const { data: updatedProfile } = await supabaseClient
