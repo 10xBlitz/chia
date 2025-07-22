@@ -204,6 +204,7 @@ export default function ClinicSingleViewPage() {
   if (isClinicLoading || !clinic) {
     return (
       <MobileLayout>
+        <BackButton link="/" />
         <ClinicCardSkeleton />
         <div className="p-4">
           <ClinicReviewCardSkeleton />

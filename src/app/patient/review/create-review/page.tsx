@@ -153,7 +153,7 @@ export default function CreateReviewPage() {
                           }`}
                           onClick={() => field.onChange(t.id)}
                         >
-                          {t.treatment?.treatment_name || "시술"}
+                          {t.treatment.treatment_name}
                         </Button>
                       ))}
                   </div>

@@ -179,12 +179,16 @@ export async function fetchClinicReviews({
   const { data: reviews, error } = await supabaseClient
     .from("review")
     .select(
-      "*, user:patient_id(*), clinic_treatment!inner(id, clinic_id, clinic!inner(status))"
+      "*, user:patient_id(*), clinic_treatment!inner(id, clinic_id, status, treatment!inner(status), clinic!inner(status))"
     )
     .eq("clinic_treatment.clinic_id", clinic_id)
-    .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reviews from active clinics
+    .eq("clinic_treatment.clinic.status", "active") // Only show reviews from active clinics
+    .eq("clinic_treatment.treatment.status", "active") //Only show reviews for active treatments
+    .eq("clinic_treatment.status", "active") // Only show reviews for active clinic treatments
     .order("created_at", { ascending: false })
     .range(pageParam * pageSize, pageParam * pageSize + pageSize - 1);
+
+  console.log("---->reviews: ", reviews);
 
   if (error) throw error;
   return {

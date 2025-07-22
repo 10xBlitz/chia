@@ -51,7 +51,7 @@ export default function CreateQuotationPage() {
 
   // Treatments fetch
   const { data: treatmentsData } = useQuery({
-    queryKey: ["clinic-treatments", clinic_id],
+    queryKey: ["formatted-treatments", clinic_id],
     queryFn: async () => {
       if (clinic_id) {
         //fetch treatments for specific clinic (private quotation)
