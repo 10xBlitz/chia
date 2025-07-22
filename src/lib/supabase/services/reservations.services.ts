@@ -35,7 +35,7 @@ export async function getPaginatedReservations(
       payment(*)
     `,
       { count: "exact" }
-    ) // dot-less select implies INNER JOIN
+    )
     .eq("clinic_treatment.clinic.status", "active") // Only show reservations from active clinics
     .eq("clinic_treatment.treatment.status", "active") // Only show reservations for active treatments
     .eq("clinic_treatment.status", "active") // Only show reservations for active clinic treatments

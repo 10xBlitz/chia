@@ -46,7 +46,7 @@ export async function getPaginatedReviews(
         clinic_treatment!inner(
           id,
           status,
-          treatment(
+          treatment!inner(
             treatment_name,
             status
           ),
@@ -89,6 +89,7 @@ export async function getPaginatedReviews(
   }
 
   const { data, error, count } = await query;
+  console.log("---->data", data);
 
   if (error) throw error;
 

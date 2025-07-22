@@ -7,7 +7,9 @@ export async function fetchClinicTreatments(
   if (!clinic_id) return [];
   const { data } = await supabaseClient
     .from("clinic_treatment")
-    .select("treatment_id")
+    .select("treatment_id, status, treatment!inner(status)")
+    .eq("status", "active")
+    .eq("treatment.status", "active")
     .eq("clinic_id", clinic_id);
   return data || [];
 }
