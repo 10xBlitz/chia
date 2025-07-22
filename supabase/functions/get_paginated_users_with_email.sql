@@ -38,11 +38,13 @@ begin
               au.email::text
             from "user" u
             join auth.users au on u.id = au.id
+            left join clinic c on u.clinic_id = c.id
             where u.login_status = 'active'
               and (p_full_name is null or u.full_name ilike '%' || p_full_name || '%')
               and (p_category is null or u.role::text = p_category)
               and (p_date_from is null or u.created_at >= p_date_from)
               and (p_date_to is null or u.created_at <= p_date_to)
+              and (u.clinic_id is null or c.status != 'deleted')
             order by
               case when lower(p_order) = 'asc' then
                 case when p_sort = 'created_at' then u.created_at end
@@ -57,11 +59,13 @@ begin
           select count(*)
           from "user" u
           join auth.users au on u.id = au.id
+          left join clinic c on u.clinic_id = c.id
           where u.login_status = 'active'
             and (p_full_name is null or u.full_name ilike '%' || p_full_name || '%')
             and (p_category is null or u.role::text = p_category)
             and (p_date_from is null or u.created_at >= p_date_from)
             and (p_date_to is null or u.created_at <= p_date_to)
+            and (u.clinic_id is null or c.status != 'deleted')
         ) as total
     )
     select

@@ -39,7 +39,7 @@ export default function ClinicPage() {
       <ClinicModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        onSuccess={() =>
+        onSuccess={() => {
           queryClient.invalidateQueries({
             queryKey: [
               "clinics",
@@ -48,8 +48,8 @@ export default function ClinicPage() {
               filters.clinic_name,
               filters.date_range,
             ],
-          })
-        }
+          });
+        }}
       />
       {isError && <div className="bg-red-500/20">{error.message}</div>}
       <DataTable

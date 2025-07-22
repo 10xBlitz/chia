@@ -46,7 +46,7 @@ export const columns: ColumnDef<ClinicEventTable>[] = [
               {dates.to.toLocaleDateString()}
             </span>
           ) : (
-            <>No Date Range</>
+            <>기간 없음 {/** No date range */}</>
           )}
         </>
       );
@@ -65,7 +65,7 @@ export const columns: ColumnDef<ClinicEventTable>[] = [
             alt={row.original.title}
           />
         ) : (
-          <>No Image</>
+          <>이미지 없음 {/** No image */}</>
         )}
       </>
     ),

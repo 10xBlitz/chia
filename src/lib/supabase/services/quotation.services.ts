@@ -99,7 +99,7 @@ export async function getPaginatedQuotations(
 
   let query = supabaseClient
     .from("quotation")
-    .select("*, treatment(*), bid(*), clinic(clinic_name, status)", {
+    .select("*, treatment(*), bid(*), clinic!inner(clinic_name, status)", {
       count: "exact",
     })
     .filter("clinic.status", "neq", "deleted") // Only show quotations from active clinics
