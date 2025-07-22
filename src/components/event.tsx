@@ -22,8 +22,11 @@ export default function EventCarousel() {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("event")
-        .select("*, clinic_treatment(*,treatment(*))")
-        .neq("status", "deleted");
+        .select(
+          "*, clinic_treatment!inner(*, clinic!inner(status), treatment(*))"
+        )
+        .neq("status", "deleted")
+        .neq("clinic_treatment.clinic.status", "deleted");
       if (error) throw error;
       return data;
     },
@@ -102,6 +105,8 @@ export default function EventCarousel() {
   if (error) return <p>Error loading events: {error.message}</p>;
   // // 이벤트가 없습니다 (No events available)
   // if (!events || events.length === 0) return <p>이벤트가 없습니다</p>;
+
+  if (!events || events.length === 0) return <></>;
 
   return (
     <div className="p-4">
