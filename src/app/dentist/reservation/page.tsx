@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { format, lastDayOfMonth } from "date-fns";
 import { supabaseClient } from "@/lib/supabase/client";
 import HeaderWithBackButton from "@/components/header-with-back-button";
@@ -77,8 +82,14 @@ export default function DentistReservationPage() {
     setDisplayMonth(selectedDate);
   }, [selectedDate]);
 
-  // Query for reservations
-  const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
+  // Query for reservations using infinite query
+  const {
+    data: reservationsData,
+    isLoading: reservationsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: [
       "reservations",
       user?.clinic_id,
@@ -86,9 +97,18 @@ export default function DentistReservationPage() {
       selectedDate.getMonth(),
       selectedDate.getFullYear(),
     ],
-    queryFn: () => fetchReservations(user?.clinic_id, selectedDate),
+    queryFn: ({ pageParam = 1 }) =>
+      fetchReservations(user?.clinic_id, selectedDate, pageParam),
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < ITEMS_PER_PAGE) return undefined;
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
     enabled: !!user?.clinic_id,
   });
+
+  // Flatten the infinite query data
+  const reservations = reservationsData?.pages.flat() || [];
 
   // Collect all reservation dates in the current month for dot marking
   const { data: reservationDays = [] } = useQuery({
@@ -230,7 +250,7 @@ export default function DentistReservationPage() {
           </button>
         </div>
       </div>
-      <div className="mt-10 ">
+      <div className="mt-10 pb-10 ">
         <h2 className="font-bold text-lg mb-2">
           예약 내역 {/**Reservation details */}
         </h2>
@@ -287,6 +307,23 @@ export default function DentistReservationPage() {
               />
             </div>
           ))}
+
+          {/* Load More Button */}
+          {hasNextPage && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="px-5 py-2 border-1 border-gray-200 text-sm  text-black rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {
+                  isFetchingNextPage
+                    ? "로딩 중..." /* Loading... */
+                    : "더 보기" /* Load More */
+                }
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -332,19 +369,27 @@ export default function DentistReservationPage() {
   );
 }
 
+// Configuration for pagination
+const ITEMS_PER_PAGE = 10;
+
 async function fetchReservations(
   clinicId: string | null | undefined,
-  selectedDate: Date
+  selectedDate: Date,
+  page: number = 1
 ) {
   if (!clinicId) return [];
+
   const dateStr = format(selectedDate, "yyyy-MM-dd");
+  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+  const endIndex = page * ITEMS_PER_PAGE - 1;
+
   const { data } = await supabaseClient
     .from("reservation")
     .select("*, clinic_treatment!inner(*, treatment(*)), user!patient_id(*)")
     .eq("reservation_date", dateStr)
     .eq("clinic_treatment.clinic_id", clinicId)
     .order("reservation_time", { ascending: true })
-    .limit(100);
+    .range(startIndex, endIndex);
 
   return data ? (Array.isArray(data) ? data : [data]) : [];
 }
