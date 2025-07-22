@@ -76,6 +76,10 @@ export function DataTable<TData, TValue>({
     []
   );
 
+  const [fullName, setFullName] = React.useState(
+    searchParam.get("full_name") || ""
+  );
+
   // Use search params for pagination and filters (no local state)
   const pageParam = searchParam.get("page")
     ? Number(searchParam.get("page"))
@@ -83,7 +87,6 @@ export function DataTable<TData, TValue>({
   const limitParam = searchParam.get("limit")
     ? Number(searchParam.get("limit"))
     : 10;
-  const fullName = searchParam.get("full_name") || "";
   const datesParam = searchParam.get("dates");
   let dates: { from: Date; to: Date } | undefined;
   if (datesParam) {
@@ -150,9 +153,7 @@ export function DataTable<TData, TValue>({
           <Input
             placeholder="이름으로 검색..." // Search by full name...
             value={fullName}
-            onChange={(event) =>
-              updateParam("full_name", event.target.value, { resetPage: true })
-            }
+            onChange={(event) => setFullName(event.target.value)}
             className={cn("max-w-sm h-[45px] bg-white", filterTextSize)}
           />
           <Popover>

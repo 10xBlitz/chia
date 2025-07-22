@@ -45,24 +45,24 @@ export async function getPaginatedReviews(
         ),
         clinic_treatment!inner(
           id,
+          status,
           treatment(
-            treatment_name
+            treatment_name,
+            status
           ),
           clinic!inner(
+            status,
             clinic_name
           )
         )
     `,
       { count: "exact" }
     ) // dot-less select implies INNER JOIN
-    .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reviews from active clinics
+    .eq("clinic_treatment.clinic.status", "active") // Only show reviews from active clinics
+    .eq("clinic_treatment.treatment.status", "active") // Only show reviews for active treatments
+    .eq("clinic_treatment.status", "active") // Only show reviews for active clinic treatments
     .order("created_at", { ascending: true })
     .range(offset, offset + limit - 1);
-
-  // Filters
-  // if (filters.treatment_id) {
-  //   query = query.eq("clinic_treatment.treatment_id", filters.treatment_id);
-  // }
 
   if (filters.full_name) {
     query = query.ilike("patient.full_name", `%${filters.full_name}%`);
