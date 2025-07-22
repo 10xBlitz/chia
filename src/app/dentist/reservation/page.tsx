@@ -125,8 +125,13 @@ export default function DentistReservationPage() {
       const lastDay = format(lastDayOfMonth(displayMonth), "dd");
       const { data } = await supabaseClient
         .from("reservation")
-        .select("reservation_date, clinic_treatment!inner(*)")
+        .select(
+          "reservation_date, clinic_treatment!inner(*, clinic!inner(status), treatment!inner(status))"
+        )
         .eq("clinic_treatment.clinic_id", user.clinic_id)
+        .eq("clinic_treatment.treatment.status", "active") // Only show reservations for active treatments
+        .eq("clinic_treatment.clinic.status", "active") // Only show reservations from active clinics
+        .eq("clinic_treatment.status", "active") // Only show active clinic treatments
         .gte("reservation_date", `${year}-${format(displayMonth, "MM")}-01`)
         .lte(
           "reservation_date",

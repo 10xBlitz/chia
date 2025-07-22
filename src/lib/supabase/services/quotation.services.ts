@@ -102,7 +102,7 @@ export async function getPaginatedQuotations(
     .select("*, treatment(*), bid(*), clinic!inner(clinic_name, status)", {
       count: "exact",
     })
-    .filter("clinic.status", "neq", "deleted") // Only show quotations from active clinics
+    .eq("clinic.status", "active") // Only show quotations from active clinics
     .order(sortField, { ascending: sortDir })
     .range(offset, offset + limit - 1);
 
@@ -110,6 +110,8 @@ export async function getPaginatedQuotations(
   if (filters.name) {
     query = query.ilike("name", `%${filters.name}%`);
   }
+
+  // We'll filter treatments with deleted status in post-processing since
 
   // Filter by status
   if (filters.status) {
@@ -142,10 +144,22 @@ export async function getPaginatedQuotations(
 
   if (error) throw error;
 
+  // Filter out quotations with deleted treatments (post-processing)
+  const filteredData =
+    data?.filter((quotation) => {
+      // Include if no treatment
+      if (!quotation.treatment_id) return true;
+      // Include if treatment exists and is active
+      if (quotation.treatment && quotation.treatment.status === "active")
+        return true;
+      // Exclude if treatment is deleted or inactive
+      return false;
+    }) || [];
+
   const totalPages = count ? Math.ceil(count / limit) : 1;
 
   return {
-    data,
+    data: filteredData,
     totalItems: count,
     totalPages,
     hasNextPage: page < totalPages,
