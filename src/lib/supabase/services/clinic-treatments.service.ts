@@ -1,5 +1,17 @@
 import { supabaseClient } from "../client";
 
+// Separate fetch function for clinic treatments
+export async function fetchClinicTreatments(
+  clinic_id?: string | undefined | null
+) {
+  if (!clinic_id) return [];
+  const { data } = await supabaseClient
+    .from("clinic_treatment")
+    .select("treatment_id")
+    .eq("clinic_id", clinic_id);
+  return data || [];
+}
+
 /**
  * Marks a clinic treatment as deleted by setting its status to "deleted".
  *
