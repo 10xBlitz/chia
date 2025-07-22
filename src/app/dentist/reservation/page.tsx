@@ -28,6 +28,7 @@ import { sendSolapiSMS } from "@/lib/send-sms";
 import { Tables } from "@/lib/supabase/types";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { ReservationDetailModal } from "@/components/modals/reservation-detail-modal";
+import toast from "react-hot-toast";
 
 const YEARS = Array.from(
   { length: 300 },
@@ -154,6 +155,7 @@ export default function DentistReservationPage() {
       });
     },
     onSuccess: () => {
+      toast.success("예약이 확정되었습니다."); // Reservation has been confirmed.
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
       setConfirmModalOpen(false);
       setReservationToConfirm(null);
@@ -388,6 +390,7 @@ async function fetchReservations(
     .select("*, clinic_treatment!inner(*, treatment(*)), user!patient_id(*)")
     .eq("reservation_date", dateStr)
     .eq("clinic_treatment.clinic_id", clinicId)
+    .order("status", { ascending: true }) // pending comes before accepted
     .order("reservation_time", { ascending: true })
     .range(startIndex, endIndex);
 
