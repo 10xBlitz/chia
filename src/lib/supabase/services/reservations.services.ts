@@ -29,21 +29,18 @@ export async function getPaginatedReservations(
        ),
       clinic_treatment!inner(
         *,
-        treatment(*),
+        treatment!inner(*),
         clinic!inner(*)
       ),
       payment(*)
     `,
       { count: "exact" }
     ) // dot-less select implies INNER JOIN
-    .filter("clinic_treatment.clinic.status", "neq", "deleted") // Only show reservations from active clinics
+    .eq("clinic_treatment.clinic.status", "active") // Only show reservations from active clinics
+    .eq("clinic_treatment.treatment.status", "active") // Only show reservations for active treatments
+    .eq("clinic_treatment.status", "active") // Only show reservations for active clinic treatments
     .order("reservation_date", { ascending: false })
     .range(offset, offset + limit - 1);
-
-  // Filters
-  // if (filters.treatment_id) {
-  //   query = query.eq("clinic_treatment.treatment_id", filters.treatment_id);
-  // }
 
   if (filters.full_name) {
     query = query.ilike("patient.full_name", `%${filters.full_name}%`);
@@ -64,6 +61,8 @@ export async function getPaginatedReservations(
   }
 
   const { data, error, count } = await query;
+
+  console.log("---->data", data);
 
   if (error) throw error;
 
