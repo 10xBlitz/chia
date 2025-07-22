@@ -1,15 +1,13 @@
 import { supabaseClient } from "../client";
 
 export async function getViewCountOfClinic(clinicId: string) {
-  const { data, error } = await supabaseClient
+  const { error, count } = await supabaseClient
     .from("clinic_view")
-    .select("*", { count: "exact" })
-    .eq("clinic_id", clinicId)
-    .limit(1);
+    .select("*", { count: "exact", head: true })
+    .eq("clinic_id", clinicId);
 
   if (error) {
     throw new Error(`Error fetching view count: ${error.message}`);
   }
-
-  return data.length ?? 0; // Return 0 if no views found
+  return count ?? 0; // Return 0 if no views found
 }
