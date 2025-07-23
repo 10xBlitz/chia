@@ -37,9 +37,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
     onSuccess: () => {
       setShowDeleteModal(false);
-      queryClient.invalidateQueries({
-        queryKey: ["treatments"],
-      });
+
+      // there are many querys that need to be invalidated
+      // to be safe I just invalidate all queries
+      queryClient.invalidateQueries();
+
       toast.success("시술이 성공적으로 삭제되었습니다."); // Treatment deleted successfully
     },
     onError: () => {

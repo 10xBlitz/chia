@@ -154,6 +154,7 @@ async function fetchQuotations(
     .select("*, treatment(*), bid(*)")
     .order("created_at", { ascending: false })
     .eq("status", "active")
+    .or("treatment_id.is.null, and(treatment.status.eq.active)")
     .range(startIndex, endIndex);
 
   // Properly quote region if it contains a comma
