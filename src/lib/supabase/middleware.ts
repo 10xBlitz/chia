@@ -1,12 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { Database } from "./types";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -62,7 +63,39 @@ export async function updateSession(request: NextRequest) {
 
   const role = user?.user_metadata?.role;
 
+  console.log("---->role:", role);
+
   if (user) {
+    // Check clinic status for dentists
+    if (role === "dentist") {
+      try {
+        const { data: userProfile, error: profileError } = await supabase
+          .from("user")
+          .select("clinic_id, clinic:clinic_id(status)")
+          .eq("id", user.id)
+          .single();
+
+        console.log("---->userProfile:", userProfile);
+        console.log("---->user.id:", user.id);
+        console.log("---->profileError:", profileError);
+
+        // If dentist's clinic is deleted, sign them out
+        if (userProfile?.clinic && userProfile.clinic.status === "deleted") {
+          console.log("---->clinic status: ", userProfile.clinic.status);
+          await supabase.auth.signOut();
+          const url = request.nextUrl.clone();
+          url.pathname = "/auth/login";
+          url.searchParams.set(
+            "message",
+            "관리자가 귀하의 클리닉을 삭제했으며, 귀하는 로그아웃되었습니다."
+          ); // "Your clinic has been deleted by the admin, and you have been logged out."
+          return NextResponse.redirect(url);
+        }
+      } catch (error) {
+        console.error("Error checking clinic status:", error);
+      }
+    }
+
     if (request.nextUrl.pathname.startsWith("/patient") && role !== "patient") {
       // User is not a patient, redirect to forbidden page
       const url = request.nextUrl.clone();

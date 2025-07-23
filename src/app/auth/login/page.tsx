@@ -4,8 +4,14 @@ import { Button } from "@/components/ui/button";
 import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const PatientHomePage = () => {
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message"); // Get error message from URL params
+  console.log("---->message:", message);
   const kakaoLoginHandler = async () => {
     await supabaseClient.auth.signInWithOAuth({
       provider: "kakao",
@@ -14,6 +20,14 @@ const PatientHomePage = () => {
       },
     });
   };
+
+  // Show toast message if redirected with message (e.g., clinic deleted)
+  useEffect(() => {
+    if (message) {
+      toast.error(message);
+    }
+  }, [message]);
+
   return (
     <MobileLayout className="min-h-dvh flex flex-col">
       <header className="flex flex-col gap-10">
