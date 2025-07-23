@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { TreatmentModal } from "./treatment-modal";
 import { TreatmentTable } from "./columns";
-import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { TreatmentDeleteWarningModal } from "@/components/modals/treatment-delete-warning-modal";
 import {
   removeTreatmentImage,
   softDeleteTreatment,
@@ -79,11 +79,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         />
       )}
 
-      <ConfirmModal
+      <TreatmentDeleteWarningModal
         open={showDeleteModal}
-        title="시술 삭제" // (Delete Treatment)
-        description={`시술 \"${data.treatment_name}\"을(를) 삭제하시겠습니까?`}
-        // 시술 \"{data.treatment_name}\"을(를) 삭제하시겠습니까? (Are you sure you want to delete treatment ...)
+        treatmentName={data.treatment_name}
+        isDeleting={deleteMutation.isPending}
         onCancel={() => {
           setTimeout(() => {
             const body = document.querySelector("body");

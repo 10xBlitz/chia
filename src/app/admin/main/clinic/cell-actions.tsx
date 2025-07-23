@@ -11,7 +11,7 @@ import { EditIcon, MoreHorizontal, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { ClinicTable } from "./columns";
 import { ClinicModal } from "./clinic-modal";
-import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { ClinicDeleteWarningModal } from "@/components/modals/clinic-delete-warning-modal";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { softDeleteClinic } from "@/lib/supabase/services/clinics.services";
 import toast from "react-hot-toast";
@@ -71,15 +71,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         />
       )}
 
-      <ConfirmModal
+      <ClinicDeleteWarningModal
         open={showDeleteModal}
+        clinicName={data.clinic_name}
+        isDeleting={deleteMutation.isPending}
         onConfirm={() => deleteMutation.mutate(data.id)}
         onCancel={() => setShowDeleteModal(false)}
-        title="병원삭제" // Confirm clinic deletion
-        description={`"${data.clinic_name}" 삭제되면 복구가 불가능합니다.`}
-        confirmLabel="삭제" // Delete
-        cancelLabel="취소" // Cancel
-        loading={deleteMutation.status === "pending"}
       />
 
       <DropdownMenu>
