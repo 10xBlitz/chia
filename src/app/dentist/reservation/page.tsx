@@ -392,8 +392,13 @@ async function fetchReservations(
 
   const { data } = await supabaseClient
     .from("reservation")
-    .select("*, clinic_treatment!inner(*, treatment(*)), user!patient_id(*)")
+    .select(
+      "*, clinic_treatment!inner(*, treatment!inner(*), clinic!inner(status)), user!patient_id(*)"
+    )
     .eq("reservation_date", dateStr)
+    .eq("clinic_treatment.status", "active")
+    .eq("clinic_treatment.clinic.status", "active")
+    .eq("clinic_treatment.treatment.status", "active")
     .eq("clinic_treatment.clinic_id", clinicId)
     .order("status", { ascending: true }) // pending comes before accepted
     .order("reservation_time", { ascending: true })
