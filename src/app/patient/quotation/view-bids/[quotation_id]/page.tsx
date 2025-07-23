@@ -257,7 +257,6 @@ export default function BidsPage() {
               <Button
                 className="rounded-md px-4 h-9 font-medium bg-blue-500 text-white"
                 variant="outline"
-                onClick={(e) => e.stopPropagation()}
               >
                 상세보기 {/* View Details */}
               </Button>

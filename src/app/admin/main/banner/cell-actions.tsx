@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { EditIcon, MoreHorizontal, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { BannerTable } from "./columns";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { deleteBanner } from "@/lib/supabase/services/banner.services";
 import {
   deleteFileFromSupabase,
@@ -26,11 +26,9 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [selected, setSelected] = useState<BannerTable | undefined>(undefined);
   const queryClient = useQueryClient();
-  const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
       // Delete image from storage if present
       if (data.image) {
         try {
@@ -43,16 +41,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         }
       }
       await deleteBanner(data.id);
+    },
+    onSuccess: () => {
       toast.success("배너가 삭제되었습니다."); // Banner deleted
       queryClient.invalidateQueries({ queryKey: ["banners"] });
-    } catch (e) {
-      if (e instanceof Error) {
-        toast.error(e.message || "삭제 실패");
-      }
-    } finally {
-      setDeleting(false);
-    }
-  };
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "삭제 실패");
+    },
+  });
 
   return (
     <>
@@ -83,8 +80,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer text-red-500"
-            onClick={handleDelete}
-            disabled={deleting}
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
           >
             <Trash2 className="w-4 h-4 mr-2" /> 삭제 {/* Delete */}
           </DropdownMenuItem>

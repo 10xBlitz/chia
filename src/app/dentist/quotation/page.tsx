@@ -151,10 +151,9 @@ async function fetchQuotations(
 
   let query = supabaseClient
     .from("quotation")
-    .select("*, treatment(*), bid(*)")
+    .select("*, treatment(*), bid(*), clinic(status)")
     .order("created_at", { ascending: false })
     .eq("status", "active")
-    .or("treatment_id.is.null, and(treatment.status.eq.active)")
     .range(startIndex, endIndex);
 
   // Properly quote region if it contains a comma
@@ -178,5 +177,26 @@ async function fetchQuotations(
   const { data, error } = await query;
 
   if (error) throw new Error(error.message);
-  return data;
+
+  // Filter out quotations with deleted treatments and inactive clinics (post-processing)
+  const filteredData =
+    data?.filter((quotation) => {
+      // Check treatment filter: Include if no treatment or treatment is active
+      if (quotation.treatment_id) {
+        if (!quotation.treatment || quotation.treatment.status !== "active") {
+          return false;
+        }
+      }
+
+      // Check clinic filter: Include if no clinic or clinic is active
+      if (quotation.clinic_id) {
+        if (!quotation.clinic || quotation.clinic.status !== "active") {
+          return false;
+        }
+      }
+
+      return true;
+    }) || [];
+
+  return filteredData;
 }
