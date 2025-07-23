@@ -35,18 +35,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       queryClient.invalidateQueries({
         queryKey: ["clinics"],
       });
-      //this if for the clinic events page here in admin
-      queryClient.invalidateQueries({ queryKey: ["clinic-events"] });
-      //this is for the reviews page here in admin
-      queryClient.invalidateQueries({ queryKey: ["reviews"] });
-      //this is for the quotations page here in admin
-      queryClient.invalidateQueries({ queryKey: ["quotations"] });
-      //this is for the reservations page here in admin
-      queryClient.invalidateQueries({ queryKey: ["reservations"] });
-      //this is for the users page here in admin
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      //this is for the banners page here in admin
-      queryClient.invalidateQueries({ queryKey: ["banners"] });
+
+      //there are a lot of queries that need to be invalidated
+      //so we can just invalidate all queries
+      queryClient.invalidateQueries();
 
       setShowDeleteModal(false);
     },

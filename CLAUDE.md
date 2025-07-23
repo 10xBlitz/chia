@@ -125,6 +125,55 @@ All database operations are organized in `src/lib/supabase/services/` by table/d
 - Optimize queries to minimize database load
 - Reuse existing service functions when possible
 
+#### Soft Deletion Business Logic
+
+**Critical Rule**: When a record is soft deleted (status != "active"), it should not be fetched by any referencing table queries.
+
+**Query Strategy by Relationship Type:**
+
+**Non-Nullable Foreign Keys (Required Relationships):**
+- Use `!inner` joins and filter at database level
+- Since the relationship is required, filtering deleted records in the query is safe
+
+```typescript
+// Example: bid always has a treatment_id (non-nullable)
+.select("*, treatment!inner(*)")
+.eq("treatment.status", "active")
+```
+
+**Nullable Foreign Keys (Optional Relationships):**
+- Use left joins (no `!inner`) to preserve null relationships
+- Filter deleted records in post-processing to avoid excluding null records
+
+```typescript
+// Example: quotation may have null treatment_id or clinic_id
+.select("*, treatment(*), clinic(status)")
+
+// Post-processing filter
+const filteredData = data?.filter((record) => {
+  // For nullable treatment_id: include if null OR active
+  if (record.treatment_id) {
+    if (!record.treatment || record.treatment.status !== "active") {
+      return false;
+    }
+  }
+  
+  // For nullable clinic_id: include if null OR active
+  if (record.clinic_id) {
+    if (!record.clinic || record.clinic.status !== "active") {
+      return false;
+    }
+  }
+  
+  return true;
+}) || [];
+```
+
+**Affected Entities:**
+- `treatment` (status: active/deleted)
+- `clinic` (status: active/deleted) 
+- `clinic_treatment` (status: active/deleted)
+
 ### Form Components
 
 - Always use form components from `src/components/ui/`

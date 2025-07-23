@@ -151,7 +151,9 @@ async function fetchQuotations(
 
   let query = supabaseClient
     .from("quotation")
-    .select("*, treatment(*), bid(*), clinic(status)")
+    .select(
+      "*, treatment(*), bid(*,clinic_treatment(treatment(status))), clinic(status)"
+    )
     .order("created_at", { ascending: false })
     .eq("status", "active")
     .range(startIndex, endIndex);
@@ -178,7 +180,7 @@ async function fetchQuotations(
 
   if (error) throw new Error(error.message);
 
-  // Filter out quotations with deleted treatments and inactive clinics (post-processing)
+  // Filter out quotations with deleted treatments, inactive clinics, or bids with deleted treatments (post-processing)
   const filteredData =
     data?.filter((quotation) => {
       // Check treatment filter: Include if no treatment or treatment is active
@@ -191,6 +193,23 @@ async function fetchQuotations(
       // Check clinic filter: Include if no clinic or clinic is active
       if (quotation.clinic_id) {
         if (!quotation.clinic || quotation.clinic.status !== "active") {
+          return false;
+        }
+      }
+
+      // Check bid treatment filter: Exclude if any bid references a deleted treatment
+      if (quotation.bid && quotation.bid.length > 0) {
+        const hasDeletedBidTreatment = quotation.bid.some((bid) => {
+          if (bid.clinic_treatment) {
+            return (
+              !bid.clinic_treatment.treatment ||
+              bid.clinic_treatment.treatment.status !== "active"
+            );
+          }
+          return false;
+        });
+
+        if (hasDeletedBidTreatment) {
           return false;
         }
       }
