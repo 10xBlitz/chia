@@ -42,6 +42,13 @@ RETURNS TABLE (
   -- Bid count
   bid_count BIGINT,
   
+  -- Bid fields
+  bid_id UUID,
+  bid_price INTEGER,
+  bid_notes TEXT,
+  bid_created_at TIMESTAMPTZ,
+  bid_clinic_treatment_id UUID,
+  
   -- Total count for pagination
   total_count BIGINT
 ) 
@@ -77,6 +84,13 @@ BEGIN
     -- Bid count
     COALESCE(bid_counts.bid_count, 0) as bid_count,
     
+    -- Bid fields
+    b.id as bid_id,
+    b.price as bid_price,
+    b.notes as bid_notes,
+    b.created_at as bid_created_at,
+    b.clinic_treatment_id as bid_clinic_treatment_id,
+    
     -- Total count (calculated over the filtered result set)
     -- COUNT(*) OVER() is a window function that counts ALL rows in the entire filtered result set
     -- It includes this total count in every returned row, regardless of LIMIT/OFFSET
@@ -93,6 +107,7 @@ BEGIN
     q.clinic_id = ct.clinic_id AND 
     q.treatment_id = ct.treatment_id
   )
+  LEFT JOIN bid b ON q.id = b.quotation_id
   LEFT JOIN (
     -- Subquery to get bid counts for each quotation
     SELECT quotation_id, COUNT(*) as bid_count
