@@ -36,6 +36,7 @@ import {
   QuotationFormValues,
   quotationSchema,
 } from "./page.types";
+import { CheckedState } from "@radix-ui/react-checkbox";
 
 export default function CreateQuotationPage() {
   const router = useRouter();
@@ -196,6 +197,24 @@ export default function CreateQuotationPage() {
     mutation.mutate(values);
   };
 
+  const handleUseMyOwnInfo = (e: CheckedState) => {
+    if (e && user) {
+      form.setValue("name", user.full_name || "");
+      form.setValue("gender", user.gender);
+      form.setValue("birthdate", new Date(user.birthdate || ""));
+      form.setValue("residence", user.residence);
+      form.setValue("region", user.residence || "");
+    }
+
+    if (!e) {
+      form.setValue("name", "");
+      form.setValue("gender", "");
+      form.setValue("birthdate", new Date());
+      form.setValue("residence", "");
+      form.setValue("region", "");
+    }
+  };
+
   //add loading state for when user state is not yet available
   if (!user) {
     return (
@@ -240,25 +259,7 @@ export default function CreateQuotationPage() {
           </FormSelect>
           {/* Fill in for myself */}
           <div className="flex gap-3">
-            <Checkbox
-              onCheckedChange={(e) => {
-                if (e && user) {
-                  form.setValue("name", user.full_name || "");
-                  form.setValue("gender", user.gender);
-                  form.setValue("birthdate", new Date(user.birthdate || ""));
-                  form.setValue("residence", user.residence);
-                  form.setValue("region", user.residence || "");
-                }
-
-                if (!e) {
-                  form.setValue("name", "");
-                  form.setValue("gender", "");
-                  form.setValue("birthdate", new Date());
-                  form.setValue("residence", "");
-                  form.setValue("region", "");
-                }
-              }}
-            />
+            <Checkbox onCheckedChange={handleUseMyOwnInfo} />
 
             <FormLabel className="mb-0">
               내 정보 입력 {/* Fill in for myself */}

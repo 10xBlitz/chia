@@ -99,7 +99,7 @@ export async function getPaginatedQuotations(
 
   let query = supabaseClient
     .from("quotation")
-    .select("*, treatment(*), bid(*), clinic(clinic_name, status)", {
+    .select("*, treatment(*), bid(*), clinic(clinic_name, status, clinic_treatment(treatment_id, status))", {
       count: "exact",
     })
     .order(sortField, { ascending: sortDir })
@@ -145,7 +145,7 @@ export async function getPaginatedQuotations(
 
   if (error) throw error;
 
-  // Filter out quotations with deleted treatments and inactive clinics (post-processing)
+  // Filter out quotations with deleted treatments, inactive clinics, and private quotations with removed treatments (post-processing)
   const filteredData =
     data?.filter((quotation) => {
       // Check treatment filter: Include if no treatment or treatment is active
@@ -159,6 +159,18 @@ export async function getPaginatedQuotations(
       if (quotation.clinic_id) {
         if (!quotation.clinic || quotation.clinic.status !== "active") {
           return false;
+        }
+
+        // For private quotations (has clinic_id), check if treatment is still offered by clinic
+        if (quotation.treatment_id && quotation.clinic.clinic_treatment) {
+          const clinicTreatment = quotation.clinic.clinic_treatment.find(
+            (ct) => ct.treatment_id === quotation.treatment_id
+          );
+          
+          // Exclude if treatment not found in clinic or clinic_treatment is deleted
+          if (!clinicTreatment || clinicTreatment.status !== "active") {
+            return false;
+          }
         }
       }
 

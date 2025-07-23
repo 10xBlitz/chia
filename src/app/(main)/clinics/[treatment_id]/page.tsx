@@ -118,7 +118,8 @@ export default function ClinicsPage() {
                       clinic_treatment(
                         id,
                         reservation(*),
-                        review(*)
+                        review(*),
+                        treatment(status)
                       )
                     `}
               pageSize={5}
@@ -145,6 +146,8 @@ export default function ClinicsPage() {
                 );
                 q = q.filter("status", "eq", "active");
                 q.not("clinic_treatment", "is", null);
+                q.eq("clinic_treatment.status", "active");
+                q.eq("clinic_treatment.treatment.status", "active");
                 q.order("clinic_name", { ascending: true });
 
                 return q;

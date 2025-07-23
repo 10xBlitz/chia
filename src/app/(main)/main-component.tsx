@@ -27,11 +27,11 @@ import { UserIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function MainPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const user = useUserStore((state) => state.user);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   let filterOption = searchParams.get("searchByAddress") || "모두"; // Default to "근무지"
-  const user = useUserStore((state) => state.user);
-  const router = useRouter();
 
   // Fetch clinics data with React Query
   const { data: clinicsData = [], isLoading } = useQuery({
