@@ -82,17 +82,6 @@ export const columns: ColumnDef<QuotationTable>[] = [
     ),
   },
   {
-    accessorKey: "status",
-    header: "상태", // Status
-    cell: ({ row }) => {
-      const status = row.original.status;
-      const statusText = status === "active" ? "활성" : "삭제됨";
-      const statusColor =
-        status === "active" ? "text-green-600" : "text-red-600";
-      return <div className={statusColor}>{statusText}</div>;
-    },
-  },
-  {
     accessorKey: "created_at",
     header: "생성일", // Created Date
     cell: ({ row }) => (

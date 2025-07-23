@@ -112,7 +112,7 @@ export async function getClinicBidOnQuotation(
   if (!clinicId) return null;
   const { data: bid, error: bidError } = await supabaseClient
     .from("bid")
-    .select("*, clinic_treatment(*, clinic(status,id))")
+    .select("*, clinic_treatment!inner(*, clinic(status,id))")
     .filter("clinic_treatment.clinic.status", "neq", "deleted")
     .eq("quotation_id", quotationId)
     .eq("clinic_treatment.clinic_id", clinicId)

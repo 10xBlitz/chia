@@ -549,6 +549,7 @@ export type Database = {
           clinic_treatment_id: string
           consultation_type: string
           contact_number: string
+          date_reserved: string
           dentist_id: string | null
           id: string
           patient_id: string
@@ -560,6 +561,7 @@ export type Database = {
           clinic_treatment_id: string
           consultation_type: string
           contact_number?: string
+          date_reserved?: string
           dentist_id?: string | null
           id?: string
           patient_id: string
@@ -571,6 +573,7 @@ export type Database = {
           clinic_treatment_id?: string
           consultation_type?: string
           contact_number?: string
+          date_reserved?: string
           dentist_id?: string | null
           id?: string
           patient_id?: string
@@ -780,6 +783,42 @@ export type Database = {
           latest_message: string
           latest_message_sender_id: string
           latest_message_sender_full_name: string
+        }[]
+      }
+      get_filtered_quotations: {
+        Args: {
+          page_offset?: number
+          page_limit?: number
+          filter_name?: string
+          filter_status?: string
+          filter_region?: string
+          filter_patient_id?: string
+          filter_date_from?: string
+          filter_date_to?: string
+          sort_field?: string
+          sort_direction?: string
+        }
+        Returns: {
+          id: string
+          region: string
+          name: string
+          gender: string
+          birthdate: string
+          residence: string
+          concern: string
+          patient_id: string
+          clinic_id: string
+          treatment_id: string
+          image_url: string[]
+          status: string
+          created_at: string
+          treatment_name: string
+          treatment_image_url: string
+          treatment_status: string
+          clinic_name: string
+          clinic_status: string
+          bid_count: number
+          total_count: number
         }[]
       }
       get_paginated_users_with_email: {

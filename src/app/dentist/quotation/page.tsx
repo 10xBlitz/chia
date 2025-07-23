@@ -152,8 +152,9 @@ async function fetchQuotations(
   let query = supabaseClient
     .from("quotation")
     .select(
-      "*, treatment(*), bid(*,clinic_treatment(treatment(status))), clinic(status)"
+      `*, treatment(*), bid(*, clinic_treatment!inner(clinic_id, treatment(status))), clinic(status)`
     )
+    .eq("bid.clinic_treatment.clinic_id", clinic_id)
     .order("created_at", { ascending: false })
     .eq("status", "active")
     .range(startIndex, endIndex);

@@ -90,98 +90,96 @@ export async function getPaginatedQuotations(
 
   // Parse sort param (e.g. "created_at:desc")
   let sortField = "created_at";
-  let sortDir: boolean = false; // false = desc, true = asc
+  let sortDirection = "desc";
   if (sort) {
     const [field, dir] = sort.split(":");
     if (field) sortField = field;
-    if (dir) sortDir = dir === "asc";
+    if (dir) sortDirection = dir;
   }
 
-  let query = supabaseClient
-    .from("quotation")
-    .select("*, treatment(*), bid(*), clinic(clinic_name, status, clinic_treatment(treatment_id, status))", {
-      count: "exact",
-    })
-    .order(sortField, { ascending: sortDir })
-    .range(offset, offset + limit - 1);
+  // Prepare date filters
+  const dateFrom = filters.date_range?.from
+    ? startOfDay(filters.date_range.from).toISOString()
+    : undefined;
+  const dateTo = filters.date_range?.to
+    ? endOfDay(filters.date_range.to).toISOString()
+    : undefined;
 
-  // Filter by name
-  if (filters.name) {
-    query = query.ilike("name", `%${filters.name}%`);
-  }
+  // Call the RPC function instead of using regular Supabase queries
+  // Why RPC? The previous implementation had a critical pagination bug:
+  // - We filtered quotations at the JavaScript level AFTER fetching from DB
+  // - This caused inaccurate counts (e.g., limit=10 returned only 3 items)
+  // - Database returned 10 records, but 7 were filtered out in post-processing
+  // - Pagination calculations became wrong, affecting UI and user experience
+  //
+  // RPC benefits:
+  // - All filtering happens at database level for accurate counts
+  // - Better performance (less data transferred)
+  // - Consistent pagination behavior
+  // - Handles complex business logic (soft deletion, clinic-treatment relationships)
+  const { data, error } = await supabaseClient.rpc("get_filtered_quotations", {
+    page_offset: offset,
+    page_limit: limit,
+    filter_name: filters.name || undefined,
+    filter_status: filters.status || undefined,
+    filter_region: filters.region || undefined,
+    filter_patient_id: filters.patient_id || undefined,
+    filter_date_from: dateFrom,
+    filter_date_to: dateTo,
+    sort_field: sortField,
+    sort_direction: sortDirection,
+  });
 
-  // We'll filter treatments with deleted status in post-processing since
-
-  // Filter by status
-  if (filters.status) {
-    query = query.eq("status", filters.status);
-  }
-
-  // Filter by region
-  if (filters.region) {
-    query = query.ilike("region", `%${filters.region}%`);
-  }
-
-  // Filter by patient_id
-  if (filters.patient_id) {
-    query = query.eq("patient_id", filters.patient_id);
-  }
-
-  // Date range filter
-  if (filters.date_range?.from && filters.date_range?.to) {
-    query = query.gte(
-      "created_at",
-      startOfDay(filters.date_range.from).toISOString()
-    );
-    query = query.lte(
-      "created_at",
-      endOfDay(filters.date_range.to).toISOString()
-    );
-  }
-
-  const { data, error, count } = await query;
-
-  console.log("----quotaitons: ", data);
+  console.log("----quotations from RPC: ", data);
 
   if (error) throw error;
 
-  // Filter out quotations with deleted treatments, inactive clinics, and private quotations with removed treatments (post-processing)
-  const filteredData =
-    data?.filter((quotation) => {
-      // Check treatment filter: Include if no treatment or treatment is active
-      if (quotation.treatment_id) {
-        if (!quotation.treatment || quotation.treatment.status !== "active") {
-          return false;
-        }
-      }
+  // Transform the flat RPC result into the expected nested structure
+  const transformedData =
+    data?.map((row) => ({
+      id: row.id,
+      region: row.region,
+      name: row.name,
+      gender: row.gender,
+      birthdate: row.birthdate,
+      residence: row.residence,
+      concern: row.concern,
+      patient_id: row.patient_id,
+      clinic_id: row.clinic_id,
+      treatment_id: row.treatment_id,
+      image_url: row.image_url,
+      status: row.status,
+      created_at: row.created_at,
 
-      // Check clinic filter: Include if no clinic or clinic is active
-      if (quotation.clinic_id) {
-        if (!quotation.clinic || quotation.clinic.status !== "active") {
-          return false;
-        }
-
-        // For private quotations (has clinic_id), check if treatment is still offered by clinic
-        if (quotation.treatment_id && quotation.clinic.clinic_treatment) {
-          const clinicTreatment = quotation.clinic.clinic_treatment.find(
-            (ct) => ct.treatment_id === quotation.treatment_id
-          );
-          
-          // Exclude if treatment not found in clinic or clinic_treatment is deleted
-          if (!clinicTreatment || clinicTreatment.status !== "active") {
-            return false;
+      // Nested treatment object
+      treatment: row.treatment_id
+        ? {
+            id: row.treatment_id,
+            treatment_name: row.treatment_name,
+            image_url: row.treatment_image_url,
+            status: row.treatment_status,
           }
-        }
-      }
+        : null,
 
-      return true;
-    }) || [];
+      // Nested clinic object
+      clinic: row.clinic_id
+        ? {
+            clinic_name: row.clinic_name,
+            status: row.clinic_status,
+          }
+        : null,
 
-  const totalPages = count ? Math.ceil(count / limit) : 1;
+      // Bid array (simplified - just count for now)
+      bid: Array(Number(row.bid_count)).fill({}), // Create array with correct length
+    })) || [];
+
+  // Get total count from first row (all rows have same total_count)
+  const totalCount = data?.[0]?.total_count || 0;
+  const totalPages = Math.ceil(Number(totalCount) / limit);
 
   return {
-    data: filteredData,
-    totalItems: count,
+    data: transformedData,
+    totalItems: Number(totalCount),
     totalPages,
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,

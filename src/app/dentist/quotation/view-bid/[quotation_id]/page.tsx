@@ -195,7 +195,9 @@ async function fetchBid(
   }
   const { data, error } = await supabaseClient
     .from("bid")
-    .select("*, clinic_treatment(*, clinic(*), treatment(*)), quotation(*)")
+    .select(
+      "*, clinic_treatment!inner(*, clinic(*), treatment(*)), quotation(*)"
+    )
     .eq("quotation_id", quotationId)
     .eq("clinic_treatment.clinic_id", clinicId)
     .maybeSingle();

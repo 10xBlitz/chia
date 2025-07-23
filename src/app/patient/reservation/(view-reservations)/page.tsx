@@ -45,6 +45,7 @@ export default function ReservationListPage() {
       ...reservation,
       // Add required fields that might be missing
       clinic_treatment_id: "",
+      date_reserved: reservation.reservation_date || new Date().toISOString(),
       consultation_type: reservation.consultation_type || "general",
       contact_number: user?.contact_number || "",
       dentist_id: "",

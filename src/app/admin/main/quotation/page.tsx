@@ -29,6 +29,8 @@ export default function QuotationPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  console.log("---->data: ", data);
+
   // Provide fallback paginatedData for loading state
   const paginatedData = data || {
     data: [],
