@@ -114,22 +114,17 @@ export default function DentistSignupPage() {
       : dentistStep3Schema;
 
   useEffect(() => {
-    let stepIsValid = true;
-
     const validate = async () => {
       const result = currentSchema.safeParse(watchedValues);
-      stepIsValid = result.success;
-    };
+      let stepIsValid = result.success;
 
-    if (currentStep === 1) {
-      if (watchedValues.password !== watchedValues.confirmPassword) {
-        stepIsValid = false;
-      } else {
-        stepIsValid = true;
+      // Additional validation for step 1 - password confirmation
+      if (currentStep === 1 && stepIsValid) {
+        stepIsValid = watchedValues.password === watchedValues.confirmPassword;
       }
-    }
 
-    setIsStepValid(stepIsValid);
+      setIsStepValid(stepIsValid);
+    };
 
     validate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
