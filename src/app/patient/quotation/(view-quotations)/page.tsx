@@ -37,6 +37,8 @@ export default function ViewQuotationPage() {
   // Flatten all loaded quotations with safety check
   const allQuotations = data?.pages?.flatMap((page) => page?.data || []) || [];
 
+  console.log("---->all quotations: ", allQuotations);
+
   const handleQuotationClick = (
     quotation_id: string,
     quotation_details: string,
@@ -140,7 +142,7 @@ function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
   } · 공개견적`;
 
   const handleClick = () => {
-    onClick(q.id, detail, q.clinic_id, q.bid?.[0]?.id ?? null);
+    onClick(q.id, detail, q.clinic_id, q.bid[0]?.id ?? null);
   };
 
   return (

@@ -44,10 +44,7 @@ RETURNS TABLE (
   
   -- Bid fields
   bid_id UUID,
-  bid_price INTEGER,
-  bid_notes TEXT,
-  bid_created_at TIMESTAMPTZ,
-  bid_clinic_treatment_id UUID,
+
   
   -- Total count for pagination
   total_count BIGINT

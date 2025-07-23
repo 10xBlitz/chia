@@ -818,6 +818,7 @@ export type Database = {
           clinic_name: string
           clinic_status: string
           bid_count: number
+          bid_id: string
           total_count: number
         }[]
       }

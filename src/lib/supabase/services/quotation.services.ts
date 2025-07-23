@@ -130,7 +130,7 @@ export async function getPaginatedQuotations(
     sort_direction: sortDirection,
   });
 
-  console.log("----quotations from RPC: ", data);
+  console.log("---->data from rpc: ", data);
 
   if (error) throw error;
 
@@ -170,12 +170,14 @@ export async function getPaginatedQuotations(
         : null,
 
       // Bid array (simplified - just count for now)
-      bid: Array(Number(row.bid_count)).fill({}), // Create array with correct length
+      bid: Array(Number(row.bid_count)).fill({ id: row.bid_id }), // Create array with correct length
     })) || [];
 
   // Get total count from first row (all rows have same total_count)
   const totalCount = data?.[0]?.total_count || 0;
   const totalPages = Math.ceil(Number(totalCount) / limit);
+
+  console.log("---->transformed data: ", transformedData);
 
   return {
     data: transformedData,
