@@ -149,6 +149,7 @@ export type Database = {
           id: string
           introduction: string | null
           link: string | null
+          note: string | null
           notification_recipient_user_id: string | null
           opening_date: string
           pictures: string[] | null
@@ -165,6 +166,7 @@ export type Database = {
           id?: string
           introduction?: string | null
           link?: string | null
+          note?: string | null
           notification_recipient_user_id?: string | null
           opening_date: string
           pictures?: string[] | null
@@ -181,6 +183,7 @@ export type Database = {
           id?: string
           introduction?: string | null
           link?: string | null
+          note?: string | null
           notification_recipient_user_id?: string | null
           opening_date?: string
           pictures?: string[] | null

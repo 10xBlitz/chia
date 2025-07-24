@@ -43,6 +43,10 @@ export const formSchema = z.object({
     .string()
     .max(500, "소개글은 500자 이내여야 합니다.") // Introduction must be 500 characters or less.
     .optional(),
+  note: z
+    .string()
+    .max(500, "비고는 500자 이내여야 합니다.") // Note must be 500 characters or less.
+    .optional(),
   contact_number: z
     .string()
     .min(1, "연락처를 입력하세요.") // Please enter the contact number.

@@ -18,6 +18,7 @@ export interface ClinicCardProps {
   avg_reviews_per_treatment: number;
   clinic_name: string;
   introduction: string | null;
+  note: string | null;
   contact_number: string;
   created_at: string;
   id: string;
@@ -45,11 +46,9 @@ export default function ClinicCard(props: ClinicCardProps) {
   useEffect(() => {
     const checkFavorite = async () => {
       if (!user?.id && !user?.work_place) return;
-      const { isFavorite, favoriteId } = await checkIfClinicIsFavorite(
-        user.id as string,
-        props.id
-      );
-      setIsFavorite(isFavorite);
+      const { isFavorite: favorite, favoriteId } =
+        await checkIfClinicIsFavorite(user.id as string, props.id);
+      setIsFavorite(favorite);
       setFavoriteId(favoriteId);
     };
     checkFavorite();

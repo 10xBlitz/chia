@@ -193,6 +193,7 @@ export async function updateClinic(
       opening_date: values.opening_date,
       link: values.link,
       introduction: values.introduction || null,
+      note: values.note || null,
       pictures,
     })
     .eq("id", clinicId);
@@ -215,6 +216,7 @@ export async function insertClinic(
       opening_date: values.opening_date,
       link: values.link,
       introduction: values.introduction || null,
+      note: values.note || null,
       pictures,
     })
     .select("id")

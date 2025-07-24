@@ -91,6 +91,7 @@ export const ClinicModal = ({
       ? {
           clinic_name: data.clinic_name,
           introduction: data.introduction || "",
+          note: data.note || "",
           contact_number: data.contact_number,
           full_address: data.full_address,
           detail_address: data.detail_address || "",
@@ -154,6 +155,7 @@ export const ClinicModal = ({
       : {
           clinic_name: "",
           introduction: "",
+          note: "",
           contact_number: "",
           link: "",
           region: "",
@@ -279,6 +281,16 @@ export const ClinicModal = ({
                   name="introduction"
                   label="병원 소개" // Clinic Introduction
                   placeholder="병원을 소개하는 글을 작성해주세요..." // Write an introduction about your clinic...
+                  maxLength={500}
+                  formLabelClassName={formLabelClassName}
+                  inputClassName="h-[100px]"
+                />
+
+                <FormTextarea
+                  control={form.control}
+                  name="note"
+                  label="비고" // Note
+                  placeholder="병원에 대한 추가 정보를 입력하세요..." // Enter additional information about the clinic...
                   maxLength={500}
                   formLabelClassName={formLabelClassName}
                   inputClassName="h-[100px]"
@@ -934,6 +946,7 @@ async function updateClinicWithImages(
     ...values,
     link: values.link || "",
     introduction: values.introduction || null,
+    note: values.note || null,
     pictures: clinicPictures,
     detail_address: values.detail_address || null,
     region: values.region || "",

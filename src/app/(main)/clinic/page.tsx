@@ -506,6 +506,18 @@ export default function ClinicSingleViewPage() {
                 })}
               </div>
             </div>
+
+            {/* 비고 (Note) */}
+            {clinic.note && (
+              <div className="mt-6">
+                <div className="font-semibold mb-2 text-xl">비고</div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {clinic.note}
+                  </p>
+                </div>
+              </div>
+            )}
             {/* 위치 (Location) */}
             <div className="mt-6">
               <div className="font-semibold mb-2 text-xl">
