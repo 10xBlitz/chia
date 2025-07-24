@@ -134,44 +134,75 @@ export async function getPaginatedQuotations(
 
   if (error) throw error;
 
-  // Transform the flat RPC result into the expected nested structure
-  const transformedData =
-    data?.map((row) => ({
-      id: row.id,
-      region: row.region,
-      name: row.name,
-      gender: row.gender,
-      birthdate: row.birthdate,
-      residence: row.residence,
-      concern: row.concern,
-      patient_id: row.patient_id,
-      clinic_id: row.clinic_id,
-      treatment_id: row.treatment_id,
-      image_url: row.image_url,
-      status: row.status,
-      created_at: row.created_at,
+  // Transform the flat RPC result into grouped quotations with bid arrays
+  const quotationMap = new Map();
+  
+  data?.forEach((row) => {
+    const quotationId = row.id;
+    
+    // If quotation doesn't exist in map, create it
+    if (!quotationMap.has(quotationId)) {
+      quotationMap.set(quotationId, {
+        id: row.id,
+        region: row.region,
+        name: row.name,
+        gender: row.gender,
+        birthdate: row.birthdate,
+        residence: row.residence,
+        concern: row.concern,
+        patient_id: row.patient_id,
+        clinic_id: row.clinic_id,
+        treatment_id: row.treatment_id,
+        image_url: row.image_url,
+        status: row.status,
+        created_at: row.created_at,
 
-      // Nested treatment object
-      treatment: row.treatment_id
-        ? {
-            id: row.treatment_id,
-            treatment_name: row.treatment_name,
-            image_url: row.treatment_image_url,
-            status: row.treatment_status,
-          }
-        : null,
+        // Nested treatment object
+        treatment: row.treatment_id
+          ? {
+              id: row.treatment_id,
+              treatment_name: row.treatment_name,
+              image_url: row.treatment_image_url,
+              status: row.treatment_status,
+            }
+          : null,
 
-      // Nested clinic object
-      clinic: row.clinic_id
-        ? {
-            clinic_name: row.clinic_name,
-            status: row.clinic_status,
-          }
-        : null,
+        // Nested clinic object
+        clinic: row.clinic_id
+          ? {
+              clinic_name: row.clinic_name,
+              status: row.clinic_status,
+            }
+          : null,
 
-      // Bid array (simplified - just count for now)
-      bid: Array(Number(row.bid_count)).fill({ id: row.bid_id }), // Create array with correct length
-    })) || [];
+        // Initialize bid array
+        bid: [],
+      });
+    }
+
+    // Add bid to the quotation if bid exists
+    if (row.bid_id) {
+      const quotation = quotationMap.get(quotationId);
+      // Check if this bid is already added to avoid duplicates
+      const bidExists = quotation.bid.some((bid: { id: string }) => bid.id === row.bid_id);
+      
+      if (!bidExists) {
+        quotation.bid.push({
+          id: row.bid_id,
+          expected_price_min: row.bid_expected_price_min,
+          expected_price_max: row.bid_expected_price_max,
+          additional_explanation: row.bid_additional_explanation,
+          recommend_quick_visit: row.bid_recommend_quick_visit,
+          status: row.bid_status,
+          created_at: row.bid_created_at,
+          clinic_treatment_id: row.bid_clinic_treatment_id,
+        });
+      }
+    }
+  });
+
+  // Convert map to array
+  const transformedData = Array.from(quotationMap.values());
 
   // Get total count from first row (all rows have same total_count)
   const totalCount = data?.[0]?.total_count || 0;

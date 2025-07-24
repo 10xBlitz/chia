@@ -460,7 +460,6 @@ export default function ClinicSingleViewPage() {
                           weekdayLunchBreak.time_open_from &&
                           weekdayLunchBreak.time_open_to && (
                             <div className="text-sm text-gray-800 font-medium">
-                              (주중){" "}
                               {toKoreanTime(weekdayLunchBreak.time_open_from)} -{" "}
                               {toKoreanTime(weekdayLunchBreak.time_open_to)}
                             </div>

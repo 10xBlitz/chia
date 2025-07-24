@@ -44,7 +44,13 @@ RETURNS TABLE (
   
   -- Bid fields
   bid_id UUID,
-
+  bid_expected_price_min DOUBLE PRECISION,
+  bid_expected_price_max DOUBLE PRECISION,
+  bid_additional_explanation TEXT,
+  bid_recommend_quick_visit BOOLEAN,
+  bid_status TEXT,
+  bid_created_at TIMESTAMPTZ,
+  bid_clinic_treatment_id UUID,
   
   -- Total count for pagination
   total_count BIGINT
@@ -83,8 +89,11 @@ BEGIN
     
     -- Bid fields
     b.id as bid_id,
-    b.price as bid_price,
-    b.notes as bid_notes,
+    b.expected_price_min as bid_expected_price_min,
+    b.expected_price_max as bid_expected_price_max,
+    b.additional_explanation as bid_additional_explanation,
+    b.recommend_quick_visit as bid_recommend_quick_visit,
+    b.status::text as bid_status,
     b.created_at as bid_created_at,
     b.clinic_treatment_id as bid_clinic_treatment_id,
     

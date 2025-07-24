@@ -819,6 +819,13 @@ export type Database = {
           clinic_status: string
           bid_count: number
           bid_id: string
+          bid_expected_price_min: number
+          bid_expected_price_max: number
+          bid_additional_explanation: string
+          bid_recommend_quick_visit: boolean
+          bid_status: string
+          bid_created_at: string
+          bid_clinic_treatment_id: string
           total_count: number
         }[]
       }

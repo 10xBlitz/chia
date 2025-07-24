@@ -26,7 +26,7 @@ export default function CheckoutPage() {
     searchParams.get("treatmentOriginalPrice") || "";
   const [amount] = useState({
     currency: "KRW",
-    value: amountParams, // 기본 금액 50원
+    value: amountParams ? amountParams : 50, // This is only sample amount
   });
   const [ready, setReady] = useState(false);
   const [widgets, setWidgets] = useState<TossPaymentsWidgets>();
