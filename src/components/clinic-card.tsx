@@ -9,7 +9,6 @@ import {
 import { cn } from "@/lib/utils";
 import { supabaseClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import BookmarkButton from "./bookmark";
 import { Enums } from "@/lib/supabase/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -83,15 +82,9 @@ export default function ClinicCard(props: ClinicCardProps) {
 
     const isLoggedIn = user?.id && user?.role && user.work_place;
 
-    const { error } = await supabaseClient
+    supabaseClient
       .from("clinic_view")
       .insert({ clinic_id: props.id, patient_id: isLoggedIn ? user.id : null });
-
-    if (error) {
-      console.error("Error logging clinic view:", error);
-      toast.error("병원 조회에 실패했습니다."); // Failed to log hospital view
-      return;
-    }
 
     router.push(`/clinic?clinic_id=${props.id}`);
   };
