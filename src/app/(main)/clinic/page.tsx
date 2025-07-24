@@ -469,7 +469,6 @@ export default function ClinicSingleViewPage() {
                           weekendLunchBreak.time_open_from &&
                           weekendLunchBreak.time_open_to && (
                             <div className="text-sm text-gray-800 font-medium">
-                              (주말){" "}
                               {toKoreanTime(weekendLunchBreak.time_open_from)} -{" "}
                               {toKoreanTime(weekendLunchBreak.time_open_to)}
                             </div>
@@ -504,20 +503,15 @@ export default function ClinicSingleViewPage() {
                     </div>
                   );
                 })}
+                {clinic.note && (
+                  <div className="mb-4 last:mb-0">
+                    <div className="font-medium">비고</div>
+                    <div className="text-base">{clinic.note}</div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* 비고 (Note) */}
-            {clinic.note && (
-              <div className="mt-6">
-                <div className="font-semibold mb-2 text-xl">비고</div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {clinic.note}
-                  </p>
-                </div>
-              </div>
-            )}
             {/* 위치 (Location) */}
             <div className="mt-6">
               <div className="font-semibold mb-2 text-xl">
