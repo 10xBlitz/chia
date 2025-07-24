@@ -45,7 +45,7 @@ export default function EditQuotationPage() {
   // Treatments fetch (unified logic)
   const clinic_id = quotation?.clinic_id;
   const { data: treatments = [] } = useQuery({
-    queryKey: ["clinic-treatments", clinic_id],
+    queryKey: ["clinic-treatments-or-treatments", clinic_id],
     queryFn: async () => {
       if (clinic_id) {
         // fetch treatments for specific clinic (private quotation)
@@ -55,6 +55,7 @@ export default function EditQuotationPage() {
           treatment_name: t.treatment?.treatment_name,
           image_url: t.treatment?.image_url,
         }));
+
         return formattedTreatments || [];
       } else {
         // fetch all treatments (public quotation)

@@ -60,7 +60,7 @@ export default function CreateReviewPage() {
     queryFn: async () => {
       if (!clinic_id) return [];
       const res = await getPaginatedClinicTreatments(clinic_id, 1, 100);
-      return res.data || [];
+      return res.data;
     },
     enabled: !!clinic_id,
   });

@@ -70,31 +70,33 @@ const reservationSchema = z.object({
 type ReservationFormValues = z.infer<typeof reservationSchema>;
 
 export default function CreateReservation() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const user = useUserStore((state) => state.user);
+  const searchParams = useSearchParams();
   const clinic_id = searchParams.get("clinic_id");
+  const user = useUserStore((state) => state.user);
+
+  // State for treatment search
+  const [treatmentSearchTerm, setTreatmentSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(treatmentSearchTerm, 300);
 
   if (!clinic_id) {
     toast.error("클리닉 ID가 없습니다. 다시 시도해주세요."); // No clinic ID. Please try again.
     router.push("/patient/home");
   }
 
-  // State for treatment search
-  const [treatmentSearchTerm, setTreatmentSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(treatmentSearchTerm, 300);
-
   // Query for treatments with search functionality
   const { data: treatments, isLoading } = useQuery({
     queryKey: ["clinic-treatments", clinic_id, debouncedSearchTerm],
-    queryFn: async () =>
-      await getPaginatedClinicTreatments(
+    queryFn: async () => {
+      const response = await getPaginatedClinicTreatments(
         clinic_id as string,
         1,
         50,
         debouncedSearchTerm ? { treatment_name: debouncedSearchTerm } : {}
-      ),
+      );
+      return response.data;
+    },
     enabled: !!clinic_id,
   });
 
@@ -311,7 +313,7 @@ export default function CreateReservation() {
                     onOpenChange={(open) => {
                       if (open && field.value) {
                         // When opening, show the selected treatment name in search
-                        const selectedTreatment = treatments?.data?.find(
+                        const selectedTreatment = treatments?.find(
                           (treatment) => treatment.id === field.value
                         );
                         if (selectedTreatment) {
@@ -336,8 +338,8 @@ export default function CreateReservation() {
                           )}
                         >
                           {field.value
-                            ? treatments?.data &&
-                              treatments.data.find(
+                            ? treatments &&
+                              treatments.find(
                                 (treatment) => treatment.id === field.value
                               )?.treatment?.treatment_name
                             : "관심 시술을 선택하세요"}{" "}
@@ -364,9 +366,9 @@ export default function CreateReservation() {
                           </CommandEmpty>
                           <CommandGroup>
                             {!isLoading &&
-                              treatments?.data &&
-                              treatments.data.length > 0 &&
-                              treatments.data.map((treatment) => (
+                              treatments &&
+                              treatments.length > 0 &&
+                              treatments.map((treatment) => (
                                 <CommandItem
                                   value={treatment?.treatment?.treatment_name}
                                   key={treatment.id}
