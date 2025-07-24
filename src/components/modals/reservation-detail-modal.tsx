@@ -75,7 +75,7 @@ export function ReservationDetailModal({
 
           <div>
             <p className="text-sm font-medium text-gray-500">연락처</p>
-            <p className="text-base">{reservation.user.contact_number}</p>
+            <p className="text-base">{reservation.contact_number}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

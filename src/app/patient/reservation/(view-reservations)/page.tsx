@@ -19,6 +19,7 @@ interface ReservationWithDetails {
   id: string;
   reservation_date: string;
   reservation_time: string;
+  contact_number: string;
   status: string;
   consultation_type?: string;
   clinic_treatment?: {
@@ -47,7 +48,7 @@ export default function ReservationListPage() {
       clinic_treatment_id: "",
       date_reserved: reservation.reservation_date || new Date().toISOString(),
       consultation_type: reservation.consultation_type || "general",
-      contact_number: user?.contact_number || "",
+      contact_number: reservation.contact_number || user?.contact_number || "",
       dentist_id: "",
       patient_id: userId || "",
       notes: "",
