@@ -87,7 +87,7 @@ export default function MainBannerCarousel() {
               onPointerUp={() => {
                 setPointerDown(false);
                 if (!dragged && banner.clinic_id) {
-                  router.push(`/clinic/${banner.clinic_id}`);
+                  router.push(`/clinic?clinic_id=${banner.clinic_id}`);
                 }
                 setDragged(false);
                 pointerStart.current = null;
@@ -108,7 +108,10 @@ export default function MainBannerCarousel() {
                   priority={index === 0}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    if (target.src !== window.location.origin + "/images/fallback-image.png") {
+                    if (
+                      target.src !==
+                      window.location.origin + "/images/fallback-image.png"
+                    ) {
                       target.src = "/images/fallback-image.png";
                     }
                   }}

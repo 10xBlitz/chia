@@ -93,7 +93,7 @@ export default function ClinicCard(props: ClinicCardProps) {
       return;
     }
 
-    router.push(`/clinic/${props.id}`);
+    router.push(`/clinic?clinic_id=${props.id}`);
   };
 
   const avgReviews = props.avg_reviews_per_treatment
