@@ -8,25 +8,48 @@ import { CellAction } from "./cell-actions";
 import { Tables } from "@/lib/supabase/types";
 import { calculateAge } from "@/lib/utils";
 
-export type QuotationTable = {
-  id: string;
-  name: string;
-  gender: string;
-  birthdate: string;
-  region: string;
-  residence: string;
-  concern: string | null;
-  treatment_id: string | null;
-  clinic_id: string | null;
-  created_at: string;
-  status: string;
-  bid: Tables<"bid">[] | null;
-  treatment?: {
+// export type QuotationTable = {
+//   id: string;
+//   name: string;
+//   gender: string;
+//   birthdate: string;
+//   region: string;
+//   residence: string;
+//   concern: string | null;
+//   treatment_id: string | null;
+//   clinic_id: string | null;
+//   created_at: string;
+//   status: string;
+//   bid: Tables<"bid">[] | null;
+//   treatment?: {
+//     treatment_name: string;
+//   } | null;
+//   clinic?: {
+//     clinic_name: string;
+//   } | null;
+// };
+
+export type QuotationTable = Tables<"quotation"> & {
+  treatment: {
+    id: string;
     treatment_name: string;
+    image_url: string | null;
+    status: string;
   } | null;
-  clinic?: {
+  clinic: {
     clinic_name: string;
+    status: string;
   } | null;
+  bid: {
+    id: string;
+    expected_price_min: number;
+    expected_price_max: number;
+    additional_explanation: string | null;
+    recommend_quick_visit: boolean;
+    status: "active" | "deleted";
+    created_at: string;
+    clinic_treatment_id: string;
+  }[];
 };
 
 export const columns: ColumnDef<QuotationTable>[] = [

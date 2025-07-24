@@ -32,7 +32,6 @@ export default function ViewQuotationPage() {
     queryFn: ({ pageParam = 1 }) =>
       getDentistQuotations(
         user?.clinic_id as string,
-        user?.clinic?.region as string,
         treatments?.map((t) => t.treatment_id) ?? [],
         pageParam,
         ITEMS_PER_PAGE

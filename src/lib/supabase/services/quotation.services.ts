@@ -24,7 +24,7 @@ type QuotationWithRelations = Tables<"quotation"> & {
     expected_price_max: number;
     additional_explanation: string | null;
     recommend_quick_visit: boolean;
-    status: string;
+    status: "active" | "deleted";
     created_at: string;
     clinic_treatment_id: string;
   }[];
@@ -215,11 +215,12 @@ export async function getPaginatedQuotations(
       if (!bidExists) {
         quotation.bid.push({
           id: row.bid_id,
+          quotation_id: quotationId,
           expected_price_min: row.bid_expected_price_min,
           expected_price_max: row.bid_expected_price_max,
           additional_explanation: row.bid_additional_explanation,
           recommend_quick_visit: row.bid_recommend_quick_visit,
-          status: row.bid_status,
+          status: row.bid_status as "active" | "deleted",
           created_at: row.bid_created_at,
           clinic_treatment_id: row.bid_clinic_treatment_id,
         });
@@ -240,7 +241,7 @@ export async function getPaginatedQuotations(
 
   return {
     data: transformedData,
-    totalItems: Number(totalCount),
+    totalItems: Number(totalCount) || null,
     totalPages,
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
@@ -390,7 +391,6 @@ export async function updateQuotation({
 // Get paginated quotations for dentists using RPC function
 export async function getDentistQuotations(
   clinicId: string,
-  region: string,
   clinicTreatments: string[],
   page = 1,
   limit = 10,
@@ -473,11 +473,12 @@ export async function getDentistQuotations(
       if (!bidExists) {
         quotation.bid.push({
           id: row.bid_id,
+          quotation_id: quotationId,
           expected_price_min: row.bid_expected_price_min,
           expected_price_max: row.bid_expected_price_max,
           additional_explanation: row.bid_additional_explanation,
           recommend_quick_visit: row.bid_recommend_quick_visit,
-          status: row.bid_status,
+          status: row.bid_status as "active" | "deleted",
           created_at: row.bid_created_at,
           clinic_treatment_id: row.bid_clinic_treatment_id,
         });
@@ -497,7 +498,7 @@ export async function getDentistQuotations(
 
   return {
     data: transformedData,
-    totalItems: Number(totalCount),
+    totalItems: Number(totalCount) || null,
     totalPages,
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
