@@ -7,6 +7,7 @@ import { EditIcon } from "lucide-react";
 import { useUserStore } from "@/providers/user-store-provider";
 import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
 import { QuotationListItemSkeleton } from "@/components/loading-skeletons/quotation-skeleton";
+import MainHeader from "@/components/main-header";
 
 // Constants
 const PAGE_SIZE = 10; // Number of quotations per page
@@ -60,10 +61,8 @@ export default function ViewQuotationPage() {
 
   return (
     <>
-      <h2 className="font-bold text-xl mb-6">견적 {/* Estimates */}</h2>
-      <h2 className="font-bold text-xl mb-4">
-        견적 목록 {/* List of Quotes */}
-      </h2>
+      <MainHeader title="견적" description="견적 목록" />
+
       {isLoading &&
         Array.from({ length: 3 }).map((_, i) => (
           <QuotationListItemSkeleton key={i} />

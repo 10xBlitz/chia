@@ -24,7 +24,6 @@ interface ReservationWithUser extends Tables<"reservation"> {
       treatment_name?: string;
     };
   };
-  notes?: string;
 }
 
 interface ReservationDetailModalProps {
@@ -130,13 +129,6 @@ export function ReservationDetailModal({
               </span>
             </p>
           </div>
-
-          {reservation.notes && (
-            <div>
-              <p className="text-sm font-medium text-gray-500">메모</p>
-              <p className="text-base">{reservation.notes}</p>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end gap-2">

@@ -1,18 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReservationListSkeleton } from "@/components/loading-skeletons/reservation-skeleton";
 import HeaderWithBackButton from "@/components/header-with-back-button";
-import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
 import { ReservationDetailModal } from "@/components/modals/reservation-detail-modal";
 import { useState } from "react";
-
-// Constants
-const PAGE_SIZE = 10; // Number of reservations per page
+import { UserState } from "@/stores/user-store";
+import { useReservationsInfiniteQuery } from "./queries";
+import MainHeader from "@/components/main-header";
 
 // Reservation type for the modal
 interface ReservationWithDetails {
@@ -34,64 +32,31 @@ interface ReservationWithDetails {
 }
 
 export default function ReservationListPage() {
-  const userId = useUserStore((selector) => selector.user?.id);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useUserStore((selector) => selector.user);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] =
     useState<ReservationWithDetails | null>(null);
 
-  // Convert patient reservation to the format expected by the modal
-  const convertReservationForModal = (reservation: ReservationWithDetails) => {
-    return {
-      ...reservation,
-      // Add required fields that might be missing
-      clinic_treatment_id: "",
-      date_reserved: reservation.reservation_date || new Date().toISOString(),
-      consultation_type: reservation.consultation_type || "general",
-      contact_number: reservation.contact_number || user?.contact_number || "",
-      dentist_id: "",
-      patient_id: userId || "",
-      notes: "",
-      status: reservation.status as "pending" | "accepted" | "rejected",
-      user: {
-        full_name: user?.full_name || "",
-        contact_number: user?.contact_number || "",
-        birthdate: user?.birthdate || new Date().toISOString(),
-      },
-    };
-  };
-
-  // Infinite Query for reservations
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["reservations", userId, PAGE_SIZE],
-      queryFn: async ({ pageParam = 1 }) =>
-        getPaginatedReservations(pageParam, PAGE_SIZE, { patient_id: userId }),
-      getNextPageParam: (lastPage, allPages) =>
-        lastPage?.data?.length === PAGE_SIZE ? allPages.length + 1 : undefined,
-      enabled: !!userId,
-      initialPageParam: 1,
-    });
-
-  // Flatten all loaded reservations
-  const allReservations = data?.pages.flatMap((page) => page.data) || [];
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  //this is used to conditionally show the bottom nav
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
+
+  // Infinite Query for reservations
+  const {
+    allReservations,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useReservationsInfiniteQuery(user?.id);
 
   return (
     <>
       {accessedFromProfile ? (
         <HeaderWithBackButton title="예약 목록" />
       ) : (
-        <>
-          <h2 className="font-bold text-xl mb-6">전세 {/* Reservations */}</h2>
-          <h2 className="font-bold text-xl mb-4">
-            예약 목록 {/* List of Reservations */}
-          </h2>
-        </>
+        <MainHeader title="전세" description="예약 목록" />
       )}
       {isLoading && <ReservationListSkeleton />}
 
@@ -110,7 +75,6 @@ export default function ReservationListPage() {
               style={{ minHeight: 48 }}
               onClick={() => {
                 setSelectedReservation(r);
-                setDetailModalOpen(true);
               }}
             >
               <span className="font-bold text-black text-left whitespace-nowrap mr-4 min-w-[48px]">
@@ -174,20 +138,41 @@ export default function ReservationListPage() {
 
       {/* Reservation Detail Modal */}
       <ReservationDetailModal
-        open={detailModalOpen}
+        open={!!selectedReservation}
         onClose={() => {
-          setDetailModalOpen(false);
           setSelectedReservation(null);
         }}
         reservation={
           selectedReservation
-            ? convertReservationForModal(selectedReservation)
+            ? convertReservationForModal(selectedReservation, user)
             : null
         }
-        // No onConfirm prop - patients shouldn't confirm reservations
       />
 
       {!accessedFromProfile && <BottomNavigation />}
     </>
   );
 }
+
+// Convert patient reservation to the format expected by the modal
+const convertReservationForModal = (
+  reservation: ReservationWithDetails,
+  user: UserState["user"]
+) => {
+  return {
+    ...reservation,
+    // Add required fields that might be missing
+    clinic_treatment_id: "",
+    date_reserved: reservation.reservation_date || new Date().toISOString(),
+    consultation_type: reservation.consultation_type || "general",
+    contact_number: reservation.contact_number || user?.contact_number || "",
+    dentist_id: "",
+    patient_id: user?.id || "",
+    status: reservation.status as "pending" | "accepted" | "rejected",
+    user: {
+      full_name: user?.full_name || "",
+      contact_number: user?.contact_number || "",
+      birthdate: user?.birthdate || new Date().toISOString(),
+    },
+  };
+};
