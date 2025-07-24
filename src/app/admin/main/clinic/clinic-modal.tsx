@@ -287,8 +287,8 @@ export const ClinicModal = ({
                 <FormInput
                   control={form.control}
                   name="link"
-                  label="병원 링크" // Hospital Link
-                  placeholder="여기에 병원 링크를 입력하세요." // Enter hospital link here
+                  label="유튜브" // YouTube
+                  placeholder="여기에 유튜브 링크를 입력하세요." // Enter YouTube link here
                   formLabelClassName={formLabelClassName}
                   inputClassName={inputClassName}
                 />
