@@ -132,7 +132,7 @@ BEGIN
     -- Include if: no clinic OR clinic exists and is active
     AND (q.clinic_id IS NULL OR (c.id IS NOT NULL AND c.status::text = 'active'))
     
-    -- 3. For private quotations (has clinic_id), check if treatment is still offered by clinic
+    -- 3. For quotations with both clinic and treatment, verify clinic still offers that treatment
     -- Include if: public quotation OR no treatment OR clinic still offers the treatment
     AND (
       q.clinic_id IS NULL OR 
@@ -140,21 +140,30 @@ BEGIN
       (ct.treatment_id IS NOT NULL AND ct.status::text = 'active')
     )
     
+    -- 4. Exclude quotations that have bids with deleted clinic_treatments or treatments
+    AND NOT EXISTS (
+      SELECT 1 FROM bid bid_check
+      LEFT JOIN clinic_treatment ct_check ON bid_check.clinic_treatment_id = ct_check.id
+      LEFT JOIN treatment t_check ON ct_check.treatment_id = t_check.id
+      WHERE bid_check.quotation_id = q.id
+      AND (ct_check.status != 'active' OR t_check.status != 'active')
+    )
+    
     -- User-provided filters
     
-    -- 4. Name filter (case-insensitive partial match)
+    -- 5. Name filter (case-insensitive partial match)
     AND (filter_name IS NULL OR q.name ILIKE '%' || filter_name || '%')
     
-    -- 5. Status filter (exact match)
+    -- 6. Status filter (exact match)
     AND (filter_status IS NULL OR q.status::text = filter_status)
     
-    -- 6. Region filter (case-insensitive partial match)
+    -- 7. Region filter (case-insensitive partial match)
     AND (filter_region IS NULL OR q.region ILIKE '%' || filter_region || '%')
     
-    -- 7. Patient ID filter (exact match)
+    -- 8. Patient ID filter (exact match)
     AND (filter_patient_id IS NULL OR q.patient_id = filter_patient_id)
     
-    -- 8. Date range filters
+    -- 9. Date range filters
     AND (filter_date_from IS NULL OR q.created_at >= filter_date_from)
     AND (filter_date_to IS NULL OR q.created_at <= filter_date_to)
     

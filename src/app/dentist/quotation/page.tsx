@@ -1,11 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { supabaseClient } from "@/lib/supabase/client";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/providers/user-store-provider";
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import { fetchClinicTreatments } from "@/lib/supabase/services/clinic-treatments.service";
+import { getDentistQuotations } from "@/lib/supabase/services/quotation.services";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function ViewQuotationPage() {
   const router = useRouter();
@@ -28,15 +30,15 @@ export default function ViewQuotationPage() {
   } = useInfiniteQuery({
     queryKey: ["quotations", user?.clinic_id, user?.clinic?.region, treatments],
     queryFn: ({ pageParam = 1 }) =>
-      fetchQuotations(
-        user?.clinic_id,
-        user?.clinic?.region,
-        treatments?.map((t) => t.treatment_id),
-        pageParam
+      getDentistQuotations(
+        user?.clinic_id as string,
+        user?.clinic?.region as string,
+        treatments?.map((t) => t.treatment_id) ?? [],
+        pageParam,
+        ITEMS_PER_PAGE
       ),
     getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < ITEMS_PER_PAGE) return undefined; // No more pages if less than page size
-      return allPages.length + 1;
+      return lastPage.hasNextPage ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
     enabled:
@@ -46,8 +48,8 @@ export default function ViewQuotationPage() {
       treatments.length > 0,
   });
 
-  // Flatten the infinite query data
-  const quotations = quotationsData?.pages.flat() || [];
+  // Extract quotation data from paginated response
+  const quotations = quotationsData?.pages.flatMap((page) => page.data) || [];
 
   return (
     <>
@@ -134,89 +136,88 @@ export default function ViewQuotationPage() {
 }
 
 // Configuration for pagination
-const ITEMS_PER_PAGE = 10;
 
-// Helper to fetch quotations for the current clinic, region, or clinic's treatments
-async function fetchQuotations(
-  clinic_id: string | null | undefined,
-  region: string | null | undefined,
-  treatments?: string[],
-  page: number = 1
-) {
-  if (!clinic_id || !region || treatments?.length === 0 || !treatments)
-    return [];
+// // Helper to fetch quotations for the current clinic, region, or clinic's treatments
+// async function fetchQuotations(
+//   clinic_id: string | null | undefined,
+//   region: string | null | undefined,
+//   treatments?: string[],
+//   page: number = 1
+// ) {
+//   if (!clinic_id || !region || treatments?.length === 0 || !treatments)
+//     return [];
 
-  const startIndex = (page - 1) * ITEMS_PER_PAGE;
-  const endIndex = page * ITEMS_PER_PAGE - 1;
+//   const startIndex = (page - 1) * ITEMS_PER_PAGE;
+//   const endIndex = page * ITEMS_PER_PAGE - 1;
 
-  let query = supabaseClient
-    .from("quotation")
-    .select(
-      `*, treatment(*), bid(*, clinic_treatment!inner(clinic_id, treatment(status))), clinic(status)`
-    )
-    .eq("bid.clinic_treatment.clinic_id", clinic_id)
-    .order("created_at", { ascending: false })
-    .eq("status", "active")
-    .range(startIndex, endIndex);
+//   let query = supabaseClient
+//     .from("quotation")
+//     .select(
+//       `*, treatment(*), bid(*, clinic_treatment!inner(clinic_id, treatment(status))), clinic(status)`
+//     )
+//     .eq("bid.clinic_treatment.clinic_id", clinic_id)
+//     .order("created_at", { ascending: false })
+//     .eq("status", "active")
+//     .range(startIndex, endIndex);
 
-  // Properly quote region if it contains a comma
-  // const quotedRegion = region.includes(",") ? `"${region}"` : region;
+//   // Properly quote region if it contains a comma
+//   // const quotedRegion = region.includes(",") ? `"${region}"` : region;
 
-  // treatment_id.in.(...) should not have quotes around each id
-  const treatmentsList = treatments.join(",");
+//   // treatment_id.in.(...) should not have quotes around each id
+//   const treatmentsList = treatments.join(",");
 
-  // This filter retrieves all quotations that are either:
-  //    Private to the clinic, OR
-  //    Public and no treatment, OR
-  //    Public with treatment and matching any of the clinic’s treatments.
-  const filter = [
-    `clinic_id.eq.${clinic_id}`,
-    `and(clinic_id.is.null,treatment_id.is.null)`,
-    `and(clinic_id.is.null,treatment_id.in.(${treatmentsList}))`,
-  ].join(",");
+//   // This filter retrieves all quotations that are either:
+//   //    Private to the clinic, OR
+//   //    Public and no treatment, OR
+//   //    Public with treatment and matching any of the clinic’s treatments.
+//   const filter = [
+//     `clinic_id.eq.${clinic_id}`,
+//     `and(clinic_id.is.null,treatment_id.is.null)`,
+//     `and(clinic_id.is.null,treatment_id.in.(${treatmentsList}))`,
+//   ].join(",");
 
-  query = query.or(filter);
+//   query = query.or(filter);
 
-  const { data, error } = await query;
+//   const { data, error } = await query;
 
-  if (error) throw new Error(error.message);
+//   if (error) throw new Error(error.message);
 
-  // Filter out quotations with deleted treatments, inactive clinics, or bids with deleted treatments (post-processing)
-  const filteredData =
-    data?.filter((quotation) => {
-      // Check treatment filter: Include if no treatment or treatment is active
-      if (quotation.treatment_id) {
-        if (!quotation.treatment || quotation.treatment.status !== "active") {
-          return false;
-        }
-      }
+//   // Filter out quotations with deleted treatments, inactive clinics, or bids with deleted treatments (post-processing)
+//   const filteredData =
+//     data?.filter((quotation) => {
+//       // Check treatment filter: Include if no treatment or treatment is active
+//       if (quotation.treatment_id) {
+//         if (!quotation.treatment || quotation.treatment.status !== "active") {
+//           return false;
+//         }
+//       }
 
-      // Check clinic filter: Include if no clinic or clinic is active
-      if (quotation.clinic_id) {
-        if (!quotation.clinic || quotation.clinic.status !== "active") {
-          return false;
-        }
-      }
+//       // Check clinic filter: Include if no clinic or clinic is active
+//       if (quotation.clinic_id) {
+//         if (!quotation.clinic || quotation.clinic.status !== "active") {
+//           return false;
+//         }
+//       }
 
-      // Check bid treatment filter: Exclude if any bid references a deleted treatment
-      if (quotation.bid && quotation.bid.length > 0) {
-        const hasDeletedBidTreatment = quotation.bid.some((bid) => {
-          if (bid.clinic_treatment) {
-            return (
-              !bid.clinic_treatment.treatment ||
-              bid.clinic_treatment.treatment.status !== "active"
-            );
-          }
-          return false;
-        });
+//       // Check bid treatment filter: Exclude if any bid references a deleted treatment
+//       if (quotation.bid && quotation.bid.length > 0) {
+//         const hasDeletedBidTreatment = quotation.bid.some((bid) => {
+//           if (bid.clinic_treatment) {
+//             return (
+//               !bid.clinic_treatment.treatment ||
+//               bid.clinic_treatment.treatment.status !== "active"
+//             );
+//           }
+//           return false;
+//         });
 
-        if (hasDeletedBidTreatment) {
-          return false;
-        }
-      }
+//         if (hasDeletedBidTreatment) {
+//           return false;
+//         }
+//       }
 
-      return true;
-    }) || [];
+//       return true;
+//     }) || [];
 
-  return filteredData;
-}
+//   return filteredData;
+// }

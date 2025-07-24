@@ -6,6 +6,30 @@ import {
 import { endOfDay, startOfDay } from "date-fns";
 import { Tables } from "../types";
 
+// Type for quotation with nested relations
+type QuotationWithRelations = Tables<"quotation"> & {
+  treatment: {
+    id: string;
+    treatment_name: string;
+    image_url: string | null;
+    status: string;
+  } | null;
+  clinic: {
+    clinic_name: string;
+    status: string;
+  } | null;
+  bid: {
+    id: string;
+    expected_price_min: number;
+    expected_price_max: number;
+    additional_explanation: string | null;
+    recommend_quick_visit: boolean;
+    status: string;
+    created_at: string;
+    clinic_treatment_id: string;
+  }[];
+};
+
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_MB = 10;
 const BUCKET_NAME = "quotation-images";
@@ -136,10 +160,10 @@ export async function getPaginatedQuotations(
 
   // Transform the flat RPC result into grouped quotations with bid arrays
   const quotationMap = new Map();
-  
+
   data?.forEach((row) => {
     const quotationId = row.id;
-    
+
     // If quotation doesn't exist in map, create it
     if (!quotationMap.has(quotationId)) {
       quotationMap.set(quotationId, {
@@ -184,8 +208,10 @@ export async function getPaginatedQuotations(
     if (row.bid_id) {
       const quotation = quotationMap.get(quotationId);
       // Check if this bid is already added to avoid duplicates
-      const bidExists = quotation.bid.some((bid: { id: string }) => bid.id === row.bid_id);
-      
+      const bidExists = quotation.bid.some(
+        (bid: { id: string }) => bid.id === row.bid_id
+      );
+
       if (!bidExists) {
         quotation.bid.push({
           id: row.bid_id,
@@ -202,7 +228,9 @@ export async function getPaginatedQuotations(
   });
 
   // Convert map to array
-  const transformedData = Array.from(quotationMap.values());
+  const transformedData: QuotationWithRelations[] = Array.from(
+    quotationMap.values()
+  );
 
   // Get total count from first row (all rows have same total_count)
   const totalCount = data?.[0]?.total_count || 0;
@@ -359,6 +387,123 @@ export async function updateQuotation({
 }
 
 // Delete a quotation and its images
+// Get paginated quotations for dentists using RPC function
+export async function getDentistQuotations(
+  clinicId: string,
+  region: string,
+  clinicTreatments: string[],
+  page = 1,
+  limit = 10,
+  sortField = "created_at",
+  sortDirection = "desc"
+) {
+  if (limit > 1000) throw Error("limit exceeds 1000");
+  if (limit < 1) throw Error("limit must be a positive number");
+
+  const offset = (page - 1) * limit;
+
+  // Call the dentist-specific RPC function
+  // This RPC handles all the complex business logic for dentist quotation filtering
+  // including region matching, clinic-specific visibility, and soft deletion handling
+  const { data, error } = await supabaseClient.rpc("get_dentist_quotations", {
+    p_clinic_id: clinicId,
+    p_clinic_treatments: clinicTreatments,
+    page_offset: offset,
+    page_limit: limit,
+    sort_field: sortField,
+    sort_direction: sortDirection,
+  });
+
+  if (error) throw error;
+
+  // Transform the flat RPC result into grouped quotations with bid arrays
+  const quotationMap = new Map();
+
+  data?.forEach((row) => {
+    const quotationId = row.id;
+
+    // If quotation doesn't exist in map, create it
+    if (!quotationMap.has(quotationId)) {
+      quotationMap.set(quotationId, {
+        id: row.id,
+        region: row.region,
+        name: row.name,
+        gender: row.gender,
+        birthdate: row.birthdate,
+        residence: row.residence,
+        concern: row.concern,
+        patient_id: row.patient_id,
+        clinic_id: row.clinic_id,
+        treatment_id: row.treatment_id,
+        image_url: row.image_url,
+        status: row.status,
+        created_at: row.created_at,
+
+        // Nested treatment object
+        treatment: row.treatment_id
+          ? {
+              id: row.treatment_id,
+              treatment_name: row.treatment_name,
+              image_url: row.treatment_image_url,
+              status: row.treatment_status,
+            }
+          : null,
+
+        // Nested clinic object
+        clinic: row.clinic_id
+          ? {
+              clinic_name: row.clinic_name,
+              status: row.clinic_status,
+            }
+          : null,
+
+        // Initialize bid array
+        bid: [],
+      });
+    }
+
+    // Add bid to the quotation if bid exists
+    if (row.bid_id) {
+      const quotation = quotationMap.get(quotationId);
+      // Check if this bid is already added to avoid duplicates
+      const bidExists = quotation.bid.some(
+        (bid: { id: string }) => bid.id === row.bid_id
+      );
+
+      if (!bidExists) {
+        quotation.bid.push({
+          id: row.bid_id,
+          expected_price_min: row.bid_expected_price_min,
+          expected_price_max: row.bid_expected_price_max,
+          additional_explanation: row.bid_additional_explanation,
+          recommend_quick_visit: row.bid_recommend_quick_visit,
+          status: row.bid_status,
+          created_at: row.bid_created_at,
+          clinic_treatment_id: row.bid_clinic_treatment_id,
+        });
+      }
+    }
+  });
+
+  // Convert map to array
+  const transformedData: QuotationWithRelations[] = Array.from(
+    quotationMap.values()
+  );
+
+  console.log("---->transformed data: ", transformedData);
+  // Get total count from first row (all rows have same total_count)
+  const totalCount = data?.[0]?.total_count || 0;
+  const totalPages = Math.ceil(Number(totalCount) / limit);
+
+  return {
+    data: transformedData,
+    totalItems: Number(totalCount),
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  };
+}
+
 export async function deleteQuotation(quotationId: string) {
   /**
    * Delete an array of image URLs from the quotation-images bucket

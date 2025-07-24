@@ -788,19 +788,84 @@ export type Database = {
           latest_message_sender_full_name: string
         }[]
       }
+      get_dentist_quotations: {
+        Args:
+          | {
+              p_clinic_id: string
+              p_clinic_treatments: string[]
+              page_offset?: number
+              page_limit?: number
+              sort_field?: string
+              sort_direction?: string
+            }
+          | {
+              p_clinic_id: string
+              p_region: string
+              p_clinic_treatments: string[]
+              page_offset?: number
+              page_limit?: number
+              sort_field?: string
+              sort_direction?: string
+            }
+        Returns: {
+          id: string
+          region: string
+          name: string
+          gender: string
+          birthdate: string
+          residence: string
+          concern: string
+          patient_id: string
+          clinic_id: string
+          treatment_id: string
+          image_url: string[]
+          status: string
+          created_at: string
+          treatment_name: string
+          treatment_image_url: string
+          treatment_status: string
+          clinic_name: string
+          clinic_status: string
+          bid_count: number
+          bid_id: string
+          bid_expected_price_min: number
+          bid_expected_price_max: number
+          bid_additional_explanation: string
+          bid_recommend_quick_visit: boolean
+          bid_status: string
+          bid_created_at: string
+          bid_clinic_treatment_id: string
+          total_count: number
+        }[]
+      }
       get_filtered_quotations: {
-        Args: {
-          page_offset?: number
-          page_limit?: number
-          filter_name?: string
-          filter_status?: string
-          filter_region?: string
-          filter_patient_id?: string
-          filter_date_from?: string
-          filter_date_to?: string
-          sort_field?: string
-          sort_direction?: string
-        }
+        Args:
+          | {
+              page_offset?: number
+              page_limit?: number
+              filter_name?: string
+              filter_status?: string
+              filter_region?: string
+              filter_patient_id?: string
+              filter_date_from?: string
+              filter_date_to?: string
+              filter_clinic_id?: string
+              filter_clinic_treatments?: string[]
+              sort_field?: string
+              sort_direction?: string
+            }
+          | {
+              page_offset?: number
+              page_limit?: number
+              filter_name?: string
+              filter_status?: string
+              filter_region?: string
+              filter_patient_id?: string
+              filter_date_from?: string
+              filter_date_to?: string
+              sort_field?: string
+              sort_direction?: string
+            }
         Returns: {
           id: string
           region: string
