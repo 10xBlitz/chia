@@ -1,14 +1,14 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { useInfiniteChatRooms } from "../hooks/use-infinite-chat-rooms";
-import { useChatRoomsRealtime } from "../hooks/use-chat-rooms-realtime";
-import { Tables } from "@/lib/supabase/types";
-import { useUnreadCount } from "../hooks/use-unread-count";
-import { useUserStore } from "@/providers/user-store-provider";
-import { useRoomSelectionStore } from "../room-selection-context";
-import { useQueryClient } from "@tanstack/react-query";
-import { useClearUnread } from "../hooks/use-clear-unread";
-import { useSearchChatRooms } from "../hooks/use-search-chat-rooms";
 import { Input } from "@/components/ui/input";
+import { Tables } from "@/lib/supabase/types";
+import { useUserStore } from "@/providers/user-store-provider";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
+import { useChatRoomsRealtime } from "../hooks/use-chat-rooms-realtime";
+import { useClearUnread } from "../hooks/use-clear-unread";
+import { useInfiniteChatRooms } from "../hooks/use-infinite-chat-rooms";
+import { useSearchChatRooms } from "../hooks/use-search-chat-rooms";
+import { useUnreadCount } from "../hooks/use-unread-count";
+import { useRoomSelectionStore } from "../room-selection-context";
 
 interface ChatSidebarProps {
   patientId?: string;
@@ -308,13 +308,13 @@ export function ChatSidebar({ patientId }: ChatSidebarProps) {
           ) : (
             <>
               {isLoading && (
-                <li className="px-4 py-3 text-gray-400">Loading...</li>
+                <li className="px-4 py-3 text-gray-400">로딩 중...</li>
               )}
               {isError && (
-                <li className="px-4 py-3 text-red-500">Error loading rooms</li>
+                <li className="px-4 py-3 text-red-500">에러</li>
               )}
               {rooms && rooms.length === 0 && (
-                <li className="px-4 py-3 text-gray-400">No rooms</li>
+                <li className="px-4 py-3 text-gray-400">문의 사항 없음</li>
               )}
               {rooms &&
                 rooms.map((room) => (
