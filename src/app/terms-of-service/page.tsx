@@ -2,9 +2,9 @@
 
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import React, { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function TermsOfServicePage() {
   const [tab, setTab] = useState<"terms" | "payment" | "privacy">("terms");
@@ -165,12 +165,13 @@ export default function TermsOfServicePage() {
                 개인정보보호정책 (Privacy Policy)
               </h1>
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                <h2 className="font-semibold mb-2">앱 및 개발자 정보</h2>
+                
                 {/* App and Developer Information */}
                 <div className="space-y-1 text-sm">
                   <p>
                     <strong>앱 이름:</strong> 치아 (Chia)
                   </p>
+                  
                   <p>
                     <strong>상호명:</strong> 비씨디 (BCD)
                   </p>
@@ -190,7 +191,21 @@ export default function TermsOfServicePage() {
                   <p>
                     <strong>통신판매업 신고번호:</strong> 2025 - 화성향남 0101
                   </p>
-                  {/* App Name: Chia / Company: BCD / CEO: Junki Hong / Business Registration: 235-04-01772 / Address: Gyeonggi-do Hwaseong-si / Phone: 010 3757 1495 / E-commerce Registration: 2025 - 화성향남 0101 */}
+                  <br />
+                  <h2 className="font-semibold mb-2">앱 및 개발자 정보</h2>
+                  <p>
+                    <strong>개발자:</strong> 10X Blitz
+                  </p>
+                  <p>
+                    <strong>개발자 대표:</strong> 김요셉
+                  </p>
+                  <p>
+                    <strong>개발자 이메일:</strong> business@10xblitz.com
+                  </p>
+                  <p>
+                    <strong>개발자 연락처:</strong> 01050909006
+                  </p>
+                  {/* App Name: Chia / Developer: 10X Blitz / Developer CEO: Joseph Kim / Developer Email: business@10xblitz.com / Developer Contact: 01050909006 / Company: BCD / CEO: Junki Hong / Business Registration: 235-04-01772 / Address: Gyeonggi-do Hwaseong-si / Phone: 010 3757 1495 / E-commerce Registration: 2025 - 화성향남 0101 */}
                 </div>
               </div>
               <h2 className="font-semibold mt-6 mb-3">
