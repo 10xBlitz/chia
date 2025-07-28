@@ -108,90 +108,96 @@ export default function CreateReviewPage() {
   };
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <HeaderWithBackButton title="" />
-      <Form {...form}>
-        <form
-          className="flex flex-col px-4 gap-6"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          {/* Treatment chips */}
-          <FormField
-            control={form.control}
-            name="clinic_treatment_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>시술</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2 flex-wrap">
-                    {treatmentsLoading && (
-                      <span className="text-gray-400 text-sm">
-                        로딩중... {/** Loading... */}
-                      </span>
-                    )}
-                    {treatmentsError && (
-                      <span className="text-red-400 text-sm">
-                        시술 정보를 불러올 수 없습니다.{" "}
-                        {/** Unable to retrieve procedure information.  */}
-                      </span>
-                    )}
+      <div className="flex-1 overflow-y-auto">
+        <Form {...form}>
+          <form
+            className="flex flex-col px-4 gap-6 pb-24"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            {/* Treatment chips */}
+            <FormField
+              control={form.control}
+              name="clinic_treatment_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>시술</FormLabel>
+                  <FormControl>
+                    <div className="flex gap-2 flex-wrap">
+                      {treatmentsLoading && (
+                        <span className="text-gray-400 text-sm">
+                          로딩중... {/** Loading... */}
+                        </span>
+                      )}
+                      {treatmentsError && (
+                        <span className="text-red-400 text-sm">
+                          시술 정보를 불러올 수 없습니다.{" "}
+                          {/** Unable to retrieve procedure information.  */}
+                        </span>
+                      )}
 
-                    {treatmentsData && treatmentsData.length === 0 && (
-                      <span className="text-gray-400 text-sm">
-                        이 병원에는 이용 가능한 치료가 없습니다..{" "}
-                        {/** This clinic has no treatment available. */}
-                      </span>
-                    )}
-                    {treatmentsData &&
-                      treatmentsData.map((t) => (
-                        <Button
-                          key={t.id}
-                          type="button"
-                          variant={field.value === t.id ? "default" : "outline"}
-                          className={`rounded-full px-4 py-1 text-sm ${
-                            field.value === t.id ? " text-white" : ""
-                          }`}
-                          onClick={() => field.onChange(t.id)}
-                        >
-                          {t.treatment.treatment_name}
-                        </Button>
-                      ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormMultiImageUpload
-            control={form.control}
-            name="images"
-            label="사진 첨부 (선택)"
-            maxImages={MAX_IMAGES}
-          />
-          <FormStarRating
-            control={form.control}
-            name="rating"
-            label="평점" // Rating
-          />
-          <FormTextarea
-            control={form.control}
-            name="review"
-            label="리뷰"
-            maxLength={MAX_TEXT}
-            placeholder="리뷰를 입력해주세요. (최대 500자)" // Please enter your review (max 500 chars)
-          />
-          {/* Submit button */}
-          <div className="px-4 py-4">
-            <Button
-              type="submit"
-              className="w-full text-white"
-              disabled={mutation.status === "pending"}
-            >
-              {mutation.status === "pending" ? "작성중..." : "작성하기"}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </>
+                      {treatmentsData && treatmentsData.length === 0 && (
+                        <span className="text-gray-400 text-sm">
+                          이 병원에는 이용 가능한 치료가 없습니다..{" "}
+                          {/** This clinic has no treatment available. */}
+                        </span>
+                      )}
+                      {treatmentsData &&
+                        treatmentsData.map((t) => (
+                          <Button
+                            key={t.id}
+                            type="button"
+                            variant={
+                              field.value === t.id ? "default" : "outline"
+                            }
+                            className={`rounded-full px-4 py-1 text-sm ${
+                              field.value === t.id ? " text-white" : ""
+                            }`}
+                            onClick={() => field.onChange(t.id)}
+                          >
+                            {t.treatment.treatment_name}
+                          </Button>
+                        ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormMultiImageUpload
+              control={form.control}
+              name="images"
+              label="사진 첨부 (선택)"
+              maxImages={MAX_IMAGES}
+            />
+            <FormStarRating
+              control={form.control}
+              name="rating"
+              label="평점" // Rating
+            />
+            <FormTextarea
+              control={form.control}
+              name="review"
+              label="리뷰"
+              maxLength={MAX_TEXT}
+              placeholder="리뷰를 입력해주세요. (최대 500자)" // Please enter your review (max 500 chars)
+            />
+          </form>
+        </Form>
+      </div>
+      {/* Fixed submit button */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 pb-20">
+        <Button
+          type="submit"
+          form="review-form"
+          className="w-full text-white"
+          disabled={mutation.status === "pending"}
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {mutation.status === "pending" ? "작성중..." : "작성하기"}
+        </Button>
+      </div>
+    </div>
   );
 }

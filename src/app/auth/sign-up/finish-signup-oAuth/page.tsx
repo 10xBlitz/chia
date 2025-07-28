@@ -1,4 +1,5 @@
 "use client";
+import { format } from "date-fns";
 import { Stepper } from "@/components/stepper";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -78,7 +79,7 @@ const FinishOAuthSignup = () => {
         birthdate:
           typeof data.birthdate === "string"
             ? data.birthdate
-            : data.birthdate.toISOString(),
+            : data.birthdate.toDateString(),
         role: "patient",
         full_name: data.name,
         clinic_id: null,
@@ -338,7 +339,7 @@ function KakaoStep2({
       <div>
         생년월일:{" "}
         {values.birthdate instanceof Date
-          ? values.birthdate.toISOString().slice(0, 10)
+          ? format(values.birthdate, "yyyy년 MM월 dd일")
           : values.birthdate}
       </div>
       <div>거주지: {values.residence}</div>

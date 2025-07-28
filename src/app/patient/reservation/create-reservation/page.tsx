@@ -469,7 +469,7 @@ export default function CreateReservation() {
           </div>
           <Button
             type="submit"
-            className="h-[45px] mb-20"
+            className="h-[45px] mb-20 mt-5"
             disabled={reservationMutation.status === "pending"}
           >
             {reservationMutation.status === "pending"
