@@ -17,14 +17,12 @@ export default function ZoomableImage({
         <Image
           src={src}
           alt={alt || ""}
+          fill
           sizes="100vw"
           className={
             className +
-            " cursor-zoom-in transition-transform hover:scale-[1.02]"
+            " cursor-zoom-in transition-transform hover:scale-[1.02] object-cover"
           }
-          style={{ width: "100%", height: "auto" }}
-          width={500}
-          height={100}
           priority={false}
         />
       </DialogTrigger>
