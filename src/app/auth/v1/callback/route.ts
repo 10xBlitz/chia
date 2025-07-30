@@ -14,9 +14,14 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  console.log("--->Received auth code:", code);
+  if (!code) {
+    // if no code is provided, redirect to the error page
+    return NextResponse.redirect(`${origin}/auth/error?error=No code provided`);
+  }
 
   let globalError = "";
+
+  console.log("---->code:", code);
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -31,6 +36,8 @@ export async function GET(request: Request) {
       .select("login_status")
       .eq("id", userId || "")
       .maybeSingle();
+
+    console.log("---->userData:", userData);
 
     if (userData && userData.login_status !== "active") {
       return NextResponse.redirect(`${origin}/auth/deleted-account-page`);

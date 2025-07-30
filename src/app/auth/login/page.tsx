@@ -13,6 +13,7 @@ const PatientHomePage = () => {
   const message = searchParams.get("message"); // Get error message from URL params
   console.log("---->message:", message);
   const kakaoLoginHandler = async () => {
+    await supabaseClient.auth.signOut(); // Ensure user is signed out before login
     await supabaseClient.auth.signInWithOAuth({
       provider: "kakao",
       options: {
