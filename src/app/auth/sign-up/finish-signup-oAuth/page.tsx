@@ -134,29 +134,19 @@ const FinishOAuthSignup = () => {
     }),
   };
 
-  // Prevent going back to Kakao OAuth page by creating a history trap
+  // Handle browser back button - redirect to login when user leaves
+  // Handle browser back button - redirect to login when user leaves
   useEffect(() => {
-    let isNavigatingAway = false;
-    
-    const preventBack = () => {
-      if (!isNavigatingAway) {
-        // Push current page again to trap the user
-        window.history.pushState(null, "", window.location.pathname);
-        // Sign out and redirect to login
-        supabaseClient.auth.signOut().then(() => {
-          isNavigatingAway = true;
-          window.location.replace("/auth/login");
-        });
-      }
+    const handleEvent = () => {
+      supabaseClient.auth.signOut();
+      router.push("/auth/login");
     };
+    history.pushState(null, document.title, location.href);
 
-    // Push an initial state to enable popstate detection
-    window.history.pushState(null, "", window.location.pathname);
-    
-    window.addEventListener("popstate", preventBack);
+    window.addEventListener("popstate", handleEvent);
 
     return () => {
-      window.removeEventListener("popstate", preventBack);
+      window.removeEventListener("popstate", handleEvent);
     };
   }, []);
 
