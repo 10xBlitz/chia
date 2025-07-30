@@ -17,9 +17,7 @@ const PatientHomePage = () => {
   const handleSocialLogin = async (provider: "kakao" | "google" | "apple") => {
     setIsLoading(true);
     try {
-      if (provider === "kakao") {
-        await supabaseClient.auth.signOut(); // Ensure user is signed out before login
-      }
+      // await supabaseClient.auth.signOut(); // Ensure user is signed out before login
       await supabaseClient.auth.signInWithOAuth({
         provider,
         options: {
@@ -183,15 +181,24 @@ const PatientHomePage = () => {
           fontWeight: 500,
         }}
       >
-        <Link href="/auth/login/login-with-email?title=이메일로 로그인하기" className={isLoading ? "pointer-events-none opacity-50" : ""}>
+        <Link
+          href="/auth/login/login-with-email?title=이메일로 로그인하기"
+          className={isLoading ? "pointer-events-none opacity-50" : ""}
+        >
           이메일로 로그인하기 {/** Log in with email */}
         </Link>
 
-        <Link href="/auth/login/login-with-email?title=치과 의사로 로그인" className={isLoading ? "pointer-events-none opacity-50" : ""}>
+        <Link
+          href="/auth/login/login-with-email?title=치과 의사로 로그인"
+          className={isLoading ? "pointer-events-none opacity-50" : ""}
+        >
           치과 의사로 로그인 {/** Log in as dentist */}
         </Link>
 
-        <Link href="/auth/login/login-with-email?title=관리자로 로그인" className={isLoading ? "pointer-events-none opacity-50" : ""}>
+        <Link
+          href="/auth/login/login-with-email?title=관리자로 로그인"
+          className={isLoading ? "pointer-events-none opacity-50" : ""}
+        >
           관리자로 로그인 {/** Log in as admin */}
         </Link>
       </div>

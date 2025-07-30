@@ -134,6 +134,15 @@ const FinishOAuthSignup = () => {
     }),
   };
 
+  // Replace the OAuth redirect in history with login page
+  useEffect(() => {
+    // This replaces the OAuth callback URL in history with login page
+    // So back button goes to login instead of OAuth provider
+    if (window.history.length > 1) {
+      window.history.replaceState(null, "", "/auth/login");
+    }
+  }, []);
+
   // Redirect if already registered
   useEffect(() => {
     if (user && (user.work_place || user.residence)) {
