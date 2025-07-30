@@ -55,6 +55,7 @@ export async function GET(request: Request) {
         );
       }
     }
+    console.log("---->error in exchangeCodeForSession:", error);
   }
 
   // return the user to an error page with instructions
