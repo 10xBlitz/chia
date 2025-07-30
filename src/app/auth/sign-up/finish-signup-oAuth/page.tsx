@@ -136,13 +136,13 @@ const FinishOAuthSignup = () => {
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       e.preventDefault();
-      (async () => {
-        await supabaseClient.auth.signOut();
-        router.push("/auth/login");
-      })();
+      supabaseClient.auth.signOut();
+      router.push("/auth/login");
     };
 
     // Push initial state to enable popstate detection
+    window.history.pushState(null, "", window.location.href + "?v=1");
+    window.history.pushState(null, "", window.location.href + "?v=1");
     window.history.pushState(null, "", window.location.href + "?v=1");
 
     window.addEventListener("popstate", handlePopState);
@@ -161,24 +161,7 @@ const FinishOAuthSignup = () => {
 
   //if user has no email show message and button to redirect to login
   if (!user?.email) {
-    return (
-      <MobileLayout className="flex flex-col items-center justify-center min-h-screen">
-        <div className="text-lg font-semibold py-20">
-          이 페이지에 접근할 수 없습니다.{" "}
-          {/* Please complete your signup with your Kakao account. */}
-        </div>
-        <Button
-          onClick={() => {
-            supabaseClient.auth.signOut().then(() => {
-              router.push("/auth/login");
-            });
-          }}
-          className="w-1/2 bg-red-500 hover:bg-red-600"
-        >
-          로그인 페이지로 이동 {/* Go to Login Page */}
-        </Button>
-      </MobileLayout>
-    );
+    return null;
   }
 
   // Early return: do not render anything while zustand is still checking user (user === undefined)
