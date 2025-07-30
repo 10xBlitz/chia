@@ -134,53 +134,31 @@ const FinishOAuthSignup = () => {
     }),
   };
 
-  // Handle back button: sign out and redirect to login
+  // Prevent going back to Kakao OAuth page by creating a history trap
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      event.preventDefault();
-      // Prevent default back navigation
-      window.history.pushState({ page: "finish-signup" }, "", window.location.href);
-      
-      // Sign out user and redirect to login
-      supabaseClient.auth.signOut().then(() => {
-        router.push("/auth/login");
-      });
+    let isNavigatingAway = false;
+    
+    const preventBack = () => {
+      if (!isNavigatingAway) {
+        // Push current page again to trap the user
+        window.history.pushState(null, "", window.location.pathname);
+        // Sign out and redirect to login
+        supabaseClient.auth.signOut().then(() => {
+          isNavigatingAway = true;
+          window.location.replace("/auth/login");
+        });
+      }
     };
 
-    // Add event listener
-    window.addEventListener("popstate", handlePopState);
+    // Push an initial state to enable popstate detection
+    window.history.pushState(null, "", window.location.pathname);
+    
+    window.addEventListener("popstate", preventBack);
 
-    // Push a dummy state to trigger popstate on back button
-    //  The popstate event only fires when you navigate between history
-    //  entries that were created by pushState or replaceState. If you
-    //  just add the event listener without pushing a state, the
-    // popstate event won't fire when the user presses the back
-    // button.
-
-    // Here's what happens:
-
-    // Without the pushState:
-    // - User presses back → Browser goes directly to previous page
-    // - popstate event never fires
-    // - Our handler never runs
-
-    // With the pushState:
-    // - We create a new history entry for the current page
-    // - User presses back → Browser navigates from our pushed state
-    // to the previous entry
-    // - popstate event fires
-    // - Our handler runs and prevents the default behavior
-    window.history.pushState(
-      { page: "finish-signup" },
-      "",
-      window.location.href
-    );
-
-    // Cleanup
     return () => {
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("popstate", preventBack);
     };
-  }, [router]);
+  }, []);
 
   // Redirect if already registered
   useEffect(() => {
@@ -302,7 +280,7 @@ const FinishOAuthSignup = () => {
             className="w-full bg-red-500 hover:bg-red-600 -mt-5"
             onClick={() =>
               supabaseClient.auth.signOut().then(() => {
-                router.push("/");
+                router.push("/auth/login");
               })
             } // Sign out and redirect to login
           >
