@@ -5,21 +5,39 @@ import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const PatientHomePage = () => {
   const searchParams = useSearchParams();
   const message = searchParams.get("message"); // Get error message from URL params
+  const [isLoading, setIsLoading] = useState(false);
+
   console.log("---->message:", message);
-  const kakaoLoginHandler = async () => {
-    await supabaseClient.auth.signOut(); // Ensure user is signed out before login
-    await supabaseClient.auth.signInWithOAuth({
-      provider: "kakao",
-      options: {
-        redirectTo: `${window.location.origin}/auth/v1/callback`,
-      },
-    });
+  const handleSocialLogin = async (provider: "kakao" | "google" | "apple") => {
+    setIsLoading(true);
+    try {
+      if (provider === "kakao") {
+        await supabaseClient.auth.signOut(); // Ensure user is signed out before login
+      }
+      await supabaseClient.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/v1/callback`,
+        },
+      });
+    } catch (error) {
+      console.log("--->error:", error);
+      const providerNames = {
+        kakao: "카카오",
+        google: "구글",
+        apple: "애플",
+      };
+      toast.error(
+        `${providerNames[provider]} 로그인에 실패했습니다. 다시 시도해주세요.`
+      );
+      setIsLoading(false);
+    }
   };
 
   // Show toast message if redirected with message (e.g., clinic deleted)
@@ -30,7 +48,15 @@ const PatientHomePage = () => {
   }, [message]);
 
   return (
-    <MobileLayout className="min-h-dvh flex flex-col">
+    <MobileLayout className="min-h-dvh flex flex-col relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <span className="text-sm text-gray-600">로그인 중...</span>
+          </div>
+        </div>
+      )}
       <header className="flex flex-col gap-10">
         <Link href="/">
           <Image
@@ -74,15 +100,22 @@ const PatientHomePage = () => {
           letterSpacing: "-2.5%",
           fontWeight: 600,
         }}
-        onClick={kakaoLoginHandler}
+        onClick={() => handleSocialLogin("kakao")}
+        disabled={isLoading}
       >
-        <Image
-          src={"/icons/message-filled.svg"}
-          width={21.559669494628906}
-          height={19.9}
-          alt="message icon"
-        />
-        카카오로 시작하기 {/** Get started with Kakao */}
+        {isLoading ? (
+          "로딩 중..."
+        ) : (
+          <>
+            <Image
+              src={"/icons/message-filled.svg"}
+              width={21.559669494628906}
+              height={19.9}
+              alt="message icon"
+            />
+            카카오로 시작하기 {/** Get started with Kakao */}
+          </>
+        )}
       </Button>
 
       {/* Google Login Button */}
@@ -95,22 +128,22 @@ const PatientHomePage = () => {
           letterSpacing: "-2.5%",
           fontWeight: 600,
         }}
-        onClick={async () => {
-          await supabaseClient.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: `${window.location.origin}/auth/v1/callback`,
-            },
-          });
-        }}
+        onClick={() => handleSocialLogin("google")}
+        disabled={isLoading}
       >
-        <Image
-          src={"/icons/google.svg"}
-          width={20}
-          height={20}
-          alt="Google icon"
-        />
-        구글로 시작하기 {/** Get started with Google */}
+        {isLoading ? (
+          "로딩 중..."
+        ) : (
+          <>
+            <Image
+              src={"/icons/google.svg"}
+              width={20}
+              height={20}
+              alt="Google icon"
+            />
+            구글로 시작하기 {/** Get started with Google */}
+          </>
+        )}
       </Button>
 
       {/* Apple Login Button */}
@@ -123,22 +156,22 @@ const PatientHomePage = () => {
           letterSpacing: "-2.5%",
           fontWeight: 600,
         }}
-        onClick={async () => {
-          await supabaseClient.auth.signInWithOAuth({
-            provider: "apple",
-            options: {
-              redirectTo: `${window.location.origin}/auth/v1/callback`,
-            },
-          });
-        }}
+        onClick={() => handleSocialLogin("apple")}
+        disabled={isLoading}
       >
-        <Image
-          src={"/icons/apple.svg"}
-          width={20}
-          height={20}
-          alt="Apple icon"
-        />
-        애플로 시작하기 {/** Get started with Apple */}
+        {isLoading ? (
+          "로딩 중..."
+        ) : (
+          <>
+            <Image
+              src={"/icons/apple.svg"}
+              width={20}
+              height={20}
+              alt="Apple icon"
+            />
+            애플로 시작하기 {/** Get started with Apple */}
+          </>
+        )}
       </Button>
 
       <div
@@ -150,15 +183,15 @@ const PatientHomePage = () => {
           fontWeight: 500,
         }}
       >
-        <Link href="/auth/login/login-with-email?title=이메일로 로그인하기">
+        <Link href="/auth/login/login-with-email?title=이메일로 로그인하기" className={isLoading ? "pointer-events-none opacity-50" : ""}>
           이메일로 로그인하기 {/** Log in with email */}
         </Link>
 
-        <Link href="/auth/login/login-with-email?title=치과 의사로 로그인">
+        <Link href="/auth/login/login-with-email?title=치과 의사로 로그인" className={isLoading ? "pointer-events-none opacity-50" : ""}>
           치과 의사로 로그인 {/** Log in as dentist */}
         </Link>
 
-        <Link href="/auth/login/login-with-email?title=관리자로 로그인">
+        <Link href="/auth/login/login-with-email?title=관리자로 로그인" className={isLoading ? "pointer-events-none opacity-50" : ""}>
           관리자로 로그인 {/** Log in as admin */}
         </Link>
       </div>
