@@ -14,6 +14,8 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
+  console.log("---->request.url:", request.url);
+
   if (!code) {
     // if no code is provided, redirect to the error page
     return NextResponse.redirect(`${origin}/auth/error?error=No code provided`);
