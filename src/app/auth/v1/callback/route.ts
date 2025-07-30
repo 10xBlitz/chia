@@ -14,8 +14,14 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
+  console.log("--->Received auth code:", code);
+
+  let globalError = "";
+
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    globalError = error?.message || "";
 
     const userId = (await supabase.auth.getUser()).data.user?.id;
 
@@ -52,5 +58,7 @@ export async function GET(request: Request) {
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  return NextResponse.redirect(
+    `${origin}/auth/auth-code-error?error=${globalError}`
+  );
 }
