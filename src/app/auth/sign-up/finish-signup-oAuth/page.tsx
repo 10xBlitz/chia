@@ -143,7 +143,7 @@ const FinishOAuthSignup = () => {
     };
 
     // Push initial state to enable popstate detection
-    window.history.pushState(null, "", window.location.href);
+    window.history.pushState(null, "", window.location.href + "?v=1");
 
     window.addEventListener("popstate", handlePopState);
 
