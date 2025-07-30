@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const error = searchParams.get("error");
   // if "next" is in param, use it as the redirect URL
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
@@ -14,21 +15,8 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  console.log("---->request.url:", request.url);
-
-  if (!code) {
-    // if no code is provided, redirect to the error page
-    return NextResponse.redirect(`${origin}/auth/error?error=No code provided`);
-  }
-
-  let globalError = "";
-
-  console.log("---->code:", code);
-
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    globalError = error?.message || "";
 
     const userId = (await supabase.auth.getUser()).data.user?.id;
 
@@ -42,6 +30,7 @@ export async function GET(request: Request) {
     console.log("---->userData:", userData);
 
     if (userData && userData.login_status !== "active") {
+      await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/auth/deleted-account-page`);
     }
 
@@ -68,7 +57,5 @@ export async function GET(request: Request) {
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(
-    `${origin}/auth/auth-code-error?error=${globalError}`
-  );
+  return NextResponse.redirect(`${origin}/auth/login?message=${error}`);
 }

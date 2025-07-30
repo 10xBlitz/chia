@@ -134,14 +134,53 @@ const FinishOAuthSignup = () => {
     }),
   };
 
-  // Replace the OAuth redirect in history with login page
+  // Handle back button: sign out and redirect to login
   useEffect(() => {
-    // This replaces the OAuth callback URL in history with login page
-    // So back button goes to login instead of OAuth provider
-    if (window.history.length > 1) {
-      window.history.replaceState(null, "", "/auth/login");
-    }
-  }, []);
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      // Prevent default back navigation
+      window.history.pushState({ page: "finish-signup" }, "", window.location.href);
+      
+      // Sign out user and redirect to login
+      supabaseClient.auth.signOut().then(() => {
+        router.push("/auth/login");
+      });
+    };
+
+    // Add event listener
+    window.addEventListener("popstate", handlePopState);
+
+    // Push a dummy state to trigger popstate on back button
+    //  The popstate event only fires when you navigate between history
+    //  entries that were created by pushState or replaceState. If you
+    //  just add the event listener without pushing a state, the
+    // popstate event won't fire when the user presses the back
+    // button.
+
+    // Here's what happens:
+
+    // Without the pushState:
+    // - User presses back → Browser goes directly to previous page
+    // - popstate event never fires
+    // - Our handler never runs
+
+    // With the pushState:
+    // - We create a new history entry for the current page
+    // - User presses back → Browser navigates from our pushed state
+    // to the previous entry
+    // - popstate event fires
+    // - Our handler runs and prevents the default behavior
+    window.history.pushState(
+      { page: "finish-signup" },
+      "",
+      window.location.href
+    );
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
 
   // Redirect if already registered
   useEffect(() => {

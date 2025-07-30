@@ -13,15 +13,20 @@ const PatientHomePage = () => {
   const message = searchParams.get("message"); // Get error message from URL params
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("---->message:", message);
   const handleSocialLogin = async (provider: "kakao" | "google" | "apple") => {
     setIsLoading(true);
     try {
-      // await supabaseClient.auth.signOut(); // Ensure user is signed out before login
+      await supabaseClient.auth.signOut(); // Ensure user is signed out before login
       await supabaseClient.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/v1/callback`,
+          queryParams:
+            provider === "kakao"
+              ? {
+                  prompt: "login", // Forces Kakao to show login screen again
+                }
+              : undefined,
         },
       });
     } catch (error) {
@@ -40,9 +45,14 @@ const PatientHomePage = () => {
 
   // Show toast message if redirected with message (e.g., clinic deleted)
   useEffect(() => {
-    if (message) {
+    if (message === "server_error") {
+      toast.error("오류가 발생했습니다. 몇 분 후에 다시 시도해 주세요.");
+      // A server error occurred, please try again in a few minutes
+    } else if (message) {
       toast.error(message);
     }
+    //remove the message from URL to prevent showing it again
+    window.history.replaceState({}, document.title, window.location.pathname);
   }, [message]);
 
   return (
