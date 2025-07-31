@@ -35,6 +35,11 @@ export const columns: ColumnDef<ClinicTable>[] = [
     header: "조회수", // Views
     cell: ({ row }) => <>{row.original.clinic_view?.length}</>,
   },
+  {
+    accessorKey: "is_pinned",
+    header: "고정 여부", // Is Pinned
+    cell: ({ row }) => <>{row.original.is_pinned ? "Yes" : "No"}</>,
+  },
 
   {
     id: "actions",

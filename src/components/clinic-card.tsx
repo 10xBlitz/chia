@@ -17,6 +17,7 @@ export interface ClinicCardProps {
   total_reviews: number;
   avg_reviews_per_treatment: number;
   clinic_name: string;
+  is_pinned: boolean;
   introduction: string | null;
   note: string | null;
   contact_number: string;

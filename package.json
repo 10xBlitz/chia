@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "update-types": "npx supabase gen types typescript --project-id hmhtqgzcqoxssuhtmscp --schema public > ./src/lib/supabase/types.ts"
+    "update-types": "npx -y supabase gen types typescript --project-id hmhtqgzcqoxssuhtmscp --schema public > ./src/lib/supabase/types.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -148,6 +148,7 @@ export type Database = {
           full_address: string
           id: string
           introduction: string | null
+          is_pinned: boolean
           link: string | null
           note: string | null
           notification_recipient_user_id: string | null
@@ -165,6 +166,7 @@ export type Database = {
           full_address?: string
           id?: string
           introduction?: string | null
+          is_pinned?: boolean
           link?: string | null
           note?: string | null
           notification_recipient_user_id?: string | null
@@ -182,6 +184,7 @@ export type Database = {
           full_address?: string
           id?: string
           introduction?: string | null
+          is_pinned?: boolean
           link?: string | null
           note?: string | null
           notification_recipient_user_id?: string | null
@@ -839,33 +842,18 @@ export type Database = {
         }[]
       }
       get_filtered_quotations: {
-        Args:
-          | {
-              page_offset?: number
-              page_limit?: number
-              filter_name?: string
-              filter_status?: string
-              filter_region?: string
-              filter_patient_id?: string
-              filter_date_from?: string
-              filter_date_to?: string
-              filter_clinic_id?: string
-              filter_clinic_treatments?: string[]
-              sort_field?: string
-              sort_direction?: string
-            }
-          | {
-              page_offset?: number
-              page_limit?: number
-              filter_name?: string
-              filter_status?: string
-              filter_region?: string
-              filter_patient_id?: string
-              filter_date_from?: string
-              filter_date_to?: string
-              sort_field?: string
-              sort_direction?: string
-            }
+        Args: {
+          page_offset?: number
+          page_limit?: number
+          filter_name?: string
+          filter_status?: string
+          filter_region?: string
+          filter_patient_id?: string
+          filter_date_from?: string
+          filter_date_to?: string
+          sort_field?: string
+          sort_direction?: string
+        }
         Returns: {
           id: string
           region: string

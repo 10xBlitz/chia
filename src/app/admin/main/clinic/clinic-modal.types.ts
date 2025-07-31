@@ -39,6 +39,9 @@ export const formSchema = z.object({
     .string()
     .min(1, "병원 이름을 입력하세요.") // Please enter the clinic name.
     .max(100, "병원 이름은 100자 이내여야 합니다."), // Clinic name must be 100 characters or less.
+    is_pinned: z
+    .boolean(),
+  
   introduction: z
     .string()
     .max(500, "소개글은 500자 이내여야 합니다.") // Introduction must be 500 characters or less.

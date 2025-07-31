@@ -123,6 +123,7 @@ export async function getPaginatedClinicsWthReviews(
       { count: "exact" }
     )
     .filter("status", "not.eq", "deleted") // Only show active clinics
+    .order("is_pinned", { ascending: false }) // Pinned clinics first
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -185,6 +186,7 @@ export async function updateClinic(
     .from("clinic")
     .update({
       clinic_name: values.clinic_name,
+      is_pinned: values.is_pinned || false,
       contact_number: values.contact_number,
       full_address: values.full_address,
       detail_address: values.detail_address || null,
@@ -208,6 +210,7 @@ export async function insertClinic(
     .from("clinic")
     .insert({
       clinic_name: values.clinic_name,
+      is_pinned: values.is_pinned || false,
       contact_number: values.contact_number,
       detail_address: values.detail_address || null,
       city: values.city,

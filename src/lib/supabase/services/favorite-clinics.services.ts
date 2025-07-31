@@ -64,6 +64,7 @@ export async function getPaginatedFavoriteClinics(
 
   const clinics = favoriteClinics.map((item) => ({
     clinic_name: item.clinic.clinic_name,
+    is_pinned: item.clinic.is_pinned || false,
     clinic_id: item.clinic.id,
     introduction: item.clinic.introduction || null,
     note: item.clinic.note || null,

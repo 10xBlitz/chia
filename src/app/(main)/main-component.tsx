@@ -202,6 +202,7 @@ export default function MainPage() {
                 }
                 q = q.filter("status", "eq", "active");
                 q = q.range(3, 1000);
+                q = q.order("is_pinned", { ascending: false }); // Pinned clinics first
                 q.order("id", { ascending: true });
                 return q;
               }}
