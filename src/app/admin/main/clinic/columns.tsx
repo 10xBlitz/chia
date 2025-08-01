@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { Pin } from "lucide-react";
 
 import { CellAction } from "./cell-actions";
 import { getPaginatedClinics } from "@/lib/supabase/services/clinics.services";
@@ -38,7 +39,17 @@ export const columns: ColumnDef<ClinicTable>[] = [
   {
     accessorKey: "is_pinned",
     header: "고정 여부", // Is Pinned
-    cell: ({ row }) => <>{row.original.is_pinned ? "Yes" : "No"}</>,
+    cell: ({ row }) => (
+      <span title={row.original.is_pinned ? "Pinned" : "Not pinned"}>
+        <Pin
+          className={`w-4 h-4 ${
+            row.original.is_pinned
+              ? "text-green-500 fill-current"
+              : "text-gray-300"
+          }`}
+        />
+      </span>
+    ),
   },
 
   {
