@@ -432,12 +432,24 @@ export default function ClinicSingleViewPage() {
                     점심 시간 {/* Lunch time */}
                   </div>
                   {(() => {
+                    const todayIdx = new Date().getDay();
+                    const isSaturday = todayIdx === 6;
+
                     const weekendLunchBreak = clinic.working_hour.find(
                       (item) => item.day_of_week === "주말 점심시간"
                     );
                     const weekdayLunchBreak = clinic.working_hour.find(
                       (item) => item.day_of_week === "평일 점심시간"
                     );
+
+                    // If today is Saturday, always show no lunch break
+                    if (isSaturday) {
+                      return (
+                        <div className="text-sm text-gray-500 mt-1">
+                          점심시간 없음 {/* No lunch break */}
+                        </div>
+                      );
+                    }
 
                     const hasAnyLunchBreak =
                       (weekdayLunchBreak &&
