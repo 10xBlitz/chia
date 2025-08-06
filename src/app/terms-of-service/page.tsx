@@ -261,13 +261,105 @@ export default function TermsOfServicePage() {
                 </li>
               </ul>
               <h2 className="font-semibold mt-6 mb-3">
-                {isEnglish ? "Article 3. Outsourcing of Personal Information Processing" : "제 3조. 개인정보처리의 위탁"}
+                {isEnglish ? "Article 3. Third-Party Data Sharing and Processing" : "제 3조. 개인정보의 제3자 제공 및 처리위탁"}
               </h2>
               <p className="mb-4">
                 {isEnglish
-                  ? "① Chia app and BCD do not outsource personal information processing tasks for smooth personal information business processing."
-                  : "① 치아(Chia) 앱 및 비씨디(BCD)는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리업무를 위탁하지 않습니다."}
+                  ? "① Chia app and BCD share personal information with third parties and outsource certain processing tasks for the following purposes. We ensure all third parties maintain appropriate security measures and comply with privacy regulations."
+                  : "① 치아(Chia) 앱 및 비씨디(BCD)는 다음의 목적을 위해 개인정보를 제3자에게 제공하고 일부 처리업무를 위탁합니다. 모든 제3자는 적절한 보안조치를 유지하고 개인정보보호법을 준수합니다."}
               </p>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "a. Healthcare Service Providers" : "가. 의료서비스 제공자"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: Name, contact information, medical/dental records, appointment details" : "• 제공정보: 성명, 연락처, 의료/치과 기록, 예약 정보"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Medical treatment, appointment management, healthcare service delivery" : "• 제공목적: 의료 치료, 예약 관리, 의료서비스 제공"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: 5 years as per medical record regulations" : "• 보유기간: 의료기록 법령에 따라 5년"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "b. Payment Processing Services" : "나. 결제처리 서비스"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service Provider: TossPayments (토스페이먼츠)" : "• 위탁업체: 토스페이먼츠 (TossPayments)"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: Payment information, transaction details, customer identification" : "• 위탁정보: 결제정보, 거래내역, 고객 식별정보"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Payment processing, transaction verification, fraud prevention" : "• 위탁목적: 결제처리, 거래 확인, 부정결제 방지"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: 5 years as per financial regulations" : "• 보유기간: 금융법령에 따라 5년"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "c. SMS Notification Services" : "다. SMS 알림 서비스"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service Provider: SOLAPI (솔라피)" : "• 위탁업체: 솔라피 (SOLAPI)"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: Phone numbers, SMS message content" : "• 위탁정보: 전화번호, SMS 메시지 내용"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Sending appointment confirmations, verification codes, service notifications" : "• 위탁목적: 예약 확인, 인증번호, 서비스 알림 발송"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: Immediately deleted after transmission" : "• 보유기간: 전송 즉시 삭제"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "d. Map and Location Services" : "라. 지도 및 위치 서비스"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service Providers: Google Maps API, Daum Postcode API" : "• 위탁업체: 구글 지도 API, 다음 우편번호 API"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: Address information, location coordinates" : "• 위탁정보: 주소정보, 위치좌표"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Address verification, clinic location display, navigation assistance" : "• 위탁목적: 주소 확인, 병원 위치 표시, 길찾기 지원"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: Not permanently stored, processed for immediate use" : "• 보유기간: 영구 저장하지 않음, 즉시 처리 목적"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "e. Social Login Authentication" : "마. 소셜 로그인 인증"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service Providers: Google OAuth, Kakao OAuth, Apple OAuth" : "• 위탁업체: 구글 OAuth, 카카오 OAuth, 애플 OAuth"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: Basic profile information (name, email), authentication tokens" : "• 위탁정보: 기본 프로필 정보(이름, 이메일), 인증 토큰"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: User authentication, account creation, login verification" : "• 위탁목적: 사용자 인증, 계정 생성, 로그인 확인"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: Until account deletion" : "• 보유기간: 계정 삭제 시까지"}
+                  </p>
+                </div>
+              </div>
               <h2 className="font-semibold mt-6 mb-3">
                 {isEnglish ? "Article 4. Items of Personal Information Processed" : "제 4조. 처리하는 개인정보의 항목"}
               </h2>
@@ -278,24 +370,279 @@ export default function TermsOfServicePage() {
               </p>
               <div className="mb-4">
                 <p className="font-medium mb-2">
-                  {isEnglish ? "a. Chia Member Information" : "가. 치아 회원정보"}
+                  {isEnglish ? "a. Personal Information" : "가. 개인정보"}
                 </p>
                 <div className="pl-4">
                   <p className="mb-1">
-                    {isEnglish ? "- Required Collection Items" : "- 필수 수집 항목"}
+                    {isEnglish ? "- Required Collection Items:" : "- 필수 수집 항목:"}
                   </p>
                   <p className="pl-4">
                     {isEnglish
-                      ? "· Chia app registration: name, login ID, email, contact"
-                      : "· 치아(Chia) 앱 가입 : 이름, 로그인ID, 이메일, 연락처"}
+                      ? "· Name, email address, phone number, address, date of birth, gender, workplace"
+                      : "· 이름, 이메일 주소, 전화번호, 주소, 생년월일, 성별, 직장"}
                   </p>
                   <p className="mb-1 mt-2">
-                    {isEnglish ? "- Optional Collection Items" : "- 선택 수집 항목"}
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
                   </p>
                   <p className="pl-4">
                     {isEnglish
-                      ? "· No optional items collected"
-                      : "· 선택항목 수집하지 않음"}
+                      ? "· Account registration, user identification, appointment booking, service delivery"
+                      : "· 계정 등록, 사용자 식별, 예약 관리, 서비스 제공"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "b. Health and Medical Information" : "나. 건강 및 의료정보"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Dental/medical records, treatment history, appointment details, health condition information"
+                      : "· 치과/의료 기록, 치료 이력, 예약 정보, 건강상태 정보"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Medical treatment planning, healthcare service delivery, treatment continuity"
+                      : "· 의료 치료 계획, 의료서비스 제공, 치료 연속성"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Retention:" : "- 보유기간:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· 5 years as per medical record regulations, or longer if required by law"
+                      : "· 의료기록 관련 법령에 따라 5년, 법령에 따라 더 길 수 있음"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "c. Financial and Payment Information" : "다. 재정 및 결제정보"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Payment method details, transaction records, billing information, purchase history"
+                      : "· 결제수단 정보, 거래기록, 청구정보, 구매이력"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Processing Method:" : "- 처리방법:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Processed through TossPayments secure payment gateway"
+                      : "· 토스페이먼츠 보안 결제 게이트웨이를 통해 처리"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Payment processing, transaction verification, refund processing, fraud prevention"
+                      : "· 결제처리, 거래 확인, 환불 처리, 부정결제 방지"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "d. Communication and Message Data" : "라. 통신 및 메시지 데이터"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· In-app messages between patients and healthcare providers, chat history, consultation records"
+                      : "· 환자와 의료진 간 앱 내 메시지, 채팅 기록, 상담 기록"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Patient-provider communication, consultation support, treatment coordination"
+                      : "· 환자-의료진 소통, 상담 지원, 치료 조율"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "e. Photos, Files and Documents" : "마. 사진, 파일 및 문서"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Medical photos (treatment), X-rays, medical documents, insurance forms, treatment plans"
+                      : "· 의료 사진(치료), 엑스레이, 의료 문서, 보험 서류, 치료 계획서"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Progress tracking, treatment planning, medical record keeping"
+                      : "· 진행상황 추적, 치료 계획, 의료 기록 보관"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Security:" : "- 보안:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Files are encrypted during upload and storage, compressed for optimal performance"
+                      : "· 파일은 업로드 및 저장 시 암호화되며, 최적 성능을 위해 압축됨"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "f. Location Information" : "바. 위치정보"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Address information, approximate location for clinic discovery"
+                      : "· 주소 정보, 병원 찾기를 위한 대략적 위치"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Finding nearby clinics, location-based recommendations, address verification"
+                      : "· 근처 병원 찾기, 위치 기반 추천, 주소 확인"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Processing:" : "- 처리방법:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Processed through Google Maps API and Daum Postcode API for immediate use, not permanently stored"
+                      : "· 구글 지도 API 및 다음 우편번호 API를 통해 즉시 사용 목적으로 처리, 영구 저장하지 않음"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "g. App Activity and Performance Data" : "사. 앱 활동 및 성능 데이터"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Page interactions, app navigation patterns, mobile WebView authentication tokens, URL parameters, session data"
+                      : "· 페이지 상호작용, 앱 내비게이션 패턴, 모바일 웹뷰 인증 토큰, URL 매개변수, 세션 데이터"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· App functionality, user experience optimization, payment processing, mobile app authentication"
+                      : "· 앱 기능 제공, 사용자 경험 최적화, 결제 처리, 모바일 앱 인증"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "h. Device Information and Browser Data" : "아. 기기 정보 및 브라우저 데이터"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Screen dimensions, browser capabilities, device responsiveness data, IP addresses (automatic collection)"
+                      : "· 화면 크기, 브라우저 기능, 기기 반응성 데이터, IP 주소 (자동 수집)"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Responsive design optimization, technical troubleshooting, security monitoring"
+                      : "· 반응형 디자인 최적화, 기술적 문제 해결, 보안 모니터링"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "i. Diagnostic and Performance Information" : "자. 진단 및 성능 정보"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- Collected Items:" : "- 수집 항목:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Error logs, debug information, crash reports, performance metrics, API response data"
+                      : "· 오류 로그, 디버그 정보, 충돌 보고서, 성능 지표, API 응답 데이터"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· App stability improvement, bug fixes, technical support, service optimization"
+                      : "· 앱 안정성 개선, 버그 수정, 기술 지원, 서비스 최적화"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Processing:" : "- 처리방법:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Stored locally for debugging purposes, may contain user identifiers for troubleshooting"
+                      : "· 디버깅 목적으로 로컬 저장, 문제 해결을 위해 사용자 식별자 포함 가능"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "j. Web Browsing and External Content" : "차. 웹 브라우징 및 외부 콘텐츠"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "- External Domains Accessed:" : "- 접근 외부 도메인:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Image hosting services (Picsum Photos), Supabase CDN, Google Fonts, external APIs"
+                      : "· 이미지 호스팅 서비스 (Picsum Photos), Supabase CDN, Google Fonts, 외부 API"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Data Transmitted:" : "- 전송 데이터:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· HTTP requests with referrer information, image loading requests"
+                      : "· 리퍼러 정보를 포함한 HTTP 요청, 이미지 로딩 요청"}
+                  </p>
+                  <p className="mb-1 mt-2">
+                    {isEnglish ? "- Purpose:" : "- 수집목적:"}
+                  </p>
+                  <p className="pl-4">
+                    {isEnglish
+                      ? "· Content delivery, font loading, image display, API functionality"
+                      : "· 콘텐츠 배송, 폰트 로딩, 이미지 표시, API 기능 제공"}
                   </p>
                 </div>
               </div>
@@ -358,7 +705,137 @@ export default function TermsOfServicePage() {
                 </ul>
               </div>
               <h2 className="font-semibold mt-6 mb-3">
-                {isEnglish ? "Article 6. Measures to Ensure Security of Personal Information" : "제 6조. 개인정보의 안전성 확보 조치"}
+                {isEnglish ? "Article 6. User Rights and Data Control" : "제 6조. 정보주체의 권리와 데이터 통제"}
+              </h2>
+              <p className="mb-4">
+                {isEnglish
+                  ? "Data subjects have the following rights regarding their personal information. Users can exercise these rights by contacting us through the contact information provided at the end of this policy."
+                  : "정보주체는 자신의 개인정보에 대해 다음과 같은 권리를 가집니다. 이용자는 본 정책 말미에 제공된 연락처를 통해 이러한 권리를 행사할 수 있습니다."}
+              </p>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "a. Right to Access" : "가. 열람권"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "Users can request access to their personal information and receive a copy of all data we have collected about them."
+                    : "이용자는 자신의 개인정보에 대한 열람을 요구할 수 있으며, 당사가 수집한 모든 데이터의 사본을 받을 수 있습니다."}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "b. Right to Correction" : "나. 정정·삭제권"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "Users can request correction of inaccurate information or deletion of unnecessary personal information, except where retention is required by law."
+                    : "이용자는 부정확한 정보의 정정이나 불필요한 개인정보의 삭제를 요구할 수 있습니다. 단, 법령에 의해 보관이 의무화된 경우는 예외입니다."}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "c. Right to Data Portability" : "다. 데이터 이동권"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "Users can request their personal information in a structured, commonly-used format for transfer to another service provider."
+                    : "이용자는 다른 서비스 제공자에게 전송할 수 있도록 구조화되고 일반적으로 사용되는 형식으로 개인정보를 요청할 수 있습니다."}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "d. Right to Withdraw Consent" : "라. 동의철회권"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "Users can withdraw their consent for data processing at any time. However, this may limit access to certain services that require such information."
+                    : "이용자는 언제든지 개인정보 처리에 대한 동의를 철회할 수 있습니다. 단, 해당 정보가 필요한 특정 서비스의 이용이 제한될 수 있습니다."}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "e. Medical Records Exception" : "마. 의료기록 예외사항"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "Medical and dental records are subject to healthcare regulations and may be retained for 5 years even after account deletion to comply with medical record laws and ensure treatment continuity."
+                    : "의료 및 치과 기록은 의료법령의 적용을 받으며, 의료기록법 준수 및 치료 연속성 보장을 위해 계정 삭제 후에도 5년간 보관될 수 있습니다."}
+                </p>
+              </div>
+              <h2 className="font-semibold mt-6 mb-3">
+                {isEnglish ? "Article 7. Real-time Data Processing and Communication" : "제 7조. 실시간 데이터 처리 및 통신"}
+              </h2>
+              <p className="mb-4">
+                {isEnglish
+                  ? "Our app provides real-time communication features that involve continuous data processing for enhanced user experience."
+                  : "당사의 앱은 향상된 사용자 경험을 위해 지속적인 데이터 처리를 포함하는 실시간 통신 기능을 제공합니다."}
+              </p>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "a. Real-time Messaging" : "가. 실시간 메시징"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "In-app messaging between patients and healthcare providers operates through secure WebSocket connections via Supabase real-time infrastructure."
+                    : "환자와 의료진 간 앱 내 메시징은 Supabase 실시간 인프라를 통한 보안 WebSocket 연결로 작동됩니다."}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "b. Notification System" : "나. 알림 시스템"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "SMS notifications for appointments and important updates are sent through SOLAPI service. Phone numbers are shared with this service only for the purpose of sending notifications."
+                    : "예약 및 중요 업데이트에 대한 SMS 알림은 SOLAPI 서비스를 통해 발송됩니다. 전화번호는 알림 발송 목적으로만 해당 서비스와 공유됩니다."}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "c. Data Transmission Security" : "다. 데이터 전송 보안"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "All real-time data transmission is encrypted using industry-standard TLS/SSL protocols. Message content is encrypted end-to-end for privacy protection."
+                    : "모든 실시간 데이터 전송은 업계 표준 TLS/SSL 프로토콜을 사용하여 암호화됩니다. 메시지 내용은 개인정보 보호를 위해 종단간 암호화됩니다."}
+                </p>
+              </div>
+              <h2 className="font-semibold mt-6 mb-3">
+                {isEnglish ? "Article 8. International Data Transfers and Cross-Border Processing" : "제 8조. 국제 데이터 전송 및 국경 간 처리"}
+              </h2>
+              <p className="mb-4">
+                {isEnglish
+                  ? "Some of our third-party service providers may process data in countries outside of South Korea. We ensure appropriate safeguards are in place for international transfers."
+                  : "일부 제3자 서비스 제공업체는 한국 외의 국가에서 데이터를 처리할 수 있습니다. 국제 전송에 대해 적절한 보호조치를 마련하고 있습니다."}
+              </p>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "a. Third-Party Service Locations" : "가. 제3자 서비스 위치"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Google Services (Maps, OAuth): Global infrastructure with data centers worldwide" : "• 구글 서비스 (지도, OAuth): 전세계 데이터센터가 있는 글로벌 인프라"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• TossPayments: Primarily South Korea-based with secure international connections" : "• 토스페이먼츠: 주로 한국 기반이며 보안 국제 연결 보유"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Supabase: Cloud infrastructure with data residency controls" : "• Supabase: 데이터 거주지 통제가 있는 클라우드 인프라"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "b. Transfer Safeguards" : "나. 전송 보호조치"}
+                </p>
+                <p className="pl-4">
+                  {isEnglish
+                    ? "All international data transfers are protected by appropriate safeguards including encryption, access controls, and contractual obligations with service providers to maintain privacy standards equivalent to Korean law."
+                    : "모든 국제 데이터 전송은 암호화, 접근 통제, 그리고 한국 법률과 동등한 개인정보 보호 기준을 유지하기 위한 서비스 제공업체와의 계약상 의무를 포함한 적절한 보호조치로 보호됩니다."}
+                </p>
+              </div>
+              <h2 className="font-semibold mt-6 mb-3">
+                {isEnglish ? "Article 9. Measures to Ensure Security of Personal Information" : "제 9조. 개인정보의 안전성 확보 조치"}
               </h2>
               <p className="mb-3">
                 {isEnglish
