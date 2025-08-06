@@ -312,7 +312,7 @@ export default function TermsOfServicePage() {
                     {isEnglish ? "• Service Provider: SOLAPI (솔라피)" : "• 위탁업체: 솔라피 (SOLAPI)"}
                   </p>
                   <p className="mb-1">
-                    {isEnglish ? "• Shared Data: Phone numbers, SMS message content" : "• 위탁정보: 전화번호, SMS 메시지 내용"}
+                    {isEnglish ? "• Shared Data: Phone numbers, SMS message content, HMAC authentication headers" : "• 위탁정보: 전화번호, SMS 메시지 내용, HMAC 인증 헤더"}
                   </p>
                   <p className="mb-1">
                     {isEnglish ? "• Purpose: Sending appointment confirmations, verification codes, service notifications" : "• 위탁목적: 예약 확인, 인증번호, 서비스 알림 발송"}
@@ -328,13 +328,13 @@ export default function TermsOfServicePage() {
                 </p>
                 <div className="pl-4">
                   <p className="mb-1">
-                    {isEnglish ? "• Service Providers: Google Maps API, Daum Postcode API" : "• 위탁업체: 구글 지도 API, 다음 우편번호 API"}
+                    {isEnglish ? "• Service Providers: Google Maps API, Kakao Daum Postcode API" : "• 위탁업체: 구글 지도 API, 카카오 다음 우편번호 API"}
                   </p>
                   <p className="mb-1">
-                    {isEnglish ? "• Shared Data: Address information, location coordinates" : "• 위탁정보: 주소정보, 위치좌표"}
+                    {isEnglish ? "• Shared Data: Address information, location coordinates, Korean postal codes, administrative divisions" : "• 위탁정보: 주소정보, 위치좌표, 한국 우편번호, 행정구역"}
                   </p>
                   <p className="mb-1">
-                    {isEnglish ? "• Purpose: Address verification, clinic location display, navigation assistance" : "• 위탁목적: 주소 확인, 병원 위치 표시, 길찾기 지원"}
+                    {isEnglish ? "• Purpose: Address verification, clinic location display, navigation assistance, Korean address search" : "• 위탁목적: 주소 확인, 병원 위치 표시, 길찾기 지원, 한국 주소 검색"}
                   </p>
                   <p className="mb-1">
                     {isEnglish ? "• Retention: Not permanently stored, processed for immediate use" : "• 보유기간: 영구 저장하지 않음, 즉시 처리 목적"}
@@ -350,13 +350,76 @@ export default function TermsOfServicePage() {
                     {isEnglish ? "• Service Providers: Google OAuth, Kakao OAuth, Apple OAuth" : "• 위탁업체: 구글 OAuth, 카카오 OAuth, 애플 OAuth"}
                   </p>
                   <p className="mb-1">
-                    {isEnglish ? "• Shared Data: Basic profile information (name, email), authentication tokens" : "• 위탁정보: 기본 프로필 정보(이름, 이메일), 인증 토큰"}
+                    {isEnglish ? "• Integration: Via Supabase Auth for secure token processing" : "• 통합방식: 보안 토큰 처리를 위한 Supabase Auth 경유"}
                   </p>
                   <p className="mb-1">
-                    {isEnglish ? "• Purpose: User authentication, account creation, login verification" : "• 위탁목적: 사용자 인증, 계정 생성, 로그인 확인"}
+                    {isEnglish ? "• Shared Data: Basic profile information (name, email), authentication tokens, Google ID tokens via mobile WebView" : "• 위탁정보: 기본 프로필 정보(이름, 이메일), 인증 토큰, 모바일 웹뷰를 통한 구글 ID 토큰"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: User authentication, account creation, login verification, mobile app authentication" : "• 위탁목적: 사용자 인증, 계정 생성, 로그인 확인, 모바일 앱 인증"}
                   </p>
                   <p className="mb-1">
                     {isEnglish ? "• Retention: Until account deletion" : "• 보유기간: 계정 삭제 시까지"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "f. Content Delivery and Font Services" : "바. 콘텐츠 배송 및 폰트 서비스"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service Providers: Google Fonts, Picsum Photos (demo content), Supabase CDN" : "• 위탁업체: 구글 폰트, Picsum Photos (데모 콘텐츠), Supabase CDN"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: HTTP requests with referrer information, image loading requests" : "• 위탁정보: 리퍼러 정보를 포함한 HTTP 요청, 이미지 로딩 요청"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Font loading (Geist fonts), demo image display, content delivery optimization" : "• 위탁목적: 폰트 로딩 (Geist 폰트), 데모 이미지 표시, 콘텐츠 배송 최적화"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: Temporary browser cache, not permanently stored by services" : "• 보유기간: 임시 브라우저 캐시, 서비스에서 영구 저장하지 않음"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "g. Backend Infrastructure Services" : "사. 백엔드 인프라 서비스"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service Provider: Supabase (Primary Backend)" : "• 위탁업체: Supabase (주 백엔드)"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: All application data (user profiles, medical records, communications, files)" : "• 위탁정보: 모든 애플리케이션 데이터 (사용자 프로필, 의료 기록, 통신, 파일)"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Services: Database operations, authentication backend, real-time messaging (WebSocket), file storage, image compression" : "• 서비스: 데이터베이스 운영, 인증 백엔드, 실시간 메시징 (WebSocket), 파일 저장, 이미지 압축"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Primary application infrastructure, data storage, user authentication, real-time features" : "• 위탁목적: 주 애플리케이션 인프라, 데이터 저장, 사용자 인증, 실시간 기능"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: According to user account lifecycle and medical record regulations (5 years)" : "• 보유기간: 사용자 계정 생명주기 및 의료기록 법령에 따름 (5년)"}
+                  </p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <p className="font-medium mb-2">
+                  {isEnglish ? "h. Web Push Notification Services" : "아. 웹 푸시 알림 서비스"}
+                </p>
+                <div className="pl-4">
+                  <p className="mb-1">
+                    {isEnglish ? "• Service: Web Push Protocol (Browser-based notifications)" : "• 서비스: 웹 푸시 프로토콜 (브라우저 기반 알림)"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Shared Data: Push subscription data, notification content, VAPID authentication" : "• 위탁정보: 푸시 구독 데이터, 알림 내용, VAPID 인증"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Purpose: Real-time appointment notifications, service updates" : "• 위탁목적: 실시간 예약 알림, 서비스 업데이트"}
+                  </p>
+                  <p className="mb-1">
+                    {isEnglish ? "• Retention: Until user unsubscribes or browser data is cleared" : "• 보유기간: 사용자 구독 해제 또는 브라우저 데이터 삭제 시까지"}
                   </p>
                 </div>
               </div>
