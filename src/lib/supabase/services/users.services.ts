@@ -358,6 +358,24 @@ export async function softDeleteUser(userId: string) {
   if (error) throw error;
 }
 
+export async function hardDeleteUser(userId: string) {
+  // Call the API route to permanently delete user (both database and auth)
+  const response = await fetch("/api/delete-account", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to delete account");
+  }
+
+  return await response.json();
+}
+
 /**
  * Registers a new admin user.
  * @param data - Admin signup form data
