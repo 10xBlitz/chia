@@ -13,9 +13,9 @@ export type ReviewTable = {
   patient: {
     id: string;
     full_name: string;
-    residence: string;
+    residence: string | null;
     birthdate: string;
-    work_place: string;
+    work_place: string | null;
     contact_number: string;
   };
   clinic_treatment: {

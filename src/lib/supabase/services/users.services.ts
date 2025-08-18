@@ -130,10 +130,10 @@ export async function updateUserProfile(
   values: {
     full_name: string;
     contact_number: string;
-    residence: string;
+    residence?: string;
     birthdate: Date;
     gender: string;
-    work_place: string;
+    work_place?: string;
   }
 ) {
   // Separate email from other fields
@@ -245,8 +245,8 @@ export async function registerDentist({
   gender: string;
   contact_number: string;
   birthdate: string | Date;
-  residence: string;
-  work_place: string;
+  residence?: string;
+  work_place?: string;
 }) {
   //check first if the clinic is active
   const { data: clinicData, error: clinicError } = await supabaseClient
@@ -290,8 +290,8 @@ export async function registerDentist({
     contact_number,
     full_name,
     gender,
-    residence,
-    work_place,
+    residence: residence || null,
+    work_place: work_place || null,
     email,
     password,
     role: "dentist",
@@ -306,6 +306,7 @@ export async function registerDentist({
       dentist_id: dentistId,
       clinic_department_id: department,
     }));
+    
     const { error: departmentError } = await supabaseClient
       .from("dentist_clinic_department")
       .insert(departmentInserts);
@@ -387,8 +388,8 @@ export async function registerAdmin(data: {
   gender: string;
   contact_number: string;
   birthdate: string; // ISO string
-  residence: string;
-  work_place: string;
+  residence?: string;
+  work_place?: string;
   adminPassword: string;
 }) {
   // Check admin password via API route (server-side)
@@ -409,8 +410,8 @@ export async function registerAdmin(data: {
     gender: data.gender,
     contact_number: data.contact_number,
     birthdate: data.birthdate,
-    residence: data.residence,
-    work_place: data.work_place,
+    residence: data.residence || null,
+    work_place: data.work_place || null,
     role: "admin",
     clinic_id: null, // Admins do not belong to a clinic
   });

@@ -25,31 +25,9 @@ export const step2Schema = z.object({
 // ✅ Final full schema for form types + final submission
 export const fullSchema = step1Schema.merge(step2Schema);
 /* eslint-disable @typescript-eslint/no-explicit-any */
+export type FullSchemaType = z.infer<typeof fullSchema>;
+
 export interface StepInterface {
-  form: UseFormReturn<
-    {
-      gender: string;
-      contact_number: string;
-      birthdate: Date;
-      residence: string | undefined;
-      workplace: string | undefined;
-      name: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-    },
-    any,
-    {
-      gender: string;
-      contact_number: string;
-      birthdate: Date;
-      residence: string | undefined;
-      workplace: string | undefined;
-      name: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-    }
-  >;
+  form: UseFormReturn<FullSchemaType>;
   confirmPasswordError?: string;
 }

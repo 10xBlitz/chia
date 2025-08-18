@@ -92,7 +92,8 @@ const SignupPage = () => {
         role: "patient",
         full_name: data.name,
         clinic_id: null,
-        work_place: data.workplace,
+        work_place: data.workplace || null,
+        residence: data.residence || null,
       });
 
       // Fetch updated user profile
