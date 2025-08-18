@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -690,9 +690,9 @@ export type Database = {
           gender: string
           id: string
           login_status: Database["public"]["Enums"]["login_status"]
-          residence: string
+          residence: string | null
           role: Database["public"]["Enums"]["user_role"]
-          work_place: string
+          work_place: string | null
         }
         Insert: {
           birthdate: string
@@ -703,9 +703,9 @@ export type Database = {
           gender: string
           id: string
           login_status?: Database["public"]["Enums"]["login_status"]
-          residence: string
+          residence?: string | null
           role: Database["public"]["Enums"]["user_role"]
-          work_place: string
+          work_place?: string | null
         }
         Update: {
           birthdate?: string
@@ -716,9 +716,9 @@ export type Database = {
           gender?: string
           id?: string
           login_status?: Database["public"]["Enums"]["login_status"]
-          residence?: string
+          residence?: string | null
           role?: Database["public"]["Enums"]["user_role"]
-          work_place?: string
+          work_place?: string | null
         }
         Relationships: [
           {
@@ -772,23 +772,23 @@ export type Database = {
     Functions: {
       fetch_rooms_by_latest_message: {
         Args:
-          | { p_search?: string; p_limit?: number; p_offset?: number }
+          | { p_limit?: number; p_offset?: number; p_search?: string }
           | {
-              p_user_id: string
-              p_search?: string
               p_limit?: number
               p_offset?: number
+              p_search?: string
+              p_user_id: string
             }
         Returns: {
-          id: string
           category: string
-          patient_full_name: string
+          id: string
           last_admin_read_at: string
           last_patient_read_at: string
-          latest_message_created_at: string
           latest_message: string
-          latest_message_sender_id: string
+          latest_message_created_at: string
           latest_message_sender_full_name: string
+          latest_message_sender_id: string
+          patient_full_name: string
         }[]
       }
       get_dentist_quotations: {
@@ -796,105 +796,105 @@ export type Database = {
           | {
               p_clinic_id: string
               p_clinic_treatments: string[]
-              page_offset?: number
+              p_region: string
               page_limit?: number
-              sort_field?: string
+              page_offset?: number
               sort_direction?: string
+              sort_field?: string
             }
           | {
               p_clinic_id: string
-              p_region: string
               p_clinic_treatments: string[]
-              page_offset?: number
               page_limit?: number
-              sort_field?: string
+              page_offset?: number
               sort_direction?: string
+              sort_field?: string
             }
         Returns: {
-          id: string
-          region: string
-          name: string
-          gender: string
-          birthdate: string
-          residence: string
-          concern: string
-          patient_id: string
-          clinic_id: string
-          treatment_id: string
-          image_url: string[]
-          status: string
-          created_at: string
-          treatment_name: string
-          treatment_image_url: string
-          treatment_status: string
-          clinic_name: string
-          clinic_status: string
-          bid_count: number
-          bid_id: string
-          bid_expected_price_min: number
-          bid_expected_price_max: number
           bid_additional_explanation: string
+          bid_clinic_treatment_id: string
+          bid_count: number
+          bid_created_at: string
+          bid_expected_price_max: number
+          bid_expected_price_min: number
+          bid_id: string
           bid_recommend_quick_visit: boolean
           bid_status: string
-          bid_created_at: string
-          bid_clinic_treatment_id: string
+          birthdate: string
+          clinic_id: string
+          clinic_name: string
+          clinic_status: string
+          concern: string
+          created_at: string
+          gender: string
+          id: string
+          image_url: string[]
+          name: string
+          patient_id: string
+          region: string
+          residence: string
+          status: string
           total_count: number
+          treatment_id: string
+          treatment_image_url: string
+          treatment_name: string
+          treatment_status: string
         }[]
       }
       get_filtered_quotations: {
         Args: {
-          page_offset?: number
-          page_limit?: number
-          filter_name?: string
-          filter_status?: string
-          filter_region?: string
-          filter_patient_id?: string
           filter_date_from?: string
           filter_date_to?: string
-          sort_field?: string
+          filter_name?: string
+          filter_patient_id?: string
+          filter_region?: string
+          filter_status?: string
+          page_limit?: number
+          page_offset?: number
           sort_direction?: string
+          sort_field?: string
         }
         Returns: {
-          id: string
-          region: string
-          name: string
-          gender: string
-          birthdate: string
-          residence: string
-          concern: string
-          patient_id: string
-          clinic_id: string
-          treatment_id: string
-          image_url: string[]
-          status: string
-          created_at: string
-          treatment_name: string
-          treatment_image_url: string
-          treatment_status: string
-          clinic_name: string
-          clinic_status: string
-          bid_count: number
-          bid_id: string
-          bid_expected_price_min: number
-          bid_expected_price_max: number
           bid_additional_explanation: string
+          bid_clinic_treatment_id: string
+          bid_count: number
+          bid_created_at: string
+          bid_expected_price_max: number
+          bid_expected_price_min: number
+          bid_id: string
           bid_recommend_quick_visit: boolean
           bid_status: string
-          bid_created_at: string
-          bid_clinic_treatment_id: string
+          birthdate: string
+          clinic_id: string
+          clinic_name: string
+          clinic_status: string
+          concern: string
+          created_at: string
+          gender: string
+          id: string
+          image_url: string[]
+          name: string
+          patient_id: string
+          region: string
+          residence: string
+          status: string
           total_count: number
+          treatment_id: string
+          treatment_image_url: string
+          treatment_name: string
+          treatment_status: string
         }[]
       }
       get_paginated_users_with_email: {
         Args: {
-          p_page?: number
-          p_limit?: number
-          p_full_name?: string
           p_category?: string
           p_date_from?: string
           p_date_to?: string
-          p_sort?: string
+          p_full_name?: string
+          p_limit?: number
           p_order?: string
+          p_page?: number
+          p_sort?: string
         }
         Returns: {
           items: Json

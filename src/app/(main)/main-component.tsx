@@ -83,14 +83,13 @@ export default function MainPage() {
     if (
       user?.id &&
       user.role &&
-      user.login_status === "active" &&
-      user.work_place
+      user.login_status === "active"
     ) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-  }, [user?.id, user?.role, user?.work_place, user?.login_status]);
+  }, [user?.id, user?.role, user?.login_status]);
 
   return (
     <>
@@ -191,10 +190,10 @@ export default function MainPage() {
                 let addressFilter = "";
                 if (filterOption === "근무지") {
                   //workplace
-                  addressFilter = user?.work_place.split(",")[1] || "";
+                  addressFilter = user?.work_place?.split(",")[1] || "";
                 } else if (filterOption === "거주") {
                   //residence
-                  addressFilter = user?.residence.split(",")[1] || "";
+                  addressFilter = user?.residence?.split(",")[1] || "";
                 }
                 let q = query;
                 if (addressFilter) {

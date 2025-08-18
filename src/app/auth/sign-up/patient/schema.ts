@@ -18,8 +18,8 @@ export const step2Schema = z.object({
     .min(9, "최소 9자리 숫자여야 합니다.") // Must be at least 9 digits
     .max(13, "최대 13자리 숫자입니다."), // Must be at most 13 digits
   birthdate: z.date({ required_error: "생년월일은 필수입니다." }), // Date is required
-  residence: z.string().min(1, { message: "거주지는 필수입니다." }), // Residence is required.
-  workplace: z.string().min(1, { message: "직장 정보는 필수입니다." }), // Workplace is required.
+  residence: z.string().optional(), // Residence is optional.
+  workplace: z.string().optional(), // Workplace is optional.
 });
 
 // ✅ Final full schema for form types + final submission
@@ -31,8 +31,8 @@ export interface StepInterface {
       gender: string;
       contact_number: string;
       birthdate: Date;
-      residence: string;
-      workplace: string;
+      residence: string | undefined;
+      workplace: string | undefined;
       name: string;
       email: string;
       password: string;
@@ -43,8 +43,8 @@ export interface StepInterface {
       gender: string;
       contact_number: string;
       birthdate: Date;
-      residence: string;
-      workplace: string;
+      residence: string | undefined;
+      workplace: string | undefined;
       name: string;
       email: string;
       password: string;
