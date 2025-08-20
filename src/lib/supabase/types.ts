@@ -339,6 +339,7 @@ export type Database = {
           id: string
           image_url: string | null
           status: Database["public"]["Enums"]["record_status"] | null
+          thumbnail_url: string | null
           title: string
         }
         Insert: {
@@ -350,6 +351,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           status?: Database["public"]["Enums"]["record_status"] | null
+          thumbnail_url?: string | null
           title: string
         }
         Update: {
@@ -361,6 +363,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           status?: Database["public"]["Enums"]["record_status"] | null
+          thumbnail_url?: string | null
           title?: string
         }
         Relationships: [

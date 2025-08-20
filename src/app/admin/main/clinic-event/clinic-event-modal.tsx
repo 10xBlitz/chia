@@ -46,12 +46,17 @@ export const ClinicEventModal = ({
   onClose: () => void;
   onSuccess: () => void;
 }) => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>(
+    data?.thumbnail_url || ""
+  );
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [mainImagePreview, setMainImagePreview] = useState<string>(
     data?.image_url || ""
   );
   const [progress, setProgress] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
+  const mainImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<z.infer<typeof clinicEventFormSchema>>({
     resolver: zodResolver(clinicEventFormSchema),
@@ -61,7 +66,8 @@ export const ClinicEventModal = ({
           title: data.title,
           description: data.description || "",
           discount: data.discount.toString() || "",
-          image: data.image_url || "",
+          thumbnail_image: data.thumbnail_url || "",
+          main_image: data.image_url || "",
           clinic_id: data.clinic_treatment.clinic.id,
           clinic_treatment_id: data.clinic_treatment_id,
           date_range: parseDateFromSupabase(data.date_range as string) ?? {
@@ -73,7 +79,8 @@ export const ClinicEventModal = ({
           title: "",
           description: "",
           discount: "0",
-          image: "",
+          thumbnail_image: "",
+          main_image: "",
           clinic_id: undefined, // Use undefined for unselected
           clinic_treatment_id: undefined, // Use undefined for unselected
           date_range: {
@@ -87,8 +94,10 @@ export const ClinicEventModal = ({
   useEffect(() => {
     if (!open) {
       form.reset();
-      setImageFile(null);
-      setImagePreview("");
+      setThumbnailFile(null);
+      setThumbnailPreview("");
+      setMainImageFile(null);
+      setMainImagePreview("");
     }
   }, [open, form]);
 
@@ -109,7 +118,8 @@ export const ClinicEventModal = ({
             date_range,
             clinic_treatment_id: values.clinic_treatment_id,
             discount: parseFloat(values.discount),
-            image: imageFile ? imageFile : values.image,
+            thumbnail_image: thumbnailFile ? thumbnailFile : values.thumbnail_image,
+            main_image: mainImageFile ? mainImageFile : values.main_image,
           },
           (prog) => setProgress(prog)
         );
@@ -121,7 +131,8 @@ export const ClinicEventModal = ({
             date_range,
             clinic_treatment_id: values.clinic_treatment_id,
             discount: parseFloat(values.discount),
-            image: imageFile ? imageFile : values.image,
+            thumbnail_image: thumbnailFile ? thumbnailFile : values.thumbnail_image,
+            main_image: mainImageFile ? mainImageFile : values.main_image,
           },
           (prog) => setProgress(prog)
         );
@@ -150,23 +161,42 @@ export const ClinicEventModal = ({
     mutation.mutate(values);
   };
 
-  const handleImageChange = (
+  const handleThumbnailChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldOnChange: (value: string) => void
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
+      setThumbnailFile(file);
       const reader = new FileReader();
       reader.onload = () => {
-        setImagePreview(reader.result as string);
-        // Optionally clear the text field value
+        setThumbnailPreview(reader.result as string);
         fieldOnChange("");
       };
       reader.readAsDataURL(file);
     } else {
-      setImageFile(null);
-      setImagePreview("");
+      setThumbnailFile(null);
+      setThumbnailPreview("");
+      fieldOnChange("");
+    }
+  };
+
+  const handleMainImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldOnChange: (value: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMainImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setMainImagePreview(reader.result as string);
+        fieldOnChange("");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setMainImageFile(null);
+      setMainImagePreview("");
       fieldOnChange("");
     }
   };
@@ -266,39 +296,39 @@ export const ClinicEventModal = ({
 
           <FormField
             control={form.control}
-            name="image"
+            name="thumbnail_image"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>이미지</FormLabel> {/* Image */}
+                <FormLabel>썸네일 이미지</FormLabel> {/* Thumbnail Image */}
                 <FormControl>
                   <div>
                     <input
                       type="file"
                       accept="image/*"
-                      id="clinic-event-image-upload"
-                      ref={fileInputRef}
+                      id="clinic-event-thumbnail-upload"
+                      ref={thumbnailInputRef}
                       style={{ display: "none" }}
-                      onChange={(e) => handleImageChange(e, field.onChange)}
+                      onChange={(e) => handleThumbnailChange(e, field.onChange)}
                     />
                     <div className="flex gap-3 items-center">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => thumbnailInputRef.current?.click()}
                         className="px-4 py-2"
                       >
-                        이미지 선택 {/* Select Image */}
+                        썸네일 선택 {/* Select Thumbnail */}
                       </Button>
-                      {imagePreview && (
+                      {thumbnailPreview && (
                         <Button
                           type="button"
                           variant="ghost"
                           onClick={() => {
-                            setImageFile(null);
-                            setImagePreview("");
+                            setThumbnailFile(null);
+                            setThumbnailPreview("");
                             field.onChange("");
-                            if (fileInputRef.current)
-                              fileInputRef.current.value = "";
+                            if (thumbnailInputRef.current)
+                              thumbnailInputRef.current.value = "";
                           }}
                           className="text-red-500"
                         >
@@ -306,11 +336,71 @@ export const ClinicEventModal = ({
                         </Button>
                       )}
                     </div>
-                    {imagePreview && (
+                    {thumbnailPreview && (
                       <div className="mt-2">
                         <Image
-                          src={imagePreview}
-                          alt="미리보기" // Preview
+                          src={thumbnailPreview}
+                          alt="썸네일 미리보기" // Thumbnail Preview
+                          className="rounded object-cover"
+                          width={120}
+                          height={120}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="main_image"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>메인 이미지</FormLabel> {/* Main Image */}
+                <FormControl>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="clinic-event-main-image-upload"
+                      ref={mainImageInputRef}
+                      style={{ display: "none" }}
+                      onChange={(e) => handleMainImageChange(e, field.onChange)}
+                    />
+                    <div className="flex gap-3 items-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => mainImageInputRef.current?.click()}
+                        className="px-4 py-2"
+                      >
+                        메인 이미지 선택 {/* Select Main Image */}
+                      </Button>
+                      {mainImagePreview && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => {
+                            setMainImageFile(null);
+                            setMainImagePreview("");
+                            field.onChange("");
+                            if (mainImageInputRef.current)
+                              mainImageInputRef.current.value = "";
+                          }}
+                          className="text-red-500"
+                        >
+                          삭제 {/* Delete */}
+                        </Button>
+                      )}
+                    </div>
+                    {mainImagePreview && (
+                      <div className="mt-2">
+                        <Image
+                          src={mainImagePreview}
+                          alt="메인 이미지 미리보기" // Main Image Preview
                           className="rounded object-cover"
                           width={120}
                           height={120}

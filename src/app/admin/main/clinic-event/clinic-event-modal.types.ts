@@ -16,27 +16,50 @@ export const clinicEventFormSchema = z
       })
       .min(1, "필수항목입니다"),
     discount: z.string({ required_error: "필수항목입니다" }),
-    image: z.any(),
+    thumbnail_image: z.any(),
+    main_image: z.any(),
   })
   .refine(
     (values) =>
-      typeof values.image === "string" ||
-      values.image instanceof File ||
-      values.image === undefined ||
-      values.image === null ||
-      (Array.isArray(values.image) && values.image.length === 0),
+      typeof values.thumbnail_image === "string" ||
+      values.thumbnail_image instanceof File ||
+      values.thumbnail_image === undefined ||
+      values.thumbnail_image === null ||
+      (Array.isArray(values.thumbnail_image) && values.thumbnail_image.length === 0),
     {
       message: "필수항목입니다",
-      path: ["image"],
+      path: ["thumbnail_image"],
     }
   )
   .refine(
     (values) =>
-      !values.image ||
-      typeof values.image === "string" ||
-      (values.image instanceof File && values.image.type.startsWith("image/")),
+      !values.thumbnail_image ||
+      typeof values.thumbnail_image === "string" ||
+      (values.thumbnail_image instanceof File && values.thumbnail_image.type.startsWith("image/")),
     {
       message: "File must be an image",
-      path: ["image"],
+      path: ["thumbnail_image"],
+    }
+  )
+  .refine(
+    (values) =>
+      typeof values.main_image === "string" ||
+      values.main_image instanceof File ||
+      values.main_image === undefined ||
+      values.main_image === null ||
+      (Array.isArray(values.main_image) && values.main_image.length === 0),
+    {
+      message: "필수항목입니다",
+      path: ["main_image"],
+    }
+  )
+  .refine(
+    (values) =>
+      !values.main_image ||
+      typeof values.main_image === "string" ||
+      (values.main_image instanceof File && values.main_image.type.startsWith("image/")),
+    {
+      message: "File must be an image",
+      path: ["main_image"],
     }
   );

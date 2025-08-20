@@ -53,22 +53,56 @@ export const columns: ColumnDef<ClinicEventTable>[] = [
     },
   },
   {
-    accessorKey: "image",
-    header: "이미지", // Image
+    accessorKey: "thumbnail",
+    header: () => <div className="text-center">썸네일</div>, // Thumbnail
     cell: ({ row }) => (
-      <>
-        {row.original.image_url ? (
-          <Image
-            src={row.original.image_url}
-            height={100}
-            width={100}
-            alt={row.original.title}
-          />
+      <div className="flex justify-center items-center p-2">
+        {row.original.thumbnail_url ? (
+          <div className="relative w-[80px] h-[80px] rounded overflow-hidden flex-shrink-0">
+            <Image
+              src={row.original.thumbnail_url}
+              alt={`${row.original.title} 썸네일`}
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
+          </div>
         ) : (
-          <>이미지 없음 {/** No image */}</>
+          <div className="w-[80px] h-[80px] flex items-center justify-center text-xs text-gray-500 bg-gray-100 rounded flex-shrink-0">
+            썸네일 없음
+          </div>
         )}
-      </>
+      </div>
     ),
+    size: 100,
+    minSize: 100,
+    maxSize: 100,
+  },
+  {
+    accessorKey: "image",
+    header: () => <div className="text-center">메인 이미지</div>, // Main Image
+    cell: ({ row }) => (
+      <div className="flex justify-center items-center p-2">
+        {row.original.image_url ? (
+          <div className="relative w-[80px] h-[80px] rounded overflow-hidden flex-shrink-0">
+            <Image
+              src={row.original.image_url}
+              alt={row.original.title}
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <div className="w-[80px] h-[80px] flex items-center justify-center text-xs text-gray-500 bg-gray-100 rounded flex-shrink-0">
+            메인 이미지 없음
+          </div>
+        )}
+      </div>
+    ),
+    size: 100,
+    minSize: 100,
+    maxSize: 100,
   },
 
   {
