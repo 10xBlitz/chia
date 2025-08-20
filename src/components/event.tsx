@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { supabaseClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { calculateDiscountedPrice } from "@/lib/utils";
 
 export default function EventCarousel() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -127,21 +126,14 @@ export default function EventCarousel() {
           events.map((event) => (
             <div key={event.id} className="flex-shrink-0 w-[180px]">
               <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
-                {event.image_url ? (
+                {event.thumbnail_url || event.image_url ? (
                   <Link
-                    href={`/patient/payment/event?orderId=${
-                      event.id
-                    }&amount=${calculateDiscountedPrice(
-                      0,
-                      event.discount
-                    )}&eventName=${event.title}&treatmentName=${
-                      event.clinic_treatment.treatment.treatment_name
-                    }&treatmentOriginalPrice=${0}`}
+                    href={`/event/${event.id}`}
                     className="block h-full"
                     draggable={false}
                   >
                     <Image
-                      src={event.image_url}
+                      src={event.thumbnail_url || event.image_url || "/images/fallback-image.png"}
                       alt={event.title || "event"}
                       width={300}
                       height={300}
