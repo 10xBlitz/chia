@@ -22,7 +22,7 @@ export default function EventCarousel() {
       const { data, error } = await supabaseClient
         .from("event")
         .select(
-          "*, clinic_treatment!inner(*, clinic!inner(status), treatment(*))"
+          "*, clinic_treatment!inner(*, clinic!inner(*), treatment(*))"
         )
         .neq("status", "deleted")
         .neq("clinic_treatment.clinic.status", "deleted");
@@ -125,13 +125,13 @@ export default function EventCarousel() {
         {events &&
           events.map((event) => (
             <div key={event.id} className="flex-shrink-0 w-[180px]">
-              <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
-                {event.thumbnail_url || event.image_url ? (
-                  <Link
-                    href={`/event/${event.id}`}
-                    className="block h-full"
-                    draggable={false}
-                  >
+              <Link
+                href={`/event/${event.id}`}
+                className="block"
+                draggable={false}
+              >
+                <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
+                  {event.thumbnail_url || event.image_url ? (
                     <Image
                       src={event.thumbnail_url || event.image_url || "/images/fallback-image.png"}
                       alt={event.title || "event"}
@@ -140,18 +140,30 @@ export default function EventCarousel() {
                       className="object-cover w-full h-full"
                       draggable={false}
                     />
-                  </Link>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <span className="text-gray-500">No Image</span>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <span className="text-gray-500">No Image</span>
+                    </div>
+                  )}
+                  
+                  {/* Discount Badge */}
+                  {event.discount > 0 && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                      {event.discount}% OFF
+                    </div>
+                  )}
+                  
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent p-3">
+                    <h3 className="text-white font-semibold text-sm line-clamp-2 leading-tight">
+                      {event.title}
+                    </h3>
+                    <p className="text-white/80 text-xs mt-1 truncate">
+                      {event.clinic_treatment.clinic.clinic_name}
+                    </p>
                   </div>
-                )}
-                {/* <div className="absolute bottom-2 left-0 w-full  bg-opacity-50 py-2 px-2">
-                  <h3 className="text-white ml-5 text-xl font-semibold truncate">
-                    {event.title || "치아미백"}
-                  </h3>
-                </div> */}
-              </div>
+                </div>
+              </Link>
             </div>
           ))}
       </div>

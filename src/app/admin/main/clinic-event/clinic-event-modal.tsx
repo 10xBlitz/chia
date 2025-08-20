@@ -221,7 +221,7 @@ export const ClinicEventModal = ({
       title={data ? "병원 이벤트 편집" : "병원 이벤트 추가"}
       description={""}
       isOpen={open}
-      isLong={false}
+      isLong={true}
       onClose={onClose}
     >
       <Form {...form}>
