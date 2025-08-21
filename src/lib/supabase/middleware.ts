@@ -118,6 +118,21 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Redirect logged-in non-patients away from the root landing page
+    if (request.nextUrl.pathname === "/" && user && role) {
+      if (role === "dentist") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dentist";
+        return NextResponse.redirect(url);
+      }
+      if (role === "admin") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin";
+        return NextResponse.redirect(url);
+      }
+      // Patients can stay on the landing page
+    }
+
     // if (!role && publicRoutes.includes(request.nextUrl.pathname)) {
     //   // User is logged in but has no role, redirect to profile setup
     //   console.log("--->includes:", request.nextUrl.pathname);
