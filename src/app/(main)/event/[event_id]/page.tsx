@@ -25,9 +25,7 @@ export default function EventDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("event")
-        .select(
-          "*, clinic_treatment!inner(*, clinic!inner(*), treatment(*))"
-        )
+        .select("*, clinic_treatment!inner(*, clinic!inner(*), treatment(*))")
         .eq("id", eventId)
         .eq("status", "active")
         .neq("clinic_treatment.clinic.status", "deleted")
@@ -40,16 +38,15 @@ export default function EventDetailPage() {
 
   const handleBookEvent = () => {
     if (!event) return;
-    
+
     const paymentUrl = `/patient/payment/event?orderId=${
       event.id
-    }&amount=${calculateDiscountedPrice(
-      0,
-      event.discount
-    )}&eventName=${event.title}&treatmentName=${
+    }&amount=${calculateDiscountedPrice(0, event.discount)}&eventName=${
+      event.title
+    }&treatmentName=${
       event.clinic_treatment.treatment.treatment_name
     }&treatmentOriginalPrice=${0}`;
-    
+
     router.push(paymentUrl);
   };
 
@@ -89,84 +86,93 @@ export default function EventDetailPage() {
           </div>
         </header>
 
-        {/* Main Image */}
-        <div className="relative w-full aspect-square bg-gray-100">
-          {event.image_url ? (
-            <Image
-              src={event.image_url}
-              alt={event.title}
-              fill
-              sizes="450px"
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <span className="text-gray-500">이미지가 없습니다</span>
-            </div>
-          )}
-        </div>
-
         {/* Content */}
         <div className="p-6 space-y-6">
-        {/* Event Title and Discount */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="bg-red-500 text-white px-2 py-1 rounded-md text-sm font-medium flex items-center gap-1">
-              <Percent className="w-3 h-3" />
-              {event.discount}% 할인
+          {/* Event Title and Discount */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 justify-end">
+              <div className="bg-red-500 text-white px-2 py-1 rounded-md text-sm font-medium flex items-center gap-1">
+                <Percent className="w-3 h-3" />
+                {event.discount}% 할인
+              </div>
             </div>
+            <h2 className="text-2xl font-bold text-gray-900">{event.title}</h2>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">{event.title}</h2>
-        </div>
 
-        {/* Clinic Information */}
-        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <MapPin className="w-4 h-4" />
-            병원 정보
-          </h3>
-          <div className="space-y-1">
-            <p className="font-medium">{event.clinic_treatment.clinic.clinic_name}</p>
-            <p className="text-sm text-gray-600">{event.clinic_treatment.clinic.region}</p>
-          </div>
-        </div>
-
-        {/* Treatment Information */}
-        <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900">치료 정보</h3>
-          <div className="bg-blue-50 rounded-lg p-4">
-            <p className="font-medium text-blue-900">
-              {event.clinic_treatment.treatment.treatment_name}
-            </p>
-          </div>
-        </div>
-
-        {/* Event Period */}
-        {dateRange && (
-          <div className="space-y-3">
+          {/* Clinic Information */}
+          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
             <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              이벤트 기간
+              <MapPin className="w-4 h-4" />
+              병원 정보
             </h3>
-            <div className="bg-green-50 rounded-lg p-4">
-              <p className="text-green-800">
-                {format(dateRange.from, "yyyy년 M월 d일", { locale: ko })} -{" "}
-                {format(dateRange.to, "yyyy년 M월 d일", { locale: ko })}
+            <div className="space-y-1">
+              <p className="font-medium">
+                {event.clinic_treatment.clinic.clinic_name}
+              </p>
+              <p className="text-sm text-gray-600">
+                {event.clinic_treatment.clinic.region}
               </p>
             </div>
           </div>
-        )}
 
-        {/* Description */}
-        {event.description && (
+          {/* Treatment Information */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900">이벤트 상세</h3>
+            <h3 className="font-semibold text-gray-900">치료 정보</h3>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-gray-700 whitespace-pre-wrap">{event.description}</p>
+              <p className="font-medium text-gray-700">
+                {event.clinic_treatment.treatment.treatment_name}
+              </p>
             </div>
           </div>
-        )}
+
+          {/* Event Period */}
+          {dateRange && (
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                이벤트 기간
+              </h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-700">
+                  {format(dateRange.from, "yyyy년 M월 d일", { locale: ko })} -{" "}
+                  {format(dateRange.to, "yyyy년 M월 d일", { locale: ko })}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Description */}
+          {event.description && (
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900">이벤트 상세</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {event.description}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Main Image */}
+          {event.image_url && (
+            <div className="">
+              <h3 className="font-semibold text-gray-900 mb-3">
+                이벤트 이미지
+              </h3>
+              <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden">
+                <Image
+                  src={event.image_url}
+                  alt={event.title}
+                  width={450}
+                  height={0}
+                  className="w-full h-auto object-contain"
+                  style={{ height: "auto" }}
+                  placeholder="empty"
+                  unoptimized
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom CTA */}

@@ -106,6 +106,7 @@ export async function insertClinicEvent(
       folder: "thumbnails",
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
       maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for thumbnails
     });
   } else if (typeof event.thumbnail_image === "string") {
     thumbnailUrl = event.thumbnail_image;
@@ -118,6 +119,7 @@ export async function insertClinicEvent(
       folder: "main-images",
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
       maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for main images
     });
   } else if (typeof event.main_image === "string") {
     mainImageUrl = event.main_image;
@@ -177,6 +179,7 @@ export async function updateClinicEvent(
       folder: "thumbnails",
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
       maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for thumbnails
     });
   } else if (typeof event.thumbnail_image === "string") {
     thumbnailUrl = event.thumbnail_image;
@@ -199,6 +202,7 @@ export async function updateClinicEvent(
       folder: "main-images",
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
       maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for main images
     });
   } else if (typeof event.main_image === "string") {
     mainImageUrl = event.main_image;
