@@ -18,12 +18,14 @@ const compressOptions = {
   fileType: "image/webp",
 };
 
-// High quality compression for event images
+// Maximum quality compression for event images
 const eventImageCompressOptions = {
-  maxSizeMB: 10, // Allow larger file size for better quality
-  maxWidthOrHeight: 2048, // Higher resolution
+  maxSizeMB: 50, // Maximum file size for best quality
+  maxWidthOrHeight: 8192, // Ultra high resolution (8K)
   useWebWorker: true,
-  initialQuality: 0.9, // Higher quality
+  initialQuality: 1.0, // Perfect quality (no compression)
+  alwaysKeepResolution: true, // Never reduce resolution
+  exifOrientation: 1, // Preserve orientation
   // Don't convert to webp to preserve original format
 };
 
