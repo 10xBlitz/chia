@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import BackButton from "@/components/back-button";
 import { calculateDiscountedPrice, parseDateFromSupabase } from "@/lib/utils";
-import { Calendar, MapPin, Percent } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
@@ -40,15 +40,12 @@ export default function EventDetailPage() {
     if (!event) return;
 
     const originalAmount = event.amount || 0;
-    const discountedAmount = calculateDiscountedPrice(originalAmount, event.discount);
+    const discountedAmount = calculateDiscountedPrice(
+      originalAmount,
+      event.discount
+    );
 
-    const paymentUrl = `/patient/payment/event?orderId=${
-      event.id
-    }&amount=${discountedAmount}&eventName=${
-      event.title
-    }&treatmentName=${
-      event.clinic_treatment.treatment.treatment_name
-    }&treatmentOriginalPrice=${originalAmount}`;
+    const paymentUrl = `/patient/payment/event?orderId=${event.id}&amount=${discountedAmount}&eventName=${event.title}&treatmentName=${event.clinic_treatment.treatment.treatment_name}&treatmentOriginalPrice=${originalAmount}`;
 
     router.push(paymentUrl);
   };
@@ -95,7 +92,6 @@ export default function EventDetailPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 justify-end">
               <div className="bg-red-500 text-white px-2 py-1 rounded-md text-sm font-medium flex items-center gap-1">
-                <Percent className="w-3 h-3" />
                 {event.discount}% 할인
               </div>
             </div>
