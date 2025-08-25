@@ -66,6 +66,7 @@ export const ClinicEventModal = ({
           title: data.title,
           description: data.description || "",
           discount: data.discount.toString() || "",
+          amount: data.amount?.toString() || "0",
           thumbnail_image: data.thumbnail_url || "",
           main_image: data.image_url || "",
           clinic_id: data.clinic_treatment.clinic.id,
@@ -79,6 +80,7 @@ export const ClinicEventModal = ({
           title: "",
           description: "",
           discount: "0",
+          amount: "0",
           thumbnail_image: "",
           main_image: "",
           clinic_id: undefined, // Use undefined for unselected
@@ -118,6 +120,7 @@ export const ClinicEventModal = ({
             date_range,
             clinic_treatment_id: values.clinic_treatment_id,
             discount: parseFloat(values.discount),
+            amount: parseFloat(values.amount),
             thumbnail_image: thumbnailFile ? thumbnailFile : values.thumbnail_image,
             main_image: mainImageFile ? mainImageFile : values.main_image,
           },
@@ -131,6 +134,7 @@ export const ClinicEventModal = ({
             date_range,
             clinic_treatment_id: values.clinic_treatment_id,
             discount: parseFloat(values.discount),
+            amount: parseFloat(values.amount),
             thumbnail_image: thumbnailFile ? thumbnailFile : values.thumbnail_image,
             main_image: mainImageFile ? mainImageFile : values.main_image,
           },
@@ -279,6 +283,15 @@ export const ClinicEventModal = ({
             type="number"
             label="할인율" // "Discount Rate"
             placeholder="할인율을 입력해주세요." // "Please enter the discount rate"
+          />
+
+          <FormInput
+            control={form.control}
+            name="amount"
+            type="number"
+            step="0.01"
+            label="이벤트 가격" // "Event Price"
+            placeholder="이벤트 가격을 입력해주세요." // "Please enter the event price"
           />
 
           <FormDateRangePicker

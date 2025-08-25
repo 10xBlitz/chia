@@ -16,6 +16,7 @@ export const clinicEventFormSchema = z
       })
       .min(1, "필수항목입니다"),
     discount: z.string({ required_error: "필수항목입니다" }),
+    amount: z.string({ required_error: "필수항목입니다" }),
     thumbnail_image: z.any(),
     main_image: z.any(),
   })

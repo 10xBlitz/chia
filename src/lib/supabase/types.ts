@@ -331,6 +331,7 @@ export type Database = {
       }
       event: {
         Row: {
+          amount: number | null
           clinic_treatment_id: string
           created_at: string
           date_range: unknown
@@ -343,6 +344,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          amount?: number | null
           clinic_treatment_id: string
           created_at?: string
           date_range: unknown
@@ -355,6 +357,7 @@ export type Database = {
           title: string
         }
         Update: {
+          amount?: number | null
           clinic_treatment_id?: string
           created_at?: string
           date_range?: unknown

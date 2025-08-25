@@ -39,13 +39,16 @@ export default function EventDetailPage() {
   const handleBookEvent = () => {
     if (!event) return;
 
+    const originalAmount = event.amount || 0;
+    const discountedAmount = calculateDiscountedPrice(originalAmount, event.discount);
+
     const paymentUrl = `/patient/payment/event?orderId=${
       event.id
-    }&amount=${calculateDiscountedPrice(0, event.discount)}&eventName=${
+    }&amount=${discountedAmount}&eventName=${
       event.title
     }&treatmentName=${
       event.clinic_treatment.treatment.treatment_name
-    }&treatmentOriginalPrice=${0}`;
+    }&treatmentOriginalPrice=${originalAmount}`;
 
     router.push(paymentUrl);
   };
@@ -181,7 +184,7 @@ export default function EventDetailPage() {
             onClick={handleBookEvent}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
           >
-            이벤트 예약하기
+            이벤트 결제하기
           </Button>
         </div>
       </div>
