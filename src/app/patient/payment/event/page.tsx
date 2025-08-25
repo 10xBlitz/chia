@@ -16,7 +16,7 @@ const customerKey = "N84M75LskpueYJ2yKb52m";
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const amountParams = searchParams.get("amount")
-    ? parseInt(searchParams.get("amount") as string, 10)
+    ? parseFloat(searchParams.get("amount") as string)
     : 50; // 기본 금액 50원
 
   const orderId = searchParams.get("orderId") || "-xZTsRbXHDRL30IBrjM0t";
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
             <Label className="text-right">주문 번호 {/* Order ID */}</Label>
             <span className="font-semibold text-left">{orderId}</span>
             <Label className="text-right">이벤트가 {/* Event Price */}</Label>
-            <span className="font-semibold text-left">{amount.value}원</span>
+            <span className="font-semibold text-left">{amount.value.toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}원</span>
             <Label className="text-right">이벤트명 {/* Event Name */}</Label>
             <span className="font-semibold text-left">{eventName}</span>
             <Label className="text-right">시술명 {/* Treatment Name */}</Label>
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
               시술 원가 {/* Treatment Original Price */}
             </Label>
             <span className="font-semibold text-left">
-              {treatmentOriginalPrice}원
+              {parseFloat(treatmentOriginalPrice).toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}원
             </span>
           </div>
         </div>
