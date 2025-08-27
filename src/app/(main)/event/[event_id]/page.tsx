@@ -124,6 +124,25 @@ export default function EventDetailPage() {
             </div>
           </div>
 
+          {/* Price Information */}
+          <div className="space-y-3">
+            <h3 className="font-semibold text-gray-900">가격 정보</h3>
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">원가</span>
+                <span className="text-gray-500 line-through">
+                  {event.amount?.toLocaleString('ko-KR')}원
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-900">할인가</span>
+                <span className="font-bold text-red-600 text-lg">
+                  {calculateDiscountedPrice(event.amount || 0, event.discount).toLocaleString('ko-KR')}원
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Event Period */}
           {dateRange && (
             <div className="space-y-3">

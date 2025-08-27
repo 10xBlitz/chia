@@ -21,9 +21,7 @@ export default function EventCarousel() {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("event")
-        .select(
-          "*, clinic_treatment!inner(*, clinic!inner(*), treatment(*))"
-        )
+        .select("*, clinic_treatment!inner(*, clinic!inner(*), treatment(*))")
         .neq("status", "deleted")
         .neq("clinic_treatment.clinic.status", "deleted");
       if (error) throw error;
@@ -135,7 +133,11 @@ export default function EventCarousel() {
                   <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
                     {event.thumbnail_url || event.image_url ? (
                       <Image
-                        src={event.thumbnail_url || event.image_url || "/images/fallback-image.png"}
+                        src={
+                          event.thumbnail_url ||
+                          event.image_url ||
+                          "/images/fallback-image.png"
+                        }
                         alt={event.title || "event"}
                         width={300}
                         height={300}
@@ -147,15 +149,15 @@ export default function EventCarousel() {
                         <span className="text-gray-500">No Image</span>
                       </div>
                     )}
-                    
+
                     {/* Discount Badge */}
                     {event.discount > 0 && (
                       <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-                        {event.discount}% OFF
+                        {event.discount}% 할인
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Title Below Image */}
                   <div className="space-y-1">
                     <h3 className="font-semibold text-sm text-gray-900 line-clamp-2 leading-tight">
