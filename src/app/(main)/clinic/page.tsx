@@ -115,6 +115,8 @@ export default function ClinicSingleViewPage() {
       page.reviews.map((review) => ({
         userId: review.user.id,
         id: review.id,
+        name: review.name, // Admin-provided patient name
+        user: review.user, // Patient data
         full_name: review.user?.full_name || "익명", // Anonymous if no user
         images: review.images || [],
         rating: review.rating || "0",

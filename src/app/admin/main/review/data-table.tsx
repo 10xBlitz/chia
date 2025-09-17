@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import CreateReviewModal from "./create-review-modal";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -204,6 +205,9 @@ export function DataTable<TData, TValue>({
               />
             </PopoverContent>
           </Popover>
+        </div>
+        <div className="flex items-center">
+          <CreateReviewModal />
         </div>
       </div>
       <div className="rounded-md border bg-white">

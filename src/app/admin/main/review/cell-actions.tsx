@@ -7,13 +7,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2Icon } from "lucide-react";
+import { MoreHorizontal, Trash2Icon, Edit } from "lucide-react";
 import { useState } from "react";
 import { ReviewTable } from "./columns";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { deleteReview } from "@/lib/supabase/services/reviews.services";
 import toast from "react-hot-toast";
+import CreateReviewModal from "./create-review-modal";
 
 interface CellActionProps {
   data: ReviewTable;
@@ -21,7 +22,11 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const queryClient = useQueryClient();
+
+  // Check if this review was created by admin (has name field)
+  const isAdminCreated = !!data.name;
 
   // Delete mutation - using hard delete
   const deleteMutation = useMutation({
@@ -43,6 +48,13 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   return (
     <>
+      <CreateReviewModal
+        editMode={true}
+        editData={data}
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+      />
+
       <ConfirmModal
         open={showDeleteModal}
         onCancel={() => setShowDeleteModal(false)}
@@ -61,6 +73,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {isAdminCreated && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => setShowEditModal(true)}
+            >
+              <Edit className="h-4 w-4" /> 수정 {/* Edit */}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             className="cursor-pointer text-red-600"
             onClick={() => setShowDeleteModal(true)}

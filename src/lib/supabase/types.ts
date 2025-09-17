@@ -623,6 +623,7 @@ export type Database = {
           created_at: string
           id: string
           images: string[] | null
+          name: string | null
           patient_id: string
           rating: number
           review: string | null
@@ -632,6 +633,7 @@ export type Database = {
           created_at?: string
           id?: string
           images?: string[] | null
+          name?: string | null
           patient_id: string
           rating: number
           review?: string | null
@@ -641,6 +643,7 @@ export type Database = {
           created_at?: string
           id?: string
           images?: string[] | null
+          name?: string | null
           patient_id?: string
           rating?: number
           review?: string | null

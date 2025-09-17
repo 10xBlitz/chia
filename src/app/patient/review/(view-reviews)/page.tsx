@@ -59,6 +59,8 @@ export default function ViewReviewsPage() {
         <ClinicReviewCard
           key={review.id}
           id={review.id}
+          name={review.name}
+          user={review.patient}
           full_name={user?.full_name}
           images={review.images || []}
           rating={review.rating}
