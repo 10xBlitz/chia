@@ -16,7 +16,6 @@ import MobileLayout from "@/components/layout/mobile-layout";
 export default function EmailSentPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
-  const redirectLink = searchParams.get("redirect") || "/auth/login";
 
   return (
     <MobileLayout className="min-h-dvh">
@@ -49,21 +48,13 @@ export default function EmailSentPage() {
               </div>
 
               <div className="space-y-3 pt-4">
-                <Button
-                  asChild
-                  className="w-full h-[45px]"
-                  variant="default"
-                >
-                  <Link href={redirectLink}>
+                <Button asChild className="w-full h-[45px]" variant="default">
+                  <Link href="/auth">
                     로그인 페이지로 돌아가기 {/* Back to login */}
                   </Link>
                 </Button>
 
-                <Button
-                  asChild
-                  className="w-full h-[45px]"
-                  variant="outline"
-                >
+                <Button asChild className="w-full h-[45px]" variant="outline">
                   <Link href="/auth/forgot-password">
                     다시 전송하기 {/* Send again */}
                   </Link>
