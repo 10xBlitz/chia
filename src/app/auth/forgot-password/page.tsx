@@ -55,9 +55,17 @@ export default function ForgotPassword() {
     );
 
     if (error) {
-      toast.error(
-        "비밀번호 재설정 이메일 전송에 실패했습니다. 다시 시도해주세요."
-      );
+      // Handle rate limiting error specifically
+      if (error.message.includes('you can only request this after')) {
+        const seconds = error.message.match(/(\d+)\s+seconds?/)?.[1];
+        toast.error(
+          `보안상의 이유로 ${seconds || '60'}초 후에 다시 시도해주세요.`
+        );
+      } else {
+        toast.error(
+          "비밀번호 재설정 이메일 전송에 실패했습니다. 다시 시도해주세요."
+        );
+      }
       console.error("Error sending reset password email:", error);
     } else {
       // Show success message "Check your email for the reset link."
