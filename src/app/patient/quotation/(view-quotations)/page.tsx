@@ -2,14 +2,14 @@
 
 export const dynamic = "force-dynamic";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { EditIcon } from "lucide-react";
-import { useUserStore } from "@/providers/user-store-provider";
-import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
 import { QuotationListItemSkeleton } from "@/components/loading-skeletons/quotation-skeleton";
 import MainHeader from "@/components/main-header";
+import { Button } from "@/components/ui/button";
+import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
+import { useUserStore } from "@/providers/user-store-provider";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { EditIcon, FileText } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Constants
 const PAGE_SIZE = 10; // Number of quotations per page
@@ -87,8 +87,23 @@ export default function ViewQuotationPage() {
         ))}
 
       {allQuotations.length === 0 && !isLoading && (
-        <div className="mt-10 text-center">
-          견적이 없습니다. {/* No quotations. */}
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+            <FileText className="w-10 h-10 text-gray-300" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            견적 요청 내역이 없습니다
+          </h3>
+          <p className="text-gray-500 mb-8 max-w-xs mx-auto">
+            원하는 시술의 견적을 요청하고 <br />
+            합리적인 가격을 제안받아보세요!
+          </p>
+          <Button
+            className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12 rounded-xl"
+            onClick={() => router.push("/patient/quotation/create-quotation")}
+          >
+            무료 견적 요청하기
+          </Button>
         </div>
       )}
 
@@ -154,9 +169,8 @@ interface QuotationListItemProps {
 }
 
 function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
-  const detail = `${q.region?.split(",")[1]?.trim() || q.region} · ${
-    q.treatment?.treatment_name || "선택된 치료 없음"
-  } · 공개견적`;
+  const detail = `${q.region?.split(",")[1]?.trim() || q.region} · ${q.treatment?.treatment_name || "선택된 치료 없음"
+    } · 공개견적`;
 
   const handleClick = () => {
     onClick(q.id, detail, q.clinic_id, q.bid[0]?.id ?? null);
@@ -180,11 +194,10 @@ function QuotationListItem({ quotation: q, onClick }: QuotationListItemProps) {
         {q.clinic_id ? "치과" : "공개견적"}
       </span>
       <div
-        className={`rounded-md flex justify-center items-center px-4 h-9 font-medium  ${
-          q.bid.length > 0
-            ? "bg-blue-600 text-white"
-            : "border border-gray-200 bg-white text-gray-500"
-        }`}
+        className={`rounded-md flex justify-center items-center px-4 h-9 font-medium  ${q.bid.length > 0
+          ? "bg-blue-600 text-white"
+          : "border border-gray-200 bg-white text-gray-500"
+          }`}
         tabIndex={-1}
       >
         {q.bid.length > 0 ? "답변완료" : "답변 없음"}

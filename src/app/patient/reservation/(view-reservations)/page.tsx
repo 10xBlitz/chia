@@ -2,17 +2,18 @@
 
 export const dynamic = "force-dynamic";
 
+import HeaderWithBackButton from "@/components/header-with-back-button";
+import { ReservationListSkeleton } from "@/components/loading-skeletons/reservation-skeleton";
+import MainHeader from "@/components/main-header";
+import { ReservationDetailModal } from "@/components/modals/reservation-detail-modal";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/providers/user-store-provider";
-import BottomNavigation from "../../../../components/bottom-navigation";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ReservationListSkeleton } from "@/components/loading-skeletons/reservation-skeleton";
-import HeaderWithBackButton from "@/components/header-with-back-button";
-import { ReservationDetailModal } from "@/components/modals/reservation-detail-modal";
-import { useState } from "react";
 import { UserState } from "@/stores/user-store";
+import { Calendar } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import BottomNavigation from "../../../../components/bottom-navigation";
 import { useReservationsInfiniteQuery } from "./queries";
-import MainHeader from "@/components/main-header";
 
 // Reservation type for the modal
 interface ReservationWithDetails {
@@ -80,8 +81,23 @@ export default function ReservationListPage() {
       {isLoading && <ReservationListSkeleton />}
 
       {allReservations.length === 0 && (
-        <div className="text-center ">
-          예약이 없습니다. {/* No reservations. */}
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+            <Calendar className="w-10 h-10 text-gray-300" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            예약 내역이 없습니다
+          </h3>
+          <p className="text-gray-500 mb-8 max-w-xs mx-auto">
+            아직 예약된 시술이 없습니다. <br />
+            치아에서 다양한 시술을 찾아보세요!
+          </p>
+          <Button
+            className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12 rounded-xl"
+            onClick={() => router.push("/")}
+          >
+            시술 찾아보기
+          </Button>
         </div>
       )}
 
@@ -120,16 +136,11 @@ export default function ReservationListPage() {
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent the modal from opening
                     router.push(
-                      `/patient/payment/reservation?reservation_id=${
-                        r.id
-                      }&treatment_id=${
-                        r.clinic_treatment?.treatment?.id
-                      }&treatment_name=${
-                        r.clinic_treatment?.treatment?.treatment_name || ""
-                      }&clinic_id=${
-                        r.clinic_treatment?.clinic?.id
-                      }&clinic_name=${
-                        r.clinic_treatment?.clinic?.clinic_name || ""
+                      `/patient/payment/reservation?reservation_id=${r.id
+                      }&treatment_id=${r.clinic_treatment?.treatment?.id
+                      }&treatment_name=${r.clinic_treatment?.treatment?.treatment_name || ""
+                      }&clinic_id=${r.clinic_treatment?.clinic?.id
+                      }&clinic_name=${r.clinic_treatment?.clinic?.clinic_name || ""
                       }&total_amount=${0}`
                     );
                   }}
