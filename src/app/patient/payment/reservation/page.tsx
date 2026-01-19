@@ -9,7 +9,7 @@ import {
   TossPaymentsWidgets,
 } from "@tosspayments/tosspayments-sdk";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
@@ -24,7 +24,7 @@ function CheckoutPageContent() {
 
   const orderId = searchParams.get("orderId") || "-xZTsRbXHDRL30IBrjM0t";
   // Get all relevant search params
-  const reservationId = searchParams.get("reservation_id") || "";
+
   const treatmentId = searchParams.get("treatment_id") || "";
   const treatmentName = searchParams.get("treatment_name") || "";
   const clinicId = searchParams.get("clinic_id") || "";
@@ -150,10 +150,7 @@ function CheckoutPageContent() {
         {/* 쿠폰 체크박스 */}
         {/* 결제 정보 표시 */}
         <div className="mb-4 p-4 rounded-sm bg-gray-50 border text-base grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-          <Label className="text-right">
-            예약 번호: {/* Reservation ID */}
-          </Label>
-          <span className="font-semibold text-left">{reservationId}</span>
+
           <Label className="text-right">시술 ID: {/* Treatment ID */}</Label>
           <span className="font-semibold text-left">{treatmentId}</span>
           <Label className="text-right">시술명: {/* Treatment Name */}</Label>

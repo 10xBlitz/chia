@@ -3,13 +3,13 @@
 import MobileLayout from "@/components/layout/mobile-layout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useUserStore } from "@/providers/user-store-provider";
 import {
   loadTossPayments,
   TossPaymentsWidgets,
 } from "@tosspayments/tosspayments-sdk";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
-import { useUserStore } from "@/providers/user-store-provider";
+import { Suspense, useEffect, useState } from "react";
 
 const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
@@ -147,8 +147,7 @@ function CheckoutPageContent() {
         <div>
           {/* 결제 정보 표시 */}
           <div className="mb-4 p-4 rounded-sm bg-gray-50 border text-base grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-            <Label className="text-right">주문 번호 {/* Order ID */}</Label>
-            <span className="font-semibold text-left">{orderId}</span>
+
             <Label className="text-right">이벤트가 {/* Event Price */}</Label>
             <span className="font-semibold text-left">{amount.value.toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}원</span>
             <Label className="text-right">이벤트명 {/* Event Name */}</Label>
