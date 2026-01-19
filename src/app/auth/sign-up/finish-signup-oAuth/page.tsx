@@ -63,6 +63,17 @@ const FinishOAuthSignup = () => {
 
   const watchedValues = form.watch();
 
+  // Update form values when user data becomes available
+  useEffect(() => {
+    if (user?.email && user?.full_name) {
+      form.reset({
+        ...form.getValues(),
+        name: user.full_name || form.getValues().name,
+        email: user.email || form.getValues().email,
+      });
+    }
+  }, [user?.email, user?.full_name, form]);
+
   useEffect(() => {
     // Only validate kakaoSignupSchema fields
     const result = kakaoSignupSchema.safeParse(watchedValues);
@@ -154,21 +165,14 @@ const FinishOAuthSignup = () => {
 
   // Redirect if already registered
   useEffect(() => {
-    if (user && (user.work_place || user.residence)) {
+    if (user && user.id && (user.work_place || user.residence)) {
       router.replace("/");
     }
   }, [user, router]);
 
-  //if user has no email show message and button to redirect to login
-  if (!user?.email) {
-    return null;
-  }
-
-  // Early return: do not render anything while zustand is still checking user (user === undefined)
-  if (typeof user === "undefined") return null;
-
-  // Early return: show loading UI while checking user (user === null)
-  if (user === null) {
+  // Show loading state while user data is being fetched
+  // The store initializes with empty id/email, so we wait for those to be populated
+  if (!user?.id || !user?.email) {
     return (
       <MobileLayout className="flex flex-col items-center justify-center min-h-screen">
         <div className="text-lg font-semibold py-20">
@@ -178,6 +182,7 @@ const FinishOAuthSignup = () => {
     );
   }
 
+  // Already registered, redirect handled by useEffect above
   if (user.work_place || user.residence) return null;
 
   return (

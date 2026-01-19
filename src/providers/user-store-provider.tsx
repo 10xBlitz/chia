@@ -42,13 +42,13 @@ const defaultUserState = {
 };
 
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
-  const storeRef = useRef<UserStoreApi | null>(null);
+  // Initialize store synchronously to avoid race conditions with onAuthStateChange
+  const storeRef = useRef<UserStoreApi>(createUserStore({ user: defaultUserState }));
 
   useEffect(() => {
     let mounted = true;
 
     const initializeStore = async () => {
-      let initialDataForStore: UserState = { user: defaultUserState };
       try {
         const {
           data: { session },
@@ -56,18 +56,17 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
         } = await supabaseClient.auth.getSession();
         if (sessionError) {
           console.error("Error getting initial session:", sessionError.message);
-          // Early return on session error
           return;
         }
         if (!session?.user) {
-          initialDataForStore = { user: defaultUserState };
+          // No session, keep default state
           return;
         }
         // Only runs if session.user exists
         const profile = await fetchUserProfile(session.user.id);
-        if (profile) {
-          initialDataForStore = {
-            user: {
+        if (mounted) {
+          if (profile) {
+            storeRef.current.getState().updateUser({
               id: profile.id,
               email: session.user.email || "",
               full_name: profile.full_name,
@@ -81,29 +80,19 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
               clinic_id: profile.clinic_id,
               clinic: profile.clinic,
               login_status: profile.login_status,
-            },
-          };
-        } else {
-          initialDataForStore = {
-            user: {
+            });
+          } else {
+            storeRef.current.getState().updateUser({
               ...defaultUserState,
               id: session.user.id,
               email: session.user.email || "",
               full_name: session.user.user_metadata?.full_name || "",
               role: session.user.user_metadata.role || "",
-            },
-          };
+            });
+          }
         }
       } catch (e) {
         console.error("Unexpected error during store initialization:", e);
-      } finally {
-        if (mounted) {
-          if (!storeRef.current) {
-            storeRef.current = createUserStore(initialDataForStore);
-          } else {
-            storeRef.current.getState().updateUser(initialDataForStore.user);
-          }
-        }
       }
     };
 
@@ -112,11 +101,6 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     const { data: authListener } = supabaseClient.auth.onAuthStateChange(
       (event, session) => {
         setTimeout(async () => {
-          if (!storeRef.current) {
-            console.warn("onAuthStateChange: storeRef not initialized yet.");
-            return;
-          }
-
           if (event === "SIGNED_IN" && session?.user) {
             //NOTE: This is not triggered when the user signs up, only when sign-in
             await fetchProfileAndUpdateStore(
@@ -143,9 +127,8 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Render immediately with default store - don't block the UI
   return (
-    <UserStoreContext.Provider value={storeRef.current || createUserStore({ user: defaultUserState })}>
+    <UserStoreContext.Provider value={storeRef.current}>
       {children}
     </UserStoreContext.Provider>
   );
