@@ -6,8 +6,9 @@ import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { getPaginatedReservations } from "@/lib/supabase/services/reservations.services";
+import { Suspense } from "react";
 
-export default function ReservationPage() {
+function ReservationPageContent() {
   const searchParams = useSearchParams();
   const { page, limit, filters } = validateReservationQueryParams(searchParams);
 
@@ -78,4 +79,12 @@ function validateReservationQueryParams(searchParams: ReadonlyURLSearchParams) {
   };
 
   return { page, limit, filters };
+}
+
+export default function ReservationPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ReservationPageContent />
+    </Suspense>
+  );
 }

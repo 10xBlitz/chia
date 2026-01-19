@@ -6,8 +6,9 @@ import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { getPaginatedQuotations } from "@/lib/supabase/services/quotation.services";
+import { Suspense } from "react";
 
-export default function QuotationPage() {
+function QuotationPageContent() {
   const searchParams = useSearchParams();
   const { page, limit, filters, sort } =
     validateQuotationQueryParams(searchParams);
@@ -89,4 +90,12 @@ function validateQuotationQueryParams(searchParams: ReadonlyURLSearchParams) {
   };
 
   return { page, limit, filters, sort: sortParam };
+}
+
+export default function QuotationPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <QuotationPageContent />
+    </Suspense>
+  );
 }

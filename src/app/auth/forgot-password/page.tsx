@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +28,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function ForgotPassword() {
+function ForgotPasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [rateLimitSeconds, setRateLimitSeconds] = useState<number | null>(null);
   const searchParams = useSearchParams();
@@ -153,5 +153,13 @@ export default function ForgotPassword() {
         </div>
       </div>
     </MobileLayout>
+  );
+}
+
+export default function ForgotPassword() {
+  return (
+    <Suspense fallback={<MobileLayout className="min-h-dvh"><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }

@@ -9,10 +9,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ClinicEventModal } from "./clinic-event-modal";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { getPaginatedClinicEvents } from "@/lib/supabase/services/clinic-event.services";
 
-export default function ClinicEventPage() {
+function ClinicEventPageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [openModal, setOpenModal] = useState(false);
@@ -99,4 +99,12 @@ function validateClinicEventQueryParams(searchParams: ReadonlyURLSearchParams) {
   };
 
   return { page, limit, filters };
+}
+
+export default function ClinicEventPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-4">Loading...</div>}>
+      <ClinicEventPageContent />
+    </Suspense>
+  );
 }

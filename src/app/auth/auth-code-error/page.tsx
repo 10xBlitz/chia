@@ -3,8 +3,9 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function AuthCodeErrorPage() {
+function AuthCodeErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error") || "Unknown error";
 
@@ -28,5 +29,13 @@ export default function AuthCodeErrorPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function AuthCodeErrorPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <AuthCodeErrorContent />
+    </Suspense>
   );
 }

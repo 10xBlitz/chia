@@ -12,8 +12,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Mail } from "lucide-react";
 import MobileLayout from "@/components/layout/mobile-layout";
+import { Suspense } from "react";
 
-export default function EmailSentPage() {
+function EmailSentContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
 
@@ -65,5 +66,13 @@ export default function EmailSentPage() {
         </div>
       </div>
     </MobileLayout>
+  );
+}
+
+export default function EmailSentPage() {
+  return (
+    <Suspense fallback={<MobileLayout className="min-h-dvh"><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <EmailSentContent />
+    </Suspense>
   );
 }

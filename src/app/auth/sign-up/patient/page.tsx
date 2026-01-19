@@ -1,9 +1,10 @@
 "use client";
+
 import { Stepper } from "@/components/stepper";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Step1 from "./step-1";
@@ -26,7 +27,7 @@ const steps = [
   { label: "검토" }, // Review
 ];
 
-const SignupPage = () => {
+const SignupPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   // Set currentStep from search params, default to 1
@@ -279,4 +280,10 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<MobileLayout><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <SignupPageContent />
+    </Suspense>
+  );
+}

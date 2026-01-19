@@ -7,12 +7,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { BannerModal } from "./banner-modal";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { getPaginatedBanners } from "@/lib/supabase/services/banner.services";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 
-export default function BannerPage() {
+function BannerPageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [openModal, setOpenModal] = useState(false);
@@ -110,4 +110,12 @@ function validateBannerQueryParams(searchParams: ReadonlyURLSearchParams) {
       endDate,
     },
   };
+}
+
+export default function BannerPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-4">Loading...</div>}>
+      <BannerPageContent />
+    </Suspense>
+  );
 }

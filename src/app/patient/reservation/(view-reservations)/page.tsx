@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/providers/user-store-provider";
 import BottomNavigation from "../../../../components/bottom-navigation";
@@ -42,6 +44,15 @@ export default function ReservationListPage() {
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
 
+  // Declare all hooks first (required by Rules of Hooks)
+  const {
+    allReservations,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useReservationsInfiniteQuery(user?.id);
+
   // Redirect to login if not authenticated
   if (!user || !user.id) {
     router.push("/auth/login");
@@ -58,15 +69,6 @@ export default function ReservationListPage() {
       </>
     );
   }
-
-  // Infinite Query for reservations
-  const {
-    allReservations,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useReservationsInfiniteQuery(user?.id);
 
   return (
     <>

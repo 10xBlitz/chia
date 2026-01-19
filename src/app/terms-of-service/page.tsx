@@ -5,9 +5,9 @@ import MobileLayout from "@/components/layout/mobile-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useKeyboardAware } from "@/hooks/use-keyboard-aware";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
-export default function TermsOfServicePage() {
+function TermsOfServiceContent() {
   const [tab, setTab] = useState<"terms" | "payment" | "privacy">("terms");
   const [isEnglish, setIsEnglish] = useState(false);
   const searchParams = useSearchParams();
@@ -1000,5 +1000,13 @@ export default function TermsOfServicePage() {
         </Tabs>
       </div>
     </MobileLayout>
+  );
+}
+
+export default function TermsOfServicePage() {
+  return (
+    <Suspense fallback={<MobileLayout><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <TermsOfServiceContent />
+    </Suspense>
   );
 }

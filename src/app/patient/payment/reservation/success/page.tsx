@@ -1,8 +1,9 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
-export default function SuccessPage() {
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
+
+function SuccessPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -93,5 +94,13 @@ export default function SuccessPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh]">Loading...</div>}>
+      <SuccessPageContent />
+    </Suspense>
   );
 }

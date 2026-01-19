@@ -11,9 +11,9 @@ import {
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Tables } from "@/lib/supabase/types";
 import { SortingState } from "@tanstack/react-table";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, Suspense } from "react";
 
-export default function UserPage() {
+function UserPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { page, limit, filters, sort, order } =
@@ -134,4 +134,12 @@ function validateUserQueryParams(searchParams: ReadonlyURLSearchParams) {
   };
 
   return { page, limit, filters, sort, order };
+}
+
+export default function UserPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-4">Loading...</div>}>
+      <UserPageContent />
+    </Suspense>
+  );
 }

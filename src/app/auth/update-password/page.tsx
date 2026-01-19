@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +34,7 @@ const loginSchema = z
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function UpdatePassword() {
+function UpdatePasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
   const redirectLink = searchParams.get("redirect") || "/auth/login";
@@ -132,5 +132,13 @@ export default function UpdatePassword() {
         </div>
       </div>
     </MobileLayout>
+  );
+}
+
+export default function UpdatePassword() {
+  return (
+    <Suspense fallback={<MobileLayout className="min-h-dvh"><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <UpdatePasswordContent />
+    </Suspense>
   );
 }

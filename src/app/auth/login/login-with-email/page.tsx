@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -39,7 +39,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginForm() {
+function LoginFormContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to control password visibility
   const router = useRouter();
@@ -239,5 +239,13 @@ export default function LoginForm() {
         </div>
       </div>
     </MobileLayout>
+  );
+}
+
+export default function LoginForm() {
+  return (
+    <Suspense fallback={<MobileLayout className="min-h-dvh"><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }

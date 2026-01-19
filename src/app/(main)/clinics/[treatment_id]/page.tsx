@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { InfiniteList } from "@/components/supabase-infinite-list";
 import { useUserStore } from "@/providers/user-store-provider";
 import { useParams, useRouter, useSearchParams } from "next/navigation";

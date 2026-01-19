@@ -7,7 +7,6 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState,
 } from "react";
 import { useStore } from "zustand";
 
@@ -44,7 +43,6 @@ const defaultUserState = {
 
 export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
   const storeRef = useRef<UserStoreApi | null>(null);
-  const [isStoreInitialized, setIsStoreInitialized] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -105,7 +103,6 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
           } else {
             storeRef.current.getState().updateUser(initialDataForStore.user);
           }
-          setIsStoreInitialized(true);
         }
       }
     };

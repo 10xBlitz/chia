@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import FormAddress from "@/components/form-ui/form-address";
 import FormDatePicker from "@/components/form-ui/form-date-picker-single";
 import FormGender from "@/components/form-ui/form-gender";

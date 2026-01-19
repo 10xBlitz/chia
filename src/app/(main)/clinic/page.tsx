@@ -9,7 +9,7 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock3, Phone, Youtube, EditIcon } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 import {
   addClinicToFavorites,
@@ -54,7 +54,7 @@ const PAGE_SIZE = 10;
 
 // Change prop signature to accept all clinic fields as top-level props
 
-export default function ClinicSingleViewPage() {
+function ClinicSingleViewPageContent() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -825,4 +825,12 @@ function formatKoreanPhoneNumber(phone: string = ""): string {
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
   }
   return phone; // fallback
+}
+
+export default function ClinicSingleViewPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-4">Loading...</div>}>
+      <ClinicSingleViewPageContent />
+    </Suspense>
+  );
 }

@@ -7,8 +7,9 @@ import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
 import { getPaginatedReviews } from "@/lib/supabase/services/reviews.services";
+import { Suspense } from "react";
 
-export default function ReviewPage() {
+function ReviewPageContent() {
   const searchParams = useSearchParams();
   const { page, limit, filters } = validateClinicQueryParams(searchParams);
 
@@ -80,4 +81,12 @@ function validateClinicQueryParams(searchParams: ReadonlyURLSearchParams) {
   };
 
   return { page, limit, filters };
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ReviewPageContent />
+    </Suspense>
+  );
 }

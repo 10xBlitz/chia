@@ -7,12 +7,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { getPaginatedTreatments } from "@/lib/supabase/services/treatments.services";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { TreatmentModal } from "./treatment-modal";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 
-export default function TreatmentsPage() {
+function TreatmentsPageContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [openModal, setOpenModal] = useState(false);
@@ -93,4 +93,12 @@ function validateTreatmentQueryParams(searchParams: ReadonlyURLSearchParams) {
   };
 
   return { page, limit, filters };
+}
+
+export default function TreatmentsPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-4">Loading...</div>}>
+      <TreatmentsPageContent />
+    </Suspense>
+  );
 }

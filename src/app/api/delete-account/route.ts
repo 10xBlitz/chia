@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
+// Make this route dynamic to prevent build-time analysis
+export const dynamic = "force-dynamic";
+
 export async function DELETE(request: NextRequest) {
   try {
+    
     const { userId } = await request.json();
 
     if (!userId) {

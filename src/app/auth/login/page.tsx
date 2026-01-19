@@ -1,14 +1,15 @@
 "use client";
+
 import MobileLayout from "@/components/layout/mobile-layout";
 import { Button } from "@/components/ui/button";
 import { supabaseClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import toast from "react-hot-toast";
 
-const PatientHomePage = () => {
+const PatientHomePageContent = () => {
   const searchParams = useSearchParams();
   const message = searchParams.get("message"); // Get error message from URL params
   const [isLoading, setIsLoading] = useState(false);
@@ -216,4 +217,10 @@ const PatientHomePage = () => {
   );
 };
 
-export default PatientHomePage;
+export default function PatientHomePage() {
+  return (
+    <Suspense fallback={<MobileLayout><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <PatientHomePageContent />
+    </Suspense>
+  );
+}

@@ -1,8 +1,8 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
-export default function KakaoTalk() {
+function KakaoCallback() {
   const searchParams = useSearchParams();
   const authCode = searchParams.get("code"); // 인가 코드가 저장되는 변수
 
@@ -24,4 +24,12 @@ export default function KakaoTalk() {
   }, [authCode]); // 의존성으로 인가 코드가 저장되는 변수를 사용한다.
 
   return <div>page</div>;
+}
+
+export default function KakaoTalk() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <KakaoCallback />
+    </Suspense>
+  );
 }

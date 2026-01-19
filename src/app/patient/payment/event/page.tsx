@@ -8,60 +8,16 @@ import {
   TossPaymentsWidgets,
 } from "@tosspayments/tosspayments-sdk";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useUserStore } from "@/providers/user-store-provider";
 
 const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const searchParams = useSearchParams();
   const user = useUserStore((state) => state.user);
 
-  // Check if user is logged in - required for payments
-  if (!user?.id) {
-    return (
-      <MobileLayout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-          <div className="bg-red-50 rounded-xl shadow-md p-8 max-w-md w-full flex flex-col items-center">
-            <svg
-              className="mb-4 text-red-500"
-              width={56}
-              height={56}
-              fill="none"
-              viewBox="0 0 56 56"
-            >
-              <circle cx="28" cy="28" r="28" fill="#FEE2E2" opacity="0.5" />
-              <path
-                d="M36 20L20 36M20 20l16 16"
-                stroke="#EF4444"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              로그인이 필요합니다
-            </h2>
-            <p className="text-gray-600 mb-6 text-center">
-              결제를 진행하려면 먼저 로그인해주세요.
-              <br />
-              Please log in to proceed with payment.
-            </p>
-            <Button
-              onClick={() => window.location.href = '/auth/login'}
-              className="w-full"
-            >
-              로그인하기
-            </Button>
-          </div>
-        </div>
-      </MobileLayout>
-    );
-  }
-
-  // Use user ID as customer key for Toss Payments (unique per user)
-  const customerKey = user.id;
-
+  // Declare all hooks first (required by Rules of Hooks)
   const amountParams = searchParams.get("amount")
     ? parseFloat(searchParams.get("amount") as string)
     : 50; // 기본 금액 50원
@@ -78,13 +34,19 @@ export default function CheckoutPage() {
   const [ready, setReady] = useState(false);
   const [widgets, setWidgets] = useState<TossPaymentsWidgets>();
 
+  // Use user ID as customer key for Toss Payments (unique per user)
+  const customerKey = user?.id;
+
+  // ALL hooks must be declared before any early returns
   useEffect(() => {
+    if (!customerKey) return; // Don't run if no customer key
+
     async function fetchPaymentWidgets() {
       // ------  결제위젯 초기화 ------
       const tossPayments = await loadTossPayments(clientKey);
       // 회원 결제
       const widgets = tossPayments.widgets({
-        customerKey,
+        customerKey: customerKey!, // Non-null assertion: we've already checked above
       });
       // 비회원 결제
       // const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
@@ -131,6 +93,48 @@ export default function CheckoutPage() {
 
     widgets.setAmount(amount);
   }, [widgets, amount]);
+
+  // Check if user is logged in - required for payments (AFTER all hooks)
+  if (!user?.id) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+          <div className="bg-red-50 rounded-xl shadow-md p-8 max-w-md w-full flex flex-col items-center">
+            <svg
+              className="mb-4 text-red-500"
+              width={56}
+              height={56}
+              fill="none"
+              viewBox="0 0 56 56"
+            >
+              <circle cx="28" cy="28" r="28" fill="#FEE2E2" opacity="0.5" />
+              <path
+                d="M36 20L20 36M20 20l16 16"
+                stroke="#EF4444"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              로그인이 필요합니다
+            </h2>
+            <p className="text-gray-600 mb-6 text-center">
+              결제를 진행하려면 먼저 로그인해주세요.
+              <br />
+              Please log in to proceed with payment.
+            </p>
+            <Button
+              onClick={() => window.location.href = '/auth/login'}
+              className="w-full"
+            >
+              로그인하기
+            </Button>
+          </div>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <MobileLayout>
@@ -194,5 +198,13 @@ export default function CheckoutPage() {
         )}
       </div>
     </MobileLayout>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<MobileLayout><div className="animate-pulse p-4">Loading...</div></MobileLayout>}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -19,22 +21,7 @@ export default function ViewQuotationPage() {
   const userId = user?.id;
   const pageSize = Number(searchParams.get("pageSize") || PAGE_SIZE);
 
-  // Redirect to login if not authenticated
-  if (!user || !userId) {
-    router.push("/auth/login");
-    return (
-      <>
-        <MainHeader title="견적" description="견적 목록" />
-        <div className="p-4 space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <QuotationListItemSkeleton key={i} />
-          ))}
-        </div>
-      </>
-    );
-  }
-
-  // Infinite Query for quotations
+  // Declare all hooks first (required by Rules of Hooks)
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["quotations", userId, pageSize],
@@ -50,6 +37,21 @@ export default function ViewQuotationPage() {
       initialPageParam: 1,
       staleTime: 1000 * 60 * 5, // 5 minutes
     });
+
+  // Redirect to login if not authenticated
+  if (!user || !userId) {
+    router.push("/auth/login");
+    return (
+      <>
+        <MainHeader title="견적" description="견적 목록" />
+        <div className="p-4 space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <QuotationListItemSkeleton key={i} />
+          ))}
+        </div>
+      </>
+    );
+  }
 
   // Flatten all loaded quotations with safety check
   const allQuotations = data?.pages?.flatMap((page) => page?.data || []) || [];
