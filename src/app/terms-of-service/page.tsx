@@ -3,12 +3,19 @@
 import HeaderWithBackButton from "@/components/header-with-back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useKeyboardAware } from "@/hooks/use-keyboard-aware";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function TermsOfServicePage() {
   const [tab, setTab] = useState<"terms" | "payment" | "privacy">("terms");
   const searchParams = useSearchParams();
+  
+  // Use keyboard aware hook for better mobile experience
+  useKeyboardAware({
+    autoScroll: true,
+    scrollOffset: 100,
+  });
 
   // Auto-select tab based on URL param (?tab=terms|payment|privacy)
   useEffect(() => {

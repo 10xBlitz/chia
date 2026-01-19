@@ -1,8 +1,8 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function AuthCodeErrorPage() {
   const searchParams = useSearchParams();

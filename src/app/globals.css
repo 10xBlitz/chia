@@ -141,3 +141,56 @@
   bottom: 0.2rem;
   transform: translateX(-50%);
 }
+
+/* Mobile keyboard handling */
+@media screen and (max-width: 768px) {
+  /* Ensure smooth scrolling when keyboard appears */
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile layout adjustments */
+  .mobile-layout {
+    position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* When keyboard is visible, adjust content */
+  @supports (height: 100dvh) {
+    .mobile-layout {
+      min-height: 100dvh;
+    }
+  }
+
+  /* Form inputs should scroll into view when focused */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Ensure forms are scrollable when keyboard appears */
+  form {
+    padding-bottom: calc(var(--keyboard-height, 0px) + 20px);
+  }
+
+  /* Focus handling for inputs */
+  input:focus, textarea:focus, select:focus {
+    transform: translateZ(0); /* Force GPU acceleration */
+    -webkit-transform: translateZ(0);
+  }
+}
+
+/* Keyboard animation for smoother transitions */
+@media screen and (max-width: 768px) {
+  .mobile-layout {
+    transition: padding-bottom 0.3s ease;
+  }
+}
+
+/* Visual Viewport API support */
+@supports (height: 100svh) {
+  .mobile-layout {
+    min-height: 100svh;
+  }
+}

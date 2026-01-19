@@ -146,13 +146,9 @@ export const UserStoreProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Render children only after the store is initialized
-  if (!isStoreInitialized || !storeRef.current) {
-    return null; // Or a loading spinner, or some fallback UI
-  }
-
+  // Render immediately with default store - don't block the UI
   return (
-    <UserStoreContext.Provider value={storeRef.current}>
+    <UserStoreContext.Provider value={storeRef.current || createUserStore({ user: defaultUserState })}>
       {children}
     </UserStoreContext.Provider>
   );

@@ -42,6 +42,23 @@ export default function ReservationListPage() {
   const accessedFromProfile =
     searchParams.get("accessed_from_profile") === "true";
 
+  // Redirect to login if not authenticated
+  if (!user || !user.id) {
+    router.push("/auth/login");
+    return (
+      <>
+        {accessedFromProfile ? (
+          <HeaderWithBackButton title="예약 목록" />
+        ) : (
+          <MainHeader title="전세" description="예약 목록" />
+        )}
+        <div className="p-4">
+          <ReservationListSkeleton />
+        </div>
+      </>
+    );
+  }
+
   // Infinite Query for reservations
   const {
     allReservations,

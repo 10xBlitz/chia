@@ -15,8 +15,24 @@ const PAGE_SIZE = 10; // Number of quotations per page
 export default function ViewQuotationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const userId = useUserStore((selector) => selector.user?.id);
+  const user = useUserStore((selector) => selector.user);
+  const userId = user?.id;
   const pageSize = Number(searchParams.get("pageSize") || PAGE_SIZE);
+
+  // Redirect to login if not authenticated
+  if (!user || !userId) {
+    router.push("/auth/login");
+    return (
+      <>
+        <MainHeader title="견적" description="견적 목록" />
+        <div className="p-4 space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <QuotationListItemSkeleton key={i} />
+          ))}
+        </div>
+      </>
+    );
+  }
 
   // Infinite Query for quotations
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
