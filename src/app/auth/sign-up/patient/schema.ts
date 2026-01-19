@@ -24,7 +24,7 @@ export const step2Schema = z.object({
 
 // ✅ Final full schema for form types + final submission
 export const fullSchema = step1Schema.merge(step2Schema);
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type FullSchemaType = z.infer<typeof fullSchema>;
 
 export interface StepInterface {

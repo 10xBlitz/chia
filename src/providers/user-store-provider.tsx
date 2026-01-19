@@ -10,13 +10,12 @@ import {
 } from "react";
 import { useStore } from "zustand";
 
+import { supabaseClient } from "@/lib/supabase/client";
+import type { Tables } from "@/lib/supabase/types";
 import {
   type UserStore,
   createUserStore,
-  type UserState,
 } from "@/stores/user-store"; // Ensure UserState is exported
-import { supabaseClient } from "@/lib/supabase/client";
-import type { Tables } from "@/lib/supabase/types";
 
 export type UserStoreApi = ReturnType<typeof createUserStore>;
 
