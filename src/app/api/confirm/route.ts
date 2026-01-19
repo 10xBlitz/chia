@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
   // 토스페이먼츠 API는 시크릿 키를 사용자 ID로 사용하고, 비밀번호는 사용하지 않습니다.
   // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
-  const widgetSecretKey = "test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6";
+  const widgetSecretKey = process.env.TOSS_SECRET_KEY!;
   const encryptedSecretKey =
     "Basic " + Buffer.from(widgetSecretKey + ":").toString("base64");
 

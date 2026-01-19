@@ -3,6 +3,7 @@
 import MobileLayout from "@/components/layout/mobile-layout";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useUserStore } from "@/providers/user-store-provider";
 import {
   loadTossPayments,
   TossPaymentsWidgets,
@@ -10,11 +11,57 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
-const customerKey = "N84M75LskpueYJ2yKb52m";
+const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
 
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
+  const user = useUserStore((state) => state.user);
+
+  // Check if user is logged in - required for payments
+  if (!user?.id) {
+    return (
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+          <div className="bg-red-50 rounded-xl shadow-md p-8 max-w-md w-full flex flex-col items-center">
+            <svg
+              className="mb-4 text-red-500"
+              width={56}
+              height={56}
+              fill="none"
+              viewBox="0 0 56 56"
+            >
+              <circle cx="28" cy="28" r="28" fill="#FEE2E2" opacity="0.5" />
+              <path
+                d="M36 20L20 36M20 20l16 16"
+                stroke="#EF4444"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              로그인이 필요합니다
+            </h2>
+            <p className="text-gray-600 mb-6 text-center">
+              결제를 진행하려면 먼저 로그인해주세요.
+              <br />
+              Please log in to proceed with payment.
+            </p>
+            <Button
+              onClick={() => window.location.href = '/auth/login'}
+              className="w-full"
+            >
+              로그인하기
+            </Button>
+          </div>
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Use user ID as customer key for Toss Payments (unique per user)
+  const customerKey = user.id;
+
   const amountParams = searchParams.get("amount")
     ? parseInt(searchParams.get("amount") as string, 10)
     : 50; // 기본 금액 50원
