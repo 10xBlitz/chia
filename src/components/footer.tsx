@@ -1,6 +1,6 @@
 function Footer() {
   // Footer info variables
-  const companyName = "비씨디"; // Company Name: BCD
+  const companyName = "치아"; // Company Name: BCD
   const ceoName = "홍준기"; // CEO Name: Junki Hong
   const businessNumber = "235-04-01772"; // Business Registration Number
   const address =
@@ -12,7 +12,7 @@ function Footer() {
     <footer className="w-full bg-gray-50 border-t border-b text-[13px] text-gray-600 pt-8 pb-6 px-4 flex flex-col gap-4">
       {/* Logo */}
       <div className="flex items-center gap-2">
-        <span className="font-bold text-lg text-[#4285F4]">비씨디</span>
+        <span className="font-bold text-lg text-[#4285F4]">치아</span>
         {/* Company Name: BCD */}
       </div>
       {/* Company Info */}

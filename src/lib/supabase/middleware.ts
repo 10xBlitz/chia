@@ -51,6 +51,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/clinics") &&
     !request.nextUrl.pathname.startsWith("/clinic") &&
+    !request.nextUrl.pathname.startsWith("/event") &&
     !(request.nextUrl.pathname === "/") &&
     !(request.nextUrl.pathname === "/terms-of-service")
   ) {
@@ -115,6 +116,21 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/forbidden";
       return NextResponse.redirect(url);
+    }
+
+    // Redirect logged-in non-patients away from the root landing page
+    if (request.nextUrl.pathname === "/" && user && role) {
+      if (role === "dentist") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dentist";
+        return NextResponse.redirect(url);
+      }
+      if (role === "admin") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin";
+        return NextResponse.redirect(url);
+      }
+      // Patients can stay on the landing page
     }
 
     // if (!role && publicRoutes.includes(request.nextUrl.pathname)) {

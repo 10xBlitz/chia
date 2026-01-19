@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { registerKakaoUser } from "@/lib/supabase/services/users.services";
 import MobileLayout from "@/components/layout/mobile-layout";
@@ -44,9 +44,7 @@ const FinishOAuthSignup = () => {
   const [currentStep, setCurrentStep] = useState(1); // Step 1: Form, Step 2: Review
   const [isStepValid, setIsStepValid] = useState(false);
   const [direction, setDirection] = useState<"next" | "prev">("next");
-  const [messageBanner, setMessageBanner] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Use the kakaoSignupSchema for compatibility with local steps
   const form = useForm<z.infer<typeof kakaoSignupSchema>>({
@@ -134,6 +132,26 @@ const FinishOAuthSignup = () => {
     }),
   };
 
+  // Handle browser back button - redirect to login when user leaves
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      supabaseClient.auth.signOut();
+      router.push("/auth/login");
+    };
+
+    // Push initial state to enable popstate detection
+    window.history.pushState(null, "", window.location.href + "?v=1");
+    window.history.pushState(null, "", window.location.href + "?v=1");
+    window.history.pushState(null, "", window.location.href + "?v=1");
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
+
   // Redirect if already registered
   useEffect(() => {
     if (user && (user.work_place || user.residence)) {
@@ -141,12 +159,10 @@ const FinishOAuthSignup = () => {
     }
   }, [user, router]);
 
-  useEffect(() => {
-    const message = searchParams.get("message");
-    if (message && message !== "undefined") {
-      setMessageBanner(message);
-    }
-  }, [searchParams]);
+  //if user has no email show message and button to redirect to login
+  if (!user?.email) {
+    return null;
+  }
 
   // Early return: do not render anything while zustand is still checking user (user === undefined)
   if (typeof user === "undefined") return null;
@@ -167,13 +183,6 @@ const FinishOAuthSignup = () => {
   return (
     <MobileLayout className="flex flex-col gap-6 overflow-x-hidden">
       <HeaderWithBackButton title="카카오 회원가입 완료" />
-      {messageBanner && (
-        <div className="bg-yellow-100 text-yellow-800 text-center py-2 px-4 rounded mb-2 text-sm font-medium">
-          아직 등록이 보류 중입니다.
-          <br />
-          {messageBanner}
-        </div>
-      )}
       <div className="flex items-center mt-3 justify-center w-full">
         <Stepper
           steps={steps}
@@ -254,7 +263,7 @@ const FinishOAuthSignup = () => {
             className="w-full bg-red-500 hover:bg-red-600 -mt-5"
             onClick={() =>
               supabaseClient.auth.signOut().then(() => {
-                router.push("/");
+                router.push("/auth/login");
               })
             } // Sign out and redirect to login
           >

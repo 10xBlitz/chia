@@ -16,8 +16,8 @@ export const dentistStep2Schema = z.object({
     .min(9, "최소 9자리 숫자여야 합니다.") // At least 9 digits
     .max(13, "최대 13자리 숫자입니다."), // At most 13 digits
   birthdate: z.date({ required_error: "생년월일은 필수입니다." }), // Birthdate
-  residence: z.string().min(1, { message: "거주지는 필수입니다." }), // Residence
-  work_place: z.string().min(1, { message: "근무지는 필수입니다." }), // Workplace
+  residence: z.string().optional(), // Residence is optional
+  work_place: z.string().optional(), // Workplace is optional
 });
 
 // Step 3: Clinic Info

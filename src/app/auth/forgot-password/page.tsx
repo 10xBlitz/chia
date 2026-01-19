@@ -20,7 +20,7 @@ import BackButton from "@/components/back-button";
 import MobileLayout from "@/components/layout/mobile-layout";
 import FormInput from "@/components/form-ui/form-input";
 import { supabaseClient } from "@/lib/supabase/client";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "유효한 이메일을 입력하세요" }), // "Please enter a valid email"
@@ -30,7 +30,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitSeconds, setRateLimitSeconds] = useState<number | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const redirectLink = searchParams.get("redirect") || "/auth/login";
 
   //possible redirectLink values:
@@ -55,13 +57,30 @@ export default function ForgotPassword() {
     );
 
     if (error) {
-      toast.error(
-        "비밀번호 재설정 이메일 전송에 실패했습니다. 다시 시도해주세요."
-      );
-      console.error("Error sending reset password email:", error);
+      // Handle rate limiting error specifically
+      if (error.message.includes('you can only request this after')) {
+        const seconds = parseInt(error.message.match(/(\d+)\s+seconds?/)?.[1] || '60');
+        setRateLimitSeconds(seconds);
+
+        // Start countdown timer
+        const interval = setInterval(() => {
+          setRateLimitSeconds(prev => {
+            if (prev === null || prev <= 1) {
+              clearInterval(interval);
+              return null;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        toast.error(
+          "비밀번호 재설정 이메일 전송에 실패했습니다. 다시 시도해주세요."
+        );
+      }
     } else {
-      // Show success message "Check your email for the reset link."
-      toast.success("비밀번호 재설정 링크가 이메일로 전송되었습니다.");
+      // Redirect to success page instead of showing toast
+      router.push(`/auth/forgot-password/email-sent?email=${encodeURIComponent(values.email)}&redirect=${encodeURIComponent(redirectLink)}`);
+      return;
     }
 
     setIsLoading(false);
@@ -98,11 +117,24 @@ export default function ForgotPassword() {
                     <Button
                       type="submit"
                       className="w-full h-[45px]"
-                      disabled={isLoading}
+                      disabled={isLoading || rateLimitSeconds !== null}
                     >
                       {isLoading ? "로딩중...." : "비밀번호 재설정 메일 보내기"}
                       {/** isLoading ? Loading... : Send password reset email  */}
                     </Button>
+
+                    {rateLimitSeconds !== null && (
+                      <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                        <div className="text-sm text-yellow-800 text-center">
+                          <div className="font-medium mb-1">
+                            보안상의 이유로 잠시 기다려주세요
+                          </div>
+                          <div>
+                            {rateLimitSeconds}초 후에 다시 시도할 수 있습니다
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="mt-4 text-center text-sm">
                     {/* Already have an account? */}

@@ -13,9 +13,9 @@ export type ReservationTable = {
   patient: {
     id: string;
     full_name: string;
-    residence: string;
+    residence: string | null;
     birthdate: string;
-    work_place: string;
+    work_place: string | null;
     contact_number: string;
   };
   clinic_treatment: {
@@ -53,12 +53,12 @@ export const columns: ColumnDef<ReservationTable>[] = [
   {
     accessorKey: "residence",
     header: "거주지", // Residence
-    cell: ({ row }) => <div>{row.original.patient.residence}</div>,
+    cell: ({ row }) => <div>{row.original.patient.residence || "-"}</div>,
   },
   {
     accessorKey: "workplace",
     header: "근무지", // Workplace
-    cell: ({ row }) => <div>{row.original.patient.work_place}</div>,
+    cell: ({ row }) => <div>{row.original.patient.work_place || "-"}</div>,
   },
   {
     accessorKey: "contact_number",

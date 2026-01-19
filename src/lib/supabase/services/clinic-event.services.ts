@@ -86,35 +86,52 @@ export async function getPaginatedClinicEvents(
 
 type InsertEventInput = Omit<
   TablesInsert<"event">,
-  "image_url" | "id" | "created_at"
+  "image_url" | "thumbnail_url" | "id" | "created_at"
 > & {
-  image: string | File | null;
+  thumbnail_image: string | File | null;
+  main_image: string | File | null;
 };
 
 export async function insertClinicEvent(
   event: InsertEventInput,
   progress: (prog: string | null) => void
 ) {
-  let imageUrl: string | null = null;
+  let thumbnailUrl: string | null = null;
+  let mainImageUrl: string | null = null;
 
-  if (event.image instanceof File) {
-    progress("이미지 업로드 중..."); // "Uploading image..."
-    imageUrl = await uploadFileToSupabase(event.image, {
+  if (event.thumbnail_image instanceof File) {
+    progress("썸네일 업로드 중..."); // "Uploading thumbnail..."
+    thumbnailUrl = await uploadFileToSupabase(event.thumbnail_image, {
       bucket: CLINIC_EVENT_TREATMENTS,
+      folder: "thumbnails",
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
       maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for thumbnails
     });
-  } else if (typeof event.image === "string") {
-    imageUrl = event.image;
+  } else if (typeof event.thumbnail_image === "string") {
+    thumbnailUrl = event.thumbnail_image;
+  }
+
+  if (event.main_image instanceof File) {
+    progress("메인 이미지 업로드 중..."); // "Uploading main image..."
+    mainImageUrl = await uploadFileToSupabase(event.main_image, {
+      bucket: CLINIC_EVENT_TREATMENTS,
+      folder: "main-images",
+      allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
+      maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for main images
+    });
+  } else if (typeof event.main_image === "string") {
+    mainImageUrl = event.main_image;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { image, ...eventWithNoImage } = event;
+  const { thumbnail_image, main_image, ...eventWithNoImage } = event;
 
   progress("이벤트 등록 중..."); // "Registering event..."
   const { data, error } = await supabaseClient
     .from("event")
-    .insert([{ ...eventWithNoImage, image_url: imageUrl }])
+    .insert([{ ...eventWithNoImage, thumbnail_url: thumbnailUrl, image_url: mainImageUrl }])
     .select()
     .single();
   progress(null);
@@ -125,55 +142,85 @@ export async function insertClinicEvent(
 
 type UpdateEventInput = TablesInsert<"event"> & {
   id: string;
-  image?: string | File | null;
+  thumbnail_image?: string | File | null;
+  main_image?: string | File | null;
 };
 
 export async function updateClinicEvent(
   event: UpdateEventInput,
   progress: (prog: string | null) => void
 ) {
-  let imageUrl: string | null | undefined = undefined;
+  let thumbnailUrl: string | null | undefined = undefined;
+  let mainImageUrl: string | null | undefined = undefined;
 
-  // If a new image is provided and it's a File, remove the old image first
-  if (event.image instanceof File) {
-    // Get the current event to find the old image_url
-    progress("기존 이미지 확인 중..."); // "Checking current image..."
-    const { data: current, error: currentError } = await supabaseClient
-      .from("event")
-      .select("image_url")
-      .eq("id", event.id)
-      .single();
-    if (currentError) throw currentError;
+  // Get current event to find old image URLs
+  progress("기존 이미지 확인 중..."); // "Checking current images..."
+  const { data: current, error: currentError } = await supabaseClient
+    .from("event")
+    .select("thumbnail_url, image_url")
+    .eq("id", event.id)
+    .single();
+  if (currentError) throw currentError;
 
-    // Remove old image from storage if it exists
+  // Handle thumbnail image update
+  if (event.thumbnail_image instanceof File) {
+    // Remove old thumbnail if it exists
+    if (current?.thumbnail_url) {
+      progress("기존 썸네일 삭제 중..."); // "Deleting old thumbnail..."
+      await deleteFileFromSupabase(current.thumbnail_url, {
+        bucket: CLINIC_EVENT_TREATMENTS,
+      });
+    }
+
+    // Upload new thumbnail
+    progress("새 썸네일 업로드 중..."); // "Uploading new thumbnail..."
+    thumbnailUrl = await uploadFileToSupabase(event.thumbnail_image, {
+      bucket: CLINIC_EVENT_TREATMENTS,
+      folder: "thumbnails",
+      allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
+      maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for thumbnails
+    });
+  } else if (typeof event.thumbnail_image === "string") {
+    thumbnailUrl = event.thumbnail_image;
+  }
+
+  // Handle main image update
+  if (event.main_image instanceof File) {
+    // Remove old main image if it exists
     if (current?.image_url) {
-      progress("기존 이미지 삭제 중..."); // "Deleting old image..."
+      progress("기존 메인 이미지 삭제 중..."); // "Deleting old main image..."
       await deleteFileFromSupabase(current.image_url, {
         bucket: CLINIC_EVENT_TREATMENTS,
       });
     }
 
-    // Upload new image
-    progress("새 이미지 업로드 중..."); // "Uploading new image..."
-    imageUrl = await uploadFileToSupabase(event.image, {
+    // Upload new main image
+    progress("새 메인 이미지 업로드 중..."); // "Uploading new main image..."
+    mainImageUrl = await uploadFileToSupabase(event.main_image, {
       bucket: CLINIC_EVENT_TREATMENTS,
-      folder: "treatments",
+      folder: "main-images",
       allowedMimeTypes: CLINIC_EVENT_ALLOWED_MIME_TYPES,
       maxSizeMB: CLINIC_EVENT_MAX_MB,
+      highQuality: true, // High quality for main images
     });
-  } else if (typeof event.image === "string") {
-    imageUrl = event.image;
+  } else if (typeof event.main_image === "string") {
+    mainImageUrl = event.main_image;
   }
 
-  // Remove image from update payload
+  // Remove images from update payload
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, image, ...updateData } = event;
+  const { id, thumbnail_image, main_image, ...updateData } = event;
 
-  // Only include image_url if it's defined (for partial updates)
-  const updatePayload =
-    imageUrl !== undefined
-      ? { ...updateData, image_url: imageUrl }
-      : updateData;
+  // Build update payload with only defined image URLs
+  let updatePayload = { ...updateData };
+  if (thumbnailUrl !== undefined) {
+    updatePayload = { ...updatePayload, thumbnail_url: thumbnailUrl };
+  }
+  if (mainImageUrl !== undefined) {
+    updatePayload = { ...updatePayload, image_url: mainImageUrl };
+  }
+
   progress("이벤트 업데이트 중..."); // "Updating event..."
   const { data, error } = await supabaseClient
     .from("event")

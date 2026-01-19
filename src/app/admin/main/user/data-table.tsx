@@ -215,8 +215,6 @@ export function DataTable<TData extends { id: string }, TValue>({
               <SelectItem value="admin">관리자</SelectItem> {/* Admin */}
               <SelectItem value="patient">환자</SelectItem> {/* Patient */}
               <SelectItem value="dentist">치과의사</SelectItem> {/* Dentist */}
-              <SelectItem value="dentist_employee">치과 직원</SelectItem>{" "}
-              {/* Dentist Employee */}
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -309,28 +307,37 @@ export function DataTable<TData extends { id: string }, TValue>({
                       <div className="flex items-center space-x-2">
                         {colIndex === 0 ? (
                           // First column - typically ID or avatar
-                          <div 
+                          <div
                             className="h-4 w-16 bg-gray-200 rounded animate-pulse"
                             style={{ animationDelay: `${index * 50}ms` }}
                           ></div>
                         ) : colIndex === columns.length - 1 ? (
                           // Last column - typically actions or status
                           <div className="flex space-x-1">
-                            <div 
+                            <div
                               className="h-6 w-16 bg-gray-200 rounded animate-pulse"
-                              style={{ animationDelay: `${index * 50 + 100}ms` }}
+                              style={{
+                                animationDelay: `${index * 50 + 100}ms`,
+                              }}
                             ></div>
                           </div>
                         ) : (
                           // Other columns - text content with varying widths for names, emails, roles, etc.
-                          <div 
+                          <div
                             className={`h-4 bg-gray-200 rounded animate-pulse ${
-                              colIndex === 1 ? 'w-28' : // Name column - wider
-                              colIndex === 2 ? 'w-36' : // Email column - widest
-                              colIndex === 3 ? 'w-20' : // Role column - medium
-                              colIndex % 2 === 0 ? 'w-24' : 'w-32'
+                              colIndex === 1
+                                ? "w-28" // Name column - wider
+                                : colIndex === 2
+                                ? "w-36" // Email column - widest
+                                : colIndex === 3
+                                ? "w-20" // Role column - medium
+                                : colIndex % 2 === 0
+                                ? "w-24"
+                                : "w-32"
                             }`}
-                            style={{ animationDelay: `${index * 50 + colIndex * 25}ms` }}
+                            style={{
+                              animationDelay: `${index * 50 + colIndex * 25}ms`,
+                            }}
                           ></div>
                         )}
                       </div>

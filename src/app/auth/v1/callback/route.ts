@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const error = searchParams.get("error");
   // if "next" is in param, use it as the redirect URL
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
@@ -26,7 +27,10 @@ export async function GET(request: Request) {
       .eq("id", userId || "")
       .maybeSingle();
 
+    console.log("---->userData:", userData);
+
     if (userData && userData.login_status !== "active") {
+      await supabase.auth.signOut();
       return NextResponse.redirect(`${origin}/auth/deleted-account-page`);
     }
 
@@ -49,8 +53,9 @@ export async function GET(request: Request) {
         );
       }
     }
+    console.log("---->error in exchangeCodeForSession:", error);
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  return NextResponse.redirect(`${origin}/auth/login?message=${error}`);
 }

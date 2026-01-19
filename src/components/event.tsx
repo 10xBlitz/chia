@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { supabaseClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { calculateDiscountedPrice } from "@/lib/utils";
 
 export default function EventCarousel() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -22,9 +21,7 @@ export default function EventCarousel() {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("event")
-        .select(
-          "*, clinic_treatment!inner(*, clinic!inner(status), treatment(*))"
-        )
+        .select("*, clinic_treatment!inner(*, clinic!inner(*), treatment(*))")
         .neq("status", "deleted")
         .neq("clinic_treatment.clinic.status", "deleted");
       if (error) throw error;
@@ -126,40 +123,52 @@ export default function EventCarousel() {
         {events &&
           events.map((event) => (
             <div key={event.id} className="flex-shrink-0 w-[180px]">
-              <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
-                {event.image_url ? (
-                  <Link
-                    href={`/patient/payment/event?orderId=${
-                      event.id
-                    }&amount=${calculateDiscountedPrice(
-                      0,
-                      event.discount
-                    )}&eventName=${event.title}&treatmentName=${
-                      event.clinic_treatment.treatment.treatment_name
-                    }&treatmentOriginalPrice=${0}`}
-                    className="block h-full"
-                    draggable={false}
-                  >
-                    <Image
-                      src={event.image_url}
-                      alt={event.title || "event"}
-                      width={300}
-                      height={300}
-                      className="object-cover w-full h-full"
-                      draggable={false}
-                    />
-                  </Link>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <span className="text-gray-500">No Image</span>
+              <Link
+                href={`/event/${event.id}`}
+                className="block"
+                draggable={false}
+              >
+                <div className="space-y-3">
+                  {/* Image */}
+                  <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square relative">
+                    {event.thumbnail_url || event.image_url ? (
+                      <Image
+                        src={
+                          event.thumbnail_url ||
+                          event.image_url ||
+                          "/images/fallback-image.png"
+                        }
+                        alt={event.title || "event"}
+                        width={300}
+                        height={300}
+                        className="object-cover w-full h-full"
+                        draggable={false}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <span className="text-gray-500">No Image</span>
+                      </div>
+                    )}
+
+                    {/* Discount Badge */}
+                    {event.discount > 0 && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                        {event.discount}% 할인
+                      </div>
+                    )}
                   </div>
-                )}
-                {/* <div className="absolute bottom-2 left-0 w-full  bg-opacity-50 py-2 px-2">
-                  <h3 className="text-white ml-5 text-xl font-semibold truncate">
-                    {event.title || "치아미백"}
-                  </h3>
-                </div> */}
-              </div>
+
+                  {/* Title Below Image */}
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-sm text-gray-900 line-clamp-2 leading-tight">
+                      {event.title}
+                    </h3>
+                    <p className="text-xs text-gray-600 truncate">
+                      {event.clinic_treatment.clinic.clinic_name}
+                    </p>
+                  </div>
+                </div>
+              </Link>
             </div>
           ))}
       </div>

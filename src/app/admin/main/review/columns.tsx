@@ -10,12 +10,13 @@ export type ReviewTable = {
   id: string;
   rating: number;
   review: string | null;
+  name: string | null; // Admin-provided patient name
   patient: {
     id: string;
     full_name: string;
-    residence: string;
+    residence: string | null;
     birthdate: string;
-    work_place: string;
+    work_place: string | null;
     contact_number: string;
   };
   clinic_treatment: {
@@ -41,7 +42,9 @@ export const columns: ColumnDef<ReviewTable>[] = [
   {
     accessorKey: "name",
     header: "이름", // Name
-    cell: ({ row }) => <div>{row.original.patient.full_name}</div>,
+    cell: ({ row }) => (
+      <div>{row.original.name || row.original.patient.full_name}</div>
+    ),
   },
   {
     accessorKey: "clinic_name",

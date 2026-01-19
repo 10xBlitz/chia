@@ -55,6 +55,7 @@ type FormInputProps<T extends FieldValues> = {
   disabled?: boolean;
   placeholder?: string;
   type?: HTMLInputTypeAttribute;
+  step?: string | number;
   formItemClassName?: string;
   formLabelClassName?: string;
   inputClassName?: string;
@@ -66,6 +67,7 @@ export default function FormInput<T extends FieldValues>({
   label,
   placeholder,
   type = "text",
+  step,
   disabled = false,
   formItemClassName,
   formLabelClassName,
@@ -95,6 +97,7 @@ export default function FormInput<T extends FieldValues>({
                 type={
                   isPasswordType ? (showPassword ? "text" : "password") : type
                 }
+                step={step}
                 className={cn("h-[45px] pr-10", inputClassName)}
                 placeholder={placeholder}
                 disabled={disabled}

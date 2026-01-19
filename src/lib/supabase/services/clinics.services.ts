@@ -123,6 +123,7 @@ export async function getPaginatedClinicsWthReviews(
       { count: "exact" }
     )
     .filter("status", "not.eq", "deleted") // Only show active clinics
+    .order("is_pinned", { ascending: false }) // Pinned clinics first
     .order("id", { ascending: true })
     .range(offset, offset + limit - 1);
 
@@ -150,14 +151,25 @@ export async function getPaginatedClinicsWthReviews(
       (sum, t) => sum + Number(t.total_reviews?.[0]?.count || 0),
       0
     );
-    const avg_reviews_per_treatment =
-      treatments.length > 0
-        ? treatments.reduce(
-            (sum, t) =>
-              sum + Number(t.avg_reviews_per_treatment?.[0]?.avg || 0),
-            0
-          ) / treatments.length
-        : 0;
+
+    // Calculate weighted average across all treatments for this clinic
+    let totalRatingSum = 0;
+    let totalReviewCount = 0;
+
+    treatments.forEach((treatment) => {
+      const reviewCount = Number(treatment.total_reviews?.[0]?.count || 0);
+      const avgRating = Number(treatment.avg_reviews_per_treatment?.[0]?.avg || 0);
+
+      if (reviewCount > 0 && avgRating > 0) {
+        totalRatingSum += avgRating * reviewCount; // Weight by review count
+        totalReviewCount += reviewCount;
+      }
+    });
+
+    const avg_reviews_per_treatment = totalReviewCount > 0
+      ? totalRatingSum / totalReviewCount
+      : 0;
+
     return {
       ...clinic,
       total_reviews,
@@ -185,6 +197,7 @@ export async function updateClinic(
     .from("clinic")
     .update({
       clinic_name: values.clinic_name,
+      is_pinned: values.is_pinned || false,
       contact_number: values.contact_number,
       full_address: values.full_address,
       detail_address: values.detail_address || null,
@@ -208,6 +221,7 @@ export async function insertClinic(
     .from("clinic")
     .insert({
       clinic_name: values.clinic_name,
+      is_pinned: values.is_pinned || false,
       contact_number: values.contact_number,
       detail_address: values.detail_address || null,
       city: values.city,

@@ -91,13 +91,13 @@ export default function ProfilePage() {
           />
           <InfoRow
             label="거주지 주소" // Residence Address
-            value={user?.residence}
+            value={user?.residence || undefined}
             highlightWhenEmpty
             emptyText="거주지 주소 등록" // Register Residence Address
           />
           <InfoRow
             label="근무지 주소" // Work Address
-            value={user?.work_place}
+            value={user?.work_place || undefined}
             highlightWhenEmpty
             emptyText="근무지 주소 등록" // Register Work Address
           />

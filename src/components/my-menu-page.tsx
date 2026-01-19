@@ -7,7 +7,7 @@ import { useState } from "react";
 import { UserIcon, ChevronRightIcon } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { supabaseClient } from "@/lib/supabase/client";
-import { updateLoginStatus } from "@/lib/supabase/services/users.services";
+import { hardDeleteUser } from "@/lib/supabase/services/users.services";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "./modals/confirm-modal";
 
@@ -35,11 +35,16 @@ export default function MyMenuPage({
   // Separate function for withdraw membership logic
   const handleWithdrawMembership = async () => {
     if (!user?.id) return;
-    await updateLoginStatus(user.id, "inactive");
-    await supabaseClient.auth.signOut();
-    setWithdrawModalOpen(false);
-    toast.success("회원탈퇴가 완료되었습니다."); // Membership withdrawal completed successfully
-    router.push("/");
+    try {
+      await hardDeleteUser(user.id);
+      await supabaseClient.auth.signOut();
+      setWithdrawModalOpen(false);
+      toast.success("계정이 완전히 삭제되었습니다."); // Account has been completely deleted
+      router.push("/");
+    } catch (error) {
+      console.error("Account deletion failed:", error);
+      toast.error("계정 삭제에 실패했습니다. 다시 시도해 주세요."); // Account deletion failed. Please try again.
+    }
   };
 
   return (

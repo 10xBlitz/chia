@@ -3,7 +3,13 @@ import {
   uploadFileToSupabase,
 } from "@/lib/supabase/services/upload-file.services";
 import { endOfDay, startOfDay } from "date-fns";
-import { supabaseClient } from "../client";
+import { createClient } from "../client";
+import { Database } from "../types";
+
+const supabase = createClient();
+
+type ReviewInsert = Database["public"]["Tables"]["review"]["Insert"];
+type ReviewUpdate = Database["public"]["Tables"]["review"]["Update"];
 
 const BUCKET_NAME = "review-images";
 const MAX_FILE_SIZE_MB = 50;
@@ -30,7 +36,7 @@ export async function getPaginatedReviews(
 
   const offset = (page - 1) * limit;
 
-  let query = supabaseClient
+  let query = (supabase)
     .from("review")
     .select(
       `
@@ -110,11 +116,13 @@ export async function createReview({
   clinic_treatment_id,
   user_id,
   images = [],
+  patient_name,
 }: {
   rating: number;
   review?: string;
   clinic_treatment_id: string;
   user_id: string;
+  patient_name?: string;
   images?: {
     status: "old" | "new" | "deleted" | "updated";
     file: string | File;
@@ -153,13 +161,18 @@ export async function createReview({
     }
     // deleted images are not added
   }
-  const { error: insertError } = await supabaseClient.from("review").insert({
+  const insertData: ReviewInsert = {
     rating,
     review,
     clinic_treatment_id: clinic_treatment_id,
     images: finalImageUrls,
     patient_id: user_id,
-  });
+    name: patient_name || null, // Store admin-provided patient name
+  };
+
+  const { error: insertError } = await (supabase)
+    .from("review")
+    .insert(insertData);
   if (insertError) {
     throw new Error(`리뷰 등록 실패: ${insertError.message}`);
   }
@@ -177,7 +190,8 @@ export async function fetchClinicReviews({
   clinic_id: string;
 }) {
   // Single query: join review -> clinic_treatment, filter by clinic_id
-  const { data: reviews, error } = await supabaseClient
+  // Use left join for patient_id since admin-created reviews use admin's user ID
+  const { data: reviews, error } = await (supabase)
     .from("review")
     .select(
       "*, user:patient_id(*), clinic_treatment!inner(id, clinic_id, status, treatment!inner(status), clinic!inner(status))"
@@ -200,7 +214,7 @@ export async function fetchClinicReviews({
 
 // Fetch a single review by ID (with treatment info)
 export async function fetchReviewById(review_id: string) {
-  const { data, error } = await supabaseClient
+  const { data, error } = await (supabase)
     .from("review")
     .select(
       `*, clinic_treatment:clinic_treatment_id(id, clinic_id, treatment:treatment_id(*))`
@@ -217,12 +231,14 @@ export async function updateReview({
   rating,
   review,
   clinic_treatment_id,
+  patient_name,
   images = [],
 }: {
   review_id: string;
   rating: number;
   review?: string;
   clinic_treatment_id?: string;
+  patient_name?: string;
   images?: {
     status: "old" | "new" | "deleted" | "updated";
     file: string | File;
@@ -274,18 +290,34 @@ export async function updateReview({
   }
 
   // 3. Save the combined array
-  const { error: updateError } = await supabaseClient
+  const updateData: ReviewUpdate = {
+    rating,
+    review,
+    clinic_treatment_id,
+    name: patient_name || null,
+    images: finalImageUrls,
+  };
+
+  console.log("Updating review with data:", updateData);
+  console.log("Review ID:", review_id);
+
+  const { data, error: updateError } = await (supabase)
     .from("review")
-    .update({
-      rating,
-      review,
-      clinic_treatment_id,
-      images: finalImageUrls,
-    })
-    .eq("id", review_id);
+    .update(updateData)
+    .eq("id", review_id)
+    .select(); // Add select to see what was updated
+
+  console.log("Update result:", { data, error: updateError });
+
   if (updateError) {
     throw new Error(`리뷰 수정 실패: ${updateError.message}`);
   }
+
+  // Check if any rows were actually updated
+  if (!data || data.length === 0) {
+    throw new Error("리뷰 수정 권한이 없거나 해당 리뷰를 찾을 수 없습니다. (RLS Policy)");
+  }
+
   return { success: true };
 }
 
@@ -302,7 +334,7 @@ export async function deleteReview(
   review_id: string
 ): Promise<{ success: boolean }> {
   // 1. Fetch the review to get its images
-  const { data: review, error: fetchError } = await supabaseClient
+  const { data: review, error: fetchError } = await (supabase)
     .from("review")
     .select("images, patient_id")
     .eq("id", review_id)
@@ -311,15 +343,16 @@ export async function deleteReview(
     throw new Error(fetchError.message || "리뷰 조회에 실패했습니다.");
 
   // 2. Delete the review record
-  const { error } = await supabaseClient
+  const { error } = await (supabase)
     .from("review")
     .delete()
     .eq("id", review_id);
   if (error) throw new Error(error.message || "리뷰 삭제에 실패했습니다."); // Failed to delete review
 
   // 3. Delete all images from Supabase Storage (ignore errors for missing files)
-  if (Array.isArray(review?.images) && review.images.length > 0) {
-    for (const imageUrl of review.images) {
+  const reviewData = review as { images?: string[] };
+  if (Array.isArray(reviewData?.images) && reviewData.images.length > 0) {
+    for (const imageUrl of reviewData.images) {
       try {
         await deleteFileFromSupabase(imageUrl, { bucket: BUCKET_NAME });
       } catch (err) {

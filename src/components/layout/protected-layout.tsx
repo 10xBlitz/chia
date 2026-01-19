@@ -38,7 +38,7 @@ export default function ProtectedLayout({
     );
   }
 
-  if (!user || !user.role || !user.id || !user.work_place) {
+  if (!user || !user.role || !user.id) {
     return (
       <MobileLayout className="flex items-center justify-center min-h-screen flex-col gap-4 bg-gray-50">
         <Image

@@ -64,6 +64,7 @@ import type { ClinicImageFormValue } from "./clinic-modal.types";
 import { KoreanTimePicker } from "@/components/time-picker";
 // import FormDentistsDropdown from "@/components/form-ui/form-dentists-dropdown";
 import FormContactNumber from "@/components/form-ui/form-contact-number";
+import FormCheckbox from "@/components/form-ui/form-checkbox";
 
 export const ClinicModal = ({
   data,
@@ -90,6 +91,7 @@ export const ClinicModal = ({
     defaultValues: data
       ? {
           clinic_name: data.clinic_name,
+          is_pinned: data.is_pinned || false,
           introduction: data.introduction || "",
           note: data.note || "",
           contact_number: data.contact_number,
@@ -154,6 +156,7 @@ export const ClinicModal = ({
         }
       : {
           clinic_name: "",
+          is_pinned: false,
           introduction: "",
           note: "",
           contact_number: "",
@@ -274,6 +277,14 @@ export const ClinicModal = ({
                   formLabelClassName={formLabelClassName}
                   inputClassName={inputClassName}
                   placeholder="여기에 병원 이름을 입력하세요." // Enter clinic name here
+                />
+
+                <FormCheckbox
+                  control={form.control}
+                  name="is_pinned"
+                  label="고정" // Pinned
+                  formLabelClassName={formLabelClassName}
+                  formItemClassName="flex"
                 />
 
                 <FormTextarea

@@ -18,6 +18,17 @@ const compressOptions = {
   fileType: "image/webp",
 };
 
+// Maximum quality compression for event images
+const eventImageCompressOptions = {
+  maxSizeMB: 50, // Maximum file size for best quality
+  maxWidthOrHeight: 8192, // Ultra high resolution (8K)
+  useWebWorker: true,
+  initialQuality: 1.0, // Perfect quality (no compression)
+  alwaysKeepResolution: true, // Never reduce resolution
+  exifOrientation: 1, // Preserve orientation
+  // Don't convert to webp to preserve original format
+};
+
 /**
  * Upload a single file to Supabase Storage.
  * @param file The file to upload.
@@ -31,6 +42,7 @@ export async function uploadFileToSupabase(
     folder?: string;
     allowedMimeTypes?: string[];
     maxSizeMB?: number;
+    highQuality?: boolean; // New parameter for high quality uploads
   }
 ): Promise<string> {
   const bucket = options?.bucket || DEFAULT_BUCKET;
@@ -50,7 +62,9 @@ export async function uploadFileToSupabase(
     throw new Error(`파일 크기는 ${maxSizeMB}MB를 초과할 수 없습니다.`); // "File size exceeds limit."
   }
 
-  const compressedFile = await imageCompression(file, compressOptions);
+  // Choose compression options based on quality preference
+  const compressionOptions = options?.highQuality ? eventImageCompressOptions : compressOptions;
+  const compressedFile = await imageCompression(file, compressionOptions);
 
   const fileExt = file.name.split(".").pop();
   const fileName = `${crypto.randomUUID()}.${fileExt}`;

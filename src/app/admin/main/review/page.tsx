@@ -2,6 +2,7 @@
 
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+// import CreateReviewModal from "./create-review-modal";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Loading from "@/components/loading";
@@ -38,6 +39,7 @@ export default function ReviewPage() {
     <div className="p-4">
       {isError && <div className="bg-red-500/20">{error.message}</div>}
       {isLoading && <Loading />}
+      {/* <CreateReviewModal /> */}
       <DataTable columns={columns} paginatedData={paginatedData} />
     </div>
   );

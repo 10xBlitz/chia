@@ -49,7 +49,7 @@ export default function MainBannerCarousel() {
       } else {
         api.scrollNext();
       }
-    }, 5000);
+    }, 2500);
     return () => clearInterval(interval);
   }, [api, data?.data.length]);
 

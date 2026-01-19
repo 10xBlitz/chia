@@ -10,7 +10,11 @@ import { ConfirmModal } from "./modals/confirm-modal";
 
 interface ClinicReviewCardProps {
   id: string;
-  full_name?: string;
+  name?: string | null; // Admin-provided patient name
+  user?: {
+    full_name: string;
+  } | null; // Actual patient data
+  full_name?: string; // Fallback for backwards compatibility
   images?: string[];
   rating?: number | string;
   created_at?: string | Date;
@@ -23,6 +27,8 @@ interface ClinicReviewCardProps {
 function ClinicReviewCard(props: ClinicReviewCardProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  console.log("----> review props: ", props);
 
   // Handle delete confirmation
   const handleDelete = async () => {
@@ -96,7 +102,7 @@ function ClinicReviewCard(props: ClinicReviewCardProps) {
           </div>
           <div className="flex-1">
             <div className="font-semibold text-base">
-              {props?.full_name || "김00"}
+              {props.name || props.user?.full_name || props.full_name || "김00"}
             </div>
           </div>
         </div>
