@@ -36,41 +36,25 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 function UpdatePasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isExchangingCode, setIsExchangingCode] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const redirectLink = searchParams.get("redirect") || "/auth/login";
-  const code = searchParams.get("code");
   const router = useRouter();
 
-  // Exchange the code for a session when the component mounts
+  // Check for active session when the component mounts
+  // (Code exchange is handled by /auth/reset-password/callback server route)
   useEffect(() => {
-    const exchangeCode = async () => {
-      if (code) {
-        const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
-        if (error) {
-          console.error("Error exchanging code for session:", error);
-          setSessionError("링크가 만료되었거나 유효하지 않습니다. 다시 시도해주세요."); // "Link has expired or is invalid. Please try again."
-        } else if (!data.session) {
-          console.error("No session returned after code exchange");
-          setSessionError("세션을 생성할 수 없습니다. 다시 시도해주세요."); // "Could not create session. Please try again."
-        } else {
-          console.log("Session established successfully");
-          // Remove code from URL to prevent reuse attempts
-          router.replace(`/auth/update-password?redirect=${redirectLink}`);
-        }
-      } else {
-        // Check if there's already an active session
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) {
-          setSessionError("유효한 세션이 없습니다. 비밀번호 재설정 링크를 다시 요청해주세요."); // "No valid session. Please request a new password reset link."
-        }
+    const checkSession = async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        setSessionError("유효한 세션이 없습니다. 비밀번호 재설정 링크를 다시 요청해주세요."); // "No valid session. Please request a new password reset link."
       }
-      setIsExchangingCode(false);
+      setIsCheckingSession(false);
     };
 
-    exchangeCode();
-  }, [code, router, redirectLink]);
+    checkSession();
+  }, []);
 
   //possible redirectLink values:
   // "/" for patient
@@ -123,7 +107,7 @@ function UpdatePasswordContent() {
     setIsLoading(false);
   };
 
-  if (isExchangingCode) {
+  if (isCheckingSession) {
     return (
       <MobileLayout className="min-h-dvh">
         <div className="w-full max-w-sm">
