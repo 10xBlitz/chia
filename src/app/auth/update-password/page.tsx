@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,9 +36,41 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 function UpdatePasswordContent() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isExchangingCode, setIsExchangingCode] = useState(true);
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const redirectLink = searchParams.get("redirect") || "/auth/login";
+  const code = searchParams.get("code");
   const router = useRouter();
+
+  // Exchange the code for a session when the component mounts
+  useEffect(() => {
+    const exchangeCode = async () => {
+      if (code) {
+        const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error("Error exchanging code for session:", error);
+          setSessionError("링크가 만료되었거나 유효하지 않습니다. 다시 시도해주세요."); // "Link has expired or is invalid. Please try again."
+        } else if (!data.session) {
+          console.error("No session returned after code exchange");
+          setSessionError("세션을 생성할 수 없습니다. 다시 시도해주세요."); // "Could not create session. Please try again."
+        } else {
+          console.log("Session established successfully");
+          // Remove code from URL to prevent reuse attempts
+          router.replace(`/auth/update-password?redirect=${redirectLink}`);
+        }
+      } else {
+        // Check if there's already an active session
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+          setSessionError("유효한 세션이 없습니다. 비밀번호 재설정 링크를 다시 요청해주세요."); // "No valid session. Please request a new password reset link."
+        }
+      }
+      setIsExchangingCode(false);
+    };
+
+    exchangeCode();
+  }, [code, router, redirectLink]);
 
   //possible redirectLink values:
   // "/" for patient
@@ -55,6 +87,15 @@ function UpdatePasswordContent() {
 
   const handleForgotPassword = async (values: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
+
+    // Verify session exists before attempting update
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      toast.error("세션이 만료되었습니다. 비밀번호 재설정을 다시 요청해주세요."); // "Session expired. Please request password reset again."
+      setIsLoading(false);
+      router.push("/auth/forgot-password");
+      return;
+    }
 
     const { error } = await supabaseClient.auth.updateUser({
       password: values.password,
@@ -82,6 +123,46 @@ function UpdatePasswordContent() {
     setIsLoading(false);
   };
 
+  if (isExchangingCode) {
+    return (
+      <MobileLayout className="min-h-dvh">
+        <div className="w-full max-w-sm">
+          <Card className="shadow-none border-none">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p>세션을 확인하는 중...</p> {/* Verifying session... */}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  if (sessionError) {
+    return (
+      <MobileLayout className="min-h-dvh">
+        <div className="w-full max-w-sm">
+          <Card className="shadow-none border-none">
+            <CardHeader>
+              <CardTitle className="text-2xl">오류</CardTitle> {/* Error */}
+            </CardHeader>
+            <CardContent>
+              <p className="text-destructive mb-4">{sessionError}</p>
+              <Button
+                className="w-full h-[45px]"
+                onClick={() => router.push("/auth/forgot-password")}
+              >
+                비밀번호 재설정 다시 요청 {/* Request password reset again */}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout className="min-h-dvh">
       <div className="w-full max-w-sm">
@@ -93,8 +174,8 @@ function UpdatePasswordContent() {
                 비밀번호 재설정 {/* Reset Password */}
               </CardTitle>
               <CardDescription>
-                {/* Enter your email below to reset your password */}
-                아래에 이메일을 입력하면 비밀번호 재설정 링크를 보내드립니다.
+                {/* Enter your new password below */}
+                새 비밀번호를 입력해주세요.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -121,8 +202,8 @@ function UpdatePasswordContent() {
                       className="w-full h-[45px]"
                       disabled={isLoading}
                     >
-                      {isLoading ? "로딩중...." : "비밀번호 재설정 메일 보내기"}
-                      {/** isLoading ? Loading... : Send password reset email  */}
+                      {isLoading ? "로딩중...." : "비밀번호 변경"}
+                      {/** isLoading ? Loading... : Change password */}
                     </Button>
                   </div>
                 </form>
